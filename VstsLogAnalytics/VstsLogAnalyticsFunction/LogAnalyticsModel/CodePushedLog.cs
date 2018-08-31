@@ -13,5 +13,6 @@ namespace VstsWebhookFunction.LogAnalyticsModel
         public string RepositoryId { get; set; }
         public string RepositoryName { get; set; }
         public string VstsCommitId { get; set; }
+        public string Branch { get; set; }
     }
 }

@@ -45,6 +45,7 @@ namespace VstsWebhookFunction
             cpl.RepositoryName = data.resource.repository.name;
             cpl.TeamProject = data.resource.repository.project.name;
             cpl.VstsCommitId = data.resource.refUpdates[0].newObjectId;
+            cpl.Branch = data.resource.refUpdates[0].name;
 
             return cpl;
         }
