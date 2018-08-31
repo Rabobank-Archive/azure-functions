@@ -61,9 +61,9 @@ namespace VstsWebhookFunction
 
             var httpContent = new StringContent(json, Encoding.UTF8);
             httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-            var response = client.PostAsync(new Uri(url), httpContent);
+            var response = await client.PostAsync(new Uri(url), httpContent);
 
-            var responseContent = response.Result.Content;
+            var responseContent = response.Content;
             string result = await responseContent.ReadAsStringAsync();
         }
     }
