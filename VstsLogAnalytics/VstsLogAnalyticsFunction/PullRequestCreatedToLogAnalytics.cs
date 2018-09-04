@@ -63,9 +63,12 @@ namespace VstsWebhookFunction
             prcl.Status = data.resource.status;
             prcl.Id = data.resource.pullRequestId;
 
-            foreach (var commit in data.resource.commits)
+            if (data.resource?.commits != null)
             {
-                prcl.CommitIds += $"{commit.commitId};";
+                foreach (var commit in data.resource.commits)
+                {
+                    prcl.CommitIds += $"{commit.commitId};";
+                }
             }
 
             return prcl;
