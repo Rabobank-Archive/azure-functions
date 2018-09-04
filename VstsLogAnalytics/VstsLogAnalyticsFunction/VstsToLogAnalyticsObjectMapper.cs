@@ -15,8 +15,8 @@ namespace VstsLogAnalyticsFunction
         {
             PullRequestLog prcl = new PullRequestLog();
             dynamic data = JsonConvert.DeserializeObject(pullRequestEvent);
-            if (data.eventType.ToString() == "git.pullrequest.created" || 
-                data.eventType.ToString() == "git.pullrequest.updated")
+            if (data.eventType.ToString() != "git.pullrequest.created" &&
+                data.eventType.ToString() != "git.pullrequest.updated")
             {
                 throw new ArgumentException($"Event data does not contain a valid json. Data {pullRequestEvent}");
             }

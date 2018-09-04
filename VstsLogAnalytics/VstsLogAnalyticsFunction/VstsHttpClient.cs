@@ -19,7 +19,7 @@ namespace VstsLogAnalyticsFunction
             _projectUrl = projectUrl;
             _pat = pat;
 
-            _cred = new VssBasicCredential(string.Empty, "");
+            _cred = new VssBasicCredential(string.Empty, pat);
         }
 
         public async Task<List<GitRepository>> GetRepositoriesForTeamProject(string project)

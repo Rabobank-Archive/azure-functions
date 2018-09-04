@@ -25,9 +25,7 @@ namespace VstsLogAnalyticsFunction
 
                 LogAnalyticsClient lac = new LogAnalyticsClient(Environment.GetEnvironmentVariable("logAnalyticsWorkspace", EnvironmentVariableTarget.Process),
                                                                 Environment.GetEnvironmentVariable("logAnalyticsKey", EnvironmentVariableTarget.Process));
-
-
-
+           
 
                 await lac.AddCustomLogJsonAsync("pullrequest", JsonConvert.SerializeObject(new VstsToLogAnalyticsObjectMapper().GeneratePullRequestLog(pullRequestEvent)), "Date");
             }
