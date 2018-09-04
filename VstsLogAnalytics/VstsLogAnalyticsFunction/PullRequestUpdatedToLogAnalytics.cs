@@ -3,9 +3,14 @@ using System.Globalization;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.Services.Common;
+using Microsoft.VisualStudio.Services.WebApi;
 using Newtonsoft.Json;
 using VstsLogAnalyticsFunction;
 using VstsWebhookFunction.LogAnalyticsModel;
+using Microsoft.TeamFoundation.SourceControl.WebApi;
+using Microsoft.VisualStudio.Services.WebApi;
+using Microsoft.TeamFoundation.Build.WebApi;
 
 namespace VstsLogAnalyticsFunction
 {
@@ -22,11 +27,13 @@ namespace VstsLogAnalyticsFunction
                                                                 Environment.GetEnvironmentVariable("logAnalyticsKey", EnvironmentVariableTarget.Process));
 
 
+
+
                 await lac.AddCustomLogJsonAsync("pullrequest", JsonConvert.SerializeObject(new VstsToLogAnalyticsObjectMapper().GeneratePullRequestLog(pullRequestEvent)), "Date");
             }
             catch (Exception ex)
             {
-                log.LogError(ex, "Failed to write 'pull request created event' to log analytics for event", pullRequestEvent);
+                log.LogError(ex, "Failed to write 'pull request updated event' to log analytics for event", pullRequestEvent);
             }
         }
     }

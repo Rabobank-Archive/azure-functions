@@ -21,7 +21,6 @@ namespace VstsLogAnalyticsFunction
                 LogAnalyticsClient lac = new LogAnalyticsClient(Environment.GetEnvironmentVariable("logAnalyticsWorkspace", EnvironmentVariableTarget.Process),
                                                                 Environment.GetEnvironmentVariable("logAnalyticsKey", EnvironmentVariableTarget.Process));
 
-
                 await lac.AddCustomLogJsonAsync("codepushed", JsonConvert.SerializeObject(new VstsToLogAnalyticsObjectMapper().GenerateCodePushLog(codePushedEvent)), "Date");
             }
             catch (Exception ex)

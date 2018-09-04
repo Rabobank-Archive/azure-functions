@@ -1,7 +1,10 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.TeamFoundation.SourceControl.WebApi;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
+using VstsLogAnalyticsFunction.LogAnalyticsModel;
 using VstsWebhookFunction.LogAnalyticsModel;
 
 namespace VstsLogAnalyticsFunction
@@ -52,6 +55,27 @@ namespace VstsLogAnalyticsFunction
             }
 
             return prcl;
+        }
+
+        internal List<RepositoryLog> GenerateReposLog(List<GitRepository> repos, DateTime date)
+        {
+            List<RepositoryLog> repositorylogs = new List<RepositoryLog>();
+
+            foreach (var repo in repos)
+            {
+                RepositoryLog repoLog = new RepositoryLog();
+
+                repoLog.Name = repo.Name;
+                repoLog.Id = repo.Id.ToString();
+                repoLog.Project = repo.ProjectReference.Name;
+                repoLog.DefaultBranch = repo.DefaultBranch;
+                repoLog.Date = date;
+
+                repositorylogs.Add(repoLog);
+
+            }
+
+            return repositorylogs;
         }
 
         public CodePushedLog GenerateCodePushLog(string codePushedEvent)
