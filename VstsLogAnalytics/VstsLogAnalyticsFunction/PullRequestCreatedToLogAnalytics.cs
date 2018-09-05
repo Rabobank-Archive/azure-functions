@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Extensions.Logging;
@@ -12,7 +13,7 @@ namespace VstsLogAnalyticsFunction
     public static class PullRequestCreatedToLogAnalytics
     {
         [FunctionName("PullRequestCreatedToLogAnalytics")]
-        public static async void Run([QueueTrigger("pullrequestcreated", Connection = "connectionString")]string pullRequestEvent, ILogger log)
+        public static async Task Run([QueueTrigger("pullrequestcreated", Connection = "connectionString")]string pullRequestEvent, ILogger log)
         {
             try
             {

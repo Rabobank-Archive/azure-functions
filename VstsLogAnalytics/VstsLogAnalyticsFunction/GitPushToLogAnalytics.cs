@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Extensions.Logging;
@@ -12,7 +13,7 @@ namespace VstsLogAnalyticsFunction
     public static class GitPushToLogAnalytics
     {
         [FunctionName("GitPushToLogAnalytics")]
-        public static async void Run([QueueTrigger("codepushed", Connection = "connectionString")]string codePushedEvent, ILogger log)
+        public static async Task Run([QueueTrigger("codepushed", Connection = "connectionString")]string codePushedEvent, ILogger log)
         {
             try
             {

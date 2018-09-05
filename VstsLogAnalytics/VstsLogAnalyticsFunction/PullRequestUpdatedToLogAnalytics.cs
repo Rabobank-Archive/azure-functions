@@ -11,13 +11,14 @@ using VstsWebhookFunction.LogAnalyticsModel;
 using Microsoft.TeamFoundation.SourceControl.WebApi;
 using Microsoft.VisualStudio.Services.WebApi;
 using Microsoft.TeamFoundation.Build.WebApi;
+using System.Threading.Tasks;
 
 namespace VstsLogAnalyticsFunction
 {
     public static class PullRequestUpdatedToLogAnalytics
     {
         [FunctionName("PullRequestUpdatedToLogAnalytics")]
-        public static async void Run([QueueTrigger("pullrequestupdated", Connection = "connectionString")]string pullRequestEvent, ILogger log)
+        public static async Task Run([QueueTrigger("pullrequestupdated", Connection = "connectionString")]string pullRequestEvent, ILogger log)
         {
             try
             {
