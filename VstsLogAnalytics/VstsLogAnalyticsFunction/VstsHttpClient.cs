@@ -1,5 +1,7 @@
-﻿using Microsoft.TeamFoundation.SourceControl.WebApi;
+﻿using Microsoft.TeamFoundation.Policy.WebApi;
+using Microsoft.TeamFoundation.SourceControl.WebApi;
 using Microsoft.VisualStudio.Services.Common;
+using Microsoft.VisualStudio.Services.Organization.Client;
 using Microsoft.VisualStudio.Services.WebApi;
 using System;
 using System.Collections.Generic;
@@ -29,6 +31,16 @@ namespace VstsLogAnalyticsFunction
                 var git = connection.GetClient<GitHttpClient>();
 
                 return await git.GetRepositoriesAsync(project);
+            }
+        }
+
+        public async Task<List<PolicyConfiguration>> GetRepoPoliciesForTeamProject(string project)
+        {
+            using (var connection = new VssConnection(new Uri(_projectUrl), _cred))
+            {
+                var policyClient = connection.GetClient<PolicyHttpClient>();
+
+                return await policyClient.GetPolicyConfigurationsAsync(project);
             }
         }
     }

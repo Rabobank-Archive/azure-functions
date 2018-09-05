@@ -1,6 +1,8 @@
-﻿using Microsoft.TeamFoundation.SourceControl.WebApi;
+﻿using Microsoft.TeamFoundation.Policy.WebApi;
+using Microsoft.TeamFoundation.SourceControl.WebApi;
 using Newtonsoft.Json;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -97,6 +99,43 @@ namespace VstsLogAnalyticsFunction
             cpl.Branch = data.resource.refUpdates[0].name;
 
             return cpl;
+        }
+
+        public List<PolicyConfigurationLog> GeneratePolicyConfigurationLog(List<PolicyConfiguration> policies, DateTime date, List<RepositoryLog> repos)
+        {
+            List<PolicyConfigurationLog> policyLog = new List<PolicyConfigurationLog>();
+
+            foreach (var policy in policies)
+            {
+                PolicyConfigurationLog log = new PolicyConfigurationLog();
+
+                dynamic settings = policy.Settings;
+                
+
+                log.Id = policy.Id.ToString();
+                log.Branch = settings.scope[0].refName;
+                log.CreatorVoteCounts = settings?.creatorVoteCounts ?? false;
+                log.Date = date;
+                log.MinimumApproverCount = settings?.minimumApproverCount ?? 0;
+                if (settings.scope[0].repositoryId != null)
+                {
+                    log.RepositoryId = settings.scope[0].repositoryId;
+                }
+                log.Version = policy.Revision;
+                log.IsBlocking = policy.IsBlocking;
+                log.IsEnabled = policy.IsEnabled;
+                log.IsDeleted = policy.IsDeleted;
+                log.CreatedDate = policy.CreatedDate;
+                log.CreatedBy = policy.CreatedBy.UniqueName;
+                    
+
+
+                policyLog.Add(log);
+            }
+            
+
+            return policyLog;
+
         }
 
 
