@@ -1,6 +1,7 @@
 ﻿using Microsoft.Azure.WebJobs.Host.Config;
 using Microsoft.Azure.WebJobs.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using SecurePipelineScan.VstsService;
 using System;
 using VstsLogAnalytics.Client;
 using VstsLogAnalytics.Common;
@@ -33,6 +34,8 @@ namespace VstsLogAnalytics.Common
             var vstsPat = Environment.GetEnvironmentVariable("vstsPat", EnvironmentVariableTarget.Process);
 
             services.AddScoped<IVstsHttpClient>((_) => new VstsHttpClient(vstsUrl, vstsPat));
+
+            services.AddScoped<IVstsRestClient>((_) => new VstsRestClient("somecompany", vstsPat));
         }
     }
 }

@@ -7,8 +7,8 @@ namespace VstsLogAnalytics.Client
 {
     public interface IVstsHttpClient
     {
-        Task<List<GitRepository>> GetRepositoriesForTeamProject(string project);
+        Task<IEnumerable<GitRepository>> GetRepositoriesForTeamProject(string project);
 
-        Task<List<PolicyConfiguration>> GetRepoPoliciesForTeamProject(string project);
+        Task<IEnumerable<PolicyConfiguration>> GetRepoPoliciesForTeamProject(string project);
     }
 }

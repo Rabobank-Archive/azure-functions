@@ -12,13 +12,13 @@ namespace VstsLogAnalyticsFunction
     {
         [FunctionName("PullRequestUpdatedToLogAnalytics")]
         public static async Task Run([QueueTrigger("pullrequestupdated", Connection = "connectionString")]string pullRequestEvent,
-            [Inject]ILogAnalyticsClient lac, ILogger log)
+            [Inject]ILogAnalyticsClient logAnalyticsClient, ILogger log)
         {
             try
             {
                 log.LogInformation("logging pull request updated event to Log Analytics");
 
-                await lac.AddCustomLogJsonAsync("pullrequest", JsonConvert.SerializeObject(new VstsToLogAnalyticsObjectMapper().GeneratePullRequestLog(pullRequestEvent)), "Date");
+                await logAnalyticsClient.AddCustomLogJsonAsync("pullrequest", JsonConvert.SerializeObject(new VstsToLogAnalyticsObjectMapper().GeneratePullRequestLog(pullRequestEvent)), "Date");
             }
             catch (Exception ex)
             {
