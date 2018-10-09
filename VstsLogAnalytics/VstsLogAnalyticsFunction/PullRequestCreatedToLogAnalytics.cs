@@ -1,27 +1,23 @@
-using System;
-using System.Globalization;
-using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using VstsLogAnalyticsFunction;
-using VstsWebhookFunction.LogAnalyticsModel;
+using System;
+using System.Threading.Tasks;
+using VstsLogAnalytics.Client;
+using VstsLogAnalytics.Common;
 
 namespace VstsLogAnalyticsFunction
 {
     public static class PullRequestCreatedToLogAnalytics
     {
         [FunctionName("PullRequestCreatedToLogAnalytics")]
-        public static async Task Run([QueueTrigger("pullrequestcreated", Connection = "connectionString")]string pullRequestEvent, ILogger log)
+        public static async Task Run(
+            [QueueTrigger("pullrequestcreated", Connection = "connectionString")]
+        string pullRequestEvent, ILogger log, [Inject]ILogAnalyticsClient lac)
         {
             try
             {
                 log.LogInformation("logging pull request created event to Log Analytics");
-
-                LogAnalyticsClient lac = new LogAnalyticsClient(Environment.GetEnvironmentVariable("logAnalyticsWorkspace", EnvironmentVariableTarget.Process),
-                                                                Environment.GetEnvironmentVariable("logAnalyticsKey", EnvironmentVariableTarget.Process));
-
 
                 await lac.AddCustomLogJsonAsync("pullrequest", JsonConvert.SerializeObject(new VstsToLogAnalyticsObjectMapper().GeneratePullRequestLog(pullRequestEvent)), "Date");
             }

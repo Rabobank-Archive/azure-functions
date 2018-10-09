@@ -8,9 +8,9 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace VstsLogAnalyticsFunction
+namespace VstsLogAnalytics.Client
 {
-    public class VstsHttpClient
+    public class VstsHttpClient : IVstsHttpClient
     {
         private string _projectUrl;
         private string _pat;

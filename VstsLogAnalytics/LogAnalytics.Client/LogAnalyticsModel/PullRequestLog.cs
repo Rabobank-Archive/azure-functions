@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace VstsWebhookFunction.LogAnalyticsModel
+namespace VstsLogAnalytics.Client.LogAnalyticsModel
 {
     public class PullRequestLog
     {
@@ -12,7 +10,6 @@ namespace VstsWebhookFunction.LogAnalyticsModel
         public string TeamProject { get; set; }
         public string RepositoryId { get; set; }
         public string RepositoryName { get; set; }
-
 
         public string Title { get; set; }
         public int Id { get; set; }
@@ -27,7 +24,5 @@ namespace VstsWebhookFunction.LogAnalyticsModel
         public string LastMergeTargetCommit { get; set; }
         public string LastMergeCommit { get; set; }
         public string CommitIds { get; set; }
-
-
     }
 }

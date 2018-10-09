@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace VstsLogAnalyticsFunction.LogAnalyticsModel
+namespace VstsLogAnalytics.Client.LogAnalyticsModel
 {
     public class PolicyConfigurationLog
     {

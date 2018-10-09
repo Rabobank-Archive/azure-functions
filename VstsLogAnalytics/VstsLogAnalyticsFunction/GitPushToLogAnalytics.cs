@@ -1,26 +1,25 @@
-using System;
-using System.Globalization;
-using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using VstsLogAnalyticsFunction;
-using VstsWebhookFunction.LogAnalyticsModel;
+using System;
+using System.Threading.Tasks;
+using VstsLogAnalytics.Client;
+using VstsLogAnalytics.Common;
 
 namespace VstsLogAnalyticsFunction
 {
     public static class GitPushToLogAnalytics
     {
         [FunctionName("GitPushToLogAnalytics")]
-        public static async Task Run([QueueTrigger("codepushed", Connection = "connectionString")]string codePushedEvent, ILogger log)
+        public static async Task Run(
+            [QueueTrigger("codepushed", Connection = "connectionString")]
+        string codePushedEvent,
+            [Inject]ILogAnalyticsClient lac,
+            ILogger log)
         {
             try
             {
                 log.LogInformation("logging code push to Log Analytics");
-
-                LogAnalyticsClient lac = new LogAnalyticsClient(Environment.GetEnvironmentVariable("logAnalyticsWorkspace", EnvironmentVariableTarget.Process),
-                                                                Environment.GetEnvironmentVariable("logAnalyticsKey", EnvironmentVariableTarget.Process));
 
                 await lac.AddCustomLogJsonAsync("codepushed", JsonConvert.SerializeObject(new VstsToLogAnalyticsObjectMapper().GenerateCodePushLog(codePushedEvent)), "Date");
             }

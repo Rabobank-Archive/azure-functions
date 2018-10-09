@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace VstsWebhookFunction.LogAnalyticsModel
+namespace VstsLogAnalytics.Client.LogAnalyticsModel
 {
     public class CodePushedLog
     {

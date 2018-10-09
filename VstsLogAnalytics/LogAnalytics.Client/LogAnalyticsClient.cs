@@ -1,14 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace VstsLogAnalyticsFunction
+namespace VstsLogAnalytics.Client
 {
-    public class LogAnalyticsClient
+    public class LogAnalyticsClient : ILogAnalyticsClient
     {
         private string _workspace;
         private string _key;
@@ -30,7 +29,6 @@ namespace VstsLogAnalyticsFunction
 
             await PostData(logName, signature, datestring, json, timefield);
         }
-
 
         // Build the API signature
         private string BuildSignature(string message, string secret)
@@ -57,7 +55,6 @@ namespace VstsLogAnalyticsFunction
             client.DefaultRequestHeaders.Add("Authorization", signature);
             client.DefaultRequestHeaders.Add("x-ms-date", date);
             client.DefaultRequestHeaders.Add("time-generated-field", timefield);
-
 
             var httpContent = new StringContent(json, Encoding.UTF8);
             httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
