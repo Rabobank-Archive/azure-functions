@@ -1,6 +1,7 @@
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Rules.Reports;
 using SecurePipelineScan.Rules;
 using SecurePipelineScan.VstsService;
 using System;
@@ -24,11 +25,13 @@ namespace VstsLogAnalyticsFunction
 
                 var scan = new PolicyScan(client, _ =>
                 {
+                    BranchPolicyReport r = _ as BranchPolicyReport;
                     logAnalyticsClient.AddCustomLogJsonAsync("branchPolicy",
                         JsonConvert.SerializeObject(new
                         {
                             report = _,
                             Date = DateTime.UtcNow,
+                            
                         }), "Date");
                 });
                 scan.Execute("TAS");
