@@ -24,32 +24,32 @@ namespace VstsLogAnalyticsFunction
             log.LogInformation("C# Time trigger function to process endpoints");
 
             string team = "TAS";
-            List<LogAnalyticsReleaseItem> logAnalyticsItems = new List<LogAnalyticsReleaseItem>();
 
-            var endPointScan = new SecurePipelineScan.Rules.EndPointScan(client,
-                (_) =>
+            List<LogAnalyticsReleaseItem> list = new List<LogAnalyticsReleaseItem>();
+
+            var endPointScan = new SecurePipelineScan.Rules.EndPointScan(client, (_) =>
+            list.Add(
+                new LogAnalyticsReleaseItem
                 {
-                    ReleaseReport r = (ReleaseReport)_;
-                    logAnalyticsItems.Add(new LogAnalyticsReleaseItem
-                    {
-                        Endpoint = _.Endpoint.Name,
-                        Definition = _.Request.Definition.Name,
-                        RequestId = _.Request.Id,
-                        OwnerName = _.Request.Owner.Name,
-                        HasFourEyesOnAllBuildArtefacts = (_ as ReleaseReport)?.Result,
-                        Date = DateTime.UtcNow,
-                    });
-                });
+                    Endpoint = _.Endpoint.Name,
+                    Definition = _.Request.Definition.Name,
+                    RequestId = _.Request.Id,
+                    OwnerName = _.Request.Owner.Name,
+                    HasFourEyesOnAllBuildArtefacts = (_ as ReleaseReport)?.Result,
+                    Date = DateTime.UtcNow,
+                }
+                ));
             endPointScan.Execute(team);
 
-            for (int i = 0; i < logAnalyticsItems.Count; i = i + 50)
-            {
-                var items = logAnalyticsItems.Skip(i).Take(50);
-                await logAnalyticsClient.AddCustomLogJsonAsync("Release", JsonConvert.SerializeObject(items), "Date");
-            }
-            
-
             log.LogInformation("Done retrieving endpoint information. Send to log analytics");
+
+            for (int i = 0; i < list.Count; i = i + 100)
+            {
+                var items = list.Skip(i).Take(100);
+
+                await logAnalyticsClient.AddCustomLogJsonAsync("EndpointScan",
+                    JsonConvert.SerializeObject(new { items, Date = DateTime.UtcNow }), "Date");
+            }
         }
     }
 }

@@ -2,7 +2,7 @@
 
 namespace VstsLogAnalyticsFunction
 {
-    internal class LogAnalyticsReleaseItem
+    public class LogAnalyticsReleaseItem
     {
         public string Endpoint { get; set; }
         public string Definition { get; set; }
