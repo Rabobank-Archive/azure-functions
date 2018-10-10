@@ -2,6 +2,7 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using SecurePipelineScan.VstsService;
+using System;
 using System.Threading.Tasks;
 using VstsLogAnalytics.Client;
 using VstsLogAnalytics.Common;
@@ -21,14 +22,20 @@ namespace VstsLogAnalyticsFunction
 
             string team = "TAS";
 
-            EndPointReport report = new EndPointReport();
+            var endPointScan = new SecurePipelineScan.Rules.EndPointScan(client,
+                (_) =>
+                {
+                    logAnalyticsClient.AddCustomLogJsonAsync("EndpointScan",
+                        JsonConvert.SerializeObject(new
+                        {
+                            report = _,
+                            Date = DateTime.UtcNow,
+                        }), "Date");
+                });
 
-            var endPointScan = new SecurePipelineScan.Rules.EndPointScan(client, (_) => report.Reports.Add(_));
             endPointScan.Execute(team);
 
             log.LogInformation("Done retrieving endpoint information. Send to log analytics");
-
-            await logAnalyticsClient.AddCustomLogJsonAsync("EndpointScan", JsonConvert.SerializeObject(report), "Date");
         }
     }
 }
