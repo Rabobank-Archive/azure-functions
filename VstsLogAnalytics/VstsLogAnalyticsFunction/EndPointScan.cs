@@ -48,7 +48,7 @@ namespace VstsLogAnalyticsFunction
                 var items = list.Skip(i).Take(100);
 
                 await logAnalyticsClient.AddCustomLogJsonAsync("EndpointScan",
-                    JsonConvert.SerializeObject(new { items, Date = DateTime.UtcNow }), "Date");
+                    JsonConvert.SerializeObject(items), "Date");
             }
         }
     }
