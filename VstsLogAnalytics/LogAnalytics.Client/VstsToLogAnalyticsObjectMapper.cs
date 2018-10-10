@@ -57,7 +57,7 @@ namespace VstsLogAnalytics.Client
             return prcl;
         }
 
-        public IEnumerable<RepositoryLog> GenerateReposLog(List<GitRepository> repos, DateTime date)
+        public IEnumerable<RepositoryLog> GenerateReposLog(IEnumerable<GitRepository> repos, DateTime date)
         {
             foreach (var repo in repos)
             {
