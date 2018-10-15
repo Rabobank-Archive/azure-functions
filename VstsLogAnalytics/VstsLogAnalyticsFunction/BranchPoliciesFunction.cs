@@ -5,6 +5,7 @@ using Rules.Reports;
 using SecurePipelineScan.Rules;
 using SecurePipelineScan.VstsService;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using VstsLogAnalytics.Client;
 using VstsLogAnalytics.Common;
@@ -25,16 +26,19 @@ namespace VstsLogAnalyticsFunction
 
                 var scan = new PolicyScan(client, _ =>
                 {
-                    BranchPolicyReport r = _ as BranchPolicyReport;
-                    logAnalyticsClient.AddCustomLogJsonAsync("branchPolicy",
-                        JsonConvert.SerializeObject(new
-                        {
-                            r.Project,
-                            r.Repository,
-                            r.HasRequiredReviewerPolicy,
-                            Date = DateTime.UtcNow,
-                            
-                        }), "Date");
+                    var reports = _ as IEnumerable<BranchPolicyReport>;
+                    foreach (var r in reports)
+                    {
+                        logAnalyticsClient.AddCustomLogJsonAsync("branchPolicy",
+                            JsonConvert.SerializeObject(new
+                            {
+                                r.Project,
+                                r.Repository,
+                                r.HasRequiredReviewerPolicy,
+                                Date = DateTime.UtcNow,
+
+                            }), "Date");
+                    }
                 });
                 scan.Execute("TAS");
             }
