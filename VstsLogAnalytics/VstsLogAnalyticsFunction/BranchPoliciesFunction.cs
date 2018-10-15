@@ -16,7 +16,7 @@ namespace VstsLogAnalyticsFunction
         [FunctionName("BranchPoliciesFunction")]
         public static async Task Run([TimerTrigger("0 */30 * * * *")] TimerInfo timerInfo,
             [Inject]ILogAnalyticsClient logAnalyticsClient,
-            [Inject] IVstsRestClient client,
+            [Inject]IVstsRestClient client,
             ILogger log)
         {
             try
@@ -29,7 +29,9 @@ namespace VstsLogAnalyticsFunction
                     logAnalyticsClient.AddCustomLogJsonAsync("branchPolicy",
                         JsonConvert.SerializeObject(new
                         {
-                            report = _,
+                            r.Project,
+                            r.Repository,
+                            r.HasRequiredReviewerPolicy,
                             Date = DateTime.UtcNow,
                             
                         }), "Date");
