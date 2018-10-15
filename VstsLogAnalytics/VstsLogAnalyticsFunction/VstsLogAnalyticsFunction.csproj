@@ -10,7 +10,7 @@
     
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage" Version="3.0.0" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.23" />
-    <PackageReference Include="SecurePipelineScan.Rules" Version="0.0.1.31333" />
+    <PackageReference Include="SecurePipelineScan.Rules" Version="0.0.1.32311" />
     <PackageReference Include="WindowsAzure.Storage" Version="9.3.2" />
   </ItemGroup>
   <ItemGroup>
