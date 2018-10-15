@@ -11,7 +11,7 @@ using AutoFixture;
 
 namespace VstsLogAnalyticsFunction.Tests
 {
-    public class BranchPoliciesFunctionTests
+    public class RepositoryScanFunctionTests
     {
         [Fact]
         public void GivenMultipleReposAllReposShouldBeSentToLogAnalytics()
@@ -27,7 +27,7 @@ namespace VstsLogAnalyticsFunction.Tests
             vstsClient.Setup(client => client.Execute(It.IsAny<IVstsRestRequest<Multiple<MinimumNumberOfReviewersPolicy>>>()))
                 .Returns(new RestResponse<Multiple<MinimumNumberOfReviewersPolicy>> { Data = fixture.Create<Multiple<MinimumNumberOfReviewersPolicy>>() });
 
-            BranchPoliciesFunction.Run(new TimerInfo(null, null, false), logAnalyticsClient.Object, vstsClient.Object, new Mock<ILogger>().Object);
+            RepositoryScanFunction.Run(new TimerInfo(null, null, false), logAnalyticsClient.Object, vstsClient.Object, new Mock<ILogger>().Object);
 
             logAnalyticsClient.Verify(client => client.AddCustomLogJsonAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(3));
         }

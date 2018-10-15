@@ -12,9 +12,9 @@ using VstsLogAnalytics.Common;
 
 namespace VstsLogAnalyticsFunction
 {
-    public static class BranchPoliciesFunction
+    public static class RepositoryScanFunction
     {
-        [FunctionName("BranchPoliciesFunction")]
+        [FunctionName("RepositoryScanFunction")]
         public static async Task Run([TimerTrigger("0 */30 * * * *")] TimerInfo timerInfo,
             [Inject]ILogAnalyticsClient logAnalyticsClient,
             [Inject]IVstsRestClient client,
@@ -22,14 +22,14 @@ namespace VstsLogAnalyticsFunction
         {
             try
             {
-                log.LogInformation($"Branch Policies timed check start: {DateTime.Now}");
+                log.LogInformation($"Repository scan timed check start: {DateTime.Now}");
 
-                var scan = new PolicyScan(client, _ =>
+                var scan = new RepositoryScan(client, _ =>
                 {
-                    var reports = _ as IEnumerable<BranchPolicyReport>;
+                    var reports = _ as IEnumerable<RepositoryReport>;
                     foreach (var r in reports)
                     {
-                        logAnalyticsClient.AddCustomLogJsonAsync("branchPolicy",
+                        logAnalyticsClient.AddCustomLogJsonAsync("GitRepository",
                             JsonConvert.SerializeObject(new
                             {
                                 r.Project,
