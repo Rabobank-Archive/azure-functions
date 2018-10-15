@@ -7,39 +7,29 @@ using VstsLogAnalytics.Client;
 using Xunit;
 using System.Collections.Generic;
 using RestSharp;
+using AutoFixture;
 
 namespace VstsLogAnalyticsFunction.Tests
 {
     public class BranchPoliciesFunctionTests
     {
         [Fact]
-        public void Method1()
+        public void GivenMultipleReposAllReposShouldBeSentToLogAnalytics()
         {
-            TimerInfo timerInfo = new TimerInfo(null, null, false);
+            Fixture fixture = new Fixture();
 
-            var logger = new Mock<ILogger>();
             var logAnalyticsClient = new Mock<ILogAnalyticsClient>();
             var vstsClient = new Mock<IVstsRestClient>();
 
-            var repos = new Multiple<Repository>();
-            repos.Value = new List<Repository> { new Repository() { Name = "", DefaultBranch = "master", Project = new Project() { Name = "TAS" } } };
-
-            var policies = new Multiple<MinimumNumberOfReviewersPolicy>();
-            policies.Value = new List<MinimumNumberOfReviewersPolicy>();
-
             vstsClient.Setup(client => client.Execute(It.IsAny<IVstsRestRequest<Multiple<Repository>>>()))
-                .Returns(new RestResponse<Multiple<Repository>> { Data = repos });
+                .Returns(new RestResponse<Multiple<Repository>> { Data = fixture.Create<Multiple<Repository>>() });
 
             vstsClient.Setup(client => client.Execute(It.IsAny<IVstsRestRequest<Multiple<MinimumNumberOfReviewersPolicy>>>()))
-                .Returns(new RestResponse<Multiple<MinimumNumberOfReviewersPolicy>> { Data = policies });
+                .Returns(new RestResponse<Multiple<MinimumNumberOfReviewersPolicy>> { Data = fixture.Create<Multiple<MinimumNumberOfReviewersPolicy>>() });
 
-            logAnalyticsClient.Setup(client => client.AddCustomLogJsonAsync(It.IsAny<string>(),It.IsAny<string>(), It.IsAny<string>()))
-                .Verifiable();
+            BranchPoliciesFunction.Run(new TimerInfo(null, null, false), logAnalyticsClient.Object, vstsClient.Object, new Mock<ILogger>().Object);
 
-
-            BranchPoliciesFunction.Run(timerInfo, logAnalyticsClient.Object, vstsClient.Object, logger.Object);
-            logAnalyticsClient.VerifyAll();
-
+            logAnalyticsClient.Verify(client => client.AddCustomLogJsonAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(3));
         }
     }
 }
