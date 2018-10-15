@@ -44,7 +44,7 @@ namespace VstsLogAnalyticsFunction
             }
             catch (Exception ex)
             {
-                log.LogError(ex, $"Failed to write branch policies to log analytics: {ex}");
+                log.LogError(ex, $"Failed to write repository scan to log analytics: {ex}");
                 throw;
             }
         }
