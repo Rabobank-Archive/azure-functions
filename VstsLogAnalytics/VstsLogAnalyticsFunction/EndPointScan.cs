@@ -27,19 +27,23 @@ namespace VstsLogAnalyticsFunction
 
             List<LogAnalyticsReleaseItem> list = new List<LogAnalyticsReleaseItem>();
 
-            var endPointScan = new SecurePipelineScan.Rules.EndPointScan(client, (_) =>
-            list.Add(
-                new LogAnalyticsReleaseItem
-                {
-                    Endpoint = _.Endpoint.Name,
-                    Definition = _.Request.Definition.Name,
-                    RequestId = _.Request.Id,
-                    OwnerName = _.Request.Owner.Name,
-                    HasFourEyesOnAllBuildArtefacts = (_ as ReleaseReport)?.Result,
-                    Date = DateTime.UtcNow,
-                }
-                ));
-            endPointScan.Execute(team);
+            var endPointScan = new SecurePipelineScan.Rules.EndPointScan(client);
+            var results = endPointScan.Execute(team);
+
+            foreach (var report in results.OfType<ReleaseReport>())
+            {
+                list.Add(
+                    new LogAnalyticsReleaseItem
+                    {
+                        Endpoint = report.Endpoint.Name,
+                        EndpointType = report.Endpoint.Type,
+                        Definition = report.Request.Definition.Name,
+                        RequestId = report.Request.Id,
+                        StageName = report.Request.Owner.Name,
+                        HasFourEyesOnAllBuildArtefacts = (report as ReleaseReport)?.Result,
+                        Date = DateTime.UtcNow,
+                    });
+            }
 
             log.LogInformation("Done retrieving endpoint information. Send to log analytics");
 

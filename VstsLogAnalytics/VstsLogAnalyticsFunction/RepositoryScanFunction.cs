@@ -24,12 +24,12 @@ namespace VstsLogAnalyticsFunction
             {
                 log.LogInformation($"Repository scan timed check start: {DateTime.Now}");
 
-                var scan = new RepositoryScan(client, _ =>
+                var scan = new RepositoryScan(client);
+                var results = scan.Execute("TAS");
+
+                foreach (var r in results)
                 {
-                    var reports = _ as IEnumerable<RepositoryReport>;
-                    foreach (var r in reports)
-                    {
-                        logAnalyticsClient.AddCustomLogJsonAsync("GitRepository",
+                    await logAnalyticsClient.AddCustomLogJsonAsync("GitRepository",
                             JsonConvert.SerializeObject(new
                             {
                                 r.Project,
@@ -38,10 +38,10 @@ namespace VstsLogAnalyticsFunction
                                 Date = DateTime.UtcNow,
 
                             }), "Date");
-                    }
-                });
-                scan.Execute("TAS");
+                }
             }
+
+
             catch (Exception ex)
             {
                 log.LogError(ex, $"Failed to write repository scan to log analytics: {ex}");
