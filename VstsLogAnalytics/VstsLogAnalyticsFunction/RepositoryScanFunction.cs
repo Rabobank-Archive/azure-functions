@@ -1,7 +1,6 @@
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using Rules.Reports;
 using SecurePipelineScan.Rules;
 using SecurePipelineScan.VstsService;
 using System;
@@ -24,24 +23,49 @@ namespace VstsLogAnalyticsFunction
             {
                 log.LogInformation($"Repository scan timed check start: {DateTime.Now}");
 
-                var scan = new RepositoryScan(client);
-                var results = scan.Execute("TAS");
+                var projects = client.Execute(Requests.Projects()).Data;
 
-                foreach (var r in results)
+                log.LogInformation($"Projects found: {projects.Count}");
+                List<Exception> aggregateExceptions = new List<Exception>();
+
+                foreach (var p in projects.Value)
                 {
-                    await logAnalyticsClient.AddCustomLogJsonAsync("GitRepository",
-                            JsonConvert.SerializeObject(new
-                            {
-                                r.Project,
-                                r.Repository,
-                                r.HasRequiredReviewerPolicy,
-                                Date = DateTime.UtcNow,
+                    try
+                    {
+                        var scan = new RepositoryScan(client);
 
-                            }), "Date");
+                        var results = scan.Execute(p.Name);
+
+                        foreach (var r in results)
+                        {
+                            await logAnalyticsClient.AddCustomLogJsonAsync("GitRepository",
+                                    JsonConvert.SerializeObject(new
+                                    {
+                                        r.Project,
+                                        r.Repository,
+                                        r.HasRequiredReviewerPolicy,
+                                        Date = DateTime.UtcNow,
+                                    }), "Date");
+
+                            log.LogInformation($"Project scanned: {r.Project}");
+
+                            //ContinueWith((_) =>
+                            //    {
+                            //        log.LogInformation($"Project scanned: {r.Project}");
+                            //    }
+                            //);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        aggregateExceptions.Add(e);
+                    }
+                }
+                if (aggregateExceptions.Count > 0)
+                {
+                    throw new AggregateException(aggregateExceptions);
                 }
             }
-
-
             catch (Exception ex)
             {
                 log.LogError(ex, $"Failed to write repository scan to log analytics: {ex}");

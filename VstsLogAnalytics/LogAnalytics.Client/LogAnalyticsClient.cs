@@ -11,11 +11,13 @@ namespace VstsLogAnalytics.Client
     {
         private string _workspace;
         private string _key;
+        private HttpClient _httpClient;
 
         public LogAnalyticsClient(string workspace, string key)
         {
             _workspace = workspace;
             _key = key;
+            _httpClient = new HttpClient();
         }
 
         public async Task AddCustomLogJsonAsync(string logName, string json, string timefield)
@@ -48,8 +50,9 @@ namespace VstsLogAnalytics.Client
         {
             string url = "https://" + _workspace + ".ods.opinsights.azure.com/api/logs?api-version=2016-04-01";
 
-            var client = new HttpClient();
+            var client = _httpClient;
 
+            client.DefaultRequestHeaders.Clear();
             client.DefaultRequestHeaders.Add("Accept", "application/json");
             client.DefaultRequestHeaders.Add("Log-Type", logname);
             client.DefaultRequestHeaders.Add("Authorization", signature);
