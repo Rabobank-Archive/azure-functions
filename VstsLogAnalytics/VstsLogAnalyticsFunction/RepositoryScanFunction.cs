@@ -49,11 +49,6 @@ namespace VstsLogAnalyticsFunction
 
                             log.LogInformation($"Project scanned: {r.Project}");
 
-                            //ContinueWith((_) =>
-                            //    {
-                            //        log.LogInformation($"Project scanned: {r.Project}");
-                            //    }
-                            //);
                         }
                     }
                     catch (Exception e)
