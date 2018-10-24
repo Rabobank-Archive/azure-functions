@@ -46,7 +46,7 @@ namespace VstsLogAnalyticsFunction
 
                 foreach (var p in poolStatus.Data.Value)
                 {
-                    var assignedTask = (p.AssignedRequest == null) ? "Idle" : p.AssignedRequest.PlanType;
+                    var assignedTask = (p.Status != "online") ? "Offline" : ((p.AssignedRequest == null) ? "Idle" : p.AssignedRequest.PlanType);
 
                     list.Add(new LogAnalyticsAgentStatus
                     {
@@ -56,6 +56,7 @@ namespace VstsLogAnalyticsFunction
                         Status = p.Status,
                         Version = p.Version,
                         AssignedTask = assignedTask,
+                        Pool = a.Name,
                         Date = DateTime.UtcNow,
                     });
                 }
