@@ -5,16 +5,16 @@ VisualStudioVersion = 15.0.28010.2016
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VstsLogAnalyticsFunction", "VstsLogAnalyticsFunction\VstsLogAnalyticsFunction.csproj", "{74667D48-0D4F-49AD-9BF5-899198AD4FA2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LogAnalytics.Client", "LogAnalytics.Client\LogAnalytics.Client.csproj", "{47CF5D5C-E846-4E9E-B7D6-2B6587C91DDF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LogAnalytics.Client", "LogAnalytics.Client\LogAnalytics.Client.csproj", "{47CF5D5C-E846-4E9E-B7D6-2B6587C91DDF}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{974D9CB3-B265-4904-B5AB-808549B7EC8E}"
 	ProjectSection(SolutionItems) = preProject
-		..\README.md = ..\README.md
+		NuGet.Config = NuGet.Config
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VstsLogAnalyticsFunction.Tests", "VstsLogAnalyticsFunction.Tests\VstsLogAnalyticsFunction.Tests.csproj", "{0D4398D2-2E84-4D5E-8E85-845F3C5C1E99}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VstsLogAnalyticsFunction.Tests", "VstsLogAnalyticsFunction.Tests\VstsLogAnalyticsFunction.Tests.csproj", "{0D4398D2-2E84-4D5E-8E85-845F3C5C1E99}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VstsLogAnalytics.Common", "VstsLogAnalytics.Common\VstsLogAnalytics.Common.csproj", "{CB13A477-0AAB-4B97-8557-692B8E308D94}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VstsLogAnalytics.Common", "VstsLogAnalytics.Common\VstsLogAnalytics.Common.csproj", "{CB13A477-0AAB-4B97-8557-692B8E308D94}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
