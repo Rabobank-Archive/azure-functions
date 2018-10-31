@@ -24,6 +24,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="releasedeploymentcompleted.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="gitpushexample.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

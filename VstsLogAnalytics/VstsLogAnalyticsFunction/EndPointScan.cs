@@ -6,7 +6,6 @@ using SecurePipelineScan.VstsService;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using VstsLogAnalytics.Client;
 using VstsLogAnalytics.Common;
 
@@ -15,7 +14,7 @@ namespace VstsLogAnalyticsFunction
     public static class EndPointScan
     {
         [FunctionName("EndPointScan")]
-        public static async Task Run(
+        public static async System.Threading.Tasks.Task Run(
             [TimerTrigger("0 0 */4 * * *")] TimerInfo timerInfo,
             [Inject]ILogAnalyticsClient logAnalyticsClient,
             [Inject] IVstsRestClient client,

@@ -5,7 +5,6 @@ using SecurePipelineScan.VstsService;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using VstsLogAnalytics.Client;
 using VstsLogAnalytics.Common;
 
@@ -14,7 +13,7 @@ namespace VstsLogAnalyticsFunction
     public static class AgentPoolScan
     {
         [FunctionName("AgentPoolScan")]
-        public static async Task Run(
+        public static async System.Threading.Tasks.Task Run(
             [TimerTrigger("0 */5 * * * *")] TimerInfo timerInfo,
             [Inject]ILogAnalyticsClient logAnalyticsClient,
             [Inject] IVstsRestClient client,
@@ -53,7 +52,7 @@ namespace VstsLogAnalyticsFunction
                         case "Idle": statusCode = 1; break;
                         case "Build": statusCode = 2; break;
                         case "Release": statusCode = 3; break;
-                        case "Offline": 
+                        case "Offline":
                         default: statusCode = 0; break;
                     }
 

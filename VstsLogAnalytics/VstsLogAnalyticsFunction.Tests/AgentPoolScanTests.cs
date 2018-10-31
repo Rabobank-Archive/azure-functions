@@ -1,7 +1,6 @@
 ﻿using AutoFixture;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
-
 using Moq;
 using RestSharp;
 using SecurePipelineScan.VstsService;

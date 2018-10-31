@@ -1,0 +1,546 @@
+{
+  "id": "ffa87373-e4e9-41d2-90f0-15f1523782a5",
+  "eventType": "ms.vss-release.deployment-completed-event",
+  "publisherId": "rm",
+  "message": {
+    "text": "Deployment of release Release-2 on stage Stage 1 rejected.",
+    "html": "Deployment on stage <a href='https://somecompany-test.visualstudio.com/SOx-compliant-demo/_release?_a=environment-summary&definitionId=1&definitionEnvironmentId=1'>Stage 1</a> rejected.",
+    "markdown": "Deployment on stage [Stage 1](https://somecompany-test.visualstudio.com/SOx-compliant-demo/_release?_a=environment-summary&definitionId=1&definitionEnvironmentId=1) rejected."
+  },
+  "detailedMessage": {
+    "text": "Deployment of release Release-2 on stage Stage 1 rejected. Time to deploy: 00:00:00.",
+    "html": "Deployment on stage <a href='https://somecompany-test.visualstudio.com/SOx-compliant-demo/_release?_a=environment-summary&definitionId=1&definitionEnvironmentId=1'>Stage 1</a> rejected. Time to deploy: 00:00:00.",
+    "markdown": "Deployment on stage [Stage 1](https://somecompany-test.visualstudio.com/SOx-compliant-demo/_release?_a=environment-summary&definitionId=1&definitionEnvironmentId=1) rejected. Time to deploy: 00:00:00."
+  },
+  "resource": {
+    "environment": {
+      "id": 2,
+      "releaseId": 2,
+      "name": "Stage 1",
+      "status": "rejected",
+      "variables": {},
+      "variableGroups": [],
+      "preDeployApprovals": [
+        {
+          "id": 4,
+          "revision": 1,
+          "approvalType": "preDeploy",
+          "createdOn": "2018-10-26T10:20:27.747Z",
+          "modifiedOn": "2018-10-26T10:20:27.76Z",
+          "status": "approved",
+          "comments": "",
+          "isAutomated": true,
+          "isNotificationOn": false,
+          "trialNumber": 1,
+          "attempt": 1,
+          "rank": 1,
+          "release": {
+            "id": 2,
+            "name": "Release-2",
+            "url": "https://somecompany-test.vsrm.visualstudio.com/53410703-e2e5-4238-9025-233bd7c811b3/_apis/Release/releases/2",
+            "_links": {}
+          },
+          "releaseDefinition": {
+            "id": 1,
+            "name": "New release pipeline",
+            "path": "\\",
+            "projectReference": null,
+            "url": "https://somecompany-test.vsrm.visualstudio.com/53410703-e2e5-4238-9025-233bd7c811b3/_apis/Release/definitions/1",
+            "_links": {}
+          },
+          "releaseEnvironment": {
+            "id": 2,
+            "name": "Stage 1",
+            "url": "https://somecompany-test.vsrm.visualstudio.com/53410703-e2e5-4238-9025-233bd7c811b3/_apis/Release/releases/2/environments/2",
+            "_links": {}
+          },
+          "url": "https://somecompany-test.vsrm.visualstudio.com/53410703-e2e5-4238-9025-233bd7c811b3/_apis/Release/approvals/4"
+        }
+      ],
+      "postDeployApprovals": [],
+      "preApprovalsSnapshot": { "approvals": [] },
+      "postApprovalsSnapshot": { "approvals": [] },
+      "deploySteps": [
+        {
+          "id": 5,
+          "deploymentId": 2,
+          "attempt": 1,
+          "reason": "automated",
+          "status": "notDeployed",
+          "operationStatus": "PhaseFailed",
+          "releaseDeployPhases": [
+            {
+              "id": 2,
+              "phaseId": "2",
+              "name": "Run on agent",
+              "rank": 1,
+              "phaseType": "agentBasedDeployment",
+              "status": "failed",
+              "runPlanId": null,
+              "deploymentJobs": [],
+              "errorLog": "",
+              "manualInterventions": []
+            }
+          ],
+          "requestedBy": {
+            "displayName": "Pruyssenaere de la Woestijne de, L (Leon)",
+            "url": "https://app.vssps.visualstudio.com/Ab0ae02f6-64d2-439b-a771-4ec43a2465a2/_apis/Identities/404d8d74-f3c6-6aeb-9f05-2f8e576cd1ba",
+            "_links": { "avatar": { "href": "https://somecompany-test.visualstudio.com/_apis/GraphProfile/MemberAvatars/aad.NDA0ZDhkNzQtZjNjNi03YWViLTlmMDUtMmY4ZTU3NmNkMWJh" } },
+            "id": "404d8d74-f3c6-6aeb-9f05-2f8e576cd1ba",
+            "uniqueName": "Leon.de.Pruyssenaere.de.la.Woestijne@somecompany.nl",
+            "imageUrl": "https://somecompany-test.visualstudio.com/_api/_common/identityImage?id=404d8d74-f3c6-6aeb-9f05-2f8e576cd1ba",
+            "descriptor": "aad.NDA0ZDhkNzQtZjNjNi03YWViLTlmMDUtMmY4ZTU3NmNkMWJh"
+          },
+          "requestedFor": {
+            "displayName": "Pruyssenaere de la Woestijne de, L (Leon)",
+            "url": "https://app.vssps.visualstudio.com/Ab0ae02f6-64d2-439b-a771-4ec43a2465a2/_apis/Identities/404d8d74-f3c6-6aeb-9f05-2f8e576cd1ba",
+            "_links": { "avatar": { "href": "https://somecompany-test.visualstudio.com/_apis/GraphProfile/MemberAvatars/aad.NDA0ZDhkNzQtZjNjNi03YWViLTlmMDUtMmY4ZTU3NmNkMWJh" } },
+            "id": "404d8d74-f3c6-6aeb-9f05-2f8e576cd1ba",
+            "uniqueName": "Leon.de.Pruyssenaere.de.la.Woestijne@somecompany.nl",
+            "imageUrl": "https://somecompany-test.visualstudio.com/_api/_common/identityImage?id=404d8d74-f3c6-6aeb-9f05-2f8e576cd1ba",
+            "descriptor": "aad.NDA0ZDhkNzQtZjNjNi03YWViLTlmMDUtMmY4ZTU3NmNkMWJh"
+          },
+          "queuedOn": "2018-10-26T10:20:27.59Z",
+          "lastModifiedBy": {
+            "displayName": "Microsoft.VisualStudio.Services.ReleaseManagement",
+            "id": "0000000d-0000-8888-8000-000000000000",
+            "uniqueName": "0000000d-0000-8888-8000-000000000000@2c895908-04e0-4952-89fd-54b0046d6288",
+            "descriptor": "s2s.MDAwMDAwMGQtMDAwMC04ODg4LTgwMDAtMDAwMDAwMDAwMDAwQDJjODk1OTA4LTA0ZTAtNDk1Mi04OWZkLTU0YjAwNDZkNjI4OA"
+          },
+          "lastModifiedOn": "2018-10-26T10:20:27.87Z",
+          "hasStarted": false,
+          "tasks": [],
+          "runPlanId": "00000000-0000-0000-0000-000000000000",
+          "errorLog": "\r\nException Message: VS402925: Build ID 'lkj' is invalid. Make sure that the build ID is valid and try again. (type InvalidRequestException)\r\nException Stack Trace:    at Microsoft.VisualStudio.Services.ReleaseManagement.Artifact.Extensions.Build.BuildArtifact.TryParseBuildId(InputValue versionData, Boolean shouldThrow) in C:\\tmp\\a\\_work\\6\\s\\ReleaseManagement\\Service\\ReleaseManagement2\\ArtifactType\\Build\\BuildArtifact.cs:line 2489\r\n   at Microsoft.VisualStudio.Services.ReleaseManagement.Artifact.Extensions.Build.BuildArtifact.GetArtifactConfigurationVariables(IVssRequestContext context, IDictionary`2 sourceInputs) in C:\\tmp\\a\\_work\\6\\s\\ReleaseManagement\\Service\\ReleaseManagement2\\ArtifactType\\Build\\BuildArtifact.cs:line 1878\r\n   at Microsoft.VisualStudio.Services.ReleaseManagement.Server.Processors.DeployPhaseRunner.GetArtifactVariables(Release release, IVssRequestContext requestContext) in C:\\tmp\\a\\_work\\6\\s\\ReleaseManagement\\Service\\ReleaseManagement2\\Server\\Processors\\DeployPhaseRunner.cs:line 368\r\n   at Microsoft.VisualStudio.Services.ReleaseManagement.Server.Processors.DeployPhaseRunner.GetMergedReleaseVariables(Release release, ReleaseEnvironment releaseEnvironment, ReleaseEnvironmentSnapshotDelta deploymentDelta, Boolean includeArtifactVariables) in C:\\tmp\\a\\_work\\6\\s\\ReleaseManagement\\Service\\ReleaseManagement2\\Server\\Processors\\DeployPhaseRunner.cs:line 562\r\n   at Microsoft.VisualStudio.Services.ReleaseManagement.Server.Processors.DeployPhaseRunner.GetAutomationEngineInput(Release release, ReleaseEnvironment releaseEnvironment, ReleaseEnvironmentStep step, Int32 trialNumber, DeployPhaseSnapshot snapshotToProcess, ReleaseEnvironmentSnapshotDelta deploymentDelta) in C:\\tmp\\a\\_work\\6\\s\\ReleaseManagement\\Service\\ReleaseManagement2\\Server\\Processors\\DeployPhaseRunner.cs:line 283\r\n   at Microsoft.VisualStudio.Services.ReleaseManagement.Server.Processors.DeployPhaseRunner.Run(Release release, ReleaseEnvironment releaseEnvironment, ReleaseEnvironmentStep deployStep, DeployPhaseSnapshot snapshotToProcess) in C:\\tmp\\a\\_work\\6\\s\\ReleaseManagement\\Service\\ReleaseManagement2\\Server\\Processors\\DeployPhaseRunner.cs:line 262\r\n   at Microsoft.VisualStudio.Services.ReleaseManagement.Server.Processors.DeployPhaseOrchestrator.RunDeployPhase(Release release, ReleaseEnvironment releaseEnvironment, ReleaseEnvironmentStep deployStep, DeployPhaseSnapshot snapshotToProcess) in C:\\tmp\\a\\_work\\6\\s\\ReleaseManagement\\Service\\ReleaseManagement2\\Server\\Processors\\DeployPhaseOrchestrator.cs:line 465\r\n   at Microsoft.VisualStudio.Services.ReleaseManagement.Server.Processors.DeployPhaseOrchestrator.InvokeRunner(Release release, ReleaseEnvironmentStep deployStep, ReleaseEnvironment releaseEnvironment, DeployPhaseSnapshot snapshotToProcess, Func`5 runDeployPhase, Action`4 acceptStep, Action`3 rejectStep, Action`4 handleException) in C:\\tmp\\a\\_work\\6\\s\\ReleaseManagement\\Service\\ReleaseManagement2\\Server\\Processors\\DeployPhaseOrchestrator.cs:line 436\r\n",
+          "issues": [
+            {
+              "issueType": "Error",
+              "message": "\r\nException Message: VS402925: Build ID 'lkj' is invalid. Make sure that the build ID is valid and try again. (type InvalidRequestException)\r\nException Stack Trace:    at Microsoft.VisualStudio.Services.ReleaseManagement.Artifact.Extensions.Build.BuildArtifact.TryParseBuildId(InputValue versionData, Boolean shouldThrow) in C:\\tmp\\a\\_work\\6\\s\\ReleaseManagement\\Service\\ReleaseManagement2\\ArtifactType\\Build\\BuildArtifact.cs:line 2489\r\n   at Microsoft.VisualStudio.Services.ReleaseManagement.Artifact.Extensions.Build.BuildArtifact.GetArtifactConfigurationVariables(IVssRequestContext context, IDictionary`2 sourceInputs) in C:\\tmp\\a\\_work\\6\\s\\ReleaseManagement\\Service\\ReleaseManagement2\\ArtifactType\\Build\\BuildArtifact.cs:line 1878\r\n   at Microsoft.VisualStudio.Services.ReleaseManagement.Server.Processors.DeployPhaseRunner.GetArtifactVariables(Release release, IVssRequestContext requestContext) in C:\\tmp\\a\\_work\\6\\s\\ReleaseManagement\\Service\\ReleaseManagement2\\Server\\Processors\\DeployPhaseRunner.cs:line 368\r\n   at Microsoft.VisualStudio.Services.ReleaseManagement.Server.Processors.DeployPhaseRunner.GetMergedReleaseVariables(Release release, ReleaseEnvironment releaseEnvironment, ReleaseEnvironmentSnapshotDelta deploymentDelta, Boolean includeArtifactVariables) in C:\\tmp\\a\\_work\\6\\s\\ReleaseManagement\\Service\\ReleaseManagement2\\Server\\Processors\\DeployPhaseRunner.cs:line 562\r\n   at Microsoft.VisualStudio.Services.ReleaseManagement.Server.Processors.DeployPhaseRunner.GetAutomationEngineInput(Release release, ReleaseEnvironment releaseEnvironment, ReleaseEnvironmentStep step, Int32 trialNumber, DeployPhaseSnapshot snapshotToProcess, ReleaseEnvironmentSnapshotDelta deploymentDelta) in C:\\tmp\\a\\_work\\6\\s\\ReleaseManagement\\Service\\ReleaseManagement2\\Server\\Processors\\DeployPhaseRunner.cs:line 283\r\n   at Microsoft.VisualStudio.Services.ReleaseManagement.Server.Processors.DeployPhaseRunner.Run(Release release, ReleaseEnvironment releaseEnvironment, ReleaseEnvironmentStep deployStep, DeployPhaseSnapshot snapshotToProcess) in C:\\tmp\\a\\_work\\6\\s\\ReleaseManagement\\Service\\ReleaseManagement2\\Server\\Processors\\DeployPhaseRunner.cs:line 262\r\n   at Microsoft.VisualStudio.Services.ReleaseManagement.Server.Processors.DeployPhaseOrchestrator.RunDeployPhase(Release release, ReleaseEnvironment releaseEnvironment, ReleaseEnvironmentStep deployStep, DeployPhaseSnapshot snapshotToProcess) in C:\\tmp\\a\\_work\\6\\s\\ReleaseManagement\\Service\\ReleaseManagement2\\Server\\Processors\\DeployPhaseOrchestrator.cs:line 465\r\n   at Microsoft.VisualStudio.Services.ReleaseManagement.Server.Processors.DeployPhaseOrchestrator.InvokeRunner(Release release, ReleaseEnvironmentStep deployStep, ReleaseEnvironment releaseEnvironment, DeployPhaseSnapshot snapshotToProcess, Func`5 runDeployPhase, Action`4 acceptStep, Action`3 rejectStep, Action`4 handleException) in C:\\tmp\\a\\_work\\6\\s\\ReleaseManagement\\Service\\ReleaseManagement2\\Server\\Processors\\DeployPhaseOrchestrator.cs:line 436\r\n",
+              "data": {}
+            }
+          ]
+        }
+      ],
+      "rank": 1,
+      "definitionEnvironmentId": 1,
+      "environmentOptions": {
+        "emailNotificationType": "OnlyOnFailure",
+        "emailRecipients": "release.environment.owner;release.creator",
+        "skipArtifactsDownload": false,
+        "timeoutInMinutes": 0,
+        "enableAccessToken": false,
+        "publishDeploymentStatus": true,
+        "badgeEnabled": false,
+        "autoLinkWorkItems": false,
+        "pullRequestDeploymentEnabled": false
+      },
+      "demands": [],
+      "conditions": [
+        {
+          "result": true,
+          "name": "ReleaseStarted",
+          "conditionType": "event",
+          "value": ""
+        }
+      ],
+      "createdOn": "2018-10-26T10:20:27.59Z",
+      "modifiedOn": "2018-10-26T10:20:27.857Z",
+      "workflowTasks": [],
+      "deployPhasesSnapshot": [],
+      "owner": {
+        "displayName": "Pruyssenaere de la Woestijne de, L (Leon)",
+        "url": "https://app.vssps.visualstudio.com/Ab0ae02f6-64d2-439b-a771-4ec43a2465a2/_apis/Identities/404d8d74-f3c6-6aeb-9f05-2f8e576cd1ba",
+        "_links": { "avatar": { "href": "https://somecompany-test.visualstudio.com/_apis/GraphProfile/MemberAvatars/aad.NDA0ZDhkNzQtZjNjNi03YWViLTlmMDUtMmY4ZTU3NmNkMWJh" } },
+        "id": "404d8d74-f3c6-6aeb-9f05-2f8e576cd1ba",
+        "uniqueName": "Leon.de.Pruyssenaere.de.la.Woestijne@somecompany.nl",
+        "imageUrl": "https://somecompany-test.visualstudio.com/_api/_common/identityImage?id=404d8d74-f3c6-6aeb-9f05-2f8e576cd1ba",
+        "descriptor": "aad.NDA0ZDhkNzQtZjNjNi03YWViLTlmMDUtMmY4ZTU3NmNkMWJh"
+      },
+      "schedules": [],
+      "release": {
+        "id": 2,
+        "name": "Release-2",
+        "url": "https://somecompany-test.vsrm.visualstudio.com/53410703-e2e5-4238-9025-233bd7c811b3/_apis/Release/releases/2",
+        "_links": {
+          "web": { "href": "https://somecompany-test.visualstudio.com/53410703-e2e5-4238-9025-233bd7c811b3/_release?releaseId=2&_a=release-summary" },
+          "self": { "href": "https://somecompany-test.vsrm.visualstudio.com/53410703-e2e5-4238-9025-233bd7c811b3/_apis/Release/releases/2" }
+        }
+      },
+      "releaseDefinition": {
+        "id": 1,
+        "name": "New release pipeline",
+        "path": "\\",
+        "projectReference": null,
+        "url": "https://somecompany-test.vsrm.visualstudio.com/53410703-e2e5-4238-9025-233bd7c811b3/_apis/Release/definitions/1",
+        "_links": {
+          "web": { "href": "https://somecompany-test.visualstudio.com/53410703-e2e5-4238-9025-233bd7c811b3/_release?definitionId=1" },
+          "self": { "href": "https://somecompany-test.vsrm.visualstudio.com/53410703-e2e5-4238-9025-233bd7c811b3/_apis/Release/definitions/1" }
+        }
+      },
+      "releaseCreatedBy": {
+        "displayName": "Pruyssenaere de la Woestijne de, L (Leon)",
+        "url": "https://app.vssps.visualstudio.com/Ab0ae02f6-64d2-439b-a771-4ec43a2465a2/_apis/Identities/404d8d74-f3c6-6aeb-9f05-2f8e576cd1ba",
+        "_links": { "avatar": { "href": "https://somecompany-test.visualstudio.com/_apis/GraphProfile/MemberAvatars/aad.NDA0ZDhkNzQtZjNjNi03YWViLTlmMDUtMmY4ZTU3NmNkMWJh" } },
+        "id": "404d8d74-f3c6-6aeb-9f05-2f8e576cd1ba",
+        "uniqueName": "Leon.de.Pruyssenaere.de.la.Woestijne@somecompany.nl",
+        "imageUrl": "https://somecompany-test.visualstudio.com/_api/_common/identityImage?id=404d8d74-f3c6-6aeb-9f05-2f8e576cd1ba",
+        "descriptor": "aad.NDA0ZDhkNzQtZjNjNi03YWViLTlmMDUtMmY4ZTU3NmNkMWJh"
+      },
+      "triggerReason": "ReleaseStarted",
+      "timeToDeploy": 0.0010666666666666667,
+      "processParameters": {},
+      "preDeploymentGatesSnapshot": {
+        "id": 0,
+        "gatesOptions": null,
+        "gates": []
+      },
+      "postDeploymentGatesSnapshot": {
+        "id": 0,
+        "gatesOptions": null,
+        "gates": []
+      }
+    },
+    "project": {
+      "id": "53410703-e2e5-4238-9025-233bd7c811b3",
+      "name": "SOx-compliant-demo"
+    },
+    "deployment": {
+      "id": 2,
+      "release": {
+        "id": 2,
+        "name": "Release-2",
+        "url": "https://somecompany-test.vsrm.visualstudio.com/53410703-e2e5-4238-9025-233bd7c811b3/_apis/Release/releases/2",
+        "artifacts": [
+          {
+            "sourceId": "53410703-e2e5-4238-9025-233bd7c811b3:2",
+            "type": "Build",
+            "alias": "_SOx-compliant-demo-ASP.NET Core-CI",
+            "definitionReference": {
+              "definition": {
+                "id": "2",
+                "name": "SOx-compliant-demo-ASP.NET Core-CI"
+              },
+              "definitions": {
+                "id": "",
+                "name": ""
+              },
+              "IsMultiDefinitionType": {
+                "id": "False",
+                "name": "False"
+              },
+              "project": {
+                "id": "53410703-e2e5-4238-9025-233bd7c811b3",
+                "name": "SOx-compliant-demo"
+              },
+              "repository": {
+                "id": "97d7b870-a21b-461c-8085-208d84d1a1c1",
+                "name": "dotnetcoresample"
+              },
+              "version": {
+                "id": "lkj",
+                "name": "lkj"
+              },
+              "artifactSourceVersionUrl": {
+                "id": "https://somecompany-test.visualstudio.com/_permalink/_build/index?collectionId=764e9f75-d69a-4705-9b33-b8e0d95c63d3&projectId=53410703-e2e5-4238-9025-233bd7c811b3&buildId=lkj",
+                "name": ""
+              },
+              "artifactSourceDefinitionUrl": {
+                "id": "https://somecompany-test.visualstudio.com/_permalink/_build/index?collectionId=764e9f75-d69a-4705-9b33-b8e0d95c63d3&projectId=53410703-e2e5-4238-9025-233bd7c811b3&definitionId=2",
+                "name": ""
+              },
+              "defaultVersionType": {
+                "id": "selectDuringReleaseCreationType",
+                "name": "Specify at the time of release creation"
+              }
+            },
+            "isPrimary": true,
+            "isRetained": false
+          }
+        ],
+        "webAccessUri": "https://somecompany-test.visualstudio.com/53410703-e2e5-4238-9025-233bd7c811b3/_release?releaseId=2&_a=release-summary",
+        "_links": {
+          "self": { "href": "https://somecompany-test.vsrm.visualstudio.com/53410703-e2e5-4238-9025-233bd7c811b3/_apis/Release/releases/2" },
+          "web": { "href": "https://somecompany-test.visualstudio.com/SOx-compliant-demo/_release?releaseId=2&_a=release-summary" },
+          "logs": { "href": "https://somecompany-test.visualstudio.com/SOx-compliant-demo/_release?releaseId=2&_a=release-logs&environmentId=2&releaseEnvironmentId=2" }
+        },
+        "description": "",
+        "reason": "manual"
+      },
+      "releaseDefinition": {
+        "id": 1,
+        "name": "New release pipeline",
+        "path": "\\",
+        "projectReference": {
+          "id": "53410703-e2e5-4238-9025-233bd7c811b3",
+          "name": null
+        },
+        "url": "https://somecompany-test.vsrm.visualstudio.com/53410703-e2e5-4238-9025-233bd7c811b3/_apis/Release/definitions/1",
+        "_links": {
+          "self": { "href": "https://somecompany-test.vsrm.visualstudio.com/53410703-e2e5-4238-9025-233bd7c811b3/_apis/Release/definitions/1" },
+          "web": { "href": "https://somecompany-test.visualstudio.com/53410703-e2e5-4238-9025-233bd7c811b3/_release?definitionId=1" }
+        }
+      },
+      "releaseEnvironment": {
+        "id": 2,
+        "name": "Stage 1",
+        "url": "https://somecompany-test.vsrm.visualstudio.com/53410703-e2e5-4238-9025-233bd7c811b3/_apis/Release/releases/2/environments/2",
+        "_links": { "self": { "href": "https://somecompany-test.vsrm.visualstudio.com/53410703-e2e5-4238-9025-233bd7c811b3/_apis/Release/releases/2/environments/2" } }
+      },
+      "projectReference": null,
+      "definitionEnvironmentId": 1,
+      "attempt": 1,
+      "reason": "automated",
+      "deploymentStatus": "notDeployed",
+      "operationStatus": "PhaseFailed",
+      "requestedBy": {
+        "displayName": "Pruyssenaere de la Woestijne de, L (Leon)",
+        "url": "https://app.vssps.visualstudio.com/Ab0ae02f6-64d2-439b-a771-4ec43a2465a2/_apis/Identities/404d8d74-f3c6-6aeb-9f05-2f8e576cd1ba",
+        "_links": { "avatar": { "href": "https://somecompany-test.visualstudio.com/_apis/GraphProfile/MemberAvatars/aad.NDA0ZDhkNzQtZjNjNi03YWViLTlmMDUtMmY4ZTU3NmNkMWJh" } },
+        "id": "404d8d74-f3c6-6aeb-9f05-2f8e576cd1ba",
+        "uniqueName": "Leon.de.Pruyssenaere.de.la.Woestijne@somecompany.nl",
+        "imageUrl": "https://somecompany-test.visualstudio.com/_api/_common/identityImage?id=404d8d74-f3c6-6aeb-9f05-2f8e576cd1ba",
+        "descriptor": "aad.NDA0ZDhkNzQtZjNjNi03YWViLTlmMDUtMmY4ZTU3NmNkMWJh"
+      },
+      "requestedFor": {
+        "displayName": "Pruyssenaere de la Woestijne de, L (Leon)",
+        "url": "https://app.vssps.visualstudio.com/Ab0ae02f6-64d2-439b-a771-4ec43a2465a2/_apis/Identities/404d8d74-f3c6-6aeb-9f05-2f8e576cd1ba",
+        "_links": { "avatar": { "href": "https://somecompany-test.visualstudio.com/_apis/GraphProfile/MemberAvatars/aad.NDA0ZDhkNzQtZjNjNi03YWViLTlmMDUtMmY4ZTU3NmNkMWJh" } },
+        "id": "404d8d74-f3c6-6aeb-9f05-2f8e576cd1ba",
+        "uniqueName": "Leon.de.Pruyssenaere.de.la.Woestijne@somecompany.nl",
+        "imageUrl": "https://somecompany-test.visualstudio.com/_api/_common/identityImage?id=404d8d74-f3c6-6aeb-9f05-2f8e576cd1ba",
+        "descriptor": "aad.NDA0ZDhkNzQtZjNjNi03YWViLTlmMDUtMmY4ZTU3NmNkMWJh"
+      },
+      "queuedOn": "2018-10-26T10:20:27.59Z",
+      "startedOn": "0001-01-01T00:00:00",
+      "completedOn": "0001-01-01T00:00:00",
+      "lastModifiedOn": "2018-10-26T10:20:27.87Z",
+      "lastModifiedBy": {
+        "displayName": "Microsoft.VisualStudio.Services.ReleaseManagement",
+        "id": "0000000d-0000-8888-8000-000000000000",
+        "uniqueName": "0000000d-0000-8888-8000-000000000000@2c895908-04e0-4952-89fd-54b0046d6288",
+        "descriptor": "s2s.MDAwMDAwMGQtMDAwMC04ODg4LTgwMDAtMDAwMDAwMDAwMDAwQDJjODk1OTA4LTA0ZTAtNDk1Mi04OWZkLTU0YjAwNDZkNjI4OA"
+      },
+      "conditions": [
+        {
+          "name": "ReleaseStarted",
+          "conditionType": "event",
+          "value": ""
+        }
+      ],
+      "preDeployApprovals": [
+        {
+          "id": 4,
+          "revision": 1,
+          "approvalType": "preDeploy",
+          "createdOn": "2018-10-26T10:20:27.747Z",
+          "modifiedOn": "2018-10-26T10:20:27.76Z",
+          "status": "approved",
+          "comments": "",
+          "isAutomated": true,
+          "isNotificationOn": false,
+          "trialNumber": 1,
+          "attempt": 1,
+          "rank": 1,
+          "release": {
+            "id": 2,
+            "name": "",
+            "url": "https://somecompany-test.vsrm.visualstudio.com/53410703-e2e5-4238-9025-233bd7c811b3/_apis/Release/releases/2",
+            "_links": {}
+          },
+          "releaseDefinition": {
+            "id": 0,
+            "name": "",
+            "projectReference": null,
+            "url": "https://somecompany-test.vsrm.visualstudio.com/53410703-e2e5-4238-9025-233bd7c811b3/_apis/Release/definitions/0",
+            "_links": {}
+          },
+          "releaseEnvironment": {
+            "id": 2,
+            "name": "",
+            "url": "https://somecompany-test.vsrm.visualstudio.com/53410703-e2e5-4238-9025-233bd7c811b3/_apis/Release/releases/2/environments/2",
+            "_links": {}
+          },
+          "url": "https://somecompany-test.vsrm.visualstudio.com/53410703-e2e5-4238-9025-233bd7c811b3/_apis/Release/approvals/4"
+        }
+      ],
+      "postDeployApprovals": [],
+      "_links": {}
+    },
+    "comment": "",
+    "data": {
+      "releaseProperties": "{\"DownloadBuildArtifactsUsingTask\":{\"$type\":\"System.String\",\"$value\":\"True\"},\"ReleaseCreationSource\":{\"$type\":\"System.String\",\"$value\":\"ReleaseHub\"}}",
+      "environmentStatuses": "{\"1\":\"Rejected\"}",
+      "workItems": [],
+      "previousReleaseEnvironment": {
+        "id": 1,
+        "releaseId": 1,
+        "name": "Stage 1",
+        "status": "succeeded",
+        "variables": {},
+        "variableGroups": [],
+        "preDeployApprovals": [],
+        "postDeployApprovals": [],
+        "preApprovalsSnapshot": { "approvals": [] },
+        "postApprovalsSnapshot": { "approvals": [] },
+        "deploySteps": [
+          {
+            "id": 0,
+            "deploymentId": 1,
+            "attempt": 1,
+            "reason": "automated",
+            "status": "succeeded",
+            "operationStatus": "Approved",
+            "releaseDeployPhases": [
+              {
+                "id": 1,
+                "phaseId": "1",
+                "name": "Run on agent",
+                "rank": 1,
+                "phaseType": "agentBasedDeployment",
+                "status": "succeeded",
+                "runPlanId": null,
+                "deploymentJobs": [],
+                "errorLog": "",
+                "manualInterventions": [],
+                "startedOn": "2018-10-26T10:02:01.467Z"
+              }
+            ],
+            "requestedBy": {
+              "displayName": null,
+              "id": "404d8d74-f3c6-6aeb-9f05-2f8e576cd1ba"
+            },
+            "requestedFor": {
+              "displayName": null,
+              "id": "404d8d74-f3c6-6aeb-9f05-2f8e576cd1ba"
+            },
+            "queuedOn": "2018-10-26T10:01:54.547Z",
+            "lastModifiedBy": {
+              "displayName": null,
+              "id": "0000000d-0000-8888-8000-000000000000"
+            },
+            "lastModifiedOn": "2018-10-26T10:02:11.013Z",
+            "hasStarted": true,
+            "tasks": [],
+            "runPlanId": "00000000-0000-0000-0000-000000000000",
+            "issues": []
+          }
+        ],
+        "rank": 1,
+        "definitionEnvironmentId": 1,
+        "environmentOptions": {
+          "emailNotificationType": "OnlyOnFailure",
+          "emailRecipients": "release.environment.owner;release.creator",
+          "skipArtifactsDownload": false,
+          "timeoutInMinutes": 0,
+          "enableAccessToken": false,
+          "publishDeploymentStatus": true,
+          "badgeEnabled": false,
+          "autoLinkWorkItems": false,
+          "pullRequestDeploymentEnabled": false
+        },
+        "demands": [],
+        "conditions": [
+          {
+            "result": true,
+            "name": "ReleaseStarted",
+            "conditionType": "event",
+            "value": ""
+          }
+        ],
+        "workflowTasks": [],
+        "deployPhasesSnapshot": [],
+        "owner": {
+          "displayName": null,
+          "id": "404d8d74-f3c6-6aeb-9f05-2f8e576cd1ba"
+        },
+        "schedules": [],
+        "release": {
+          "id": 1,
+          "name": "Release-1",
+          "url": "https://somecompany-test.vsrm.visualstudio.com/53410703-e2e5-4238-9025-233bd7c811b3/_apis/Release/releases/1",
+          "_links": {
+            "web": { "href": "https://somecompany-test.visualstudio.com/53410703-e2e5-4238-9025-233bd7c811b3/_release?releaseId=1&_a=release-summary" },
+            "self": { "href": "https://somecompany-test.vsrm.visualstudio.com/53410703-e2e5-4238-9025-233bd7c811b3/_apis/Release/releases/1" }
+          }
+        },
+        "releaseDefinition": {
+          "id": 1,
+          "name": "New release pipeline",
+          "path": "\\",
+          "projectReference": null,
+          "url": "https://somecompany-test.vsrm.visualstudio.com/53410703-e2e5-4238-9025-233bd7c811b3/_apis/Release/definitions/1",
+          "_links": {
+            "web": { "href": "https://somecompany-test.visualstudio.com/53410703-e2e5-4238-9025-233bd7c811b3/_release?definitionId=1" },
+            "self": { "href": "https://somecompany-test.vsrm.visualstudio.com/53410703-e2e5-4238-9025-233bd7c811b3/_apis/Release/definitions/1" }
+          }
+        },
+        "releaseCreatedBy": {
+          "displayName": null,
+          "id": "404d8d74-f3c6-6aeb-9f05-2f8e576cd1ba"
+        },
+        "triggerReason": "ReleaseStarted",
+        "processParameters": {},
+        "preDeploymentGatesSnapshot": {
+          "id": 0,
+          "gatesOptions": null,
+          "gates": []
+        },
+        "postDeploymentGatesSnapshot": {
+          "id": 0,
+          "gatesOptions": null,
+          "gates": []
+        }
+      },
+      "commits": [],
+      "testResults": {
+        "aggregatedResultsAnalysis": {
+          "previousContext": {
+            "contextType": 0,
+            "build": null,
+            "release": null
+          },
+          "totalTests": 0,
+          "duration": "00:00:00",
+          "resultsByOutcome": {},
+          "runSummaryByState": {},
+          "runSummaryByOutcome": {}
+        },
+        "testResultsContext": {
+          "contextType": "release",
+          "build": null,
+          "release": {
+            "id": 2,
+            "name": null,
+            "environmentId": 2,
+            "environmentName": null,
+            "definitionId": 0,
+            "environmentDefinitionId": 0,
+            "environmentDefinitionName": null
+          }
+        },
+        "teamProject": {
+          "id": "53410703-e2e5-4238-9025-233bd7c811b3",
+          "name": "SOx-compliant-demo",
+          "state": "unchanged",
+          "visibility": "unchanged"
+        }
+      }
+    }
+  },
+  "resourceVersion": "3.0-preview.1",
+  "resourceContainers": {
+    "collection": {
+      "id": "764e9f75-d69a-4705-9b33-b8e0d95c63d3",
+      "baseUrl": "https://somecompany-test.vsrm.visualstudio.com/"
+    },
+    "account": {
+      "id": "b0ae02f6-64d2-439b-a771-4ec43a2465a2",
+      "baseUrl": "https://somecompany-test.vsrm.visualstudio.com/"
+    },
+    "project": {
+      "id": "53410703-e2e5-4238-9025-233bd7c811b3",
+      "baseUrl": "https://somecompany-test.vsrm.visualstudio.com/"
+    }
+  },
+  "createdDate": "2018-10-26T10:20:31.0761219Z"
+}

@@ -5,7 +5,6 @@ using SecurePipelineScan.Rules;
 using SecurePipelineScan.VstsService;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using VstsLogAnalytics.Client;
 using VstsLogAnalytics.Common;
 
@@ -14,7 +13,7 @@ namespace VstsLogAnalyticsFunction
     public static class RepositoryScanFunction
     {
         [FunctionName("RepositoryScanFunction")]
-        public static async Task Run([TimerTrigger("0 */30 * * * *")] TimerInfo timerInfo,
+        public static async System.Threading.Tasks.Task Run([TimerTrigger("0 */30 * * * *")] TimerInfo timerInfo,
             [Inject]ILogAnalyticsClient logAnalyticsClient,
             [Inject]IVstsRestClient client,
             ILogger log)
@@ -23,7 +22,8 @@ namespace VstsLogAnalyticsFunction
             {
                 log.LogInformation($"Repository scan timed check start: {DateTime.Now}");
 
-                var projects = client.Execute(Requests.Projects()).Data;
+                var response = client.Execute(Requests.Projects());
+                var projects = response.Data;
 
                 log.LogInformation($"Projects found: {projects.Count}");
                 List<Exception> aggregateExceptions = new List<Exception>();
@@ -48,7 +48,6 @@ namespace VstsLogAnalyticsFunction
                                     }), "Date");
 
                             log.LogInformation($"Project scanned: {r.Project}");
-
                         }
                     }
                     catch (Exception e)
