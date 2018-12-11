@@ -7,6 +7,7 @@ using SecurePipelineScan.VstsService;
 using System;
 using VstsLogAnalytics.Client;
 using VstsLogAnalytics.Common;
+using Requests = SecurePipelineScan.VstsService.Requests;
 
 namespace VstsLogAnalyticsFunction
 {
