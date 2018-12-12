@@ -7,6 +7,7 @@ using SecurePipelineScan.VstsService;
 using System;
 using VstsLogAnalytics.Client;
 using VstsLogAnalytics.Common;
+using Requests = SecurePipelineScan.VstsService.Requests;
 
 namespace VstsLogAnalyticsFunction
 {
@@ -36,7 +37,7 @@ namespace VstsLogAnalyticsFunction
 
             var release = client.Execute(Requests.Release.Releases(projectName, releaseId.ToString())).Data;
 
-            var rule = new FourEyesOnAllBuildArtefacts();
+            var rule = new IsStageApproved();
             var fourEyesResult = rule.GetResult(release, environmentId);
 
             var rule2 = new LastModifiedByNotTheSameAsApprovedBy();

@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using VstsLogAnalytics.Client;
 using VstsLogAnalytics.Common;
+using Requests = SecurePipelineScan.VstsService.Requests;
 
 namespace VstsLogAnalyticsFunction
 {
@@ -22,7 +23,7 @@ namespace VstsLogAnalyticsFunction
             {
                 log.LogInformation($"Repository scan timed check start: {DateTime.Now}");
 
-                var response = client.Execute(Requests.Projects());
+                var response = client.Execute(Requests.Project.Projects());
                 var projects = response.Data;
 
                 log.LogInformation($"Projects found: {projects.Count}");

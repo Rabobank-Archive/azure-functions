@@ -7,6 +7,7 @@ using System.IO;
 using VstsLogAnalytics.Client;
 using Xunit;
 
+
 namespace VstsLogAnalyticsFunction.Tests
 {
     public class ReleaseDeploymentCompletedTests
