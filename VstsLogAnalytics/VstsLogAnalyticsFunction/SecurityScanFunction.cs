@@ -26,7 +26,12 @@ namespace VstsLogAnalyticsFunction
             {
                 log.LogInformation($"Security scan timed check start: {DateTime.Now}");
 
-                var projects = getAllAzDoProjects(client);
+                var response = client.Execute(Requests.Project.Projects());
+                var projects = response.Data;
+                
+                log.LogInformation($"Status code is : {response.StatusCode}");
+                
+//                var projects = getAllAzDoProjects(client);
                 log.LogInformation($"Projects found: {projects.Count}");
                 List<Exception> aggregateExceptions = new List<Exception>();
 
@@ -72,11 +77,11 @@ namespace VstsLogAnalyticsFunction
             });
         }
 
-        private static Multiple<SecurePipelineScan.VstsService.Response.Project> getAllAzDoProjects(IVstsRestClient client)
-        {
-            var response = client.Execute(Requests.Project.Projects());
-            var projects = response.Data;
-            return projects;
-        }
+//        private static Multiple<SecurePipelineScan.VstsService.Response.Project> getAllAzDoProjects(IVstsRestClient client)
+//        {
+//            var response = client.Execute(Requests.Project.Projects());
+//            var projects = response.Data;
+//            return projects;
+//        }
     }
 }
