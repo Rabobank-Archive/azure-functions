@@ -28,7 +28,6 @@ namespace VstsLogAnalyticsFunction
 
                 var projects = getAllAzDoProjects(client);
                 log.LogInformation($"Projects found: {projects.Count}");
-                var securityReportScan = new SecurityReportScan(client);
                 List<Exception> aggregateExceptions = new List<Exception>();
 
 
@@ -36,6 +35,7 @@ namespace VstsLogAnalyticsFunction
                 {
                     try
                     {
+                        var securityReportScan = new SecurityReportScan(client);
                         var securityReport = securityReportScan.Execute(project.Name);
                         var jsonSecurityLog = SerializeObject(project, securityReport);
                         {
