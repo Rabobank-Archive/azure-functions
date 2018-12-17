@@ -17,7 +17,7 @@ namespace VstsLogAnalyticsFunction
     public static class SecurityScanFunction
     {
         [FunctionName("SecurityScanFunction")]
-        public static async Task Run([TimerTrigger("0 */30 * * * *", RunOnStartup = true)] TimerInfo timerInfo,
+         public static async Task Run([TimerTrigger("0 */30 * * * *", RunOnStartup = true)] TimerInfo timerInfo,
             [Inject] ILogAnalyticsClient logAnalyticsClient,
             [Inject] IVstsRestClient client,
             ILogger log)
@@ -27,11 +27,10 @@ namespace VstsLogAnalyticsFunction
                 log.LogInformation($"Security scan timed check start: {DateTime.Now}");
 
                 var response = client.Execute(Requests.Project.Projects());
-                log.LogInformation($"Status code is : {response.StatusCode}");
                 var projects = response.Data;
                 
+                log.LogInformation($"Status code is : {response.StatusCode}, Content: {response.Content}");
                 
-//                var projects = getAllAzDoProjects(client);
                 log.LogInformation($"Projects found: {projects.Count}");
                 List<Exception> aggregateExceptions = new List<Exception>();
 
@@ -51,6 +50,7 @@ namespace VstsLogAnalyticsFunction
                     catch (Exception e)
                     {
                         aggregateExceptions.Add(e);
+                        
                     }
                 }
 
@@ -75,12 +75,5 @@ namespace VstsLogAnalyticsFunction
                 Date = DateTime.UtcNow,
             });
         }
-
-//        private static Multiple<SecurePipelineScan.VstsService.Response.Project> getAllAzDoProjects(IVstsRestClient client)
-//        {
-//            var response = client.Execute(Requests.Project.Projects());
-//            var projects = response.Data;
-//            return projects;
-//        }
     }
 }
