@@ -1,61 +1,82 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Rules.Reports;
 using SecurePipelineScan.Rules;
 using SecurePipelineScan.VstsService;
+using SecurePipelineScan.VstsService.Response;
 using VstsLogAnalytics.Client;
 using VstsLogAnalytics.Common;
+using Requests = SecurePipelineScan.VstsService.Requests;
 
 namespace VstsLogAnalyticsFunction
 {
     public static class SecurityScanFunction
     {
         [FunctionName("SecurityScanFunction")]
-        public static async Task Run([TimerTrigger("0 */30 * * * *")] TimerInfo timerInfo, 
-            [Inject]ILogAnalyticsClient logAnalyticsClient,
-            [Inject]IVstsRestClient client, 
+        public static async Task Run([TimerTrigger("0 */30 * * * *")] TimerInfo timerInfo,
+            [Inject] ILogAnalyticsClient logAnalyticsClient,
+            [Inject] IVstsRestClient client,
             ILogger log)
         {
             try
             {
                 log.LogInformation($"Security scan timed check start: {DateTime.Now}");
 
-                var response = client.Execute(SecurePipelineScan.VstsService.Requests.Project.Projects());
-                var projects = response.Data;
-                
-
+                var projects = getAllAzDoProjects(client);
                 log.LogInformation($"Projects found: {projects.Count}");
-
                 var securityReportScan = new SecurityReportScan(client);
+                List<Exception> aggregateExceptions = new List<Exception>();
+
 
                 foreach (var project in projects.Value)
                 {
-                    var securityReport = securityReportScan.Execute(project.Name);
-                    var securityCustomLog = new SecurityCustomLog
+                    try
                     {
-                        hasProductionEnvOwner = securityReport.ApplicationGroupContainsProductionEnvironmentOwner,
-                        ProjectName = project.Name,
-                    };
-
-                    await logAnalyticsClient.AddCustomLogJsonAsync("SecurityScanReport",
-                        JsonConvert.SerializeObject(new
+                        var securityReport = securityReportScan.Execute(project.Name);
+                        var jsonSecurityLog = SerializeObject(project, securityReport);
                         {
-                            securityCustomLog.ProjectName,
-                            securityCustomLog.hasProductionEnvOwner,
-                            Date = DateTime.UtcNow,
-                        }), "Date");
+                            await logAnalyticsClient.AddCustomLogJsonAsync("SecurityScanReport", jsonSecurityLog, "Date");
+                            log.LogInformation($"Project scanned: {project.Name}");
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        aggregateExceptions.Add(e);
+                        throw;
+                    }
+                }
 
-                    log.LogInformation($"Project scanned: {securityCustomLog.ProjectName}");
+                if (aggregateExceptions.Count > 0)
+                {
+                    throw new AggregateException(aggregateExceptions);
                 }
             }
-            catch (Exception e)
+            catch (Exception exception)
             {
-                Console.WriteLine(e);
+                log.LogError(exception, $"Failed to write security scan to log analytics : {exception}");
                 throw;
             }
+        }
 
+        private static string SerializeObject(SecurePipelineScan.VstsService.Response.Project project, SecurityReport securityReport)
+        {
+            return JsonConvert.SerializeObject(new
+            {
+                project.Name,
+                securityReport.ApplicationGroupContainsProductionEnvironmentOwner,
+                Date = DateTime.UtcNow,
+            });
+        }
+
+        private static Multiple<SecurePipelineScan.VstsService.Response.Project> getAllAzDoProjects(IVstsRestClient client)
+        {
+            var response = client.Execute(Requests.Project.Projects());
+            var projects = response.Data;
+            return projects;
         }
     }
 }
