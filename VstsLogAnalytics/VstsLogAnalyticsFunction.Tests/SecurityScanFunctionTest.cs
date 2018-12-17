@@ -21,7 +21,7 @@ namespace VstsLogAnalyticsFunction.Tests
     public class SecurityScanFunctionTest
     {
         [Fact]
-        public void ProductionOwnerResponseShouldBeSentToLogAnalytics()
+        public void productionOwnerResponseShouldBeSentToLogAnalytics()
         {
             Fixture fixture = new Fixture();
 
@@ -79,19 +79,7 @@ namespace VstsLogAnalyticsFunction.Tests
                 Times.AtLeastOnce());
         }
 
-//        [Fact]
-//        public void createSecurityCustomLogShouldReturnSecurityCustomLogObject()
-//        {
-//            var securityReport = new SecurityReport
-//            {
-//                Project = "Test",
-//                ApplicationGroupContainsProductionEnvironmentOwner = false
-//            };
-//
-//            var securityCustomLog = SecurityScanFunction.createSecurityCustomLog(securityReport);
-//
-//            Assert.Equal(securityReport.ApplicationGroupContainsProductionEnvironmentOwner, securityCustomLog.hasProductionEnvOwner);
-//            Assert.Equal(securityReport.Project, securityCustomLog.ProjectName);
-//        }
+       
+
     }
 }
