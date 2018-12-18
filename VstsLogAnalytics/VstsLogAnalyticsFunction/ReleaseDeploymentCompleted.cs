@@ -34,8 +34,7 @@ namespace VstsLogAnalyticsFunction
             
             log.LogInformation("Done retrieving deployment information. Send to log analytics");
 
-            await logAnalyticsClient.AddCustomLogJsonAsync("DeploymentStatus",
-                JsonConvert.SerializeObject(report), "Date");
+            await logAnalyticsClient.AddCustomLogJsonAsync("DeploymentStatus", report, "Date");
         }
     }
 }

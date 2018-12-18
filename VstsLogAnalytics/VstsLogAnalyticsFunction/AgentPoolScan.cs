@@ -1,6 +1,5 @@
 ﻿using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using SecurePipelineScan.VstsService;
 using System;
 using System.Collections.Generic;
@@ -74,8 +73,7 @@ namespace VstsLogAnalyticsFunction
 
             log.LogInformation("Done retrieving poolstatus information. Send to log analytics");
 
-            await logAnalyticsClient.AddCustomLogJsonAsync("AgentStatus",
-                JsonConvert.SerializeObject(list), "Date");
+            await logAnalyticsClient.AddCustomLogJsonAsync("AgentStatus", list, "Date");
         }
     }
 }

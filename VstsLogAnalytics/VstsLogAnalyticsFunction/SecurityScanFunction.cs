@@ -38,11 +38,15 @@ namespace VstsLogAnalyticsFunction
                     {
                         var securityReportScan = new SecurityReportScan(client);
                         var securityReport = securityReportScan.Execute(project.Name);
-                        var jsonSecurityLog = SerializeObject(project, securityReport);
+                        var report = new
                         {
-                            await logAnalyticsClient.AddCustomLogJsonAsync("SecurityScanReport", jsonSecurityLog, "Date");
-                            log.LogInformation($"Project scanned: {project.Name}");
-                        }
+                            project.Name,
+                            securityReport.ApplicationGroupContainsProductionEnvironmentOwner,
+                            Date = DateTime.UtcNow,
+                        };
+                        
+                        await logAnalyticsClient.AddCustomLogJsonAsync("SecurityScanReport", report, "Date");
+                        log.LogInformation($"Project scanned: {project.Name}");
                     }
                     catch (Exception e)
                     {
@@ -61,16 +65,6 @@ namespace VstsLogAnalyticsFunction
                 log.LogError(exception, $"Failed to write security scan to log analytics : {exception}");
                 throw;
             }
-        }
-
-        private static string SerializeObject(SecurePipelineScan.VstsService.Response.Project project, SecurityReport securityReport)
-        {
-            return JsonConvert.SerializeObject(new
-            {
-                project.Name,
-                securityReport.ApplicationGroupContainsProductionEnvironmentOwner,
-                Date = DateTime.UtcNow,
-            });
         }
     }
 }

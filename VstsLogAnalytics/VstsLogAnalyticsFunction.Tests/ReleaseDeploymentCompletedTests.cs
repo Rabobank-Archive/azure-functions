@@ -6,6 +6,8 @@ using SecurePipelineScan.VstsService.Response;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
+using SecurePipelineScan.Rules.Events;
+using SecurePipelineScan.Rules.Reports;
 using VstsLogAnalytics.Client;
 using Xunit;
 
@@ -43,7 +45,7 @@ namespace VstsLogAnalyticsFunction.Tests
                     );
             }
 
-            logAnalyticsClient.Verify(x => x.AddCustomLogJsonAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.AtLeastOnce());
+            logAnalyticsClient.Verify(x => x.AddCustomLogJsonAsync(It.IsAny<string>(), It.IsAny<ReleaseDeploymentCompletedReport>(), It.IsAny<string>()), Times.AtLeastOnce());
         }
 
         private static string ReleaseDeploymentCompletedJson()

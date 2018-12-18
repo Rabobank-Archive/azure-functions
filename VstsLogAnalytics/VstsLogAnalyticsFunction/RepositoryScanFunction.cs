@@ -38,15 +38,15 @@ namespace VstsLogAnalyticsFunction
 
                         foreach (var r in results)
                         {
-                            await logAnalyticsClient.AddCustomLogJsonAsync("GitRepository",
-                                    JsonConvert.SerializeObject(new
-                                    {
-                                        r.Project,
-                                        r.Repository,
-                                        r.HasRequiredReviewerPolicy,
-                                        Date = DateTime.UtcNow,
-                                    }), "Date");
-
+                            var report = new
+                            {
+                                r.Project,
+                                r.Repository,
+                                r.HasRequiredReviewerPolicy,
+                                Date = DateTime.UtcNow,
+                            };
+                            
+                            await logAnalyticsClient.AddCustomLogJsonAsync("GitRepository", report, "Date");
                             log.LogInformation($"Project scanned: {r.Project}");
                         }
                     }

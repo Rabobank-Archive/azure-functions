@@ -22,61 +22,61 @@ namespace VstsLogAnalyticsFunction.Tests
     public class SecurityScanFunctionTest
     {
         [Fact]
-        public async Task productionOwnerResponseShouldBeSentToLogAnalytics()
+        public async Task ProductionOwnerResponseShouldBeSentToLogAnalytics()
         {
-            Fixture fixture = new Fixture();
+            var fixture = new Fixture();
 
             var logAnalyticsClient = new Mock<ILogAnalyticsClient>();
-            var vstsClient = new Mock<IVstsRestClient>(MockBehavior.Strict);
+            var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
 
-            vstsClient.Setup(client => client.Get(It.IsAny<IVstsRestRequest<Response.Multiple<SecurePipelineScan.VstsService.Response.Project>>>()))
+            client.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Response.Multiple<SecurePipelineScan.VstsService.Response.Project>>>()))
                 .Returns(fixture.Create<Response.Multiple<SecurePipelineScan.VstsService.Response.Project>>());
 
-            vstsClient.Setup(client => client.Get(It.IsAny<IVstsRestRequest<Response.ApplicationGroups>>())).Returns(
+            client.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Response.ApplicationGroups>>())).Returns(
                 fixture.Create<Response.ApplicationGroups>());
 
-            await SecurityScanFunction.Run(new TimerInfo(null, null, false), logAnalyticsClient.Object, vstsClient.Object, new Mock<ILogger>().Object);
+            await SecurityScanFunction.Run(new TimerInfo(null, null, false), logAnalyticsClient.Object, client.Object, new Mock<ILogger>().Object);
 
-            logAnalyticsClient.Verify(client => client.AddCustomLogJsonAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.AtLeastOnce());
+            logAnalyticsClient.Verify(x => x.AddCustomLogJsonAsync(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<string>()), Times.AtLeastOnce());
         }
 
         [Fact]
-        public async Task logNameInAddCustomLogJsonAsyncShouldBeSecurityScanReport()
+        public async Task LogNameInAddCustomLogJsonAsyncShouldBeSecurityScanReport()
         {
-            Fixture fixture = new Fixture();
+            var fixture = new Fixture();
 
             var logAnalyticsClient = new Mock<ILogAnalyticsClient>();
-            var vstsClient = new Mock<IVstsRestClient>(MockBehavior.Strict);
+            var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
 
-            vstsClient.Setup(client => client.Get(It.IsAny<IVstsRestRequest<Response.Multiple<SecurePipelineScan.VstsService.Response.Project>>>()))
+            client.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Response.Multiple<SecurePipelineScan.VstsService.Response.Project>>>()))
                 .Returns(fixture.Create<Response.Multiple<SecurePipelineScan.VstsService.Response.Project>>());
 
-            vstsClient.Setup(client => client.Get(It.IsAny<IVstsRestRequest<Response.ApplicationGroups>>()))
+            client.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Response.ApplicationGroups>>()))
                 .Returns(fixture.Create<Response.ApplicationGroups>());
 
-            await SecurityScanFunction.Run(new TimerInfo(null, null, false), logAnalyticsClient.Object, vstsClient.Object, new Mock<ILogger>().Object);
+            await SecurityScanFunction.Run(new TimerInfo(null, null, false), logAnalyticsClient.Object, client.Object, new Mock<ILogger>().Object);
 
-            logAnalyticsClient.Verify(client => client.AddCustomLogJsonAsync("SecurityScanReport", It.IsAny<string>(), It.IsAny<string>()),
+            logAnalyticsClient.Verify(x => x.AddCustomLogJsonAsync("SecurityScanReport", It.IsAny<object>(), It.IsAny<string>()),
                 Times.AtLeastOnce());
         }
 
         [Fact]
         public async Task RunShouldGetAllAzDoProjects()
         {
-            Fixture fixture = new Fixture();
+            var fixture = new Fixture();
 
             var logAnalyticsClient = new Mock<ILogAnalyticsClient>();
-            var vstsClient = new Mock<IVstsRestClient>(MockBehavior.Strict);
+            var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
 
-            vstsClient.Setup(client => client.Get(It.IsAny<IVstsRestRequest<Response.Multiple<Response.Project>>>()))
+            client.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Response.Multiple<Response.Project>>>()))
                 .Returns(fixture.Create<Response.Multiple<Response.Project>>());
 
-            vstsClient.Setup(client => client.Get(It.IsAny<IVstsRestRequest<Response.ApplicationGroups>>()))
+            client.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Response.ApplicationGroups>>()))
                 .Returns(fixture.Create<Response.ApplicationGroups>());
 
-            await SecurityScanFunction.Run(new TimerInfo(null, null, false), logAnalyticsClient.Object, vstsClient.Object, new Mock<ILogger>().Object);
+            await SecurityScanFunction.Run(new TimerInfo(null, null, false), logAnalyticsClient.Object, client.Object, new Mock<ILogger>().Object);
 
-            vstsClient.Verify(client => client.Get(It.IsAny<IVstsRestRequest<Response.Multiple<Response.Project>>>()),
+            client.Verify(x => x.Get(It.IsAny<IVstsRestRequest<Response.Multiple<Response.Project>>>()),
                 Times.AtLeastOnce());
         }
 
