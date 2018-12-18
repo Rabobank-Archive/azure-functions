@@ -6,6 +6,8 @@ using RestSharp;
 using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Response;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using VstsLogAnalytics.Client;
 using Xunit;
 
@@ -14,11 +16,11 @@ namespace VstsLogAnalyticsFunction.Tests
     public class AgentPoolScanTests
     {
         [Fact]
-        public void AgentPoolScanTest()
+        public async Task AgentPoolScanTest()
         {
-            Fixture fixture = new Fixture();
+            var fixture = new Fixture();
 
-            fixture.Register<Multiple<AgentPoolInfo>>(() => new Multiple<AgentPoolInfo>()
+            fixture.Register(() => new Multiple<AgentPoolInfo>()
             {
                 Value = new List<AgentPoolInfo>()
                 {
@@ -40,17 +42,17 @@ namespace VstsLogAnalyticsFunction.Tests
             var logAnalyticsClient = new Mock<ILogAnalyticsClient>();
             var vstsClient = new Mock<IVstsRestClient>();
 
-            vstsClient.Setup(client => client.Execute(It.IsAny<IVstsRestRequest<Multiple<AgentPoolInfo>>>()))
-                .Returns(new RestResponse<Multiple<AgentPoolInfo>> { Data = fixture.Create<Multiple<AgentPoolInfo>>() });
+            vstsClient.Setup(client => client.Get(It.IsAny<IVstsRestRequest<Multiple<AgentPoolInfo>>>()))
+                .Returns(fixture.Create<Multiple<AgentPoolInfo>>());
 
-            vstsClient.Setup(client => client.Execute(It.IsAny<IVstsRestRequest<Multiple<AgentStatus>>>()))
-                .Returns(new RestResponse<Multiple<AgentStatus>> { Data = fixture.Create<Multiple<AgentStatus>>() });
+            vstsClient.Setup(client => client.Get(It.IsAny<IVstsRestRequest<Multiple<AgentStatus>>>()))
+                .Returns(new Multiple<AgentStatus>(fixture.CreateMany<AgentStatus>().ToArray()));
 
-            AgentPoolScan.Run(timerInfo, logAnalyticsClient.Object, vstsClient.Object, logger.Object);
+            await AgentPoolScan.Run(timerInfo, logAnalyticsClient.Object, vstsClient.Object, logger.Object);
 
-            vstsClient.Verify(v => v.Execute(It.IsAny<IVstsRestRequest<Multiple<AgentPoolInfo>>>()), Times.Exactly(1));
+            vstsClient.Verify(v => v.Get(It.IsAny<IVstsRestRequest<Multiple<AgentPoolInfo>>>()), Times.Exactly(1));
 
-            vstsClient.Verify(v => v.Execute(It.IsAny<IVstsRestRequest<Multiple<AgentStatus>>>()), Times.Exactly(8));
+            vstsClient.Verify(v => v.Get(It.IsAny<IVstsRestRequest<Multiple<AgentStatus>>>()), Times.Exactly(8));
 
             logAnalyticsClient.Verify(client => client.AddCustomLogJsonAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(1));
         }

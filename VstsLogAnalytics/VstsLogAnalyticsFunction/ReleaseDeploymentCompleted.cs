@@ -5,6 +5,11 @@ using Newtonsoft.Json.Serialization;
 using SecurePipelineScan.Rules.Release;
 using SecurePipelineScan.VstsService;
 using System;
+using System.IO;
+using Microsoft.Extensions.Caching.Memory;
+using Newtonsoft.Json.Linq;
+using SecurePipelineScan.Rules;
+using SecurePipelineScan.Rules.Events;
 using VstsLogAnalytics.Client;
 using VstsLogAnalytics.Common;
 using Requests = SecurePipelineScan.VstsService.Requests;
@@ -18,45 +23,19 @@ namespace VstsLogAnalyticsFunction
             [QueueTrigger("releasedeploymentcompleted", Connection = "connectionString")]string releaseCompleted,
             [Inject]ILogAnalyticsClient logAnalyticsClient,
             [Inject] IVstsRestClient client,
+            [Inject] IMemoryCache cache,
             ILogger log)
         {
             log.LogInformation($"Queuetriggered {nameof(ReleaseDeploymentCompleted)} by Azure Storage queue");
-
-            var serializerSettings = new JsonSerializerSettings
-            {
-                ContractResolver = new CamelCasePropertyNamesContractResolver()
-            };
-
-            var deployInfo = JsonConvert.DeserializeObject<ReleaseCompleted>(releaseCompleted, serializerSettings);
-
-            string projectName = deployInfo.Resource.Project.Name;
-            int releaseId = deployInfo.Resource.Deployment.Release.Id;
-            int environmentId = deployInfo.Resource.Environment.Id;
-
             log.LogInformation($"release: {releaseCompleted}");
 
-            var release = client.Execute(Requests.Release.Releases(projectName, releaseId.ToString())).Data;
-
-            var rule = new IsStageApproved();
-            var fourEyesResult = rule.GetResult(release, environmentId);
-
-            var rule2 = new LastModifiedByNotTheSameAsApprovedBy();
-            var LastModifiedByNotTheSameAsApprovedBy = rule2.GetResult(release);
-
-            var deployment = new ReleaseDeployment
-            {
-                ReleaseId = releaseId,
-                EnvironmentId = environmentId,
-                ProjectName = projectName,
-                FourEyesOnAllBuildArtefacts = fourEyesResult,
-                LastModifiedByNotTheSameAsApprovedBy = LastModifiedByNotTheSameAsApprovedBy,
-                Date = DateTime.UtcNow,
-            };
-
+            var scan = new ReleaseDeploymentScan(new ServiceEndpointValidator(client, cache));
+            var report = scan.Completed(JObject.Parse(releaseCompleted));
+            
             log.LogInformation("Done retrieving deployment information. Send to log analytics");
 
             await logAnalyticsClient.AddCustomLogJsonAsync("DeploymentStatus",
-            JsonConvert.SerializeObject(deployment), "Date");
+                JsonConvert.SerializeObject(report), "Date");
         }
     }
 }

@@ -23,8 +23,7 @@ namespace VstsLogAnalyticsFunction
             {
                 log.LogInformation($"Repository scan timed check start: {DateTime.Now}");
 
-                var response = client.Execute(Requests.Project.Projects());
-                var projects = response.Data;
+                var projects = client.Get(Requests.Project.Projects());
 
                 log.LogInformation($"Projects found: {projects.Count}");
                 List<Exception> aggregateExceptions = new List<Exception>();

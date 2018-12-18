@@ -26,10 +26,7 @@ namespace VstsLogAnalyticsFunction
             {
                 log.LogInformation($"Security scan timed check start: {DateTime.Now}");
 
-                var response = client.Execute(Requests.Project.Projects());
-                var projects = response.Data;
-                
-                log.LogInformation($"Status code is : {response.StatusCode}, Content: {response.Content}");
+                var projects = client.Get(Requests.Project.Projects());
                 
                 log.LogInformation($"Projects found: {projects.Count}");
                 List<Exception> aggregateExceptions = new List<Exception>();

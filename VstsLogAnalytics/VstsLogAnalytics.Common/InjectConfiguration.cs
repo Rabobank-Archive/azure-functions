@@ -3,6 +3,7 @@ using Microsoft.Azure.WebJobs.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using SecurePipelineScan.VstsService;
 using System;
+using Microsoft.Extensions.Caching.Memory;
 using VstsLogAnalytics.Client;
 using VstsLogAnalytics.Common;
 
@@ -36,6 +37,7 @@ namespace VstsLogAnalytics.Common
             services.AddScoped<IVstsHttpClient>((_) => new VstsHttpClient(vstsUrl, vstsPat));
 
             services.AddScoped<IVstsRestClient>((_) => new VstsRestClient("somecompany", vstsPat));
+            services.AddScoped<IMemoryCache>(_ => new MemoryCache(new MemoryCacheOptions()));
         }
     }
 }
