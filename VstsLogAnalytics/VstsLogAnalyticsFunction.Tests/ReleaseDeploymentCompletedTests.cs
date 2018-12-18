@@ -20,33 +20,33 @@ namespace VstsLogAnalyticsFunction.Tests
             Fixture fixture = new Fixture();
 
             var logAnalyticsClient = new Mock<ILogAnalyticsClient>();
-            var vstsClient = new Mock<IVstsRestClient>();
+            var client = new Mock<IVstsRestClient>();
 
-            vstsClient.Setup(client => client.Get(It.IsAny<IVstsRestRequest<SecurePipelineScan.VstsService.Response.Release>>()))
-                .Returns(fixture.Create<SecurePipelineScan.VstsService.Response.Release>());
+            client.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Release>>()))
+                .Returns(fixture.Create<Release>());
 
-            vstsClient.Setup(client => client.Get(It.IsAny<IVstsRestRequest<Multiple<Repository>>>()))
+            client.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Multiple<Repository>>>()))
                 .Returns(fixture.Create<Multiple<Repository>>());
 
-            vstsClient.Setup(client => client.Get(It.IsAny<IVstsRestRequest<Multiple<MinimumNumberOfReviewersPolicy>>>()))
+            client.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Multiple<MinimumNumberOfReviewersPolicy>>>()))
                 .Returns(fixture.Create<Multiple<MinimumNumberOfReviewersPolicy>>());
 
-            string jsonEvent = ReleaseDeploymentCompletedJson();
+            var jsonEvent = ReleaseDeploymentCompletedJson();
 
             using (var cache = new MemoryCache(new MemoryCacheOptions()))
             {                
                 await ReleaseDeploymentCompleted.Run(jsonEvent, 
                     logAnalyticsClient.Object, 
-                    vstsClient.Object, 
+                    client.Object, 
                     cache,
                     new Mock<Microsoft.Extensions.Logging.ILogger>().Object
                     );
             }
 
-            logAnalyticsClient.Verify(client => client.AddCustomLogJsonAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.AtLeastOnce());
+            logAnalyticsClient.Verify(x => x.AddCustomLogJsonAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.AtLeastOnce());
         }
 
-        private string ReleaseDeploymentCompletedJson()
+        private static string ReleaseDeploymentCompletedJson()
         {
             var path = Path.Combine(System.Environment.CurrentDirectory, "releasedeploymentcompleted.json");
             return File.ReadAllText(path);

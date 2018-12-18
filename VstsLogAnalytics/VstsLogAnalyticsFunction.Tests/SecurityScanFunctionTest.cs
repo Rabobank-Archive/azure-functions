@@ -61,7 +61,7 @@ namespace VstsLogAnalyticsFunction.Tests
         }
 
         [Fact]
-        public async Task runShouldGetAllAzDoProjects()
+        public async Task RunShouldGetAllAzDoProjects()
         {
             Fixture fixture = new Fixture();
 
