@@ -5,6 +5,7 @@ using SecurePipelineScan.Rules;
 using SecurePipelineScan.VstsService;
 using System;
 using System.Collections.Generic;
+using Indigo.Functions.Injection;
 using VstsLogAnalytics.Client;
 using VstsLogAnalytics.Common;
 using Requests = SecurePipelineScan.VstsService.Requests;
@@ -13,8 +14,9 @@ namespace VstsLogAnalyticsFunction
 {
     public static class RepositoryScanFunction
     {
-        [FunctionName("RepositoryScanFunction")]
-        public static async System.Threading.Tasks.Task Run([TimerTrigger("0 */30 * * * *")] TimerInfo timerInfo,
+        [FunctionName(nameof(RepositoryScanFunction))]
+        public static async System.Threading.Tasks.Task Run(
+            [TimerTrigger("0 */30 * * * *", RunOnStartup = true)] TimerInfo timerInfo,
             [Inject]ILogAnalyticsClient logAnalyticsClient,
             [Inject]IVstsRestClient client,
             ILogger log)

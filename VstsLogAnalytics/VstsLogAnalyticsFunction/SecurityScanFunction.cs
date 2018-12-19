@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Indigo.Functions.Injection;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -16,8 +17,9 @@ namespace VstsLogAnalyticsFunction
 {
     public static class SecurityScanFunction
     {
-        [FunctionName("SecurityScanFunction")]
-         public static async Task Run([TimerTrigger("0 */30 * * * *", RunOnStartup = true)] TimerInfo timerInfo,
+        [FunctionName(nameof(SecurityScanFunction))]
+         public static async Task Run(
+            [TimerTrigger("0 */30 * * * *", RunOnStartup = true)] TimerInfo timerInfo,
             [Inject] ILogAnalyticsClient logAnalyticsClient,
             [Inject] IVstsRestClient client,
             ILogger log)

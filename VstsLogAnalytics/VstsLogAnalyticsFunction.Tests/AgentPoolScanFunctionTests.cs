@@ -13,13 +13,13 @@ using Xunit;
 
 namespace VstsLogAnalyticsFunction.Tests
 {
-    public class AgentPoolScanTests
+    public class AgentPoolScanFunctionTests
     {
         [Fact]
         public async Task AgentPoolScanTest()
         {
+            // Arrange
             var fixture = new Fixture();
-
             fixture.Register(() => new Multiple<AgentPoolInfo>()
             {
                 Value = new List<AgentPoolInfo>()
@@ -36,25 +36,34 @@ namespace VstsLogAnalyticsFunction.Tests
                 },
             });
 
-            TimerInfo timerInfo = new TimerInfo(null, null, false);
-
-            var logger = new Mock<ILogger>();
             var logAnalyticsClient = new Mock<ILogAnalyticsClient>();
-            var vstsClient = new Mock<IVstsRestClient>();
+            var client = new Mock<IVstsRestClient>();
 
-            vstsClient.Setup(client => client.Get(It.IsAny<IVstsRestRequest<Multiple<AgentPoolInfo>>>()))
+            client.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Multiple<AgentPoolInfo>>>()))
                 .Returns(fixture.Create<Multiple<AgentPoolInfo>>());
 
-            vstsClient.Setup(client => client.Get(It.IsAny<IVstsRestRequest<Multiple<AgentStatus>>>()))
+            client.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Multiple<AgentStatus>>>()))
                 .Returns(new Multiple<AgentStatus>(fixture.CreateMany<AgentStatus>().ToArray()));
 
-            await AgentPoolScan.Run(timerInfo, logAnalyticsClient.Object, vstsClient.Object, logger.Object);
+            // Act
+            await AgentPoolScanFunction.Run(
+                new TimerInfo(null, null), 
+                logAnalyticsClient.Object, 
+                client.Object, 
+                new Mock<ILogger>().Object);
 
-            vstsClient.Verify(v => v.Get(It.IsAny<IVstsRestRequest<Multiple<AgentPoolInfo>>>()), Times.Exactly(1));
+            // Assert
+            client
+                .Verify(v => v.Get(It.IsAny<IVstsRestRequest<Multiple<AgentPoolInfo>>>()), 
+                    Times.Exactly(1));
 
-            vstsClient.Verify(v => v.Get(It.IsAny<IVstsRestRequest<Multiple<AgentStatus>>>()), Times.Exactly(8));
+            client
+                .Verify(v => v.Get(It.IsAny<IVstsRestRequest<Multiple<AgentStatus>>>()), 
+                    Times.Exactly(8));
 
-            logAnalyticsClient.Verify(client => client.AddCustomLogJsonAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(1));
+            logAnalyticsClient
+                .Verify(x => x.AddCustomLogJsonAsync(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<string>()), 
+                    Times.Exactly(1));
         }
     }
 }

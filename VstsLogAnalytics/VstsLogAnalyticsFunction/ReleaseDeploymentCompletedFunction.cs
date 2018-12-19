@@ -6,6 +6,7 @@ using SecurePipelineScan.Rules.Release;
 using SecurePipelineScan.VstsService;
 using System;
 using System.IO;
+using Indigo.Functions.Injection;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json.Linq;
 using SecurePipelineScan.Rules;
@@ -16,9 +17,9 @@ using Requests = SecurePipelineScan.VstsService.Requests;
 
 namespace VstsLogAnalyticsFunction
 {
-    public static class ReleaseDeploymentCompleted
+    public static class ReleaseDeploymentCompletedFunction
     {
-        [FunctionName("ReleaseDeploymentCompleted")]
+        [FunctionName(nameof(ReleaseDeploymentCompletedFunction))]
         public static async System.Threading.Tasks.Task Run(
             [QueueTrigger("releasedeploymentcompleted", Connection = "connectionString")]string releaseCompleted,
             [Inject]ILogAnalyticsClient logAnalyticsClient,
@@ -26,7 +27,7 @@ namespace VstsLogAnalyticsFunction
             [Inject] IMemoryCache cache,
             ILogger log)
         {
-            log.LogInformation($"Queuetriggered {nameof(ReleaseDeploymentCompleted)} by Azure Storage queue");
+            log.LogInformation($"Queuetriggered {nameof(ReleaseDeploymentCompletedFunction)} by Azure Storage queue");
             log.LogInformation($"release: {releaseCompleted}");
 
             var scan = new ReleaseDeploymentScan(new ServiceEndpointValidator(client, cache));

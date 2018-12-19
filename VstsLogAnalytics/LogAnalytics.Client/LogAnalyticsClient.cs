@@ -8,17 +8,19 @@ using Newtonsoft.Json;
 
 namespace VstsLogAnalytics.Client
 {
+    /// <summary>
+    /// Copied from: https://docs.microsoft.com/en-us/azure/azure-monitor/platform/data-collector-api#c-sample
+    /// </summary>
     public class LogAnalyticsClient : ILogAnalyticsClient
     {
         private string _workspace;
         private string _key;
-        private HttpClient _httpClient;
+        private HttpClient _httpClient = new HttpClient();
 
         public LogAnalyticsClient(string workspace, string key)
         {
             _workspace = workspace;
             _key = key;
-            _httpClient = new HttpClient();
         }
 
         public async Task AddCustomLogJsonAsync(string logName, object input, string timefield)

@@ -14,7 +14,7 @@ using Xunit;
 
 namespace VstsLogAnalyticsFunction.Tests
 {
-    public class ReleaseDeploymentCompletedTests
+    public class ReleaseDeploymentCompletedScanTests
     {
         [Fact]
         public async Task Test()
@@ -37,7 +37,7 @@ namespace VstsLogAnalyticsFunction.Tests
 
             using (var cache = new MemoryCache(new MemoryCacheOptions()))
             {                
-                await ReleaseDeploymentCompleted.Run(jsonEvent, 
+                await ReleaseDeploymentCompletedFunction.Run(jsonEvent, 
                     logAnalyticsClient.Object, 
                     client.Object, 
                     cache,

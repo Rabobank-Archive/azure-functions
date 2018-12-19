@@ -4,17 +4,18 @@ using SecurePipelineScan.VstsService;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Indigo.Functions.Injection;
 using VstsLogAnalytics.Client;
 using VstsLogAnalytics.Common;
 using Requests = SecurePipelineScan.VstsService.Requests;
 
 namespace VstsLogAnalyticsFunction
 {
-    public static class AgentPoolScan
+    public static class AgentPoolScanFunction
     {
-        [FunctionName("AgentPoolScan")]
+        [FunctionName(nameof(AgentPoolScanFunction))]
         public static async System.Threading.Tasks.Task Run(
-            [TimerTrigger("0 */5 * * * *")] TimerInfo timerInfo,
+            [TimerTrigger("0 */5 * * * *", RunOnStartup = true)] TimerInfo timerInfo,
             [Inject]ILogAnalyticsClient logAnalyticsClient,
             [Inject] IVstsRestClient client,
             ILogger log)

@@ -26,18 +26,22 @@ namespace VstsLogAnalytics.Common
 
         private void RegisterServices(IServiceCollection services)
         {
+            RegisterLogAnalyticsClient(services);
+            RegisterVstsRestClient(services);
+            services.AddScoped<IMemoryCache>(_ => new MemoryCache(new MemoryCacheOptions()));
+        }
+
+        private static void RegisterVstsRestClient(IServiceCollection services)
+        {
+            var token = Environment.GetEnvironmentVariable("vstsPat", EnvironmentVariableTarget.Process);
+            services.AddScoped<IVstsRestClient>(_ => new VstsRestClient("somecompany", token));
+        }
+
+        private static void RegisterLogAnalyticsClient(IServiceCollection services)
+        {
             var workspace = Environment.GetEnvironmentVariable("logAnalyticsWorkspace", EnvironmentVariableTarget.Process);
             var key = Environment.GetEnvironmentVariable("logAnalyticsKey", EnvironmentVariableTarget.Process);
-
-            services.AddScoped<ILogAnalyticsClient>((_) => new LogAnalyticsClient(workspace, key));
-
-            var vstsUrl = Environment.GetEnvironmentVariable("vstsUrl", EnvironmentVariableTarget.Process);
-            var vstsPat = Environment.GetEnvironmentVariable("vstsPat", EnvironmentVariableTarget.Process);
-
-            services.AddScoped<IVstsHttpClient>((_) => new VstsHttpClient(vstsUrl, vstsPat));
-
-            services.AddScoped<IVstsRestClient>((_) => new VstsRestClient("somecompany", vstsPat));
-            services.AddScoped<IMemoryCache>(_ => new MemoryCache(new MemoryCacheOptions()));
+            services.AddScoped<ILogAnalyticsClient>(_ => new LogAnalyticsClient(workspace, key));
         }
     }
 }
