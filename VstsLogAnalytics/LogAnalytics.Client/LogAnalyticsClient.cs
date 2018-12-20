@@ -4,24 +4,29 @@ using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace VstsLogAnalytics.Client
 {
+    /// <summary>
+    /// Copied from: https://docs.microsoft.com/en-us/azure/azure-monitor/platform/data-collector-api#c-sample
+    /// </summary>
     public class LogAnalyticsClient : ILogAnalyticsClient
     {
         private string _workspace;
         private string _key;
-        private HttpClient _httpClient;
+        private HttpClient _httpClient = new HttpClient();
 
         public LogAnalyticsClient(string workspace, string key)
         {
             _workspace = workspace;
             _key = key;
-            _httpClient = new HttpClient();
         }
 
-        public async Task AddCustomLogJsonAsync(string logName, string json, string timefield)
+        public async Task AddCustomLogJsonAsync(string logName, object input, string timefield)
         {
+            var json = JsonConvert.SerializeObject(input);
+            
             // Create a hash for the API signature
             var datestring = DateTime.UtcNow.ToString("r");
             var jsonBytes = Encoding.UTF8.GetBytes(json);
@@ -64,7 +69,7 @@ namespace VstsLogAnalytics.Client
             var response = await client.PostAsync(new Uri(url), httpContent);
 
             var responseContent = response.Content;
-            string result = await responseContent.ReadAsStringAsync();
+            await responseContent.ReadAsStringAsync();
         }
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Indigo.Functions.Injection;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -16,8 +17,9 @@ namespace VstsLogAnalyticsFunction
 {
     public static class SecurityScanFunction
     {
-        [FunctionName("SecurityScanFunction")]
-         public static async Task Run([TimerTrigger("0 */30 * * * *", RunOnStartup = true)] TimerInfo timerInfo,
+        [FunctionName(nameof(SecurityScanFunction))]
+         public static async Task Run(
+            [TimerTrigger("0 */30 * * * *", RunOnStartup = true)] TimerInfo timerInfo,
             [Inject] ILogAnalyticsClient logAnalyticsClient,
             [Inject] IVstsRestClient client,
             ILogger log)
@@ -26,10 +28,7 @@ namespace VstsLogAnalyticsFunction
             {
                 log.LogInformation($"Security scan timed check start: {DateTime.Now}");
 
-                var response = client.Execute(Requests.Project.Projects());
-                var projects = response.Data;
-                
-                log.LogInformation($"Status code is : {response.StatusCode}, Content: {response.Content}");
+                var projects = client.Get(Requests.Project.Projects());
                 
                 log.LogInformation($"Projects found: {projects.Count}");
                 List<Exception> aggregateExceptions = new List<Exception>();
@@ -41,11 +40,15 @@ namespace VstsLogAnalyticsFunction
                     {
                         var securityReportScan = new SecurityReportScan(client);
                         var securityReport = securityReportScan.Execute(project.Name);
-                        var jsonSecurityLog = SerializeObject(project, securityReport);
+                        var report = new
                         {
-                            await logAnalyticsClient.AddCustomLogJsonAsync("SecurityScanReport", jsonSecurityLog, "Date");
-                            log.LogInformation($"Project scanned: {project.Name}");
-                        }
+                            project.Name,
+                            securityReport.ApplicationGroupContainsProductionEnvironmentOwner,
+                            Date = DateTime.UtcNow,
+                        };
+                        
+                        await logAnalyticsClient.AddCustomLogJsonAsync("SecurityScanReport", report, "Date");
+                        log.LogInformation($"Project scanned: {project.Name}");
                     }
                     catch (Exception e)
                     {
@@ -64,16 +67,6 @@ namespace VstsLogAnalyticsFunction
                 log.LogError(exception, $"Failed to write security scan to log analytics : {exception}");
                 throw;
             }
-        }
-
-        private static string SerializeObject(SecurePipelineScan.VstsService.Response.Project project, SecurityReport securityReport)
-        {
-            return JsonConvert.SerializeObject(new
-            {
-                project.Name,
-                securityReport.ApplicationGroupContainsProductionEnvironmentOwner,
-                Date = DateTime.UtcNow,
-            });
         }
     }
 }

@@ -1,21 +1,21 @@
 ﻿using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using SecurePipelineScan.VstsService;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Indigo.Functions.Injection;
 using VstsLogAnalytics.Client;
 using VstsLogAnalytics.Common;
 using Requests = SecurePipelineScan.VstsService.Requests;
 
 namespace VstsLogAnalyticsFunction
 {
-    public static class AgentPoolScan
+    public static class AgentPoolScanFunction
     {
-        [FunctionName("AgentPoolScan")]
+        [FunctionName(nameof(AgentPoolScanFunction))]
         public static async System.Threading.Tasks.Task Run(
-            [TimerTrigger("0 */5 * * * *")] TimerInfo timerInfo,
+            [TimerTrigger("0 */5 * * * *", RunOnStartup = true)] TimerInfo timerInfo,
             [Inject]ILogAnalyticsClient logAnalyticsClient,
             [Inject] IVstsRestClient client,
             ILogger log)
@@ -34,17 +34,17 @@ namespace VstsLogAnalyticsFunction
                 "Rabo-Build-Azure-Windows-Preview"
             };
 
-            var orgPools = client.Execute(Requests.DistributedTask.OrganizationalAgentPools());
+            var orgPools = client.Get(Requests.DistributedTask.OrganizationalAgentPools());
 
-            var agentsToObserve = orgPools.Data.Value.Where(x => observedPools.Contains(x.Name));
+            var agentsToObserve = orgPools.Value.Where(x => observedPools.Contains(x.Name));
 
             List<LogAnalyticsAgentStatus> list = new List<LogAnalyticsAgentStatus>();
 
             foreach (var a in agentsToObserve)
             {
-                var poolStatus = client.Execute(Requests.DistributedTask.AgentPoolStatus(a.Id));
+                var poolStatus = client.Get(Requests.DistributedTask.AgentPoolStatus(a.Id));
 
-                foreach (var p in poolStatus.Data.Value)
+                foreach (var p in poolStatus.Value)
                 {
                     var assignedTask = (p.Status != "online") ? "Offline" : ((p.AssignedRequest == null) ? "Idle" : p.AssignedRequest.PlanType);
                     int statusCode = 0;
@@ -74,8 +74,7 @@ namespace VstsLogAnalyticsFunction
 
             log.LogInformation("Done retrieving poolstatus information. Send to log analytics");
 
-            await logAnalyticsClient.AddCustomLogJsonAsync("AgentStatus",
-                JsonConvert.SerializeObject(list), "Date");
+            await logAnalyticsClient.AddCustomLogJsonAsync("AgentStatus", list, "Date");
         }
     }
 }
