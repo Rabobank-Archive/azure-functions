@@ -3,32 +3,22 @@ using Microsoft.Azure.WebJobs.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using SecurePipelineScan.VstsService;
 using System;
+using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Caching.Memory;
 using VstsLogAnalytics.Client;
 using VstsLogAnalytics.Common;
 
-[assembly: WebJobsStartup(typeof(WebJobsExtensionStartup), "VstsLogAnalyticsFunction")]
+[assembly: WebJobsStartup(typeof(InjectConfiguration), "VstsLogAnalyticsFunction")]
 
 namespace VstsLogAnalytics.Common
 {
-    public class InjectConfiguration : IExtensionConfigProvider
+    public class InjectConfiguration : IWebJobsStartup
     {
-        public void Initialize(ExtensionConfigContext context)
+        public void Configure(IWebJobsBuilder builder)
         {
-            var services = new ServiceCollection();
-            RegisterServices(services);
-            var serviceProvider = services.BuildServiceProvider(true);
-
-            context
-                .AddBindingRule<InjectAttribute>()
-                .Bind(new InjectBindingProvider(serviceProvider));
-        }
-
-        private void RegisterServices(IServiceCollection services)
-        {
-            RegisterLogAnalyticsClient(services);
-            RegisterVstsRestClient(services);
-            services.AddScoped<IMemoryCache>(_ => new MemoryCache(new MemoryCacheOptions()));
+            RegisterLogAnalyticsClient(builder.Services);
+            RegisterVstsRestClient(builder.Services);
+            builder.Services.AddScoped<IMemoryCache>(_ => new MemoryCache(new MemoryCacheOptions()));
         }
 
         private static void RegisterVstsRestClient(IServiceCollection services)
