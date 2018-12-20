@@ -22,11 +22,15 @@ namespace VstsLogAnalyticsFunction
         [FunctionName(nameof(ReleaseDeploymentCompletedFunction))]
         public static async System.Threading.Tasks.Task Run(
             [QueueTrigger("releasedeploymentcompleted", Connection = "connectionString")]string releaseCompleted,
-            [Inject]ILogAnalyticsClient logAnalyticsClient,
+            [Inject] ILogAnalyticsClient logAnalyticsClient,
             [Inject] IVstsRestClient client,
             [Inject] IMemoryCache cache,
             ILogger log)
         {
+            if (logAnalyticsClient == null) { throw new ArgumentNullException("Log Analytics Client is not set"); }
+            if (client == null) { throw new ArgumentNullException("VSTS Rest client is not set"); }
+            if (cache == null) { throw new ArgumentNullException("MemoryCache is not set"); }
+
             log.LogInformation($"Queuetriggered {nameof(ReleaseDeploymentCompletedFunction)} by Azure Storage queue");
             log.LogInformation($"release: {releaseCompleted}");
 
