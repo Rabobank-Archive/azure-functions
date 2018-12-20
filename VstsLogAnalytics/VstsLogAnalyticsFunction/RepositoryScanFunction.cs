@@ -21,6 +21,9 @@ namespace VstsLogAnalyticsFunction
             [Inject]IVstsRestClient client,
             ILogger log)
         {
+            if (logAnalyticsClient == null) { throw new ArgumentNullException("Log Analytics Client is not set"); }
+            if (client == null) { throw new ArgumentNullException("VSTS Rest client is not set"); }
+
             try
             {
                 log.LogInformation($"Repository scan timed check start: {DateTime.Now}");
