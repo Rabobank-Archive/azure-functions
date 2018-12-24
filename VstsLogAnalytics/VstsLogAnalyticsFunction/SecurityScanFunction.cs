@@ -1,14 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Indigo.Functions.Injection;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Rules.Reports;
 using SecurePipelineScan.Rules;
 using SecurePipelineScan.VstsService;
-using SecurePipelineScan.VstsService.Response;
 using VstsLogAnalytics.Client;
 using VstsLogAnalytics.Common;
 using Requests = SecurePipelineScan.VstsService.Requests;

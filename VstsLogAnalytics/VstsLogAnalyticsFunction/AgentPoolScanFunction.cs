@@ -4,7 +4,6 @@ using SecurePipelineScan.VstsService;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Indigo.Functions.Injection;
 using VstsLogAnalytics.Client;
 using VstsLogAnalytics.Common;
 using Requests = SecurePipelineScan.VstsService.Requests;
