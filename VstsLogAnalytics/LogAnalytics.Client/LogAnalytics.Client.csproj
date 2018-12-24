@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -11,7 +11,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.23" />
     <PackageReference Include="Microsoft.TeamFoundationServer.Client" Version="16.140.0-preview" />
-    <PackageReference Include="SecurePipelineScan.VstsService" Version="0.0.1.63642" />
+    <PackageReference Include="SecurePipelineScan.VstsService" Version="0.0.1.65004" />
   </ItemGroup>
 
 </Project>
