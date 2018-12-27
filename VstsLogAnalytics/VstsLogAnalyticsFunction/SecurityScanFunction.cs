@@ -41,8 +41,10 @@ namespace VstsLogAnalyticsFunction
                         var securityReport = securityReportScan.Execute(project.Name);
                         var report = new
                         {
-                            project.Name,
+                            securityReport.Project,
+                            securityReport.ProjectIsSecure,
                             securityReport.ApplicationGroupContainsProductionEnvironmentOwner,
+                            securityReport.ProjectAdminGroupOnlyContainsRabobankProjectAdminGroup,
                             Date = DateTime.UtcNow,
                         };
                         
