@@ -93,9 +93,10 @@ namespace VstsLogAnalyticsFunction.Tests
 
             client.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Response.Multiple<SecurePipelineScan.VstsService.Response.Repository>>>()))
                 .Returns(fixture.Create<Response.Multiple<SecurePipelineScan.VstsService.Response.Repository>>());
+            
+            client.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Response.PermissionsSetId>>()))
+                .Returns(fixture.Create<Response.PermissionsSetId>());
 
-            client.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Response.PermissionsRepository>>()))
-                .Returns(fixture.Create<Response.PermissionsRepository>());
         }
 
         private static void MockSecurityNameSpaces(Mock<IVstsRestClient> client)

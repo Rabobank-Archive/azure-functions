@@ -19,20 +19,20 @@ namespace VstsLogAnalyticsFunction.Tests
             Fixture fixture = new Fixture();
 
             var logAnalyticsClient = new Mock<ILogAnalyticsClient>();
-            var vstsClient = new Mock<IVstsRestClient>(MockBehavior.Strict);
+            var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
 
-            vstsClient.Setup(client => client.Get(It.IsAny<IVstsRestRequest<Multiple<SecurePipelineScan.VstsService.Response.Project>>>()))
-                .Returns(fixture.Create<Multiple<SecurePipelineScan.VstsService.Response.Project>>());
+            client.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Multiple<Project>>>()))
+                .Returns(fixture.Create<Multiple<Project>>());
 
-            vstsClient.Setup(client => client.Get(It.IsAny<IVstsRestRequest<Multiple<Repository>>>()))
+            client.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Multiple<Repository>>>()))
                 .Returns(fixture.Create<Multiple<Repository>>());
 
-            vstsClient.Setup(client => client.Get(It.IsAny<IVstsRestRequest<Multiple<MinimumNumberOfReviewersPolicy>>>()))
-                .Returns(fixture.Create<Multiple<MinimumNumberOfReviewersPolicy>>());
+            client.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Multiple<Policy>>>()))
+                .Returns(fixture.Create<Multiple<Policy>>());
 
-            await RepositoryScanFunction.Run(new TimerInfo(null, null, false), logAnalyticsClient.Object, vstsClient.Object, new Mock<ILogger>().Object);
+            await RepositoryScanFunction.Run(new TimerInfo(null, null), logAnalyticsClient.Object, client.Object, new Mock<ILogger>().Object);
 
-            logAnalyticsClient.Verify(client => client.AddCustomLogJsonAsync(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<string>()), Times.AtLeastOnce());
+            logAnalyticsClient.Verify(x => x.AddCustomLogJsonAsync(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<string>()), Times.AtLeastOnce());
         }
     }
 }
