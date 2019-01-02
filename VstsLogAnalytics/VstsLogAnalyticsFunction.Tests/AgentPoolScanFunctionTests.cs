@@ -20,21 +20,17 @@ namespace VstsLogAnalyticsFunction.Tests
         {
             // Arrange
             var fixture = new Fixture();
-            fixture.Register(() => new Multiple<AgentPoolInfo>()
-            {
-                Value = new List<AgentPoolInfo>()
-                {
-                    new AgentPoolInfo { Name = "Rabo-Build-Azure-Linux", Id=1},
-                    new AgentPoolInfo { Name = "Rabo-Build-Azure-Linux-Canary", Id=2},
-                    new AgentPoolInfo { Name = "Rabo-Build-Azure-Linux-Fallback", Id=3},
-                    new AgentPoolInfo { Name = "Rabo-Build-Azure-Linux-Preview", Id=4},
-                    new AgentPoolInfo { Name = "Rabo-Build-Azure-Windows", Id=5},
-                    new AgentPoolInfo { Name = "Rabo-Build-Azure-Windows-Canary", Id=6},
-                    new AgentPoolInfo { Name = "Rabo-Build-Azure-Windows-Fallback", Id=7},
-                    new AgentPoolInfo { Name = "Rabo-Build-Azure-Windows-Preview", Id=8 },
-                    new AgentPoolInfo { Name = "Rabo-Build-Azure-Windows-NOT-OBSERVED", Id=9 },
-                },
-            });
+            fixture.Register(() => new Multiple<AgentPoolInfo>(
+                new AgentPoolInfo { Name = "Rabo-Build-Azure-Linux", Id=1},
+                new AgentPoolInfo { Name = "Rabo-Build-Azure-Linux-Canary", Id=2},
+                new AgentPoolInfo { Name = "Rabo-Build-Azure-Linux-Fallback", Id=3},
+                new AgentPoolInfo { Name = "Rabo-Build-Azure-Linux-Preview", Id=4},
+                new AgentPoolInfo { Name = "Rabo-Build-Azure-Windows", Id=5},
+                new AgentPoolInfo { Name = "Rabo-Build-Azure-Windows-Canary", Id=6},
+                new AgentPoolInfo { Name = "Rabo-Build-Azure-Windows-Fallback", Id=7},
+                new AgentPoolInfo { Name = "Rabo-Build-Azure-Windows-Preview", Id=8 },
+                new AgentPoolInfo { Name = "Rabo-Build-Azure-Windows-NOT-OBSERVED", Id=9 }
+            ));
 
             var logAnalyticsClient = new Mock<ILogAnalyticsClient>();
             var client = new Mock<IVstsRestClient>();

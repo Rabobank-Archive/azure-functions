@@ -3,6 +3,7 @@ using Microsoft.Azure.WebJobs.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using SecurePipelineScan.VstsService;
 using System;
+using Microsoft.Extensions.Caching.Memory;
 using VstsLogAnalytics.Client;
 using VstsLogAnalytics.Common;
 
@@ -27,13 +28,11 @@ namespace VstsLogAnalytics.Common
         {
             var workspace = Environment.GetEnvironmentVariable("logAnalyticsWorkspace", EnvironmentVariableTarget.Process);
             var key = Environment.GetEnvironmentVariable("logAnalyticsKey", EnvironmentVariableTarget.Process);
+            services.AddScoped<ILogAnalyticsClient>(_ => new LogAnalyticsClient(workspace, key));
 
-            services.AddScoped<ILogAnalyticsClient>((_) => new LogAnalyticsClient(workspace, key));
-
-            var vstsUrl = Environment.GetEnvironmentVariable("vstsUrl", EnvironmentVariableTarget.Process);
             var vstsPat = Environment.GetEnvironmentVariable("vstsPat", EnvironmentVariableTarget.Process);
-
-            services.AddScoped<IVstsRestClient>((_) => new VstsRestClient("somecompany", vstsPat));
+            services.AddScoped<IVstsRestClient>(_ => new VstsRestClient("somecompany", vstsPat));
+            services.AddScoped<IMemoryCache>(_ => new MemoryCache(new MemoryCacheOptions()));
         }
     }
 }
