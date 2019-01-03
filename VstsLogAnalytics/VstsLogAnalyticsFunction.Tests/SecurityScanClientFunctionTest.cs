@@ -16,7 +16,7 @@ namespace VstsLogAnalyticsFunction.Tests
     public class SecurityScanClientFunctionTest
     {
         [Fact]
-        public void SecurityScanGetProjectsShouldCallGetProjects()
+        public void SecurityScanOrchestrationFunctionShouldCallGetProjects()
         {
             var allProjects = CreateProjectsResponse();
 
@@ -24,24 +24,12 @@ namespace VstsLogAnalyticsFunction.Tests
             client.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Multiple<Project>>>()))
                 .Returns(allProjects);
 
-            SecurityScanClientFunction.SecurityScanGetProjects(client.Object, new Mock<ILogger>().Object);
+            var durableOrchestrationContextBaseMock = new Mock<DurableOrchestrationContextBase>();
+
+            SecurityScanClientFunction.SecurityScanOrchestrationFunction(durableOrchestrationContextBaseMock.Object, client.Object, new Mock<ILogger>().Object);
 
             client.Verify(x => x.Get(It.IsAny<IVstsRestRequest<Multiple<Project>>>()),
                 Times.AtLeastOnce());
-        }
-
-        [Fact]
-        public void SecurityScanGetProjectsShouldReturnProjects()
-        {
-            var allProjects = CreateProjectsResponse();
-
-            var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
-            client.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Multiple<Project>>>()))
-                .Returns(allProjects);
-
-            var securityScanGetProjects = SecurityScanClientFunction.SecurityScanGetProjects(client.Object, new Mock<ILogger>().Object);
-
-            Assert.Equal(2, securityScanGetProjects.Count());
         }
 
         private static Multiple<Project> CreateProjectsResponse()

@@ -14,6 +14,7 @@ namespace VstsLogAnalyticsFunction
 {
     public static class SecurityScanFunction
     {
+        [Disable]
         [FunctionName(nameof(SecurityScanFunction))]
         public static async Task Run(
             [TimerTrigger("0 */30 * * * *", RunOnStartup = true)]
