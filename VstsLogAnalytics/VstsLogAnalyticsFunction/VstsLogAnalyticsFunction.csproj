@@ -10,6 +10,7 @@
 
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage" Version="3.0.0" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.23" />
+    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.DurableTask" Version="1.7.0"/>
     <PackageReference Include="WindowsAzure.Storage" Version="9.3.1" />
     <PackageReference Include="SecurePipelineScan.Rules" Version="0.0.1.66716" />
     <PackageReference Include="SecurePipelineScan.VstsService" Version="0.0.1.66716" />
@@ -29,5 +30,10 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Azure.WebJobs.Extensions.DurableTask, Version=1.0.0.0, Culture=neutral, PublicKeyToken=014045d636e89289">
+      <HintPath>..\..\..\..\..\.nuget\packages\microsoft.azure.webjobs.extensions.durabletask\1.6.2\lib\netstandard2.0\Microsoft.Azure.WebJobs.Extensions.DurableTask.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>
