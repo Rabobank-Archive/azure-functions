@@ -53,7 +53,7 @@ namespace VstsLogAnalyticsFunction
 
         [FunctionName(nameof(CreateSecurityReportFunction))]
         public static async Task CreateSecurityReportFunction(
-            [ActivityTrigger] DurableOrchestrationContext context,
+            [ActivityTrigger] DurableActivityContext context,
             [Inject] ILogAnalyticsClient logAnalyticsClient,
             [Inject] IVstsRestClient client,
             ILogger log)
