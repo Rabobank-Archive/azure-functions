@@ -65,10 +65,12 @@ namespace VstsLogAnalyticsFunction
 
 
             log.LogInformation($"Creating SecurityReport for project {project.Name}");
-            SecurityReport report = new SecurityReport
+            
+            var report = new
             {
                 Project = project.Name,
                 ApplicationGroupContainsProductionEnvironmentOwner = ProjectApplicationGroup.ApplicationGroupContainsProductionEnvironmentOwner(applicationGroups),
+                Date = DateTime.UtcNow,
             };
 
             log.LogInformation($"Writing SecurityReport for project {project.Name} to Azure Devops");
