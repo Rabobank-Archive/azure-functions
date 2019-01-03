@@ -19,7 +19,7 @@ namespace VstsLogAnalyticsFunction
     public static class SecurityScanClientFunction
     {
         [FunctionName(nameof(SecurityScanClientFunction))]
-        public static async Task Run([TimerTrigger("0 */1 * * * *", RunOnStartup = true)]
+        public static async Task Run([TimerTrigger("0 */5 * * * *", RunOnStartup = true)]
             TimerInfo timerInfo,
             [OrchestrationClient] DurableOrchestrationClientBase orchestrationClientBase,
             ILogger log)
@@ -53,7 +53,7 @@ namespace VstsLogAnalyticsFunction
 
         [FunctionName(nameof(CreateSecurityReportFunction))]
         public static async Task CreateSecurityReportFunction(
-            [ActivityTrigger] DurableOrchestrationContext context,
+            [ActivityTrigger] DurableActivityContext context,
             [Inject] ILogAnalyticsClient logAnalyticsClient,
             [Inject] IVstsRestClient client,
             ILogger log)
