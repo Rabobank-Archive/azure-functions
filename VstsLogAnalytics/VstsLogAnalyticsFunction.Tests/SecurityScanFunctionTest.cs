@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using AutoFixture;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
-using Microsoft.TeamFoundation.TestManagement.WebApi;
 using Moq;
 using Newtonsoft.Json;
 using RestSharp;
