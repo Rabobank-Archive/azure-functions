@@ -37,10 +37,7 @@ namespace VstsLogAnalyticsFunction
         )
 
         {
-//            var projects = await context.CallActivityAsync<string>("SecurityScanGetProjectsFunction", null);
-            
             var projects = client.Get(Project.Projects()).Value;
-
 
             log.LogInformation($"Creating tasks for every project");
             var tasks = projects.Select(x => context.CallActivityAsync<int>("CreateSecurityReportFunction", x));
@@ -58,24 +55,32 @@ namespace VstsLogAnalyticsFunction
             [Inject] IVstsRestClient client,
             ILogger log)
         {
-
             var project = context.GetInput<SecurePipelineScan.VstsService.Response.Project>();
-            
+
+            if (project == null) throw new ArgumentNullException("No project found from context while creating report");
+
+            log.LogInformation($"Creating SecurityReport for project {project.Name}");
+
             var applicationGroups = client.Get(ApplicationGroup.ApplicationGroups(project.Id)).Identities;
 
 
-            log.LogInformation($"Creating SecurityReport for project {project.Name}");
-            
-            var report = new
+            try
             {
-                Project = project.Name,
-                ApplicationGroupContainsProductionEnvironmentOwner = ProjectApplicationGroup.ApplicationGroupContainsProductionEnvironmentOwner(applicationGroups),
-                Date = DateTime.UtcNow,
-            };
+                var report = new
+                {
+                    Project = project.Name,
+                    ApplicationGroupContainsProductionEnvironmentOwner = ProjectApplicationGroup.ApplicationGroupContainsProductionEnvironmentOwner(applicationGroups),
+                    Date = DateTime.UtcNow,
+                };
+                log.LogInformation($"Writing SecurityReport for project {project.Name} to Azure Devops");
 
-            log.LogInformation($"Writing SecurityReport for project {project.Name} to Azure Devops");
-
-            await logAnalyticsClient.AddCustomLogJsonAsync("SecurityScanReport", report, "Date");
+                await logAnalyticsClient.AddCustomLogJsonAsync("SecurityScanReport", report, "Date");
+            }
+            catch (Exception ex)
+            {
+                log.LogError(ex, $"Failed to write report to log analytics: {ex}");
+                throw;
+            }
         }
     }
 }
