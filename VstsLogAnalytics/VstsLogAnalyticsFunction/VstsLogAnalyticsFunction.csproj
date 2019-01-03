@@ -30,4 +30,9 @@
   <ItemGroup>
     <Folder Include="Properties\" />
   </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Azure.WebJobs.Extensions.DurableTask, Version=1.0.0.0, Culture=neutral, PublicKeyToken=014045d636e89289">
+      <HintPath>..\..\..\..\..\.nuget\packages\microsoft.azure.webjobs.extensions.durabletask\1.6.2\lib\netstandard2.0\Microsoft.Azure.WebJobs.Extensions.DurableTask.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 </Project>
