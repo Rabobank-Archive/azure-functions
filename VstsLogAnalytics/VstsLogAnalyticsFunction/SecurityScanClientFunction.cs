@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
@@ -15,30 +16,34 @@ using VstsLogAnalytics.Common;
 
 namespace VstsLogAnalyticsFunction
 {
-    public class SecurityScanClientFunction
+    public static class SecurityScanClientFunction
     {
-        [FunctionName("SecurityScanClientFunction")]
-        public static async Task StartSecurityClientScan([TimerTrigger("0 */1 * * * *", RunOnStartup = true)]
+        [FunctionName(nameof(SecurityScanClientFunction))]
+        public static async Task Run([TimerTrigger("0 */1 * * * *", RunOnStartup = true)]
             TimerInfo timerInfo,
             [OrchestrationClient] DurableOrchestrationClientBase orchestrationClientBase,
             ILogger log)
         {
-            const string functionName = "SecurityScanOrchestrationFunction";
+            const string functionName = nameof(SecurityScanOrchestrationFunction);
             var instanceId = await orchestrationClientBase.StartNewAsync(functionName, null);
             log.LogInformation($"Started orchestration with ID = '{instanceId}'.");
         }
 
-        [FunctionName("SecurityScanOrchestrationFunction")]
-        public static async Task<string> SecurityScanOrchestration(
+        [FunctionName(nameof(SecurityScanOrchestrationFunction))]
+        public static async Task<string> SecurityScanOrchestrationFunction(
             [OrchestrationTrigger] DurableOrchestrationContextBase context,
+            [Inject] IVstsRestClient client,
             ILogger log
         )
 
         {
-            var projects = await context.CallActivityAsync<string>("SecurityScanGetProjectsFunction", null);
+//            var projects = await context.CallActivityAsync<string>("SecurityScanGetProjectsFunction", null);
+            
+            var projects = client.Get(Project.Projects()).Value;
+
 
             log.LogInformation($"Creating tasks for every project");
-            var tasks = projects.Select(x => context.CallActivityAsync<int>("CreateSecurityReport", x));
+            var tasks = projects.Select(x => context.CallActivityAsync<int>("CreateSecurityReportFunction", x));
 
             var enumerable = tasks.ToList();
             await Task.WhenAll(enumerable);
@@ -46,25 +51,16 @@ namespace VstsLogAnalyticsFunction
             return enumerable.Sum(t => t.Result).ToString();
         }
 
-        [FunctionName("SecurityScanGetProjectsFunction")]
-        public static IEnumerable<SecurePipelineScan.VstsService.Response.Project> SecurityScanGetProjects(
-            [ActivityTrigger] 
-            [Inject] IVstsRestClient client,
-            ILogger log)
-        {
-            log.LogInformation($"Getting all Azure DevOps Projects");
-            var projects = client.Get(Project.Projects()).Value;
-            return projects;
-        }
-
-        [FunctionName("CreateSecurityReport")]
-        public static async Task Run(
+        [FunctionName(nameof(CreateSecurityReportFunction))]
+        public static async Task CreateSecurityReportFunction(
             [ActivityTrigger] DurableOrchestrationContext context,
-            SecurePipelineScan.VstsService.Response.Project project,
             [Inject] ILogAnalyticsClient logAnalyticsClient,
             [Inject] IVstsRestClient client,
             ILogger log)
         {
+
+            var project = context.GetInput<SecurePipelineScan.VstsService.Response.Project>();
+            
             var applicationGroups = client.Get(ApplicationGroup.ApplicationGroups(project.Id)).Identities;
 
 
@@ -76,9 +72,8 @@ namespace VstsLogAnalyticsFunction
             };
 
             log.LogInformation($"Writing SecurityReport for project {project.Name} to Azure Devops");
-            string date = DateTime.UtcNow.ToString();
 
-            await logAnalyticsClient.AddCustomLogJsonAsync("SecurityScanReport", report, date);
+            await logAnalyticsClient.AddCustomLogJsonAsync("SecurityScanReport", report, "Date");
         }
     }
 }
