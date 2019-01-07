@@ -1,58 +1,21 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
-using Rules.Reports;
 using SecurePipelineScan.Rules.Checks;
 using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Requests;
 using VstsLogAnalytics.Client;
 using VstsLogAnalytics.Common;
+using Project = SecurePipelineScan.VstsService.Response.Project;
 
-//using SecurePipelineScan.VstsService.Response;
-
-namespace VstsLogAnalyticsFunction
+namespace VstsLogAnalyticsFunction.SecurityScan.Activites
 {
-    public static class SecurityScanClientFunction
+    public class CreateSecurityReport
     {
-        [Disable]
-        [FunctionName(nameof(SecurityScanClientFunction))]
-        public static async Task Run([TimerTrigger("0 0 6 * * *", RunOnStartup = true)]
-            TimerInfo timerInfo,
-            [OrchestrationClient] DurableOrchestrationClientBase orchestrationClientBase,
-            ILogger log)
-        {
-            const string functionName = nameof(SecurityScanOrchestrationFunction);
-            var instanceId = await orchestrationClientBase.StartNewAsync(functionName, null);
-            log.LogInformation($"Started orchestration with ID = '{instanceId}'.");
-        }
-
-        [Disable]
-        [FunctionName(nameof(SecurityScanOrchestrationFunction))]
-        public static async Task<string> SecurityScanOrchestrationFunction(
-            [OrchestrationTrigger] DurableOrchestrationContextBase context,
-            [Inject] IVstsRestClient client,
-            ILogger log
-        )
-
-        {
-            var projects = client.Get(Project.Projects()).Value;
-
-            log.LogInformation($"Creating tasks for every project");
-            var tasks = projects.Select(x => context.CallActivityAsync<int>("CreateSecurityReportFunction", x));
-
-            var enumerable = tasks.ToList();
-            await Task.WhenAll(enumerable);
-
-            return enumerable.Sum(t => t.Result).ToString();
-        }
-
-        [Disable]
-        [FunctionName(nameof(CreateSecurityReportFunction))]
-        public static async Task CreateSecurityReportFunction(
+        [FunctionName(nameof(CreateSecurityReport))]
+        public static async Task Run(
             [ActivityTrigger] DurableActivityContext context,
             [Inject] ILogAnalyticsClient logAnalyticsClient,
             [Inject] IVstsRestClient client,
@@ -67,6 +30,11 @@ namespace VstsLogAnalyticsFunction
             var applicationGroups = client.Get(ApplicationGroup.ApplicationGroups(project.Id)).Identities;
 
 
+            await AddToLogAnalytics(logAnalyticsClient, log, project, applicationGroups);
+        }
+
+        private static async Task AddToLogAnalytics(ILogAnalyticsClient logAnalyticsClient, ILogger log, Project project, IEnumerable<SecurePipelineScan.VstsService.Response.ApplicationGroup> applicationGroups)
+        {
             try
             {
                 var report = new
