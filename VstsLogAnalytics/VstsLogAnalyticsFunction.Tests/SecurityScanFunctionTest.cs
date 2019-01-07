@@ -100,11 +100,16 @@ namespace VstsLogAnalyticsFunction.Tests
 
         private static void MockSecurityNameSpaces(Mock<IVstsRestClient> client)
         {
-            var names = new Response.Multiple<Response.SecurityNamespace>(new Response.SecurityNamespace
-            {
-                DisplayName = "Git Repositories",
-                NamespaceId = "123456"
-            });
+            var names = new Response.Multiple<Response.SecurityNamespace>(
+                new Response.SecurityNamespace
+                {
+                    DisplayName = "Git Repositories",
+                    NamespaceId = "123456"
+                },
+                new Response.SecurityNamespace
+                {
+                    Name = "Build"
+                });
 
             client.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Response.Multiple<SecurePipelineScan.VstsService.Response.SecurityNamespace>>>()))
                 .Returns(names);
@@ -112,9 +117,18 @@ namespace VstsLogAnalyticsFunction.Tests
 
         private static void MockApplicationGroups(Mock<IVstsRestClient> client)
         {
-            var applicationGroup1 = new Response.ApplicationGroup {DisplayName = "[TAS]\\Project Administrators", TeamFoundationId = "1234",};
-            var applicationGroup2 = new Response.ApplicationGroup {DisplayName = "[TAS]\\Rabobank Project Administrators"};
-            var applicationGroups = new Response.ApplicationGroups {Identities = new[] {applicationGroup1, applicationGroup2}};
+            var applicationGroup1 = new Response.ApplicationGroup { DisplayName = "[TAS]\\Project Administrators", TeamFoundationId = "1234" };
+            var applicationGroup2 = new Response.ApplicationGroup { DisplayName = "[TAS]\\Rabobank Project Administrators" };
+            var applicationGroup3 = new Response.ApplicationGroup { DisplayName = "[TAS]\\Build Administrators", TeamFoundationId = "1234" };
+            var applicationGroups = new Response.ApplicationGroups
+            {
+                Identities = new[]
+                {
+                    applicationGroup1, 
+                    applicationGroup2,
+                    applicationGroup3
+                }
+            };
 
             client.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Response.ApplicationGroups>>())).Returns(applicationGroups);
         }

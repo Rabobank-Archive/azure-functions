@@ -19,7 +19,7 @@ namespace VstsLogAnalyticsFunction.Tests
         [Fact]
         public async Task Test()
         {
-            Fixture fixture = new Fixture();
+            var fixture = new Fixture();
 
             var logAnalyticsClient = new Mock<ILogAnalyticsClient>();
             var client = new Mock<IVstsRestClient>();
@@ -33,6 +33,9 @@ namespace VstsLogAnalyticsFunction.Tests
             client.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Multiple<MinimumNumberOfReviewersPolicy>>>()))
                 .Returns(fixture.Create<Multiple<MinimumNumberOfReviewersPolicy>>());
 
+            client.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Environment>>()))
+                .Returns(fixture.Create<Environment>());
+
             var jsonEvent = ReleaseDeploymentCompletedJson();
 
             using (var cache = new MemoryCache(new MemoryCacheOptions()))
@@ -42,7 +45,7 @@ namespace VstsLogAnalyticsFunction.Tests
                     client.Object, 
                     cache,
                     new Mock<Microsoft.Extensions.Logging.ILogger>().Object
-                    );
+                );
             }
 
             logAnalyticsClient.Verify(x => x.AddCustomLogJsonAsync(It.IsAny<string>(), It.IsAny<ReleaseDeploymentCompletedReport>(), It.IsAny<string>()), Times.AtLeastOnce());
