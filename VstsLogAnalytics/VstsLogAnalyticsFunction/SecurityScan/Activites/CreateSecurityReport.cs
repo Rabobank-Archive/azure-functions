@@ -16,24 +16,24 @@ namespace VstsLogAnalyticsFunction.SecurityScan.Activites
     {
         [FunctionName(nameof(CreateSecurityReport))]
         public static async Task Run(
-            [ActivityTrigger] DurableActivityContext context,
+            [ActivityTrigger] DurableActivityContextBase context,
             [Inject] ILogAnalyticsClient logAnalyticsClient,
             [Inject] IVstsRestClient client,
             ILogger log)
         {
-            var project = context.GetInput<SecurePipelineScan.VstsService.Response.Project>();
+            var project = context.GetInput<Project>();
 
-            if (project == null) throw new ArgumentNullException("No project found from context while creating report");
+            if (project == null) throw new Exception("No Project found in parameter DurableActivityContextBase");
 
             log.LogInformation($"Creating SecurityReport for project {project.Name}");
 
             var applicationGroups = client.Get(ApplicationGroup.ApplicationGroups(project.Id)).Identities;
 
-
             await AddToLogAnalytics(logAnalyticsClient, log, project, applicationGroups);
         }
 
-        private static async Task AddToLogAnalytics(ILogAnalyticsClient logAnalyticsClient, ILogger log, Project project, IEnumerable<SecurePipelineScan.VstsService.Response.ApplicationGroup> applicationGroups)
+        private static async Task AddToLogAnalytics(ILogAnalyticsClient logAnalyticsClient, ILogger log, Project project,
+            IEnumerable<SecurePipelineScan.VstsService.Response.ApplicationGroup> applicationGroups)
         {
             try
             {
