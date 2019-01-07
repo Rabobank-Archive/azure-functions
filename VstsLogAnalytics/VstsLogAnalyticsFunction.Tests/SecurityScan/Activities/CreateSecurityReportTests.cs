@@ -1,18 +1,14 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
-using Microsoft.Build.Framework;
+using Microsoft.Extensions.Logging;
 using Moq;
 using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Response;
 using VstsLogAnalytics.Client;
 using VstsLogAnalyticsFunction.SecurityScan.Activites;
-using ApplicationGroup = SecurePipelineScan.VstsService.Requests;
 using Xunit;
-using Xunit.Abstractions;
-using ILogger = Microsoft.Extensions.Logging.ILogger;
-using Project = SecurePipelineScan.VstsService.Response.Project;
-using Response = SecurePipelineScan.VstsService.Response;
+using ApplicationGroup = SecurePipelineScan.VstsService.Requests;
 
 
 namespace VstsLogAnalyticsFunction.Tests.SecurityScan.Activities
@@ -20,7 +16,7 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan.Activities
     public class CreateSecurityReportTest
     {
         [Fact]
-        public void RunShouldCallAddCustomLogJsonAsync()
+        public async Task RunShouldCallAddCustomLogJsonAsync()
         {
             
             //Arrange
@@ -36,7 +32,7 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan.Activities
             durableActivityContextBaseMock.Setup(x => x.GetInput<Project>()).Returns(testProject);
 
             //Act
-            CreateSecurityReport.Run(durableActivityContextBaseMock.Object, logAnalyticsClient.Object, client.Object, iLoggerMock.Object);
+            await CreateSecurityReport.Run(durableActivityContextBaseMock.Object, logAnalyticsClient.Object, client.Object, iLoggerMock.Object);
 
             //Assert
             logAnalyticsClient.Verify(x => x.AddCustomLogJsonAsync("SecurityScanReport", It.IsAny<object>(), It.IsAny<string>()),
@@ -44,7 +40,7 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan.Activities
         }
 
         [Fact]
-        public void RunShouldCallGetApplicationGroups()
+        public async Task RunShouldCallGetApplicationGroups()
         {
             //Arrange
             var clientMock = new Mock<IVstsRestClient>(MockBehavior.Strict);
@@ -59,7 +55,7 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan.Activities
             durableActivityContextBaseMock.Setup(x => x.GetInput<Project>()).Returns(testProject);
 
             //Act
-            CreateSecurityReport.Run(durableActivityContextBaseMock.Object, logAnalyticsClientMock.Object, clientMock.Object, iLoggerMock.Object);
+            await CreateSecurityReport.Run(durableActivityContextBaseMock.Object, logAnalyticsClientMock.Object, clientMock.Object, iLoggerMock.Object);
 
             //Assert
             clientMock.Verify(x => x.Get(It.IsAny<IVstsRestRequest<ApplicationGroups>>()),Times.AtLeastOnce());
@@ -94,8 +90,8 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan.Activities
         
         private static ApplicationGroups CreateApplicationGroupsMock()
         {
-            var applicationGroup1 = new Response.ApplicationGroup {DisplayName = "[dummy]\\Project Administrators", TeamFoundationId = "1234",};
-            var applicationGroup2 = new Response.ApplicationGroup {DisplayName = "[TAS]\\Rabobank Project Administrators"};
+            var applicationGroup1 = new SecurePipelineScan.VstsService.Response.ApplicationGroup {DisplayName = "[dummy]\\Project Administrators", TeamFoundationId = "1234",};
+            var applicationGroup2 = new SecurePipelineScan.VstsService.Response.ApplicationGroup {DisplayName = "[TAS]\\Rabobank Project Administrators"};
             var applicationGroups = new ApplicationGroups {Identities = new[] {applicationGroup1, applicationGroup2}};
             return applicationGroups;
         }
@@ -109,23 +105,6 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan.Activities
                 Description = "blabalba",
             };
             return testProject;
-        }
-
-        private static Multiple<Project> CreateProjectsResponse()
-        {
-            var project1 = new Project
-            {
-                Id = "1",
-                Name = "TAS"
-            };
-
-            var project2 = new Project
-            {
-                Id = "2",
-                Name = "TASSIE"
-            };
-            var allProjects = new Multiple<Project>(project1, project2);
-            return allProjects;
         }
     }
 }

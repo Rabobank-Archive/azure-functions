@@ -12,7 +12,7 @@ using Project = SecurePipelineScan.VstsService.Response.Project;
 
 namespace VstsLogAnalyticsFunction.SecurityScan.Activites
 {
-    public class CreateSecurityReport
+    public static class CreateSecurityReport
     {
         [FunctionName(nameof(CreateSecurityReport))]
         public static async Task Run(
@@ -43,7 +43,7 @@ namespace VstsLogAnalyticsFunction.SecurityScan.Activites
                     ApplicationGroupContainsProductionEnvironmentOwner = ProjectApplicationGroup.ApplicationGroupContainsProductionEnvironmentOwner(applicationGroups),
                     Date = DateTime.UtcNow,
                 };
-                log.LogInformation($"Writing SecurityReport for project {project.Name} to Azure Devops");
+                log.LogInformation($"Writing SecurityReport for project {project.Name} to Azure DevOps");
 
                 await logAnalyticsClient.AddCustomLogJsonAsync("SecurityScanReport", report, "Date");
             }

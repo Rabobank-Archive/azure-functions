@@ -21,7 +21,7 @@ namespace VstsLogAnalyticsFunction.SecurityScan.Orchestrations
 
         {
             var projects = client.Get(Project.Projects()).Value;
-
+            
             log.LogInformation($"Creating tasks for every project");
             var tasks = projects.Select(x => context.CallActivityAsync<int>(nameof(CreateSecurityReport), x));
 
