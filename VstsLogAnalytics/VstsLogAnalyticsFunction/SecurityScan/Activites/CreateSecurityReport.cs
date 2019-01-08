@@ -22,6 +22,10 @@ namespace VstsLogAnalyticsFunction.SecurityScan.Activites
             [Inject] IVstsRestClient client,
             ILogger log)
         {
+            if (logAnalyticsClient == null) { throw new ArgumentNullException(nameof(logAnalyticsClient)); }
+            if (client == null) { throw new ArgumentNullException(nameof(client)); }
+            if (context == null) { throw new ArgumentNullException(nameof(context)); }
+            
             var project = context.GetInput<Project>();
 
             if (project == null) throw new Exception("No Project found in parameter DurableActivityContextBase");
