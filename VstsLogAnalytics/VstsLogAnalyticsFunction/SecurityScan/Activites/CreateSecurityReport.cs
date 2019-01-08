@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
+using SecurePipelineScan.Rules;
 using SecurePipelineScan.Rules.Checks;
 using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Requests;
@@ -24,34 +25,38 @@ namespace VstsLogAnalyticsFunction.SecurityScan.Activites
             var project = context.GetInput<Project>();
 
             if (project == null) throw new Exception("No Project found in parameter DurableActivityContextBase");
+            
+            var report = new SecurityReportScan(client);
 
             log.LogInformation($"Creating SecurityReport for project {project.Name}");
-
-            var applicationGroups = client.Get(ApplicationGroup.ApplicationGroups(project.Id)).Identities;
-
-            await AddToLogAnalytics(logAnalyticsClient, log, project, applicationGroups);
+            
+            report.Execute(project.Name);
+            
+//            var applicationGroups = client.Get(ApplicationGroup.ApplicationGroups(project.Id)).Identities;
+//
+//            await AddToLogAnalytics(logAnalyticsClient, log, project, applicationGroups);
         }
-
-        private static async Task AddToLogAnalytics(ILogAnalyticsClient logAnalyticsClient, ILogger log, Project project,
-            IEnumerable<SecurePipelineScan.VstsService.Response.ApplicationGroup> applicationGroups)
-        {
-            try
-            {
-                var report = new
-                {
-                    Project = project.Name,
-                    ApplicationGroupContainsProductionEnvironmentOwner = ProjectApplicationGroup.ApplicationGroupContainsProductionEnvironmentOwner(applicationGroups),
-                    Date = DateTime.UtcNow,
-                };
-                log.LogInformation($"Writing SecurityReport for project {project.Name} to Azure DevOps");
-
-                await logAnalyticsClient.AddCustomLogJsonAsync("SecurityScanReport", report, "Date");
-            }
-            catch (Exception ex)
-            {
-                log.LogError(ex, $"Failed to write report to log analytics: {ex}");
-                throw;
-            }
-        }
+//
+//        private static async Task AddToLogAnalytics(ILogAnalyticsClient logAnalyticsClient, ILogger log, Project project,
+//            IEnumerable<SecurePipelineScan.VstsService.Response.ApplicationGroup> applicationGroups)
+//        {
+//            try
+//            {
+//                var report = new
+//                {
+//                    Project = project.Name,
+//                    ApplicationGroupContainsProductionEnvironmentOwner = ProjectApplicationGroup.ApplicationGroupContainsProductionEnvironmentOwner(applicationGroups),
+//                    Date = DateTime.UtcNow,
+//                };
+//                log.LogInformation($"Writing SecurityReport for project {project.Name} to Azure DevOps");
+//
+//                await logAnalyticsClient.AddCustomLogJsonAsync("SecurityScanReport", report, "Date");
+//            }
+//            catch (Exception ex)
+//            {
+//                log.LogError(ex, $"Failed to write report to log analytics: {ex}");
+//                throw;
+//            }
+//        }
     }
 }
