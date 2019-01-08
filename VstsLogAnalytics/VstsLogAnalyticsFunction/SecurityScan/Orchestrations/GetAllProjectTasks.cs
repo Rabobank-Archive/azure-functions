@@ -20,7 +20,7 @@ namespace VstsLogAnalyticsFunction.SecurityScan.Orchestrations
         )
 
         {
-            var projects = context.GetInput<Multiple<Project>>();
+            var projects = context.GetInput<List<Project>>();
     
             log.LogInformation($"Creating tasks for every project total amount of projects {projects.Count()}");
             var tasks = projects.Select(x => context.CallActivityAsync<int>(nameof(CreateSecurityReport), x));
