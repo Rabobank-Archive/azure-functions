@@ -25,38 +25,26 @@ namespace VstsLogAnalyticsFunction.SecurityScan.Activites
             var project = context.GetInput<Project>();
 
             if (project == null) throw new Exception("No Project found in parameter DurableActivityContextBase");
-            
+
             var report = new SecurityReportScan(client);
 
             log.LogInformation($"Creating SecurityReport for project {project.Name}");
-            
-            report.Execute(project.Name);
-            
-//            var applicationGroups = client.Get(ApplicationGroup.ApplicationGroups(project.Id)).Identities;
-//
-//            await AddToLogAnalytics(logAnalyticsClient, log, project, applicationGroups);
+
+            var securityReport = report.Execute(project.Name);
+
+            {
+                try
+                {
+                    log.LogInformation($"Writing SecurityReport for project {project.Name} to Azure DevOps");
+
+                    await logAnalyticsClient.AddCustomLogJsonAsync("SecurityScanReport", securityReport, "Date");
+                }
+                catch (Exception ex)
+                {
+                    log.LogError(ex, $"Failed to write report to log analytics: {ex}");
+                    throw;
+                }
+            }
         }
-//
-//        private static async Task AddToLogAnalytics(ILogAnalyticsClient logAnalyticsClient, ILogger log, Project project,
-//            IEnumerable<SecurePipelineScan.VstsService.Response.ApplicationGroup> applicationGroups)
-//        {
-//            try
-//            {
-//                var report = new
-//                {
-//                    Project = project.Name,
-//                    ApplicationGroupContainsProductionEnvironmentOwner = ProjectApplicationGroup.ApplicationGroupContainsProductionEnvironmentOwner(applicationGroups),
-//                    Date = DateTime.UtcNow,
-//                };
-//                log.LogInformation($"Writing SecurityReport for project {project.Name} to Azure DevOps");
-//
-//                await logAnalyticsClient.AddCustomLogJsonAsync("SecurityScanReport", report, "Date");
-//            }
-//            catch (Exception ex)
-//            {
-//                log.LogError(ex, $"Failed to write report to log analytics: {ex}");
-//                throw;
-//            }
-//        }
     }
 }
