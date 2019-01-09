@@ -3,6 +3,7 @@ using Microsoft.Azure.WebJobs.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using SecurePipelineScan.VstsService;
 using System;
+using System.Collections.Generic;
 using Microsoft.Extensions.Caching.Memory;
 using Rules.Reports;
 using SecurePipelineScan.Rules;
@@ -39,6 +40,7 @@ namespace VstsLogAnalytics.Common
             services.AddScoped<IMemoryCache>(_ => new MemoryCache(new MemoryCacheOptions()));
             services.AddTransient<IProjectScan<SecurityReport>, SecurityReportScan>();
             services.AddTransient<IServiceHookScan<ReleaseDeploymentCompletedReport>, ReleaseDeploymentScan>();
+            services.AddTransient<IProjectScan<IEnumerable<RepositoryReport>>, RepositoryScan>();
         }
     }
 }
