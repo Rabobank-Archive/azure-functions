@@ -6,6 +6,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json.Linq;
 using SecurePipelineScan.Rules;
 using SecurePipelineScan.Rules.Events;
+using SecurePipelineScan.Rules.Reports;
 using VstsLogAnalytics.Client;
 using VstsLogAnalytics.Common;
 
@@ -17,22 +18,18 @@ namespace VstsLogAnalyticsFunction
         public static async System.Threading.Tasks.Task Run(
             [QueueTrigger("releasedeploymentcompleted", Connection = "connectionString")]string releaseCompleted,
             [Inject] ILogAnalyticsClient logAnalyticsClient,
-            [Inject] IVstsRestClient client,
-            [Inject] IMemoryCache cache,
+            [Inject] IServiceHookScan<ReleaseDeploymentCompletedReport> scan,
             ILogger log)
         {
-            if (logAnalyticsClient == null) { throw new ArgumentNullException("Log Analytics Client is not set"); }
-            if (client == null) { throw new ArgumentNullException("VSTS Rest client is not set"); }
-            if (cache == null) { throw new ArgumentNullException("MemoryCache is not set"); }
+            if (logAnalyticsClient == null) throw new ArgumentNullException(nameof(logAnalyticsClient));
+            if (scan == null) throw new ArgumentNullException(nameof(scan));
 
             log.LogInformation($"Queuetriggered {nameof(ReleaseDeploymentCompletedFunction)} by Azure Storage queue");
             log.LogInformation($"release: {releaseCompleted}");
 
-            var scan = new ReleaseDeploymentScan(new ServiceEndpointValidator(client, cache));
             var report = scan.Completed(JObject.Parse(releaseCompleted));
             
             log.LogInformation("Done retrieving deployment information. Send to log analytics");
-
             await logAnalyticsClient.AddCustomLogJsonAsync("DeploymentStatus", report, "Date");
         }
     }

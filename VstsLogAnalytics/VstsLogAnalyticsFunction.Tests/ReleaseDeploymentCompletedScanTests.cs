@@ -6,6 +6,7 @@ using SecurePipelineScan.VstsService.Response;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
+using Newtonsoft.Json.Linq;
 using SecurePipelineScan.Rules.Events;
 using SecurePipelineScan.Rules.Reports;
 using VstsLogAnalytics.Client;
@@ -21,34 +22,23 @@ namespace VstsLogAnalyticsFunction.Tests
         {
             var fixture = new Fixture();
 
+            var report = fixture.Create<ReleaseDeploymentCompletedReport>();            
             var logAnalyticsClient = new Mock<ILogAnalyticsClient>();
-            var client = new Mock<IVstsRestClient>();
+            var client = new Mock<IServiceHookScan<ReleaseDeploymentCompletedReport>>();
+            client
+                .Setup(x => x.Completed(It.IsAny<JObject>()))
+                .Returns(report);
 
-            client.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Release>>()))
-                .Returns(fixture.Create<Release>());
+            var json = ReleaseDeploymentCompletedJson();
+            await ReleaseDeploymentCompletedFunction.Run(
+                json, 
+                logAnalyticsClient.Object, 
+                client.Object, 
+                new Mock<Microsoft.Extensions.Logging.ILogger>().Object
+            );
 
-            client.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Multiple<Repository>>>()))
-                .Returns(fixture.Create<Multiple<Repository>>());
-
-            client.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Multiple<MinimumNumberOfReviewersPolicy>>>()))
-                .Returns(fixture.Create<Multiple<MinimumNumberOfReviewersPolicy>>());
-
-            client.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Environment>>()))
-                .Returns(fixture.Create<Environment>());
-
-            var jsonEvent = ReleaseDeploymentCompletedJson();
-
-            using (var cache = new MemoryCache(new MemoryCacheOptions()))
-            {                
-                await ReleaseDeploymentCompletedFunction.Run(jsonEvent, 
-                    logAnalyticsClient.Object, 
-                    client.Object, 
-                    cache,
-                    new Mock<Microsoft.Extensions.Logging.ILogger>().Object
-                );
-            }
-
-            logAnalyticsClient.Verify(x => x.AddCustomLogJsonAsync(It.IsAny<string>(), It.IsAny<ReleaseDeploymentCompletedReport>(), It.IsAny<string>()), Times.AtLeastOnce());
+            logAnalyticsClient.Verify(x => 
+                x.AddCustomLogJsonAsync(It.IsAny<string>(), report, It.IsAny<string>()), Times.AtLeastOnce());
         }
 
         private static string ReleaseDeploymentCompletedJson()
