@@ -78,6 +78,70 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan.Activities
                 Assert.Equal("No Project found in parameter DurableActivityContextBase", ex.Message);
             }
         }
+
+        [Fact]
+
+        public async Task RunWithNullLogAnalyticsClientShouldThrowException()
+        {
+            //Arrange
+            var clientMock = new Mock<IVstsRestClient>(MockBehavior.Strict);
+            var durableActivityContextBaseMock = new Mock<DurableActivityContextBase>();
+            var iLoggerMock = new Mock<ILogger>();
+
+            //Act
+            try
+            {
+                await CreateSecurityReport.Run(durableActivityContextBaseMock.Object, null, clientMock.Object, iLoggerMock.Object);
+            }
+            
+            //Assert
+            catch(Exception ex)
+            {
+                Assert.Equal("Value cannot be null.\nParameter name: logAnalyticsClient", ex.Message);
+            }
+        }
+        
+        [Fact]
+        public async Task RunWithNullIVstsRestClientShouldThrowException()
+        {
+            //Arrange
+            var logAnalyticsClientMock = new Mock<ILogAnalyticsClient>();
+            var durableActivityContextBaseMock = new Mock<DurableActivityContextBase>();
+            var iLoggerMock = new Mock<ILogger>();
+
+            //Act
+            try
+            {
+                await CreateSecurityReport.Run(durableActivityContextBaseMock.Object, logAnalyticsClientMock.Object, null, iLoggerMock.Object);
+            }
+            
+            //Assert
+            catch(Exception ex)
+            {
+                Assert.Equal("Value cannot be null.\nParameter name: client", ex.Message);
+            }
+        }
+        
+        [Fact]
+        public async Task RunWithNullDurableActivityContextShouldThrowException()
+        {
+            //Arrange
+            var clientMock = new Mock<IVstsRestClient>(MockBehavior.Strict);
+            var logAnalyticsClientMock = new Mock<ILogAnalyticsClient>();
+            var iLoggerMock = new Mock<ILogger>();
+
+            //Act
+            try
+            {
+                await CreateSecurityReport.Run(null, logAnalyticsClientMock.Object, clientMock.Object, iLoggerMock.Object);
+            }
+            
+            //Assert
+            catch(Exception ex)
+            {
+                Assert.Equal("Value cannot be null.\nParameter name: context", ex.Message);
+            }
+        }
         
         private static ApplicationGroups CreateApplicationGroupsMock()
         {
