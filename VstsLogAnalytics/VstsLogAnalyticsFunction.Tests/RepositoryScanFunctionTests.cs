@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoFixture;
+using AutoFixture.AutoMoq;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -19,7 +21,8 @@ namespace VstsLogAnalyticsFunction.Tests
         [Fact]
         public async Task GivenMultipleReposAllReposShouldBeSentToLogAnalytics()
         {
-            Fixture fixture = new Fixture();
+            var fixture = new Fixture();
+            fixture.Customize(new AutoMoqCustomization());
 
             var logAnalyticsClient = new Mock<ILogAnalyticsClient>();
             var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
@@ -29,11 +32,11 @@ namespace VstsLogAnalyticsFunction.Tests
 
             var scan = new Mock<IProjectScan<IEnumerable<RepositoryReport>>>();
             scan
-                .Setup(x => x.Execute(It.IsAny<string>()))
+                .Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<DateTime>()))
                 .Returns(fixture.CreateMany<RepositoryReport>());
 
             await RepositoryScanFunction.Run(
-                new TimerInfo(null, null), 
+                fixture.Create<TimerInfo>(), 
                 logAnalyticsClient.Object, 
                 client.Object,
                 scan.Object,

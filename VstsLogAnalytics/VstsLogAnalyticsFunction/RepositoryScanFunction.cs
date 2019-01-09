@@ -37,7 +37,7 @@ namespace VstsLogAnalyticsFunction
                 {
                     try
                     {
-                        var reports = scan.Execute(p.Name);
+                        var reports = scan.Execute(p.Name, timerInfo.ScheduleStatus.Last);
                         foreach (var report in reports)
                         {
                             await logAnalyticsClient.AddCustomLogJsonAsync("GitRepository", report, "Date");

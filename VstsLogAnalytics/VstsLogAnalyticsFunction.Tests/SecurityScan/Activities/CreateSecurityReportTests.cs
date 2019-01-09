@@ -25,7 +25,7 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan.Activities
             var iLoggerMock = new Mock<ILogger>();
             var scan = new Mock<IProjectScan<SecurityReport>>();
             scan
-                .Setup(x => x.Execute(It.IsAny<string>()))
+                .Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<DateTime>()))
                 .Returns(fixture.Create<SecurityReport>());
 
             var durableActivityContextBaseMock = new Mock<DurableActivityContextBase>();
@@ -33,16 +33,27 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan.Activities
                 .Setup(x => x.GetInput<Project>())
                 .Returns(fixture.Create<Project>());
             
+            var durableOrchestrationClient = new Mock<DurableOrchestrationClientBase>();
+            durableOrchestrationClient
+                .Setup(x => x.GetStatusAsync(It.IsAny<string>()))
+                .ReturnsAsync(fixture.Build<DurableOrchestrationStatus>()
+                    .Without(x => x.Input)
+                    .Without(x => x.Output)
+                    .Without(x => x.History)
+                    .Without(x => x.CustomStatus)
+                    .Create());
+            
             //Act
             await CreateSecurityReport.Run(
                 durableActivityContextBaseMock.Object, 
+                durableOrchestrationClient.Object,
                 logAnalyticsClient.Object, 
                 scan.Object,
                 iLoggerMock.Object);
 
             //Assert
             scan
-                .Verify(x => x.Execute(It.IsAny<string>()) ,Times.AtLeastOnce());
+                .Verify(x => x.Execute(It.IsAny<string>(), It.IsAny<DateTime>()) ,Times.AtLeastOnce());
             logAnalyticsClient
                 .Verify(x => x.AddCustomLogJsonAsync("SecurityScanReport", It.IsAny<SecurityReport>(), It.IsAny<string>()));
         }
@@ -54,11 +65,13 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan.Activities
             var scan = new Mock<IProjectScan<SecurityReport>>(MockBehavior.Strict);
             var logAnalyticsClientMock = new Mock<ILogAnalyticsClient>();
             var durableActivityContextBaseMock = new Mock<DurableActivityContextBase>();
+            var durableOrchestrationClient = new Mock<DurableOrchestrationClientBase>();
             var iLoggerMock = new Mock<ILogger>();
 
             //Act
             var ex = await Assert.ThrowsAsync<Exception>(async () => await CreateSecurityReport.Run(
                 durableActivityContextBaseMock.Object, 
+                durableOrchestrationClient.Object,
                 logAnalyticsClientMock.Object,
                 scan.Object,
                 iLoggerMock.Object));
@@ -74,11 +87,13 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan.Activities
             //Arrange
             var scan = new Mock<IProjectScan<SecurityReport>>(MockBehavior.Strict);
             var durableActivityContextBaseMock = new Mock<DurableActivityContextBase>();
+            var durableOrchestrationClient = new Mock<DurableOrchestrationClientBase>();
             var iLoggerMock = new Mock<ILogger>();
 
             //Act
             var ex = await Assert.ThrowsAsync<ArgumentNullException>(async () => await CreateSecurityReport.Run(
-                    durableActivityContextBaseMock.Object, 
+                    durableActivityContextBaseMock.Object,
+                    durableOrchestrationClient.Object,
                     null,
                     scan.Object,
                     iLoggerMock.Object));            
@@ -92,11 +107,13 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan.Activities
             //Arrange
             var logAnalyticsClientMock = new Mock<ILogAnalyticsClient>();
             var durableActivityContextBaseMock = new Mock<DurableActivityContextBase>();
+            var durableOrchestrationClient = new Mock<DurableOrchestrationClientBase>();
             var iLoggerMock = new Mock<ILogger>();
 
             //Act
             var ex = await Assert.ThrowsAsync<ArgumentNullException>(async () => await CreateSecurityReport.Run(
                     durableActivityContextBaseMock.Object, 
+                    durableOrchestrationClient.Object,
                     logAnalyticsClientMock.Object,
                     null,
                     iLoggerMock.Object));            
@@ -109,12 +126,14 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan.Activities
         {
             //Arrange
             var scan = new Mock<IProjectScan<SecurityReport>>(MockBehavior.Strict);
+            var durableOrchestrationClient = new Mock<DurableOrchestrationClientBase>();
             var logAnalyticsClientMock = new Mock<ILogAnalyticsClient>();
             var iLoggerMock = new Mock<ILogger>();
 
             //Act
             var ex = await Assert.ThrowsAsync<ArgumentNullException>(async () => await CreateSecurityReport.Run(
                     null, 
+                    durableOrchestrationClient.Object,
                     logAnalyticsClientMock.Object,
                     scan.Object,
                     iLoggerMock.Object));            
