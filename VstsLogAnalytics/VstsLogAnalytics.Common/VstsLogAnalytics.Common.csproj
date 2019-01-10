@@ -6,8 +6,8 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage" Version="3.0.0" />
-    <PackageReference Include="SecurePipelineScan.Rules" Version="0.0.1.69389" />
-    <PackageReference Include="SecurePipelineScan.VstsService" Version="0.0.1.69389" />
+    <PackageReference Include="SecurePipelineScan.Rules" Version="0.0.1.68492" />
+    <PackageReference Include="SecurePipelineScan.VstsService" Version="0.0.1.68492" />
   </ItemGroup>
 
   <ItemGroup>
