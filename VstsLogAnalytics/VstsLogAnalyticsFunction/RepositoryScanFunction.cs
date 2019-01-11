@@ -4,6 +4,7 @@ using SecurePipelineScan.Rules;
 using SecurePipelineScan.VstsService;
 using System;
 using System.Collections.Generic;
+using Rules.Reports;
 using VstsLogAnalytics.Client;
 using VstsLogAnalytics.Common;
 using Requests = SecurePipelineScan.VstsService.Requests;
@@ -15,42 +16,32 @@ namespace VstsLogAnalyticsFunction
         [FunctionName(nameof(RepositoryScanFunction))]
         public static async System.Threading.Tasks.Task Run(
             [TimerTrigger("0 */30 * * * *", RunOnStartup = true)] TimerInfo timerInfo,
-            [Inject]ILogAnalyticsClient logAnalyticsClient,
-            [Inject]IVstsRestClient client,
+            [Inject] ILogAnalyticsClient logAnalyticsClient,
+            [Inject] IVstsRestClient client,
+            [Inject] IProjectScan<IEnumerable<RepositoryReport>> scan,
             ILogger log)
         {
             if (logAnalyticsClient == null) { throw new ArgumentNullException("Log Analytics Client is not set"); }
             if (client == null) { throw new ArgumentNullException("VSTS Rest client is not set"); }
+            if (scan == null) throw new ArgumentNullException(nameof(scan));
 
             try
             {
                 log.LogInformation($"Repository scan timed check start: {DateTime.Now}");
 
                 var projects = client.Get(Requests.Project.Projects());
-
                 log.LogInformation($"Projects found: {projects.Count}");
-                List<Exception> aggregateExceptions = new List<Exception>();
+                var aggregateExceptions = new List<Exception>();
 
                 foreach (var p in projects.Value)
                 {
                     try
                     {
-                        var scan = new RepositoryScan(client);
-
-                        var results = scan.Execute(p.Name);
-
-                        foreach (var r in results)
+                        var reports = scan.Execute(p.Name, timerInfo.ScheduleStatus.Last);
+                        foreach (var report in reports)
                         {
-                            var report = new
-                            {
-                                r.Project,
-                                r.Repository,
-                                r.HasRequiredReviewerPolicy,
-                                Date = DateTime.UtcNow,
-                            };
-                            
                             await logAnalyticsClient.AddCustomLogJsonAsync("GitRepository", report, "Date");
-                            log.LogInformation($"Project scanned: {r.Project}");
+                            log.LogInformation($"Project scanned: {report.Project}");
                         }
                     }
                     catch (Exception e)

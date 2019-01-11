@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
+using Rules.Reports;
 using SecurePipelineScan.Rules;
 using SecurePipelineScan.Rules.Checks;
-using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Requests;
 using VstsLogAnalytics.Client;
 using VstsLogAnalytics.Common;
@@ -18,36 +18,30 @@ namespace VstsLogAnalyticsFunction.SecurityScan.Activites
         [FunctionName(nameof(CreateSecurityReport))]
         public static async Task Run(
             [ActivityTrigger] DurableActivityContextBase context,
+            [OrchestrationClient] DurableOrchestrationClientBase starter,
             [Inject] ILogAnalyticsClient logAnalyticsClient,
-            [Inject] IVstsRestClient client,
+            [Inject] IProjectScan<SecurityReport> scan,
             ILogger log)
         {
-            if (logAnalyticsClient == null) { throw new ArgumentNullException(nameof(logAnalyticsClient)); }
-            if (client == null) { throw new ArgumentNullException(nameof(client)); }
-            if (context == null) { throw new ArgumentNullException(nameof(context)); }
-            
-            var project = context.GetInput<Project>();
+            if (context == null) throw new ArgumentNullException(nameof(context));
+            if (logAnalyticsClient == null) throw new ArgumentNullException(nameof(logAnalyticsClient));
+            if (scan == null) throw new ArgumentNullException(nameof(scan));
 
+            var project = context.GetInput<Project>();
             if (project == null) throw new Exception("No Project found in parameter DurableActivityContextBase");
 
-            var report = new SecurityReportScan(client);
-
             log.LogInformation($"Creating SecurityReport for project {project.Name}");
+            var report = scan.Execute(project.Name, DateTime.Now);
 
-            var securityReport = report.Execute(project.Name);
-
+            try
             {
-                try
-                {
-                    log.LogInformation($"Writing SecurityReport for project {project.Name} to Azure DevOps");
-
-                    await logAnalyticsClient.AddCustomLogJsonAsync("SecurityScanReport", securityReport, "Date");
-                }
-                catch (Exception ex)
-                {
-                    log.LogError(ex, $"Failed to write report to log analytics: {ex}");
-                    throw;
-                }
+                log.LogInformation($"Writing SecurityReport for project {project.Name} to Azure DevOps");
+                await logAnalyticsClient.AddCustomLogJsonAsync("SecurityScanReport", report, "Date");
+            }
+            catch (Exception ex)
+            {
+                log.LogError(ex, $"Failed to write report to log analytics: {ex}");
+                throw;
             }
         }
     }
