@@ -9,6 +9,7 @@ using Rules.Reports;
 using SecurePipelineScan.Rules;
 using SecurePipelineScan.Rules.Events;
 using SecurePipelineScan.Rules.Reports;
+using SecurePipelineScan.VstsService.Requests;
 using VstsLogAnalytics.Client;
 using VstsLogAnalytics.Common;
 
@@ -41,6 +42,7 @@ namespace VstsLogAnalytics.Common
             services.AddTransient<IProjectScan<SecurityReport>, SecurityReportScan>();
             services.AddTransient<IServiceHookScan<ReleaseDeploymentCompletedReport>, ReleaseDeploymentScan>();
             services.AddTransient<IProjectScan<IEnumerable<RepositoryReport>>, RepositoryScan>();
+            services.AddTransient<IServiceEndpointValidator, ServiceEndpointValidator>();
         }
     }
 }
