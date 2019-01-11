@@ -27,12 +27,11 @@ namespace VstsLogAnalyticsFunction.SecurityScan.Activites
             if (logAnalyticsClient == null) throw new ArgumentNullException(nameof(logAnalyticsClient));
             if (scan == null) throw new ArgumentNullException(nameof(scan));
 
-            var status = await starter.GetStatusAsync(context.InstanceId);          
             var project = context.GetInput<Project>();
             if (project == null) throw new Exception("No Project found in parameter DurableActivityContextBase");
 
             log.LogInformation($"Creating SecurityReport for project {project.Name}");
-            var report = scan.Execute(project.Name, status.CreatedTime);
+            var report = scan.Execute(project.Name, DateTime.Now);
 
             try
             {
