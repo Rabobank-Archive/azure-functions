@@ -10,8 +10,8 @@
     <PackageReference Include="AutoFixture.AutoMoq" Version="4.5.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
     <PackageReference Include="Moq" Version="4.10.0" />
-    <PackageReference Include="SecurePipelineScan.Rules" Version="0.0.1.69836" />
-    <PackageReference Include="SecurePipelineScan.VstsService" Version="0.0.1.69836" />
+    <PackageReference Include="SecurePipelineScan.Rules" Version="0.0.1.71914" />
+    <PackageReference Include="SecurePipelineScan.VstsService" Version="0.0.1.71914" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.DurableTask" Version="1.7.0" />
     <PackageReference Include="xunit" Version="2.4.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0">
