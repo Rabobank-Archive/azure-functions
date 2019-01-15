@@ -10,8 +10,8 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.23" />
-    <PackageReference Include="SecurePipelineScan.Rules" Version="0.0.1.71914" />
-    <PackageReference Include="SecurePipelineScan.VstsService" Version="0.0.1.71914" />
+    <PackageReference Include="SecurePipelineScan.Rules" Version="0.0.1.72698" />
+    <PackageReference Include="SecurePipelineScan.VstsService" Version="0.0.1.72698" />
   </ItemGroup>
 
 </Project>

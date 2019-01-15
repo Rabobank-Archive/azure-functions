@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using AutoFixture;
+using AutoFixture.AutoMoq;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -19,7 +20,7 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan.Activities
         public async Task RunShouldCallSecurityReportScanExecute()
         {
             //Arrange
-            var fixture = new Fixture();
+            var fixture = new Fixture().Customize(new AutoMoqCustomization());
             
             var logAnalyticsClient = new Mock<ILogAnalyticsClient>();
             var iLoggerMock = new Mock<ILogger>();
