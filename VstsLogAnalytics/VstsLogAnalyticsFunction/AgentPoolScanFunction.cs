@@ -14,7 +14,7 @@ namespace VstsLogAnalyticsFunction
     {
         [FunctionName(nameof(AgentPoolScanFunction))]
         public static async System.Threading.Tasks.Task Run(
-            [TimerTrigger("0 */5 * * * *", RunOnStartup = true)] TimerInfo timerInfo,
+            [TimerTrigger("0 */5 * * * *")] TimerInfo timerInfo,
             [Inject]ILogAnalyticsClient logAnalyticsClient,
             [Inject] IVstsRestClient client,
             ILogger log)

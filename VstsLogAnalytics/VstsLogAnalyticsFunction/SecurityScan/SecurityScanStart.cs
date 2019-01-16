@@ -13,7 +13,7 @@ namespace VstsLogAnalyticsFunction.SecurityScan
     {
         [FunctionName(nameof(SecurityScanStart))]
         public static async Task Run(
-            [TimerTrigger("0 0 6 * * *", RunOnStartup = true)]
+            [TimerTrigger("0 0 6 * * *")]
             TimerInfo timerInfo,
             [OrchestrationClient] DurableOrchestrationClientBase orchestrationClientBase,
             [Inject] IVstsRestClient client,
