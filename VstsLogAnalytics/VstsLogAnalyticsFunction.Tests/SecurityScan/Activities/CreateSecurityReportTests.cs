@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using AutoFixture;
 using AutoFixture.AutoMoq;
 using Microsoft.Azure.WebJobs;
-using Microsoft.Extensions.Logging;
+using Microsoft.Build.Framework;
 using Moq;
 using Rules.Reports;
 using SecurePipelineScan.Rules;
@@ -11,6 +11,7 @@ using SecurePipelineScan.VstsService.Response;
 using VstsLogAnalytics.Client;
 using VstsLogAnalyticsFunction.SecurityScan.Activites;
 using Xunit;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace VstsLogAnalyticsFunction.Tests.SecurityScan.Activities
 {
@@ -47,7 +48,6 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan.Activities
             //Act
             await CreateSecurityReport.Run(
                 durableActivityContextBaseMock.Object, 
-                durableOrchestrationClient.Object,
                 logAnalyticsClient.Object, 
                 scan.Object,
                 iLoggerMock.Object);
@@ -66,13 +66,11 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan.Activities
             var scan = new Mock<IProjectScan<SecurityReport>>(MockBehavior.Strict);
             var logAnalyticsClientMock = new Mock<ILogAnalyticsClient>();
             var durableActivityContextBaseMock = new Mock<DurableActivityContextBase>();
-            var durableOrchestrationClient = new Mock<DurableOrchestrationClientBase>();
             var iLoggerMock = new Mock<ILogger>();
 
             //Act
             var ex = await Assert.ThrowsAsync<Exception>(async () => await CreateSecurityReport.Run(
                 durableActivityContextBaseMock.Object, 
-                durableOrchestrationClient.Object,
                 logAnalyticsClientMock.Object,
                 scan.Object,
                 iLoggerMock.Object));
@@ -88,13 +86,11 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan.Activities
             //Arrange
             var scan = new Mock<IProjectScan<SecurityReport>>(MockBehavior.Strict);
             var durableActivityContextBaseMock = new Mock<DurableActivityContextBase>();
-            var durableOrchestrationClient = new Mock<DurableOrchestrationClientBase>();
             var iLoggerMock = new Mock<ILogger>();
 
             //Act
             var ex = await Assert.ThrowsAsync<ArgumentNullException>(async () => await CreateSecurityReport.Run(
                     durableActivityContextBaseMock.Object,
-                    durableOrchestrationClient.Object,
                     null,
                     scan.Object,
                     iLoggerMock.Object));            
@@ -108,13 +104,11 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan.Activities
             //Arrange
             var logAnalyticsClientMock = new Mock<ILogAnalyticsClient>();
             var durableActivityContextBaseMock = new Mock<DurableActivityContextBase>();
-            var durableOrchestrationClient = new Mock<DurableOrchestrationClientBase>();
             var iLoggerMock = new Mock<ILogger>();
 
             //Act
             var ex = await Assert.ThrowsAsync<ArgumentNullException>(async () => await CreateSecurityReport.Run(
                     durableActivityContextBaseMock.Object, 
-                    durableOrchestrationClient.Object,
                     logAnalyticsClientMock.Object,
                     null,
                     iLoggerMock.Object));            
@@ -127,14 +121,12 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan.Activities
         {
             //Arrange
             var scan = new Mock<IProjectScan<SecurityReport>>(MockBehavior.Strict);
-            var durableOrchestrationClient = new Mock<DurableOrchestrationClientBase>();
             var logAnalyticsClientMock = new Mock<ILogAnalyticsClient>();
             var iLoggerMock = new Mock<ILogger>();
 
             //Act
             var ex = await Assert.ThrowsAsync<ArgumentNullException>(async () => await CreateSecurityReport.Run(
                     null, 
-                    durableOrchestrationClient.Object,
                     logAnalyticsClientMock.Object,
                     scan.Object,
                     iLoggerMock.Object));            

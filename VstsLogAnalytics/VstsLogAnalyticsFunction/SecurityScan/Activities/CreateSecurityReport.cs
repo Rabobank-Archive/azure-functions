@@ -18,7 +18,6 @@ namespace VstsLogAnalyticsFunction.SecurityScan.Activites
         [FunctionName(nameof(CreateSecurityReport))]
         public static async Task Run(
             [ActivityTrigger] DurableActivityContextBase context,
-            [OrchestrationClient] DurableOrchestrationClientBase starter,
             [Inject] ILogAnalyticsClient logAnalyticsClient,
             [Inject] IProjectScan<SecurityReport> scan,
             ILogger log)
