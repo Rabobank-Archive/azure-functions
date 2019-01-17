@@ -20,7 +20,7 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
         )
 
         {
-            var projects = context.GetInput<List<Project>>();
+            var projects = context.GetInput<Multiple<Project>>();
 
             log.LogInformation($"Creating tasks for every project total amount of projects {projects.Count()}");
 

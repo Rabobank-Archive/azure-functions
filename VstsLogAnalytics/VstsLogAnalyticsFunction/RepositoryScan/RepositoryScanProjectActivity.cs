@@ -17,7 +17,6 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
         [FunctionName(nameof(RepositoryScanProjectActivity))]
         public static async Task<IEnumerable<RepositoryReport>> Run(
             [ActivityTrigger] DurableActivityContextBase context,
-            [OrchestrationClient] DurableOrchestrationClientBase starter,
             [Inject] ILogAnalyticsClient logAnalyticsClient,
             [Inject] IProjectScan<IEnumerable<RepositoryReport>> scan,
             ILogger log)

@@ -42,7 +42,6 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
             //Act
             await  RepositoryScanProjectActivity.Run(
                 contextMock.Object,
-                durableOrchestrationClient.Object,
                 logAnalyticsClientMock.Object,
                 scan.Object,
                 iLoggerMock.Object);
@@ -64,27 +63,7 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
             //Act + assert
             var ex = await Assert.ThrowsAsync<ArgumentNullException>(async () => await RepositoryScanProjectActivity.Run(
                 durableActivityContextBaseMock.Object,
-                durableOrchestrationClient.Object,
                 null,
-                scan.Object,
-                iLoggerMock.Object));
-        }
-
-        [Fact]
-        public async Task RunWithNoContextShouldThrowArgumentNullException()
-        {
-            //Arrange
-            var scan = new Mock<IProjectScan<IEnumerable<RepositoryReport>>>(MockBehavior.Strict);
-            var logAnalyticsClientMock = new Mock<ILogAnalyticsClient>();
-            var durableActivityContextBaseMock = new Mock<DurableActivityContextBase>();
-            var durableOrchestrationClient = new Mock<DurableOrchestrationClientBase>();
-            var iLoggerMock = new Mock<ILogger>();
-
-            //Act + assert
-            var ex = await Assert.ThrowsAsync<ArgumentNullException>(async () => await RepositoryScanProjectActivity.Run(
-                null,
-                durableOrchestrationClient.Object,
-                logAnalyticsClientMock.Object,
                 scan.Object,
                 iLoggerMock.Object));
         }
@@ -101,7 +80,6 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
             //Act + assert
             var ex = await Assert.ThrowsAsync<ArgumentNullException>(async () => await RepositoryScanProjectActivity.Run(
                 durableActivityContextBaseMock.Object,
-                durableOrchestrationClient.Object,
                 logAnalyticsClientMock.Object,
                 null,
                 iLoggerMock.Object));
