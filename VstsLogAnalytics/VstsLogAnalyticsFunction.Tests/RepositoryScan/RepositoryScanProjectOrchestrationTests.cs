@@ -23,13 +23,13 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
 
             //Arrange
             var durableOrchestrationContextMock = new Mock<DurableOrchestrationContextBase>();
-            durableOrchestrationContextMock.Setup(context => context.GetInput<List<Project>>()).Returns(fixture.CreateMany<Project>(2).ToList());
+            durableOrchestrationContextMock.Setup(context => context.GetInput<Multiple<Project>>()).Returns(fixture.Create<Multiple<Project>>());
 
             //Act
             await RepositoryScanProjectOrchestration.Run(durableOrchestrationContextMock.Object, new Mock<ILogger>().Object);
             
             //Assert
-            durableOrchestrationContextMock.Verify(x => x.CallActivityAsync<IEnumerable<RepositoryReport>>(nameof(RepositoryScanProjectActivity), It.IsAny<Project>()),Times.Exactly(2));
+            durableOrchestrationContextMock.Verify(x => x.CallActivityAsync<IEnumerable<RepositoryReport>>(nameof(RepositoryScanProjectActivity), It.IsAny<Project>()),Times.AtLeastOnce());
         }
         
     }

@@ -95,7 +95,7 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan.Activities
                     scan.Object,
                     iLoggerMock.Object));            
             //Assert
-            Assert.Equal("Value cannot be null.\nParameter name: logAnalyticsClient", ex.Message);
+            Assert.Equal($"Value cannot be null.{System.Environment.NewLine}Parameter name: logAnalyticsClient", ex.Message);
         }
         
         [Fact]
@@ -113,7 +113,7 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan.Activities
                     null,
                     iLoggerMock.Object));            
             //Assert
-            Assert.Equal("Value cannot be null.\nParameter name: scan", ex.Message);
+            Assert.Equal($"Value cannot be null.{System.Environment.NewLine}Parameter name: scan", ex.Message);
         }
         
         [Fact]
@@ -131,7 +131,7 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan.Activities
                     scan.Object,
                     iLoggerMock.Object));            
             //Assert
-            Assert.Equal("Value cannot be null.\nParameter name: context", ex.Message);
+            Assert.Equal($"Value cannot be null.{System.Environment.NewLine}Parameter name: context", ex.Message);
         }
     }
 }
