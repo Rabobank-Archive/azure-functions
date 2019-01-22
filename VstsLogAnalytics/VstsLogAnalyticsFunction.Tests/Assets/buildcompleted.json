@@ -1,0 +1,67 @@
+{
+  "id": "93dbb619-17e1-4dd4-9102-657b5dfef1fe",
+  "eventType": "build.complete",
+  "publisherId": "tfs",
+  "message": {
+    "text": "Build 0.0.0.624 succeeded",
+    "html": "Build <a href=\"https://somecompany.visualstudio.com/web/build.aspx?pcguid=3f5f177f-c504-4f1c-9534-be6de83783f6&builduri=vstfs%3a%2f%2f%2fBuild%2fBuild%2f70609\">0.0.0.624</a> succeeded",
+    "markdown": "Build [0.0.0.624](https://somecompany.visualstudio.com/web/build.aspx?pcguid=3f5f177f-c504-4f1c-9534-be6de83783f6&builduri=vstfs%3a%2f%2f%2fBuild%2fBuild%2f70609) succeeded"
+  },
+  "detailedMessage": {
+    "text": "Build 0.0.0.624 succeeded",
+    "html": "Build <a href=\"https://somecompany.visualstudio.com/web/build.aspx?pcguid=3f5f177f-c504-4f1c-9534-be6de83783f6&builduri=vstfs%3a%2f%2f%2fBuild%2fBuild%2f70609\">0.0.0.624</a> succeeded",
+    "markdown": "Build [0.0.0.624](https://somecompany.visualstudio.com/web/build.aspx?pcguid=3f5f177f-c504-4f1c-9534-be6de83783f6&builduri=vstfs%3a%2f%2f%2fBuild%2fBuild%2f70609) succeeded"
+  },
+  "resource": {
+    "uri": "vstfs:///Build/Build/70609",
+    "id": 70609,
+    "buildNumber": "0.0.0.624",
+    "url": "https://somecompany.visualstudio.com/273bfaba-d856-4757-8801-cbb749a08257/_apis/build/Builds/70609",
+    "startTime": "2019-01-10T14:57:48.6602982Z",
+    "finishTime": "2019-01-10T15:30:50.7628044Z",
+    "reason": "validateShelveset",
+    "status": "succeeded",
+    "drop": {},
+    "log": {},
+    "sourceGetVersion": "LG:refs/pull/7782/merge:4507db3b9e859689b815151ba369bc2bc3227572",
+    "lastChangedBy": {
+      "displayName": "Microsoft.VisualStudio.Services.TFS",
+      "id": "00000000-0000-0000-0000-000000000000",
+      "uniqueName": "00000002-0000-8888-8000-000000000000@2c895908-04e0-4952-89fd-54b0046d6288"
+    },
+    "retainIndefinitely": false,
+    "definition": {
+      "definitionType": "xaml",
+      "id": 1436,
+      "name": "CI-pullrequests",
+      "url": "https://somecompany.visualstudio.com/273bfaba-d856-4757-8801-cbb749a08257/_apis/build/Definitions/1436"
+    },
+    "requests": [
+      {
+        "id": 70609,
+        "url": "https://somecompany.visualstudio.com/273bfaba-d856-4757-8801-cbb749a08257/_apis/build/Requests/70609",
+        "requestedFor": {
+          "displayName": "Chan, W (William)",
+          "id": "52e8de35-29a7-6568-bff9-1c8ec725982f",
+          "uniqueName": "William.Chan@somecompany.com"
+        }
+      }
+    ]
+  },
+  "resourceVersion": "1.0",
+  "resourceContainers": {
+    "collection": {
+      "id": "3f5f177f-c504-4f1c-9534-be6de83783f6",
+      "baseUrl": "https://somecompany.visualstudio.com/"
+    },
+    "account": {
+      "id": "463182bb-55b2-4a41-9476-50659007d1ed",
+      "baseUrl": "https://somecompany.visualstudio.com/"
+    },
+    "project": {
+      "id": "273bfaba-d856-4757-8801-cbb749a08257",
+      "baseUrl": "https://somecompany.visualstudio.com/"
+    }
+  },
+  "createdDate": "2019-01-10T15:31:51.012448Z"
+}

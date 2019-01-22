@@ -41,6 +41,7 @@ namespace VstsLogAnalytics.Common
             services.AddScoped<IMemoryCache>(_ => new MemoryCache(new MemoryCacheOptions()));
             services.AddTransient<IProjectScan<SecurityReport>, SecurityReportScan>();
             services.AddTransient<IServiceHookScan<ReleaseDeploymentCompletedReport>, ReleaseDeploymentScan>();
+            services.AddTransient<IServiceHookScan<BuildScanReport>, BuildScan>();
             services.AddTransient<IProjectScan<IEnumerable<RepositoryReport>>, RepositoryScan>();
             services.AddTransient<IServiceEndpointValidator, ServiceEndpointValidator>();
         }

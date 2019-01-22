@@ -43,7 +43,7 @@ namespace VstsLogAnalyticsFunction.Tests
 
         private static string ReleaseDeploymentCompletedJson()
         {
-            var path = Path.Combine(System.Environment.CurrentDirectory, "releasedeploymentcompleted.json");
+            var path = Path.Combine("Assets", "releasedeploymentcompleted.json");
             return File.ReadAllText(path);
         }
     }
