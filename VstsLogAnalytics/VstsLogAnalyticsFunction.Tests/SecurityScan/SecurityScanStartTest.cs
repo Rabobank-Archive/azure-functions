@@ -1,5 +1,4 @@
 using System;
-using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Timers;
 using Microsoft.Extensions.Logging;
@@ -15,7 +14,7 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan
     public class SecurityScanStartTest
     {
         [Fact]
-        public async Task RunShouldCallGetProjectsExactlyOnce()
+        public async System.Threading.Tasks.Task RunShouldCallGetProjectsExactlyOnce()
         {
             //Arrange
             var orchestrationClientMock = new Mock<DurableOrchestrationClientBase>();
@@ -36,7 +35,7 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan
         }
 
         [Fact]
-        public async Task RunShouldCallOrchestrationFunctionExactlyOnce()
+        public async System.Threading.Tasks.Task RunShouldCallOrchestrationFunctionExactlyOnce()
         {
             //Arrange       
             var orchestrationClientMock = new Mock<DurableOrchestrationClientBase>();

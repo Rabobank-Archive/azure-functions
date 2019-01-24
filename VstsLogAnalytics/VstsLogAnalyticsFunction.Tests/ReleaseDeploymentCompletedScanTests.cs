@@ -1,11 +1,6 @@
 ﻿using AutoFixture;
 using Moq;
-using RestSharp;
-using SecurePipelineScan.VstsService;
-using SecurePipelineScan.VstsService.Response;
 using System.IO;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json.Linq;
 using SecurePipelineScan.Rules.Events;
 using SecurePipelineScan.Rules.Reports;
@@ -18,7 +13,7 @@ namespace VstsLogAnalyticsFunction.Tests
     public class ReleaseDeploymentCompletedScanTests
     {
         [Fact]
-        public async Task Test()
+        public async System.Threading.Tasks.Task Test()
         {
             var fixture = new Fixture();
 

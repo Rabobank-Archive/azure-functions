@@ -1,13 +1,9 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AutoFixture;
 using AutoFixture.AutoMoq;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Timers;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Rules.Reports;
 using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Response;
 using VstsLogAnalyticsFunction.RepositoryScan;
@@ -18,7 +14,7 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
     public class RepositoryScanFunctionTests
     {
         [Fact]
-        public async Task GivenThereAreProjectsItShouldStartOrchestration()
+        public async System.Threading.Tasks.Task GivenThereAreProjectsItShouldStartOrchestration()
         {
             var fixture = new Fixture();
             fixture.Customize(new AutoMoqCustomization());
@@ -26,7 +22,7 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
             //Arrange
             var orchestrationClientMock = new Mock<DurableOrchestrationClientBase>();
             var clientMock = new Mock<IVstsRestClient>();
-            clientMock.Setup(x => x.Get<Multiple<Project>>(It.IsAny<VstsRestRequest<Multiple<Project>>>()))
+            clientMock.Setup(x => x.Get(It.IsAny<VstsRestRequest<Multiple<Project>>>()))
                       .Returns(fixture.Create<Multiple<Project>>);
 
             var logMock = new Mock<ILogger>();

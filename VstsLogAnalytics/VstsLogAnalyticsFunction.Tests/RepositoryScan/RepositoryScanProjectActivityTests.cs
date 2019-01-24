@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using AutoFixture;
 using AutoFixture.AutoMoq;
 using Microsoft.Azure.WebJobs;
@@ -19,7 +18,7 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
     public class RepositoryScanProjectActivityTests
     {
         [Fact]
-        public async Task GivenMultipleReposAllReposShouldBeSentToLogAnalytics()
+        public async System.Threading.Tasks.Task GivenMultipleReposAllReposShouldBeSentToLogAnalytics()
         {
             var fixture = new Fixture();
             fixture.Customize(new AutoMoqCustomization());
@@ -52,7 +51,7 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
         }
 
         [Fact]
-        public async Task RunWithNoLogAnalyticsClientShouldThrowArgumentNullException()
+        public async System.Threading.Tasks.Task RunWithNoLogAnalyticsClientShouldThrowArgumentNullException()
         {
             //Arrange
             var scan = new Mock<IProjectScan<IEnumerable<RepositoryReport>>>(MockBehavior.Strict);
@@ -69,7 +68,7 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
         }
 
         [Fact]
-        public async Task RunWithNoScannerShouldThrowArgumentNullException()
+        public async System.Threading.Tasks.Task RunWithNoScannerShouldThrowArgumentNullException()
         {
             //Arrange
             var logAnalyticsClientMock = new Mock<ILogAnalyticsClient>();

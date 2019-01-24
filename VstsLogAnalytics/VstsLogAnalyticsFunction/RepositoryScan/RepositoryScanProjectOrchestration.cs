@@ -5,7 +5,7 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Rules.Reports;
 using SecurePipelineScan.VstsService;
-using SecurePipelineScan.VstsService.Response;
+using Response = SecurePipelineScan.VstsService.Response;
 using VstsLogAnalytics.Common;
 using VstsLogAnalyticsFunction.SecurityScan.Activites;
 
@@ -20,7 +20,7 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
         )
 
         {
-            var projects = context.GetInput<Multiple<Project>>();
+            var projects = context.GetInput<Response.Multiple<Response.Project>>();
 
             log.LogInformation($"Creating tasks for every project total amount of projects {projects.Count()}");
 

@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AutoFixture;
 using AutoFixture.AutoMoq;
 using Microsoft.Azure.WebJobs;
@@ -16,7 +14,7 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
     public class RepositoryScanProjectOrchestrationTests
     {
         [Fact]
-        public async Task RunWithHasTwoProjectsShouldCallActivityAsyncForEachProject()
+        public async System.Threading.Tasks.Task RunWithHasTwoProjectsShouldCallActivityAsyncForEachProject()
         {
             var fixture = new Fixture();
             fixture.Customize(new AutoMoqCustomization());

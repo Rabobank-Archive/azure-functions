@@ -7,7 +7,6 @@ using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Response;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using VstsLogAnalytics.Client;
 using Xunit;
 
@@ -16,7 +15,7 @@ namespace VstsLogAnalyticsFunction.Tests
     public class AgentPoolScanFunctionTests
     {
         [Fact]
-        public async Task AgentPoolScanTest()
+        public async System.Threading.Tasks.Task AgentPoolScanTest()
         {
             // Arrange
             var fixture = new Fixture();

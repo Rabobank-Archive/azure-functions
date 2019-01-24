@@ -1,5 +1,4 @@
 using System;
-using System.Threading.Tasks;
 using AutoFixture;
 using AutoFixture.AutoMoq;
 using Microsoft.Azure.WebJobs;
@@ -18,7 +17,7 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan.Activities
     public class CreateSecurityReportTest
     {
         [Fact]
-        public async Task RunShouldCallSecurityReportScanExecute()
+        public async System.Threading.Tasks.Task RunShouldCallSecurityReportScanExecute()
         {
             //Arrange
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
@@ -60,7 +59,7 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan.Activities
         }
 
         [Fact]
-        public async Task RunWithNoProjectFoundFromContextShouldThrowException()
+        public async System.Threading.Tasks.Task RunWithNoProjectFoundFromContextShouldThrowException()
         {
             //Arrange
             var scan = new Mock<IProjectScan<SecurityReport>>(MockBehavior.Strict);
@@ -81,7 +80,7 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan.Activities
 
         [Fact]
 
-        public async Task RunWithNullLogAnalyticsClientShouldThrowException()
+        public async System.Threading.Tasks.Task RunWithNullLogAnalyticsClientShouldThrowException()
         {
             //Arrange
             var scan = new Mock<IProjectScan<SecurityReport>>(MockBehavior.Strict);
@@ -99,7 +98,7 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan.Activities
         }
         
         [Fact]
-        public async Task RunWithNullIVstsRestClientShouldThrowException()
+        public async System.Threading.Tasks.Task RunWithNullIVstsRestClientShouldThrowException()
         {
             //Arrange
             var logAnalyticsClientMock = new Mock<ILogAnalyticsClient>();
@@ -117,7 +116,7 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan.Activities
         }
         
         [Fact]
-        public async Task RunWithNullDurableActivityContextShouldThrowException()
+        public async System.Threading.Tasks.Task RunWithNullDurableActivityContextShouldThrowException()
         {
             //Arrange
             var scan = new Mock<IProjectScan<SecurityReport>>(MockBehavior.Strict);

@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -14,7 +13,7 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan.Orchestrations
     public class GetAllProjectTasksTest
     {
         [Fact]
-        public async Task RunWithHasTwoProjectsShouldCallActivityAsyncForEachProject()
+        public async System.Threading.Tasks.Task RunWithHasTwoProjectsShouldCallActivityAsyncForEachProject()
         {
             //Arrange
             var durableOrchestrationContextMock = new Mock<DurableOrchestrationContextBase>();
