@@ -1,15 +1,14 @@
 ﻿using Microsoft.Azure.WebJobs.Host.Config;
 using Microsoft.Azure.WebJobs.Hosting;
-using Microsoft.Extensions.DependencyInjection;
-using SecurePipelineScan.VstsService;
-using System;
-using System.Collections.Generic;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.DependencyInjection;
 using Rules.Reports;
 using SecurePipelineScan.Rules;
 using SecurePipelineScan.Rules.Events;
 using SecurePipelineScan.Rules.Reports;
-using SecurePipelineScan.VstsService.Requests;
+using SecurePipelineScan.VstsService;
+using System;
+using System.Collections.Generic;
 using VstsLogAnalytics.Client;
 using VstsLogAnalytics.Common;
 
