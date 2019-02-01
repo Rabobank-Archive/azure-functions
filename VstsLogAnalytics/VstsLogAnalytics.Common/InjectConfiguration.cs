@@ -36,7 +36,9 @@ namespace VstsLogAnalytics.Common
             services.AddScoped<ILogAnalyticsClient>(_ => new LogAnalyticsClient(workspace, key));
 
             var vstsPat = Environment.GetEnvironmentVariable("vstsPat", EnvironmentVariableTarget.Process);
-            services.AddScoped<IVstsRestClient>(_ => new VstsRestClient("somecompany", vstsPat));
+
+            services.AddSingleton<IVstsRestClient>(_ => new VstsRestRatedClient(new VstsRestClient("somecompany", vstsPat)));
+
             services.AddScoped<IMemoryCache>(_ => new MemoryCache(new MemoryCacheOptions()));
             services.AddTransient<IProjectScan<SecurityReport>, SecurityReportScan>();
             services.AddTransient<IServiceHookScan<ReleaseDeploymentCompletedReport>, ReleaseDeploymentScan>();
