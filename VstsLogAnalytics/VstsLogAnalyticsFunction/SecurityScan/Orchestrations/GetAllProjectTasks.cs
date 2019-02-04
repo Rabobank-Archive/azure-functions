@@ -24,13 +24,10 @@ namespace VstsLogAnalyticsFunction.SecurityScan.Orchestrations
             
             var projects = context.GetInput<List<Response.Project>>();
             
-            var newList50Projects = (from project in projects
-                orderby project.Name select project).Take(50);
-
             log.LogInformation($"Creating tasks for every project total amount of projects {projects.Count()}");
             
             var tasks = new List<Task<IEnumerable<SecurityReport>>>();
-            foreach (var project in newList50Projects)
+            foreach (var project in projects)
             {
                 
                 log.LogInformation($"Create securityReport for {project.Name}");
@@ -45,14 +42,6 @@ namespace VstsLogAnalyticsFunction.SecurityScan.Orchestrations
             await Task.WhenAll(tasks);
 
             return tasks.SelectMany(task => task.Result).ToList();
-            
-            
-//            var tasks = projects.Select(x => context.CallActivityAsync<int>(nameof(CreateSecurityReport), x));
-//
-//            var enumerable = tasks.ToList();
-//            await Task.WhenAll(enumerable);
-//
-//            return enumerable.Sum(t => t.Result).ToString();
         }
     }
 }
