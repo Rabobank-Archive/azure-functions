@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
+using Rules.Reports;
 using SecurePipelineScan.VstsService;
 using Response = SecurePipelineScan.VstsService.Response;
 using VstsLogAnalytics.Common;
@@ -14,7 +15,7 @@ namespace VstsLogAnalyticsFunction.SecurityScan.Orchestrations
     
     {
         [FunctionName(nameof(GetAllProjectTasks))]
-        public static async Task<string> Run(
+        public static async Task<List<SecurityReport>> Run(
             [OrchestrationTrigger] DurableOrchestrationContextBase context,
             ILogger log
         )
@@ -22,14 +23,36 @@ namespace VstsLogAnalyticsFunction.SecurityScan.Orchestrations
         {
             
             var projects = context.GetInput<List<Response.Project>>();
-    
+            
+            var newList50Projects = (from project in projects
+                orderby project.Name select project).Take(50);
+
             log.LogInformation($"Creating tasks for every project total amount of projects {projects.Count()}");
-            var tasks = projects.Select(x => context.CallActivityAsync<int>(nameof(CreateSecurityReport), x));
+            
+            var tasks = new List<Task<IEnumerable<SecurityReport>>>();
+            foreach (var project in newList50Projects)
+            {
+                
+                log.LogInformation($"Create securityReport for {project.Name}");
+                
+                tasks.Add(
+                    context.CallActivityAsync<IEnumerable<SecurityReport>>(
+                        nameof(CreateSecurityReport),
+                        project)
+                );
+            }
 
-            var enumerable = tasks.ToList();
-            await Task.WhenAll(enumerable);
+            await Task.WhenAll(tasks);
 
-            return enumerable.Sum(t => t.Result).ToString();
+            return tasks.SelectMany(task => task.Result).ToList();
+            
+            
+//            var tasks = projects.Select(x => context.CallActivityAsync<int>(nameof(CreateSecurityReport), x));
+//
+//            var enumerable = tasks.ToList();
+//            await Task.WhenAll(enumerable);
+//
+//            return enumerable.Sum(t => t.Result).ToString();
         }
     }
 }
