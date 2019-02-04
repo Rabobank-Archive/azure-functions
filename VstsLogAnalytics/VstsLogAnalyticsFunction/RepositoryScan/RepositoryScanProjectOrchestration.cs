@@ -36,6 +36,8 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
             
             foreach (var project in newList50Projects)
             {
+                log.LogInformation($"Call ActivityReport for project {project.Name}");
+
                 tasks.Add(
                     context.CallActivityAsync<IEnumerable<RepositoryReport>>(
                         nameof(RepositoryScanProjectActivity),
