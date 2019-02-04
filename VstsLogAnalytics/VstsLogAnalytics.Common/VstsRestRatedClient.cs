@@ -60,6 +60,11 @@ namespace VstsLogAnalytics.Common
             return vstsRestClient.Post(request);
         }
 
+        public TResponse Put<TResponse>(IVstsRestRequest<TResponse> request, TResponse body) where TResponse : new()
+        {
+            return vstsRestClient.Put(request, body);
+        }
+
         public void Delete(IVstsRestRequest request)
         {
             vstsRestClient.Delete(request);
