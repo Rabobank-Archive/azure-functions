@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Rules.Reports;
 using SecurePipelineScan.VstsService.Response;
 using VstsLogAnalyticsFunction.SecurityScan.Activites;
 using VstsLogAnalyticsFunction.SecurityScan.Orchestrations;
@@ -23,7 +24,7 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan.Orchestrations
             await GetAllProjectTasks.Run(durableOrchestrationContextMock.Object, new Mock<ILogger>().Object);
             
             //Assert
-            durableOrchestrationContextMock.Verify(x => x.CallActivityAsync<int>(nameof(CreateSecurityReport), It.IsAny<Project>()), Times.Exactly(2));
+            durableOrchestrationContextMock.Verify(x => x.CallActivityAsync<IEnumerable<SecurityReport>>(nameof(CreateSecurityReport), It.IsAny<Project>()), Times.Exactly(2));
         }
         
         
