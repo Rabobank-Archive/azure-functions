@@ -7,10 +7,10 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Rules.Reports;
 using SecurePipelineScan.Rules;
+using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Response;
 using VstsLogAnalytics.Client;
 using VstsLogAnalyticsFunction.RepositoryScan;
-using VstsLogAnalyticsFunction.SecurityScan.Activites;
 using Xunit;
 
 namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
@@ -24,30 +24,35 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
             fixture.Customize(new AutoMoqCustomization());
 
             //Arrange
-            var contextMock = new Mock<DurableActivityContextBase>();
-            contextMock
-                       .Setup(x => x.GetInput<Project>())
-                       .Returns(fixture.Create<Project>);
+            var context = new Mock<DurableActivityContextBase>();
+            context
+                .Setup(x => x.GetInput<Project>())
+                .Returns(fixture.Create<Project>);
 
             var scan = new Mock<IProjectScan<IEnumerable<RepositoryReport>>>(MockBehavior.Strict);
             scan
                 .Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<DateTime>()))
                 .Returns(fixture.CreateMany<RepositoryReport>());
 
-            var logAnalyticsClientMock = new Mock<ILogAnalyticsClient>();
-            var durableOrchestrationClient = new Mock<DurableOrchestrationClientBase>();
-            var iLoggerMock = new Mock<ILogger>();
+            var azure = new Mock<IVstsRestClient>();
+            azure.Setup(x => x.Put(It.IsAny<IVstsRestRequest<ExtensionDataReports>>(), It.IsAny<ExtensionDataReports>())).Verifiable();
+
+            var analytics = new Mock<ILogAnalyticsClient>();
+            var logger = new Mock<ILogger>();
 
             //Act
             await  RepositoryScanProjectActivity.Run(
-                contextMock.Object,
-                logAnalyticsClientMock.Object,
+                context.Object,
+                analytics.Object,
                 scan.Object,
-                iLoggerMock.Object);
+                azure.Object,
+                logger.Object);
 
             //Assert
-            logAnalyticsClientMock.Verify(x => 
+            analytics.Verify(x => 
               x.AddCustomLogJsonAsync(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<string>()), Times.AtLeastOnce());
+            
+            azure.Verify();
         }
 
         [Fact]
@@ -56,14 +61,15 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
             //Arrange
             var scan = new Mock<IProjectScan<IEnumerable<RepositoryReport>>>(MockBehavior.Strict);
             var durableActivityContextBaseMock = new Mock<DurableActivityContextBase>();
-            var durableOrchestrationClient = new Mock<DurableOrchestrationClientBase>();
             var iLoggerMock = new Mock<ILogger>();
+            var azure = new Mock<IVstsRestClient>();
 
             //Act + assert
             var ex = await Assert.ThrowsAsync<ArgumentNullException>(async () => await RepositoryScanProjectActivity.Run(
                 durableActivityContextBaseMock.Object,
                 null,
                 scan.Object,
+                azure.Object,
                 iLoggerMock.Object));
         }
 
@@ -73,14 +79,15 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
             //Arrange
             var logAnalyticsClientMock = new Mock<ILogAnalyticsClient>();
             var durableActivityContextBaseMock = new Mock<DurableActivityContextBase>();
-            var durableOrchestrationClient = new Mock<DurableOrchestrationClientBase>();
             var iLoggerMock = new Mock<ILogger>();
+            var azure = new Mock<IVstsRestClient>();
 
             //Act + assert
             var ex = await Assert.ThrowsAsync<ArgumentNullException>(async () => await RepositoryScanProjectActivity.Run(
                 durableActivityContextBaseMock.Object,
                 logAnalyticsClientMock.Object,
                 null,
+                azure.Object,
                 iLoggerMock.Object));
         }
     }

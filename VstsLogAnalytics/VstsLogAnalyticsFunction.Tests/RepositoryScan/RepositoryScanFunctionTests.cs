@@ -20,27 +20,28 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
             fixture.Customize(new AutoMoqCustomization());
 
             //Arrange
-            var orchestrationClientMock = new Mock<DurableOrchestrationClientBase>();
-            var clientMock = new Mock<IVstsRestClient>();
-            clientMock.Setup(x => x.Get(It.IsAny<VstsRestRequest<Multiple<Project>>>()))
-                      .Returns(fixture.Create<Multiple<Project>>);
+            var orchestration = new Mock<DurableOrchestrationClientBase>();
+            var azure = new Mock<IVstsRestClient>();
+            azure
+                .Setup(x => x.Get(It.IsAny<VstsRestRequest<Multiple<Project>>>()))
+                .Returns(fixture.Create<Multiple<Project>>);    
 
-            var logMock = new Mock<ILogger>();
-            var timerInfoMock = CreateTimerInfoMock();
+            var logger = new Mock<ILogger>();
+            var timer = CreateTimerInfoMock();
+            
             //Act
-            await RepositoryScanFunction.Run(timerInfoMock, clientMock.Object, orchestrationClientMock.Object, logMock.Object);
+            await RepositoryScanFunction.Run(timer, azure.Object, orchestration.Object, logger.Object);
 
             //Assert
-            orchestrationClientMock.Verify(x => x.StartNewAsync(nameof(RepositoryScanProjectOrchestration),It.IsAny<Multiple<Project>>()), Times.Once);
+            orchestration.Verify(
+                x => x.StartNewAsync(nameof(RepositoryScanProjectOrchestration), It.IsAny<Multiple<Project>>()), 
+                Times.Once);
         }
 
 
         private static TimerInfo CreateTimerInfoMock()
         {
-            var timerScheduleMock = new Mock<TimerSchedule>();
-            var scheduleStatusMock = new Mock<ScheduleStatus>();
-            var timerInfoMock = new TimerInfo(timerScheduleMock.Object, scheduleStatusMock.Object);
-            return timerInfoMock;
+            return new TimerInfo(new Mock<TimerSchedule>().Object, new Mock<ScheduleStatus>().Object);
         }
     }
 }

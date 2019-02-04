@@ -5,7 +5,8 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Rules.Reports;
 using SecurePipelineScan.Rules;
-using SecurePipelineScan.Rules.Checks;
+using Requests = SecurePipelineScan.VstsService.Requests;
+using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Response;
 using VstsLogAnalytics.Client;
 using VstsLogAnalytics.Common;
@@ -17,15 +18,16 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
         [FunctionName(nameof(RepositoryScanProjectActivity))]
         public static async Task<IEnumerable<RepositoryReport>> Run(
             [ActivityTrigger] DurableActivityContextBase context,
-            [Inject] ILogAnalyticsClient logAnalyticsClient,
+            [Inject] ILogAnalyticsClient analytics,
             [Inject] IProjectScan<IEnumerable<RepositoryReport>> scan,
+            [Inject] IVstsRestClient azure,
             ILogger log)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
-            if (logAnalyticsClient == null) throw new ArgumentNullException(nameof(logAnalyticsClient));
+            if (analytics == null) throw new ArgumentNullException(nameof(analytics));
             if (scan == null) throw new ArgumentNullException(nameof(scan));
 
-            List<RepositoryReport> reports = new List<RepositoryReport>();
+            var reports = new List<RepositoryReport>();
             var aggregateExceptions = new List<Exception>();
 
             var project = context.GetInput<Project>();
@@ -36,7 +38,7 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
                 {
                     try
                     {
-                        await logAnalyticsClient.AddCustomLogJsonAsync("GitRepository", report, "Date");
+                        await analytics.AddCustomLogJsonAsync("GitRepository", report, "Date");
                         log.LogInformation($"Project scanned: {report.Project}");
                         reports.Add(report);
                     }
@@ -45,6 +47,11 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
                         aggregateExceptions.Add(e);
                     }
                 }
+                
+                azure.Put(
+                    Requests.ExtensionManagement.ExtensionData<ExtensionDataReports>("tas", "tas",
+                        "GitRepositories"), new ExtensionDataReports { Reports = projectreports });
+
             }
             catch (Exception e)
             {
