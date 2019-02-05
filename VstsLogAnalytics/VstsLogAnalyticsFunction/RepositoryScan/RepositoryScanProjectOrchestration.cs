@@ -23,18 +23,11 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
         {
             var projects = context.GetInput<Response.Multiple<Response.Project>>();
 
-            var newList50Projects = (from project in projects
-                            orderby project.Name select project).Take(50);
-                                
-                
-
             log.LogInformation($"Creating tasks for every project total amount of projects {projects.Count()}");
 
             var tasks = new List<Task<IEnumerable<RepositoryReport>>>();
             
-            
-            
-            foreach (var project in newList50Projects)
+            foreach (var project in projects)
             {
                 log.LogInformation($"Call ActivityReport for project {project.Name}");
 
