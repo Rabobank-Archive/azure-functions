@@ -39,7 +39,7 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
                     try
                     {
                         await analytics.AddCustomLogJsonAsync("GitRepository", report, "Date");
-                        log.LogInformation($"Project scanned: {report.Project}");
+                        log.LogInformation($"Project: {report.Project}, repo: {report.Repository}");
                         reports.Add(report);
                     }
                     catch (Exception e)
@@ -50,7 +50,7 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
                 
                 azure.Put(
                     Requests.ExtensionManagement.ExtensionData<ExtensionDataReports>("tas", "tas",
-                        "GitRepositories"), new ExtensionDataReports { Reports = projectreports });
+                        "GitRepositories"), new ExtensionDataReports { Reports = projectreports, Id = project.Name });
 
             }
             catch (Exception e)
