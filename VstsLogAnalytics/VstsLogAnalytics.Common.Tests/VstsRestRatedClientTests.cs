@@ -21,6 +21,7 @@ namespace VstsLogAnalytics.Common.Tests
             var result = sut.Get(requestMock.Object);
 
             result.ShouldBe(6);
+            sut.QueueCount.ShouldBe(1);
         }
 
         [Fact]
@@ -36,6 +37,21 @@ namespace VstsLogAnalytics.Common.Tests
             var result = sut.Post(requestMock.Object);
 
             result.ShouldBe(6);
+            sut.QueueCount.ShouldBe(1);
+        }
+
+        [Fact]
+        public void Delete()
+        {
+            var clientMock = new Mock<IVstsRestClient>();
+            var requestMock = new Mock<IVstsRestRequest>();
+
+            clientMock.Setup(x => x.Delete(requestMock.Object));
+
+            var sut = new VstsRestRatedClient(clientMock.Object);
+
+            sut.Delete(requestMock.Object);
+            sut.QueueCount.ShouldBe(1);
         }
 
         [Fact]
@@ -53,6 +69,7 @@ namespace VstsLogAnalytics.Common.Tests
                 var result = sut.Get(requestMock.Object);
                 result.ShouldBe(6);
             }
+            sut.QueueCount.ShouldBe(1);
         }
     }
 }

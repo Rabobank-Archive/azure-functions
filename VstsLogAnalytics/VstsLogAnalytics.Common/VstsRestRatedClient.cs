@@ -1,6 +1,6 @@
 ﻿using SecurePipelineScan.VstsService;
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Threading;
 
 namespace VstsLogAnalytics.Common
@@ -9,9 +9,11 @@ namespace VstsLogAnalytics.Common
     {
         private readonly IVstsRestClient vstsRestClient;
         private TimeSpan Window { get; set; } = TimeSpan.FromSeconds(60);
-        private readonly int threshold = 3000;
+        private readonly int threshold = 300;
 
-        private Queue<DateTime> queue = new Queue<DateTime>();
+        private ConcurrentQueue<DateTime> queue = new ConcurrentQueue<DateTime>();
+
+        public int QueueCount => queue.Count;
 
         public VstsRestRatedClient(IVstsRestClient vstsRestClient)
         {
@@ -49,14 +51,20 @@ namespace VstsLogAnalytics.Common
         /// </summary>
         private void DequeueNotInWindow()
         {
-            while (queue.Count > 0 && queue.Peek() < DateTime.UtcNow.Subtract(Window))
+            while (queue.Count > 0 && queue.TryPeek(out var result) &&
+                result < DateTime.UtcNow.Subtract(Window))
             {
-                queue.Dequeue();
+                queue.TryDequeue(out var dequeuedItem);
             }
         }
 
         public TResponse Post<TResponse>(IVstsPostRequest<TResponse> request) where TResponse : new()
         {
+            CheckForQueueStatus();
+
+            var item = DateTime.UtcNow;
+            queue.Enqueue(item);
+
             return vstsRestClient.Post(request);
         }
 
@@ -67,6 +75,11 @@ namespace VstsLogAnalytics.Common
 
         public void Delete(IVstsRestRequest request)
         {
+            CheckForQueueStatus();
+
+            var item = DateTime.UtcNow;
+            queue.Enqueue(item);
+
             vstsRestClient.Delete(request);
         }
     }
