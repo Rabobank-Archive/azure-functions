@@ -6,6 +6,6 @@ namespace VstsLogAnalyticsFunction
 {
     public class ExtensionDataReports : ExtensionData
     {
-        public IEnumerable<RepositoryReport> Reports { get; set; }
+        public IList<RepositoryReport> Reports { get; set; }
     }
 }
