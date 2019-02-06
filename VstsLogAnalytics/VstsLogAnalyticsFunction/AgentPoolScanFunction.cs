@@ -2,6 +2,7 @@
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using SecurePipelineScan.VstsService;
+using SecurePipelineScan.VstsService.Response;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -78,18 +79,7 @@ namespace VstsLogAnalyticsFunction
 
                     if (assignedTask == "Offline")
                     {
-                        //re-image agent
-                        var rgPrefix = observedPools.FirstOrDefault(op => op.PoolName == pool.Name);
-                        var agentNameSplitted = agent.Name.Split('-');
-
-                        if (rgPrefix == null || agentNameSplitted.Length != 7)
-                        {
-                            throw new Exception($"Agent with illegal name detected. cannot re-image: {agent.Name}");
-                        }
-
-                        var agentRegion = agentNameSplitted[3];
-                        var agentVmId = agentNameSplitted[6];
-
+                        var agentInfo = GetAgentInfoFromName(agent, pool, observedPools);
 
                         var azureServiceTokenProvider2 = new AzureServiceTokenProvider();
                         string accessToken = await azureServiceTokenProvider2.GetAccessTokenAsync("https://management.azure.com/").ConfigureAwait(false);
@@ -97,14 +87,29 @@ namespace VstsLogAnalyticsFunction
                         HttpClient azureClient = new HttpClient();
                         azureClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-                        var reimageResult = await azureClient.PostAsync($"https://management.azure.com/subscriptions/f13f81f8-7578-4ca8-83f3-0a845fad3cb5/resourceGroups/{rgPrefix}{agentRegion}/providers/Microsoft.Compute/virtualMachineScaleSets/agents/virtualmachines/{int.Parse(agentVmId)}/reimage?api-version=2018-06-01",new StringContent(""));
-                        //var reimageResult = await azureClient.PostAsync($"https://management.azure.com/subscriptions/4562d10c-8487-4fcf-8bdf-5d9d729f5775/resourceGroups/vmss-test/providers/Microsoft.Compute/virtualMachineScaleSets/agents/virtualmachines/0/reimage?api-version=2018-06-01", new StringContent(""));
+                        var reimageResult = await azureClient.PostAsync($"https://management.azure.com/subscriptions/f13f81f8-7578-4ca8-83f3-0a845fad3cb5/resourceGroups/{agentInfo.ResourceGroup}/providers/Microsoft.Compute/virtualMachineScaleSets/agents/virtualmachines/{agentInfo.InstanceId}/reimage?api-version=2018-06-01",new StringContent(""));
                     }
                 }
             }
 
             log.LogInformation("Done retrieving poolstatus information. Send to log analytics");
             await logAnalyticsClient.AddCustomLogJsonAsync("AgentStatus", list, "Date");
+        }
+
+        public static AgentInformation GetAgentInfoFromName(AgentStatus agent, AgentPoolInfo pool, IEnumerable<AgentPoolInformation> observedPools)
+        {
+            //re-image agent
+            var rgPrefix = observedPools.FirstOrDefault(op => op.PoolName == pool.Name);
+            var agentNameSplitted = agent.Name.Split('-');
+
+            if (rgPrefix == null || agentNameSplitted.Length != 8)
+            {
+                throw new Exception($"Agent with illegal name detected. cannot re-image: {agent.Name}");
+            }
+
+            return new AgentInformation($"{rgPrefix.ResourceGroupPrefix}{agentNameSplitted[3]}", int.Parse(agentNameSplitted[6]));
+
+
         }
     }
 }
