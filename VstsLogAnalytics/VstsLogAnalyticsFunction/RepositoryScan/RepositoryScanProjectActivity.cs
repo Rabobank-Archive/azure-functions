@@ -10,6 +10,7 @@ using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Response;
 using VstsLogAnalytics.Client;
 using VstsLogAnalytics.Common;
+using System.Linq;
 
 namespace VstsLogAnalyticsFunction.RepositoryScan
 {
@@ -33,7 +34,7 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
             var project = context.GetInput<Project>();
             try
             {
-                var projectreports = scan.Execute(project.Name,DateTime.Now);
+                var projectreports = scan.Execute(project.Name, DateTime.Now).ToList();
                 foreach (var report in projectreports)
                 {
                     try
