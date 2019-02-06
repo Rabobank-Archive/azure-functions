@@ -15,7 +15,7 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
     {
         [FunctionName(nameof(RepositoryScanFunction))]
         public static async System.Threading.Tasks.Task Run(
-            [TimerTrigger("0 */30 * * * *", RunOnStartup = true)] TimerInfo timerInfo,
+            [TimerTrigger("0 */30 * * * *")] TimerInfo timerInfo,
             [Inject] IVstsRestClient client,
             [OrchestrationClient] DurableOrchestrationClientBase orchestrationClientBase,
             ILogger log)
