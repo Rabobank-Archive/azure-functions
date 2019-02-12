@@ -36,14 +36,14 @@ namespace VstsLogAnalyticsFunction
                     SecurePipelineScan.VstsService.Requests.ExtensionManagement.ExtensionData<ReleaseReports>("tas", "tas",
             "Releases",report.Project));
 
-            var releases = new List<ReleaseDeploymentCompletedReport>();
-            releases.Add(report);
+            var releases = new List<ReleaseDeploymentCompletedReport>{ report };
 
             if (releaseReports != null && releaseReports.Reports != null)
             {
                 releases.AddRange(releaseReports.Reports.Take(49));
             }
 
+            log.LogInformation($"Add release information to Azure DevOps Compliancy logging: {report.Project}");
             azDoClient.Put(
                 SecurePipelineScan.VstsService.Requests.ExtensionManagement.ExtensionData<ReleaseReports>("tas", "tas",
                     "Releases"), new ReleaseReports { Reports = releases, Id = report.Project });
