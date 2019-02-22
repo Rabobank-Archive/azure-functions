@@ -3,7 +3,7 @@ using System.Linq;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Rules.Reports;
+using SecurePipelineScan.Rules.Reports;
 using SecurePipelineScan.VstsService.Response;
 using VstsLogAnalyticsFunction.SecurityScan.Activites;
 using VstsLogAnalyticsFunction.SecurityScan.Orchestrations;

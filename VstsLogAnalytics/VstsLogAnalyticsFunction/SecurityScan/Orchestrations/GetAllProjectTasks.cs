@@ -3,10 +3,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
-using Rules.Reports;
-using SecurePipelineScan.VstsService;
+using SecurePipelineScan.Rules.Reports;
 using Response = SecurePipelineScan.VstsService.Response;
-using VstsLogAnalytics.Common;
 using VstsLogAnalyticsFunction.SecurityScan.Activites;
 
 namespace VstsLogAnalyticsFunction.SecurityScan.Orchestrations

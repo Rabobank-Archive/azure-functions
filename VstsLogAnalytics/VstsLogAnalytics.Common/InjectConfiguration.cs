@@ -2,7 +2,6 @@
 using Microsoft.Azure.WebJobs.Hosting;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
-using Rules.Reports;
 using SecurePipelineScan.Rules;
 using SecurePipelineScan.Rules.Events;
 using SecurePipelineScan.Rules.Reports;

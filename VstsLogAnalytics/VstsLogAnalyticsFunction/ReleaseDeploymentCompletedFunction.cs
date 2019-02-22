@@ -33,7 +33,7 @@ namespace VstsLogAnalyticsFunction
             var report = scan.Completed(JObject.Parse(releaseCompleted));
 
             var releaseReports = azDoClient.Get(
-                    SecurePipelineScan.VstsService.Requests.ExtensionManagement.ExtensionData<ReleaseReports>("tas", "tas",
+                    SecurePipelineScan.VstsService.Requests.ExtensionManagement.ExtensionData<ExtensionDataReports<ReleaseDeploymentCompletedReport>>("tas", "tas",
             "Releases",report.Project));
 
             var releases = new List<ReleaseDeploymentCompletedReport>{ report };
@@ -45,8 +45,8 @@ namespace VstsLogAnalyticsFunction
 
             log.LogInformation($"Add release information to Azure DevOps Compliancy logging: {report.Project}");
             azDoClient.Put(
-                SecurePipelineScan.VstsService.Requests.ExtensionManagement.ExtensionData<ReleaseReports>("tas", "tas",
-                    "Releases"), new ReleaseReports { Reports = releases, Id = report.Project });
+                SecurePipelineScan.VstsService.Requests.ExtensionManagement.ExtensionData<ExtensionDataReports<ReleaseDeploymentCompletedReport>>("tas", "tas",
+                    "Releases"), new ExtensionDataReports<ReleaseDeploymentCompletedReport> { Reports = releases, Id = report.Project });
 
             log.LogInformation("Done retrieving deployment information. Send to log analytics");
             await logAnalyticsClient.AddCustomLogJsonAsync("DeploymentStatus", report, "Date");

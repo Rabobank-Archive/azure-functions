@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
-using Rules.Reports;
 using SecurePipelineScan.Rules;
 using Requests = SecurePipelineScan.VstsService.Requests;
 using SecurePipelineScan.VstsService;
@@ -11,6 +10,7 @@ using SecurePipelineScan.VstsService.Response;
 using VstsLogAnalytics.Client;
 using VstsLogAnalytics.Common;
 using System.Linq;
+using SecurePipelineScan.Rules.Reports;
 
 namespace VstsLogAnalyticsFunction.RepositoryScan
 {
@@ -50,8 +50,8 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
                 }
                 
                 azure.Put(
-                    Requests.ExtensionManagement.ExtensionData<ExtensionDataReports>("tas", "tas",
-                        "GitRepositories"), new ExtensionDataReports { Reports = projectreports, Id = project.Name });
+                    Requests.ExtensionManagement.ExtensionData<ExtensionDataReports<RepositoryReport>>("tas", "tas",
+                        "GitRepositories"), new ExtensionDataReports<RepositoryReport> { Reports = projectreports, Id = project.Name });
 
             }
             catch (Exception e)

@@ -5,13 +5,14 @@ using AutoFixture.AutoMoq;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Rules.Reports;
 using SecurePipelineScan.Rules;
+using SecurePipelineScan.Rules.Reports;
 using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Response;
 using VstsLogAnalytics.Client;
 using VstsLogAnalyticsFunction.RepositoryScan;
 using Xunit;
+using Report = VstsLogAnalyticsFunction.ExtensionDataReports<SecurePipelineScan.Rules.Reports.RepositoryReport>;
 
 namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
 {
@@ -35,7 +36,11 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
                 .Returns(fixture.CreateMany<RepositoryReport>());
 
             var azure = new Mock<IVstsRestClient>();
-            azure.Setup(x => x.Put(It.IsAny<IVstsRestRequest<ExtensionDataReports>>(), It.IsAny<ExtensionDataReports>())).Verifiable();
+            azure.Setup(
+                x => x.Put(
+                    It.IsAny<IVstsRestRequest<Report>>(), 
+                    It.IsAny<Report>()))
+                .Verifiable();
 
             var analytics = new Mock<ILogAnalyticsClient>();
             var logger = new Mock<ILogger>();
