@@ -23,6 +23,7 @@ namespace VstsLogAnalyticsFunction
             [Inject]ILogAnalyticsClient logAnalyticsClient,
             [Inject] IVstsRestClient client,
             [Inject] HttpClient azureManagementClient,
+            [Inject] IAadManager aadManager,
             ILogger log)
         {
             if (logAnalyticsClient == null) { throw new ArgumentNullException("Log Analytics Client is not set"); }
@@ -83,7 +84,7 @@ namespace VstsLogAnalyticsFunction
                     {
                         var agentInfo = GetAgentInfoFromName(agent, pool, observedPools);
 
-                        await ReImageAgent(log, agentInfo, azureManagementClient);
+                        await ReImageAgent(log, agentInfo, azureManagementClient, aadManager);
                     }
                 }
             }
@@ -92,10 +93,9 @@ namespace VstsLogAnalyticsFunction
             await logAnalyticsClient.AddCustomLogJsonAsync("AgentStatus", list, "Date");
         }
 
-        public static async System.Threading.Tasks.Task ReImageAgent(ILogger log, AgentInformation agentInfo, HttpClient client)
+        public static async System.Threading.Tasks.Task ReImageAgent(ILogger log, AgentInformation agentInfo, HttpClient client, IAadManager aadManager)
         {
-            var azureServiceTokenProvider2 = new AzureServiceTokenProvider();
-            string accessToken = await azureServiceTokenProvider2.GetAccessTokenAsync("https://management.azure.com/").ConfigureAwait(false);
+            string accessToken = await aadManager.GetAccessTokenAsync().ConfigureAwait(false);
 
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 

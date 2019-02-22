@@ -1,4 +1,5 @@
 ﻿using AutoFixture;
+using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -14,6 +15,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using VstsLogAnalytics.Client;
+using VstsLogAnalytics.Common;
 using Xunit;
 
 namespace VstsLogAnalyticsFunction.Tests
@@ -49,6 +51,7 @@ namespace VstsLogAnalyticsFunction.Tests
                    .Respond(HttpStatusCode.OK);
 
             var logAnalyticsClient = new Mock<ILogAnalyticsClient>();
+            var aadManager = new Mock<IAadManager>();
             var client = new Mock<IVstsRestClient>();
 
             client.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Multiple<AgentPoolInfo>>>()))
@@ -64,6 +67,7 @@ namespace VstsLogAnalyticsFunction.Tests
                 logAnalyticsClient.Object, 
                 client.Object,
                 mockHttp.ToHttpClient(),
+                aadManager.Object,
                 new Mock<ILogger>().Object);
 
             // Assert
@@ -123,8 +127,10 @@ namespace VstsLogAnalyticsFunction.Tests
 
             AgentInformation agentInfo = new AgentInformation("rg", 0);
 
+            var aadManager = new Mock<IAadManager>();
+
             //Act
-            await AgentPoolScanFunction.ReImageAgent(log.Object, agentInfo, mockHttp.ToHttpClient());
+            await AgentPoolScanFunction.ReImageAgent(log.Object, agentInfo, mockHttp.ToHttpClient(), aadManager.Object);
 
             //Assert
 
@@ -151,9 +157,12 @@ namespace VstsLogAnalyticsFunction.Tests
                    .Respond(HttpStatusCode.OK);
 
             AgentInformation agentInfo = new AgentInformation("rg", 0);
-           
+
+
+            var aadManager = new Mock<IAadManager>();
+
             //Act
-            await AgentPoolScanFunction.ReImageAgent(log.Object,agentInfo, mockHttp.ToHttpClient());
+            await AgentPoolScanFunction.ReImageAgent(log.Object, agentInfo, mockHttp.ToHttpClient(), aadManager.Object);
 
             //Assert
 

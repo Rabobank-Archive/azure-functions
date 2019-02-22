@@ -1,4 +1,5 @@
-﻿using Microsoft.Azure.WebJobs.Host.Config;
+﻿using Microsoft.Azure.Services.AppAuthentication;
+using Microsoft.Azure.WebJobs.Host.Config;
 using Microsoft.Azure.WebJobs.Hosting;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
@@ -39,6 +40,7 @@ namespace VstsLogAnalytics.Common
 
             services.AddSingleton<IVstsRestClient>(_ => new VstsRestClient("somecompany", vstsPat));
             services.AddSingleton<HttpClient>(_ => new HttpClient());
+            services.AddSingleton<IAadManager>(_ => new AadManager());
 
             services.AddScoped<IMemoryCache>(_ => new MemoryCache(new MemoryCacheOptions()));
             services.AddTransient<IProjectScan<SecurityReport>, SecurityReportScan>();
