@@ -8,13 +8,7 @@ namespace VstsLogAnalytics.Common
 {
     public class AadManager : IAadManager
     {
-        readonly AzureServiceTokenProvider tokenProvider;
-
-        public AadManager()
-        {
-            tokenProvider = new AzureServiceTokenProvider();
-
-        }
+        readonly AzureServiceTokenProvider tokenProvider = new AzureServiceTokenProvider();
 
         public async Task<string> GetAccessTokenAsync()
         {

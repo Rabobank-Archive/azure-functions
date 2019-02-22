@@ -109,6 +109,11 @@ namespace VstsLogAnalyticsFunction
 
             log.LogInformation($"Re-image agent: {agentInfo.ResourceGroup} - {agentInfo.InstanceId}");
             var reimageResult = await client.PostAsync($"https://management.azure.com/subscriptions/f13f81f8-7578-4ca8-83f3-0a845fad3cb5/resourceGroups/{agentInfo.ResourceGroup}/providers/Microsoft.Compute/virtualMachineScaleSets/agents/virtualmachines/{agentInfo.InstanceId}/reimage?api-version=2018-06-01", new StringContent(""));
+            if (!reimageResult.IsSuccessStatusCode)
+            {
+                throw new Exception($"Error Re-imaging agent: {agentInfo.ResourceGroup} - {agentInfo.InstanceId}");
+            }
+
         }
 
         public static AgentInformation GetAgentInfoFromName(AgentStatus agent, AgentPoolInfo pool, IEnumerable<AgentPoolInformation> observedPools)
