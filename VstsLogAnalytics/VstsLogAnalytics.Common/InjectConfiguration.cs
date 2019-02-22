@@ -40,7 +40,7 @@ namespace VstsLogAnalytics.Common
 
             services.AddSingleton<IVstsRestClient>(_ => new VstsRestClient("somecompany", vstsPat));
             services.AddSingleton<HttpClient>(_ => new HttpClient());
-            services.AddSingleton<IAadManager>(_ => new AadManager());
+            services.AddSingleton<IAzureServiceTokenProviderWrapper>(_ => new AzureServiceTokenProviderWrapper());
 
             services.AddScoped<IMemoryCache>(_ => new MemoryCache(new MemoryCacheOptions()));
             services.AddTransient<IProjectScan<SecurityReport>, SecurityReportScan>();

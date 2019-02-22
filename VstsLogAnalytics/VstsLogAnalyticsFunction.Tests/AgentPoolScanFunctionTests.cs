@@ -51,7 +51,7 @@ namespace VstsLogAnalyticsFunction.Tests
                    .Respond(HttpStatusCode.OK);
 
             var logAnalyticsClient = new Mock<ILogAnalyticsClient>();
-            var aadManager = new Mock<IAadManager>();
+            var aadManager = new Mock<IAzureServiceTokenProviderWrapper>();
             var client = new Mock<IVstsRestClient>();
 
             client.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Multiple<AgentPoolInfo>>>()))
@@ -127,7 +127,7 @@ namespace VstsLogAnalyticsFunction.Tests
 
             AgentInformation agentInfo = new AgentInformation("rg", 0);
 
-            var aadManager = new Mock<IAadManager>();
+            var aadManager = new Mock<IAzureServiceTokenProviderWrapper>();
 
             //Act
             await AgentPoolScanFunction.ReImageAgent(log.Object, agentInfo, mockHttp.ToHttpClient(), aadManager.Object);
@@ -159,7 +159,7 @@ namespace VstsLogAnalyticsFunction.Tests
             AgentInformation agentInfo = new AgentInformation("rg", 0);
 
 
-            var aadManager = new Mock<IAadManager>();
+            var aadManager = new Mock<IAzureServiceTokenProviderWrapper>();
 
             //Act
             await AgentPoolScanFunction.ReImageAgent(log.Object, agentInfo, mockHttp.ToHttpClient(), aadManager.Object);

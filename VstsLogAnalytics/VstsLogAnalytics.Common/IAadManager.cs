@@ -2,7 +2,7 @@
 
 namespace VstsLogAnalytics.Common
 {
-    public interface IAadManager
+    public interface IAzureServiceTokenProviderWrapper
     {
         Task<string> GetAccessTokenAsync();
     }

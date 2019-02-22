@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace VstsLogAnalytics.Common
 {
-    public class AadManager : IAadManager
+    public class AzureServiceTokenProviderWrapper : IAzureServiceTokenProviderWrapper
     {
         readonly AzureServiceTokenProvider tokenProvider = new AzureServiceTokenProvider();
 
