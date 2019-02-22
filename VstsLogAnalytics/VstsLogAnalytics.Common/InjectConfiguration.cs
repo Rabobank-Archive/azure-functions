@@ -1,4 +1,5 @@
-﻿using Microsoft.Azure.WebJobs.Host.Config;
+﻿using Microsoft.Azure.Services.AppAuthentication;
+using Microsoft.Azure.WebJobs.Host.Config;
 using Microsoft.Azure.WebJobs.Hosting;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,6 +9,7 @@ using SecurePipelineScan.Rules.Reports;
 using SecurePipelineScan.VstsService;
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using VstsLogAnalytics.Client;
 using VstsLogAnalytics.Common;
 
@@ -32,11 +34,13 @@ namespace VstsLogAnalytics.Common
         {
             var workspace = Environment.GetEnvironmentVariable("logAnalyticsWorkspace", EnvironmentVariableTarget.Process);
             var key = Environment.GetEnvironmentVariable("logAnalyticsKey", EnvironmentVariableTarget.Process);
-            services.AddScoped<ILogAnalyticsClient>(_ => new LogAnalyticsClient(workspace, key));
+            services.AddSingleton<ILogAnalyticsClient>(_ => new LogAnalyticsClient(workspace, key));
 
             var vstsPat = Environment.GetEnvironmentVariable("vstsPat", EnvironmentVariableTarget.Process);
 
             services.AddSingleton<IVstsRestClient>(_ => new VstsRestClient("somecompany", vstsPat));
+            services.AddSingleton<HttpClient>();
+            services.AddSingleton<IAzureServiceTokenProviderWrapper,AzureServiceTokenProviderWrapper>();
 
             services.AddScoped<IMemoryCache>(_ => new MemoryCache(new MemoryCacheOptions()));
             services.AddTransient<IProjectScan<SecurityReport>, SecurityReportScan>();
