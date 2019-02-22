@@ -81,20 +81,25 @@ namespace VstsLogAnalyticsFunction
                     {
                         var agentInfo = GetAgentInfoFromName(agent, pool, observedPools);
 
-                        var azureServiceTokenProvider2 = new AzureServiceTokenProvider();
-                        string accessToken = await azureServiceTokenProvider2.GetAccessTokenAsync("https://management.azure.com/").ConfigureAwait(false);
-
-                        HttpClient azureClient = new HttpClient();
-                        azureClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-                        log.LogInformation($"Re-image agent: {agentInfo.ResourceGroup} - {agentInfo.InstanceId}");
-                        var reimageResult = await azureClient.PostAsync($"https://management.azure.com/subscriptions/f13f81f8-7578-4ca8-83f3-0a845fad3cb5/resourceGroups/{agentInfo.ResourceGroup}/providers/Microsoft.Compute/virtualMachineScaleSets/agents/virtualmachines/{agentInfo.InstanceId}/reimage?api-version=2018-06-01",new StringContent(""));
+                        await ReImageAgent(log, agentInfo);
                     }
                 }
             }
 
             log.LogInformation("Done retrieving poolstatus information. Send to log analytics");
             await logAnalyticsClient.AddCustomLogJsonAsync("AgentStatus", list, "Date");
+        }
+
+        public static async System.Threading.Tasks.Task ReImageAgent(ILogger log, AgentInformation agentInfo)
+        {
+            var azureServiceTokenProvider2 = new AzureServiceTokenProvider();
+            string accessToken = await azureServiceTokenProvider2.GetAccessTokenAsync("https://management.azure.com/").ConfigureAwait(false);
+
+            HttpClient azureClient = new HttpClient();
+            azureClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+            log.LogInformation($"Re-image agent: {agentInfo.ResourceGroup} - {agentInfo.InstanceId}");
+            var reimageResult = await azureClient.PostAsync($"https://management.azure.com/subscriptions/f13f81f8-7578-4ca8-83f3-0a845fad3cb5/resourceGroups/{agentInfo.ResourceGroup}/providers/Microsoft.Compute/virtualMachineScaleSets/agents/virtualmachines/{agentInfo.InstanceId}/reimage?api-version=2018-06-01", new StringContent(""));
         }
 
         public static AgentInformation GetAgentInfoFromName(AgentStatus agent, AgentPoolInfo pool, IEnumerable<AgentPoolInformation> observedPools)
