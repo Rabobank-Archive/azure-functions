@@ -1,12 +1,9 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
-using Rules.Reports;
 using SecurePipelineScan.Rules;
-using SecurePipelineScan.Rules.Checks;
-using SecurePipelineScan.VstsService.Requests;
+using SecurePipelineScan.Rules.Reports;
 using VstsLogAnalytics.Client;
 using VstsLogAnalytics.Common;
 using Project = SecurePipelineScan.VstsService.Response.Project;

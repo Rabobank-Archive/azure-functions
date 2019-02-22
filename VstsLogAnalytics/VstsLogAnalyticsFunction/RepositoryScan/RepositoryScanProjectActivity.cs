@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
-using Rules.Reports;
 using SecurePipelineScan.Rules;
 using Requests = SecurePipelineScan.VstsService.Requests;
 using SecurePipelineScan.VstsService;
@@ -11,6 +10,7 @@ using SecurePipelineScan.VstsService.Response;
 using VstsLogAnalytics.Client;
 using VstsLogAnalytics.Common;
 using System.Linq;
+using SecurePipelineScan.Rules.Reports;
 
 namespace VstsLogAnalyticsFunction.RepositoryScan
 {

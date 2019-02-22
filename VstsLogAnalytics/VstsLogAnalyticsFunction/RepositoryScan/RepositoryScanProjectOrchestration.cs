@@ -1,16 +1,12 @@
-﻿﻿using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Net.Sockets;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
-using Rules.Reports;
-using SecurePipelineScan.VstsService;
+using SecurePipelineScan.Rules.Reports;
 using Response = SecurePipelineScan.VstsService.Response;
-using VstsLogAnalytics.Common;
-using VstsLogAnalyticsFunction.SecurityScan.Activites;
 
-namespace VstsLogAnalyticsFunction.RepositoryScan
+ namespace VstsLogAnalyticsFunction.RepositoryScan
 {
     public static class RepositoryScanProjectOrchestration
     {

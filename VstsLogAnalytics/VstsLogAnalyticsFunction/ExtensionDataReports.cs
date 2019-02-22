@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Rules.Reports;
 using SecurePipelineScan.VstsService.Response;
 
 namespace VstsLogAnalyticsFunction
