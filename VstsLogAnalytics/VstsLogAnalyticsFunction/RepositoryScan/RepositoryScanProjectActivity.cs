@@ -50,8 +50,8 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
                 }
                 
                 azure.Put(
-                    Requests.ExtensionManagement.ExtensionData<ExtensionDataReports>("tas", "tas",
-                        "GitRepositories"), new ExtensionDataReports { Reports = projectreports, Id = project.Name });
+                    Requests.ExtensionManagement.ExtensionData<ExtensionDataReports<RepositoryReport>>("tas", "tas",
+                        "GitRepositories"), new ExtensionDataReports<RepositoryReport> { Reports = projectreports, Id = project.Name });
 
             }
             catch (Exception e)

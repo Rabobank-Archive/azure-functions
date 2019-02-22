@@ -1,16 +1,15 @@
 using System;
 using System.IO;
-using System.Runtime.InteropServices;
 using AutoFixture;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Newtonsoft.Json.Linq;
-using SecurePipelineScan.Rules;
 using SecurePipelineScan.Rules.Events;
 using SecurePipelineScan.Rules.Reports;
 using SecurePipelineScan.VstsService;
 using VstsLogAnalytics.Client;
 using Xunit;
+using Report = VstsLogAnalyticsFunction.ExtensionDataReports<SecurePipelineScan.Rules.Reports.BuildScanReport>;
 
 namespace VstsLogAnalyticsFunction.Tests
 {
@@ -33,11 +32,14 @@ namespace VstsLogAnalyticsFunction.Tests
 
             var azuredo = new Mock<IVstsRestClient>();
             azuredo
-                .Setup(x => x.Get(It.IsAny<IVstsRestRequest<BuildReports>>()))
-                .Returns(_fixture.Create<BuildReports>());
+                .Setup(x => x.Get(It.IsAny<IVstsRestRequest<Report>>()))
+                .Returns(_fixture.Create<Report>());
             
             azuredo
-                .Setup(x => x.Put(It.IsAny<IVstsRestRequest<BuildReports>>(), It.Is<BuildReports>(r => r.Reports.Count == 4)))
+                .Setup(
+                    x => x.Put(
+                        It.IsAny<IVstsRestRequest<Report>>(), 
+                        It.Is<Report>(r => r.Reports.Count == 4)))
                 .Verifiable();
             
             BuildCompleted.Run(
@@ -63,11 +65,13 @@ namespace VstsLogAnalyticsFunction.Tests
 
             var azuredo = new Mock<IVstsRestClient>();
             azuredo
-                .Setup(x => x.Get(It.IsAny<IVstsRestRequest<BuildReports>>()))
-                .Returns(_fixture.Create<BuildReports>());
+                .Setup(x => x.Get(It.IsAny<IVstsRestRequest<Report>>()))
+                .Returns(_fixture.Create<Report>());
             
             azuredo
-                .Setup(x => x.Put(It.IsAny<IVstsRestRequest<BuildReports>>(), It.Is<BuildReports>(r => r.Reports.Count == 50)))
+                .Setup(x => x.Put(
+                    It.IsAny<IVstsRestRequest<Report>>(),
+                    It.Is<Report>(r => r.Reports.Count == 50)))
                 .Verifiable();
             
             BuildCompleted.Run(
@@ -90,7 +94,9 @@ namespace VstsLogAnalyticsFunction.Tests
 
             var azuredo = new Mock<IVstsRestClient>();            
             azuredo
-                .Setup(x => x.Put(It.IsAny<IVstsRestRequest<BuildReports>>(), It.IsAny<BuildReports>()))
+                .Setup(x => x.Put(
+                    It.IsAny<IVstsRestRequest<Report>>(),
+                    It.IsAny<Report>()))
                 .Verifiable();
             
             BuildCompleted.Run(

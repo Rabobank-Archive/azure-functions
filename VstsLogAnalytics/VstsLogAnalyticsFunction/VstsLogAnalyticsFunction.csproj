@@ -29,6 +29,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="ExtensionManagementData" />
     <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>

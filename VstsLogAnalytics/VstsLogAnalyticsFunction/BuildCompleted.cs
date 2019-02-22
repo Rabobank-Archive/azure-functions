@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
@@ -9,6 +8,7 @@ using SecurePipelineScan.Rules.Reports;
 using SecurePipelineScan.VstsService;
 using VstsLogAnalytics.Client;
 using VstsLogAnalytics.Common;
+using Requests = SecurePipelineScan.VstsService.Requests;
 
 namespace VstsLogAnalyticsFunction
 {
@@ -36,7 +36,7 @@ namespace VstsLogAnalyticsFunction
         private static void UpdateExtensionData(IVstsRestClient azuredo, BuildScanReport report)
         {
             var reports = azuredo.Get(
-                SecurePipelineScan.VstsService.Requests.ExtensionManagement.ExtensionData<BuildReports>(
+                Requests.ExtensionManagement.ExtensionData<ExtensionDataReports<BuildScanReport>>(
                     "tas", 
                     "tas",
                     "BuildReports", 
@@ -44,7 +44,7 @@ namespace VstsLogAnalyticsFunction
 
             if (reports == null)
             {
-                reports = new BuildReports {Id = report.Project, Reports = new[] {report}};
+                reports = new ExtensionDataReports<BuildScanReport>() {Id = report.Project, Reports = new[] {report}};
             }
             else
             {
@@ -53,7 +53,7 @@ namespace VstsLogAnalyticsFunction
             }
                         
             azuredo.Put(
-                SecurePipelineScan.VstsService.Requests.ExtensionManagement.ExtensionData<BuildReports>("tas", "tas",
+                Requests.ExtensionManagement.ExtensionData<ExtensionDataReports<BuildScanReport>>("tas", "tas",
                     "BuildReports", report.Project), reports);
         }
     }
