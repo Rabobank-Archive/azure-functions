@@ -1,6 +1,7 @@
 ﻿using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Response;
 using System;
@@ -21,6 +22,7 @@ namespace VstsLogAnalyticsFunction
             [TimerTrigger("0 */5 * * * *", RunOnStartup =true)] TimerInfo timerInfo,
             [Inject]ILogAnalyticsClient logAnalyticsClient,
             [Inject] IVstsRestClient client,
+            [Inject] HttpClient azureManagementClient,
             ILogger log)
         {
             if (logAnalyticsClient == null) { throw new ArgumentNullException("Log Analytics Client is not set"); }
@@ -81,7 +83,7 @@ namespace VstsLogAnalyticsFunction
                     {
                         var agentInfo = GetAgentInfoFromName(agent, pool, observedPools);
 
-                        await ReImageAgent(log, agentInfo);
+                        await ReImageAgent(log, agentInfo, azureManagementClient);
                     }
                 }
             }
@@ -90,16 +92,23 @@ namespace VstsLogAnalyticsFunction
             await logAnalyticsClient.AddCustomLogJsonAsync("AgentStatus", list, "Date");
         }
 
-        public static async System.Threading.Tasks.Task ReImageAgent(ILogger log, AgentInformation agentInfo)
+        public static async System.Threading.Tasks.Task ReImageAgent(ILogger log, AgentInformation agentInfo, HttpClient client)
         {
             var azureServiceTokenProvider2 = new AzureServiceTokenProvider();
             string accessToken = await azureServiceTokenProvider2.GetAccessTokenAsync("https://management.azure.com/").ConfigureAwait(false);
 
-            HttpClient azureClient = new HttpClient();
-            azureClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+            var agentStatusJson = await client.GetStringAsync($"https://management.azure.com/subscriptions/f13f81f8-7578-4ca8-83f3-0a845fad3cb5/resourceGroups/{agentInfo.ResourceGroup}/providers/Microsoft.Compute/virtualMachineScaleSets/agents/virtualmachines/{agentInfo.InstanceId}/instanceView?api-version=2018-06-01");
+            dynamic status = JObject.Parse(agentStatusJson);
+            if (status.statuses[0].code == "ProvisioningState/updating")
+            {
+                log.LogInformation($"Agent already being re-imaged: {agentInfo.ResourceGroup} - {agentInfo.InstanceId}");
+                return;
+            }
 
             log.LogInformation($"Re-image agent: {agentInfo.ResourceGroup} - {agentInfo.InstanceId}");
-            var reimageResult = await azureClient.PostAsync($"https://management.azure.com/subscriptions/f13f81f8-7578-4ca8-83f3-0a845fad3cb5/resourceGroups/{agentInfo.ResourceGroup}/providers/Microsoft.Compute/virtualMachineScaleSets/agents/virtualmachines/{agentInfo.InstanceId}/reimage?api-version=2018-06-01", new StringContent(""));
+            var reimageResult = await client.PostAsync($"https://management.azure.com/subscriptions/f13f81f8-7578-4ca8-83f3-0a845fad3cb5/resourceGroups/{agentInfo.ResourceGroup}/providers/Microsoft.Compute/virtualMachineScaleSets/agents/virtualmachines/{agentInfo.InstanceId}/reimage?api-version=2018-06-01", new StringContent(""));
         }
 
         public static AgentInformation GetAgentInfoFromName(AgentStatus agent, AgentPoolInfo pool, IEnumerable<AgentPoolInformation> observedPools)
