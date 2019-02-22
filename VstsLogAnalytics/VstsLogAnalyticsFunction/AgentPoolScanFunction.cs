@@ -22,39 +22,37 @@ namespace VstsLogAnalyticsFunction
             [TimerTrigger("0 */5 * * * *", RunOnStartup =true)] TimerInfo timerInfo,
             [Inject]ILogAnalyticsClient logAnalyticsClient,
             [Inject] IVstsRestClient client,
-            [Inject] HttpClient azureManagementClient,
-            [Inject] IAzureServiceTokenProviderWrapper aadManager,
+            [Inject] HttpClient http,
+            [Inject] IAzureServiceTokenProviderWrapper tokenProvider,
             ILogger log)
         {
-            if (logAnalyticsClient == null) { throw new ArgumentNullException("Log Analytics Client is not set"); }
-            if (client == null) { throw new ArgumentNullException("VSTS Rest client is not set"); }
+            if (logAnalyticsClient == null) throw new ArgumentNullException(nameof(logAnalyticsClient));
+            if (client == null) throw new ArgumentNullException(nameof(client));
+            if (http == null) throw new ArgumentNullException(nameof(http));
+            if (tokenProvider == null) throw new ArgumentNullException(nameof(tokenProvider));
+            if (log == null) throw new ArgumentNullException(nameof(log));
 
             log.LogInformation("Time trigger function to check Azure DevOps agent status");
-
-            List<AgentPoolInformation> observedPools = new List<AgentPoolInformation>();
-
-
-            observedPools.Add(new AgentPoolInformation() { PoolName = "Rabo-Build-Azure-Linux", ResourceGroupPrefix = "rg-m01-prd-vstslinuxagents-0" });
-            observedPools.Add(new AgentPoolInformation() { PoolName = "Rabo-Build-Azure-Linux-Canary", ResourceGroupPrefix = "rg-m01-prd-vstslinuxcanary-0" });
-            observedPools.Add(new AgentPoolInformation() { PoolName = "Rabo-Build-Azure-Linux-Fallback", ResourceGroupPrefix = "rg-m01-prd-vstslinuxfallback-0" });
-            observedPools.Add(new AgentPoolInformation() { PoolName = "Rabo-Build-Azure-Linux-Preview", ResourceGroupPrefix = "rg-m01-prd-vstslinuxpreview-0" });
-            observedPools.Add(new AgentPoolInformation() { PoolName = "Rabo-Build-Azure-Windows", ResourceGroupPrefix = "rg-m01-prd-vstswinagents-0" });
-            observedPools.Add(new AgentPoolInformation() { PoolName = "Rabo-Build-Azure-Windows-Canary", ResourceGroupPrefix = "rg-m01-prd-vstswincanary-0" });
-            observedPools.Add(new AgentPoolInformation() { PoolName = "Rabo-Build-Azure-Windows-Fallback", ResourceGroupPrefix = "rg-m01-prd-vstswinfallback-0" });
-            observedPools.Add(new AgentPoolInformation() { PoolName = "Rabo-Build-Azure-Windows-Preview", ResourceGroupPrefix = "rg-m01-prd-vstswinpreview-0" });
-
+            var observedPools = new[]
+            {
+                new AgentPoolInformation {PoolName = "Rabo-Build-Azure-Linux", ResourceGroupPrefix = "rg-m01-prd-vstslinuxagents-0"},
+                new AgentPoolInformation {PoolName = "Rabo-Build-Azure-Linux-Canary", ResourceGroupPrefix = "rg-m01-prd-vstslinuxcanary-0"},
+                new AgentPoolInformation {PoolName = "Rabo-Build-Azure-Linux-Fallback", ResourceGroupPrefix = "rg-m01-prd-vstslinuxfallback-0"},
+                new AgentPoolInformation {PoolName = "Rabo-Build-Azure-Linux-Preview", ResourceGroupPrefix = "rg-m01-prd-vstslinuxpreview-0"},
+                new AgentPoolInformation {PoolName = "Rabo-Build-Azure-Windows", ResourceGroupPrefix = "rg-m01-prd-vstswinagents-0"},
+                new AgentPoolInformation {PoolName = "Rabo-Build-Azure-Windows-Canary", ResourceGroupPrefix = "rg-m01-prd-vstswincanary-0"},
+                new AgentPoolInformation {PoolName = "Rabo-Build-Azure-Windows-Fallback", ResourceGroupPrefix = "rg-m01-prd-vstswinfallback-0"},
+                new AgentPoolInformation {PoolName = "Rabo-Build-Azure-Windows-Preview", ResourceGroupPrefix = "rg-m01-prd-vstswinpreview-0"},
+            };
 
             var orgPools = client.Get(Requests.DistributedTask.OrganizationalAgentPools());
-
             var poolsToObserve = orgPools.Value.Where(x => observedPools.Any(p => p.PoolName == x.Name));
-
-            List<LogAnalyticsAgentStatus> list = new List<LogAnalyticsAgentStatus>();
+            var list = new List<LogAnalyticsAgentStatus>();
 
             foreach (var pool in poolsToObserve)
             {
-                var poolStatus = client.Get(Requests.DistributedTask.AgentPoolStatus(pool.Id));
-
-                foreach (var agent in poolStatus.Value)
+                var agents = client.Get(Requests.DistributedTask.AgentPoolStatus(pool.Id));
+                foreach (var agent in agents)
                 {
                     var assignedTask = (agent.Status != "online") ? "Offline" : ((agent.AssignedRequest == null) ? "Idle" : agent.AssignedRequest.PlanType);
                     int statusCode = 0;
@@ -83,8 +81,7 @@ namespace VstsLogAnalyticsFunction
                     if (assignedTask == "Offline")
                     {
                         var agentInfo = GetAgentInfoFromName(agent, pool, observedPools);
-
-                        await ReImageAgent(log, agentInfo, azureManagementClient, aadManager);
+                        await ReImageAgent(log, agentInfo, http, tokenProvider);
                     }
                 }
             }
@@ -93,14 +90,14 @@ namespace VstsLogAnalyticsFunction
             await logAnalyticsClient.AddCustomLogJsonAsync("AgentStatus", list, "Date");
         }
 
-        public static async System.Threading.Tasks.Task ReImageAgent(ILogger log, AgentInformation agentInfo, HttpClient client, IAzureServiceTokenProviderWrapper aadManager)
+        public static async System.Threading.Tasks.Task ReImageAgent(ILogger log, AgentInformation agentInfo, HttpClient client, IAzureServiceTokenProviderWrapper tokenProvider)
         {
-            string accessToken = await aadManager.GetAccessTokenAsync().ConfigureAwait(false);
-
+            var accessToken = await tokenProvider.GetAccessTokenAsync().ConfigureAwait(false);
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
             var agentStatusJson = await client.GetStringAsync($"https://management.azure.com/subscriptions/f13f81f8-7578-4ca8-83f3-0a845fad3cb5/resourceGroups/{agentInfo.ResourceGroup}/providers/Microsoft.Compute/virtualMachineScaleSets/agents/virtualmachines/{agentInfo.InstanceId}/instanceView?api-version=2018-06-01");
             dynamic status = JObject.Parse(agentStatusJson);
+            
             if (status.statuses[0].code == "ProvisioningState/updating")
             {
                 log.LogInformation($"Agent already being re-imaged: {agentInfo.ResourceGroup} - {agentInfo.InstanceId}");
@@ -108,28 +105,25 @@ namespace VstsLogAnalyticsFunction
             }
 
             log.LogInformation($"Re-image agent: {agentInfo.ResourceGroup} - {agentInfo.InstanceId}");
-            var reimageResult = await client.PostAsync($"https://management.azure.com/subscriptions/f13f81f8-7578-4ca8-83f3-0a845fad3cb5/resourceGroups/{agentInfo.ResourceGroup}/providers/Microsoft.Compute/virtualMachineScaleSets/agents/virtualmachines/{agentInfo.InstanceId}/reimage?api-version=2018-06-01", new StringContent(""));
-            if (!reimageResult.IsSuccessStatusCode)
+            var result = await client.PostAsync($"https://management.azure.com/subscriptions/f13f81f8-7578-4ca8-83f3-0a845fad3cb5/resourceGroups/{agentInfo.ResourceGroup}/providers/Microsoft.Compute/virtualMachineScaleSets/agents/virtualmachines/{agentInfo.InstanceId}/reimage?api-version=2018-06-01", new StringContent(""));
+            if (!result.IsSuccessStatusCode)
             {
                 throw new Exception($"Error Re-imaging agent: {agentInfo.ResourceGroup} - {agentInfo.InstanceId}");
             }
-
         }
 
         public static AgentInformation GetAgentInfoFromName(AgentStatus agent, AgentPoolInfo pool, IEnumerable<AgentPoolInformation> observedPools)
         {
             //re-image agent
             var rgPrefix = observedPools.FirstOrDefault(op => op.PoolName == pool.Name);
-            var agentNameSplitted = agent.Name.Split('-');
+            var spit = agent.Name.Split('-');
 
-            if (rgPrefix == null || agentNameSplitted.Length != 8)
+            if (rgPrefix == null || spit.Length != 8)
             {
                 throw new Exception($"Agent with illegal name detected. cannot re-image: {agent.Name}");
             }
 
-            return new AgentInformation($"{rgPrefix.ResourceGroupPrefix}{agentNameSplitted[3]}", int.Parse(agentNameSplitted[6]));
-
-
+            return new AgentInformation($"{rgPrefix.ResourceGroupPrefix}{spit[3]}", int.Parse(spit[6]));
         }
     }
 }
