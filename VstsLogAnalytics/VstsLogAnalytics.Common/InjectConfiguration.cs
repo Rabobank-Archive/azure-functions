@@ -39,8 +39,8 @@ namespace VstsLogAnalytics.Common
             var vstsPat = Environment.GetEnvironmentVariable("vstsPat", EnvironmentVariableTarget.Process);
 
             services.AddSingleton<IVstsRestClient>(_ => new VstsRestClient("somecompany", vstsPat));
-            services.AddSingleton<HttpClient>(_ => new HttpClient());
-            services.AddSingleton<IAzureServiceTokenProviderWrapper>(_ => new AzureServiceTokenProviderWrapper());
+            services.AddSingleton<HttpClient>();
+            services.AddSingleton<IAzureServiceTokenProviderWrapper,AzureServiceTokenProviderWrapper>();
 
             services.AddScoped<IMemoryCache>(_ => new MemoryCache(new MemoryCacheOptions()));
             services.AddTransient<IProjectScan<SecurityReport>, SecurityReportScan>();
