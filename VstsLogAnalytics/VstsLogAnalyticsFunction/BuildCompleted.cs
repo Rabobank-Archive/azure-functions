@@ -19,7 +19,7 @@ namespace VstsLogAnalyticsFunction
             string data,
             [Inject] ILogAnalyticsClient client,
             [Inject] IServiceHookScan<BuildScanReport> scan,
-            IVstsRestClient azuredo,
+            [Inject] IVstsRestClient azuredo,
             ILogger log)
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
