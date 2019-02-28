@@ -6,7 +6,6 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Response;
-using VstsLogAnalyticsFunction.RepositoryScan;
 using Xunit;
 
 namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
@@ -28,9 +27,10 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
 
             var logger = new Mock<ILogger>();
             var timer = CreateTimerInfoMock();
-            
+
             //Act
-            await RepositoryScanFunction.Run(timer, azure.Object, orchestration.Object, logger.Object);
+            RepositoryScanFunction fun = new RepositoryScanFunction(azure.Object);
+            await fun.Run(timer, orchestration.Object, logger.Object);
 
             //Assert
             orchestration.Verify(

@@ -6,7 +6,6 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using SecurePipelineScan.Rules.Reports;
 using SecurePipelineScan.VstsService.Response;
-using VstsLogAnalyticsFunction.RepositoryScan;
 using Xunit;
 
 namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
@@ -24,7 +23,8 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
             durableOrchestrationContextMock.Setup(context => context.GetInput<Multiple<Project>>()).Returns(fixture.Create<Multiple<Project>>());
 
             //Act
-            await RepositoryScanProjectOrchestration.Run(durableOrchestrationContextMock.Object, new Mock<ILogger>().Object);
+            RepositoryScanProjectOrchestration orch = new RepositoryScanProjectOrchestration();
+            await orch.Run(durableOrchestrationContextMock.Object, new Mock<ILogger>().Object);
             
             //Assert
             durableOrchestrationContextMock.Verify(x => x.CallActivityAsync<IEnumerable<RepositoryReport>>(nameof(RepositoryScanProjectActivity), It.IsAny<Project>()),Times.AtLeastOnce());

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Hosting;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using SecurePipelineScan.VstsService;
@@ -15,21 +16,30 @@ using Requests = SecurePipelineScan.VstsService.Requests;
 
 namespace VstsLogAnalyticsFunction
 {
-    public static class AgentPoolScanFunction
+
+    public class AgentPoolScanFunction
     {
+        private readonly ILogAnalyticsClient _logAnalyticsClient;
+        private readonly IVstsRestClient _client;
+        private readonly HttpClient _http;
+        private readonly IAzureServiceTokenProviderWrapper _tokenProvider;
+
+        public AgentPoolScanFunction(ILogAnalyticsClient logAnalyticsClient,
+            IVstsRestClient client,
+            HttpClient http,
+            IAzureServiceTokenProviderWrapper tokenProvider)
+        {
+            _logAnalyticsClient = logAnalyticsClient;
+            _client = client;
+            _http = http;
+            _tokenProvider = tokenProvider;
+        }
+
         [FunctionName(nameof(AgentPoolScanFunction))]
-        public static async System.Threading.Tasks.Task Run(
-            [TimerTrigger("0 */5 * * * *", RunOnStartup =true)] TimerInfo timerInfo,
-            [Inject]ILogAnalyticsClient logAnalyticsClient,
-            [Inject] IVstsRestClient client,
-            [Inject] HttpClient http,
-            [Inject] IAzureServiceTokenProviderWrapper tokenProvider,
+        public async System.Threading.Tasks.Task Run(
+            [TimerTrigger("0 */5 * * * *", RunOnStartup = true)] TimerInfo timerInfo,
             ILogger log)
         {
-            if (logAnalyticsClient == null) throw new ArgumentNullException(nameof(logAnalyticsClient));
-            if (client == null) throw new ArgumentNullException(nameof(client));
-            if (http == null) throw new ArgumentNullException(nameof(http));
-            if (tokenProvider == null) throw new ArgumentNullException(nameof(tokenProvider));
             if (log == null) throw new ArgumentNullException(nameof(log));
 
             log.LogInformation("Time trigger function to check Azure DevOps agent status");
@@ -45,13 +55,13 @@ namespace VstsLogAnalyticsFunction
                 new AgentPoolInformation {PoolName = "Rabo-Build-Azure-Windows-Preview", ResourceGroupPrefix = "rg-m01-prd-vstswinpreview-0"},
             };
 
-            var orgPools = client.Get(Requests.DistributedTask.OrganizationalAgentPools());
+            var orgPools = _client.Get(Requests.DistributedTask.OrganizationalAgentPools());
             var poolsToObserve = orgPools.Value.Where(x => observedPools.Any(p => p.PoolName == x.Name));
             var list = new List<LogAnalyticsAgentStatus>();
 
             foreach (var pool in poolsToObserve)
             {
-                var agents = client.Get(Requests.DistributedTask.AgentPoolStatus(pool.Id));
+                var agents = _client.Get(Requests.DistributedTask.AgentPoolStatus(pool.Id));
                 foreach (var agent in agents)
                 {
                     var assignedTask = (agent.Status != "online") ? "Offline" : ((agent.AssignedRequest == null) ? "Idle" : agent.AssignedRequest.PlanType);
@@ -81,13 +91,13 @@ namespace VstsLogAnalyticsFunction
                     if (assignedTask == "Offline")
                     {
                         var agentInfo = GetAgentInfoFromName(agent, pool, observedPools);
-                        await ReImageAgent(log, agentInfo, http, tokenProvider);
+                        await ReImageAgent(log, agentInfo, _http, _tokenProvider);
                     }
                 }
             }
 
             log.LogInformation("Done retrieving poolstatus information. Send to log analytics");
-            await logAnalyticsClient.AddCustomLogJsonAsync("AgentStatus", list, "Date");
+            await _logAnalyticsClient.AddCustomLogJsonAsync("AgentStatus", list, "Date");
         }
 
         public static async System.Threading.Tasks.Task ReImageAgent(ILogger log, AgentInformation agentInfo, HttpClient client, IAzureServiceTokenProviderWrapper tokenProvider)

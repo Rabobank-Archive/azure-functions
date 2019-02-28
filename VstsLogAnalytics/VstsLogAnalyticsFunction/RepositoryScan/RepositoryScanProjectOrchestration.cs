@@ -6,12 +6,12 @@ using Microsoft.Extensions.Logging;
 using SecurePipelineScan.Rules.Reports;
 using Response = SecurePipelineScan.VstsService.Response;
 
- namespace VstsLogAnalyticsFunction.RepositoryScan
+ namespace VstsLogAnalyticsFunction
 {
-    public static class RepositoryScanProjectOrchestration
+    public class RepositoryScanProjectOrchestration
     {
         [FunctionName(nameof(RepositoryScanProjectOrchestration))]
-        public static async Task<IEnumerable<RepositoryReport>> Run(
+        public async Task<IEnumerable<RepositoryReport>> Run(
             [OrchestrationTrigger] DurableOrchestrationContextBase context,
             ILogger log
         )

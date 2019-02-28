@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using AutoFixture;
 using Microsoft.Extensions.Logging;
@@ -36,17 +35,11 @@ namespace VstsLogAnalyticsFunction.Tests
                 .Returns(_fixture.Create<Report>());
             
             azuredo
-                .Setup(
-                    x => x.Put(
-                        It.IsAny<IVstsRestRequest<Report>>(), 
-                        It.Is<Report>(r => r.Reports.Count == 4)))
+                .Setup(x => x.Put(It.IsAny<IVstsRestRequest<Report>>(), It.Is<Report>(r => r.Reports.Count == 4)))
                 .Verifiable();
-            
-            BuildCompleted.Run(
-                File.ReadAllText(Path.Combine("Assets", "buildcompleted.json")),
-                client.Object,
-                scan.Object,
-                azuredo.Object,
+
+            var function = new BuildCompletedFunction(client.Object, scan.Object, azuredo.Object);
+            function.Run(File.ReadAllText(Path.Combine("Assets", "buildcompleted.json")),
                 new Mock<ILogger>().Object);
             
             client.Verify();
@@ -73,12 +66,9 @@ namespace VstsLogAnalyticsFunction.Tests
                     It.IsAny<IVstsRestRequest<Report>>(),
                     It.Is<Report>(r => r.Reports.Count == 50)))
                 .Verifiable();
-            
-            BuildCompleted.Run(
-                File.ReadAllText(Path.Combine("Assets", "buildcompleted.json")),
-                new Mock<ILogAnalyticsClient>().Object,
-                scan.Object,
-                azuredo.Object,
+
+            var function = new BuildCompletedFunction(new Mock<ILogAnalyticsClient>().Object, scan.Object, azuredo.Object);
+            function.Run(File.ReadAllText(Path.Combine("Assets", "buildcompleted.json")),
                 new Mock<ILogger>().Object);
             
             azuredo.Verify();
@@ -98,37 +88,12 @@ namespace VstsLogAnalyticsFunction.Tests
                     It.IsAny<IVstsRestRequest<Report>>(),
                     It.IsAny<Report>()))
                 .Verifiable();
-            
-            BuildCompleted.Run(
-                File.ReadAllText(Path.Combine("Assets", "buildcompleted.json")),
-                new Mock<ILogAnalyticsClient>().Object,
-                scan.Object,
-                azuredo.Object,
+
+            var function = new BuildCompletedFunction(new Mock<ILogAnalyticsClient>().Object, scan.Object, azuredo.Object);
+            function.Run(File.ReadAllText(Path.Combine("Assets", "buildcompleted.json")),
                 new Mock<ILogger>().Object);
             
             azuredo.Verify();
         }
-
-        [Fact]
-        public void ScanArgumentNull_ThrowsException()
-        {
-            var ex = Assert.Throws<ArgumentNullException>(() => BuildCompleted.Run("", new Mock<ILogAnalyticsClient>().Object, null, null, null));
-            Assert.Contains("scan", ex.Message);
-        }
-        
-        [Fact]
-        public void ClientArgumentNull_ThrowsException()
-        {
-            var ex = Assert.Throws<ArgumentNullException>(() => BuildCompleted.Run("", null, null, null, null));
-            Assert.Contains("client", ex.Message);
-        }
-        
-        [Fact]
-        public void AzureDevOpsArgumentNull_ThrowsException()
-        {
-            var ex = Assert.Throws<ArgumentNullException>(() => BuildCompleted.Run("", new Mock<ILogAnalyticsClient>().Object, new Mock<IServiceHookScan<BuildScanReport>>().Object, null, null));
-            Assert.Contains("azuredo", ex.Message);
-        }
-
     }
 }

@@ -8,31 +8,37 @@ using VstsLogAnalytics.Client;
 using VstsLogAnalytics.Common;
 using Project = SecurePipelineScan.VstsService.Response.Project;
 
-namespace VstsLogAnalyticsFunction.SecurityScan.Activites
+namespace VstsLogAnalyticsFunction
 {
-    public static class CreateSecurityReport
+    public  class SecurityScanProjectActivity
     {
-        [FunctionName(nameof(CreateSecurityReport))]
-        public static async Task Run(
+        private readonly ILogAnalyticsClient _client;
+        private readonly IProjectScan<SecurityReport> _scan;
+
+        public SecurityScanProjectActivity(ILogAnalyticsClient client,
+            IProjectScan<SecurityReport> scan)
+        {
+            _client = client;
+            _scan = scan;
+        }
+
+        [FunctionName(nameof(SecurityScanProjectActivity))]
+        public async Task Run(
             [ActivityTrigger] DurableActivityContextBase context,
-            [Inject] ILogAnalyticsClient logAnalyticsClient,
-            [Inject] IProjectScan<SecurityReport> scan,
             ILogger log)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
-            if (logAnalyticsClient == null) throw new ArgumentNullException(nameof(logAnalyticsClient));
-            if (scan == null) throw new ArgumentNullException(nameof(scan));
 
             var project = context.GetInput<Project>();
             if (project == null) throw new Exception("No Project found in parameter DurableActivityContextBase");
 
             log.LogInformation($"Creating SecurityReport for project {project.Name}");
-            var report = scan.Execute(project.Name, DateTime.Now);
+            var report = _scan.Execute(project.Name, DateTime.Now);
 
             try
             {
                 log.LogInformation($"Writing SecurityReport for project {project.Name} to Azure DevOps");
-                await logAnalyticsClient.AddCustomLogJsonAsync("SecurityScanReport", report, "Date");
+                await _client.AddCustomLogJsonAsync("SecurityScanReport", report, "Date");
             }
             catch (Exception ex)
             {

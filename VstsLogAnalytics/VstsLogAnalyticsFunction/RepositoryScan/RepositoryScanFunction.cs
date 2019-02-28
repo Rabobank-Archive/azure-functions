@@ -5,25 +5,31 @@ using System;
 using VstsLogAnalytics.Common;
 using Requests = SecurePipelineScan.VstsService.Requests;
 
-namespace VstsLogAnalyticsFunction.RepositoryScan
+namespace VstsLogAnalyticsFunction
 {
-    public static class RepositoryScanFunction
+    public class RepositoryScanFunction
     {
+        private readonly IVstsRestClient _azuredo;
+
+        public RepositoryScanFunction(IVstsRestClient azuredo)
+        {
+            _azuredo = azuredo;
+        }
+
+
         [FunctionName(nameof(RepositoryScanFunction))]
-        public static async System.Threading.Tasks.Task Run(
-            [TimerTrigger("0 */30 * * * *")] TimerInfo timerInfo,
-            [Inject] IVstsRestClient client,
+        public async System.Threading.Tasks.Task Run(
+            [TimerTrigger("0 */30 * * * *", RunOnStartup=true)] TimerInfo timerInfo,
             [OrchestrationClient] DurableOrchestrationClientBase orchestrationClientBase,
             ILogger log)
         {
-            if (client == null) { throw new ArgumentNullException(nameof(client)); }
             if (orchestrationClientBase == null) { throw new ArgumentNullException(nameof(orchestrationClientBase)); }
 
             try
             {
                 log.LogInformation($"Repository scan timed check start: {DateTime.Now}");
 
-                var projects = client.Get(Requests.Project.Projects());
+                var projects = _azuredo.Get(Requests.Project.Projects());
                 log.LogInformation($"Projects found: {projects.Count}");
 
 

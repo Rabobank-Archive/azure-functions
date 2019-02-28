@@ -12,21 +12,29 @@ using VstsLogAnalytics.Common;
 using System.Linq;
 using SecurePipelineScan.Rules.Reports;
 
-namespace VstsLogAnalyticsFunction.RepositoryScan
+namespace VstsLogAnalyticsFunction
 {
-    public static class RepositoryScanProjectActivity
+    public class RepositoryScanProjectActivity
     {
+
+        private readonly ILogAnalyticsClient _client;
+        private readonly IProjectScan<IEnumerable<RepositoryReport>> _scan;
+        private readonly IVstsRestClient _azuredo;
+
+        public RepositoryScanProjectActivity(ILogAnalyticsClient client,
+            IProjectScan<IEnumerable<RepositoryReport>> scan,
+            IVstsRestClient azuredo)
+        {
+            _client = client;
+            _scan = scan;
+            _azuredo = azuredo;
+        }
+
         [FunctionName(nameof(RepositoryScanProjectActivity))]
-        public static async Task<IEnumerable<RepositoryReport>> Run(
+        public async Task<IEnumerable<RepositoryReport>> Run(
             [ActivityTrigger] DurableActivityContextBase context,
-            [Inject] ILogAnalyticsClient analytics,
-            [Inject] IProjectScan<IEnumerable<RepositoryReport>> scan,
-            [Inject] IVstsRestClient azure,
             ILogger log)
         {
-            if (context == null) throw new ArgumentNullException(nameof(context));
-            if (analytics == null) throw new ArgumentNullException(nameof(analytics));
-            if (scan == null) throw new ArgumentNullException(nameof(scan));
 
             var reports = new List<RepositoryReport>();
             var aggregateExceptions = new List<Exception>();
@@ -34,12 +42,12 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
             var project = context.GetInput<Project>();
             try
             {
-                var projectreports = scan.Execute(project.Name, DateTime.Now).ToList();
+                var projectreports = _scan.Execute(project.Name, DateTime.Now).ToList();
                 foreach (var report in projectreports)
                 {
                     try
                     {
-                        await analytics.AddCustomLogJsonAsync("GitRepository", report, "Date");
+                        await _client.AddCustomLogJsonAsync("GitRepository", report, "Date");
                         log.LogInformation($"Project: {report.Project}, repo: {report.Repository}");
                         reports.Add(report);
                     }
@@ -48,8 +56,8 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
                         aggregateExceptions.Add(e);
                     }
                 }
-                
-                azure.Put(
+
+                _azuredo.Put(
                     Requests.ExtensionManagement.ExtensionData<ExtensionDataReports<RepositoryReport>>("tas", "tas",
                         "GitRepositories"), new ExtensionDataReports<RepositoryReport> { Reports = projectreports, Id = project.Name });
 

@@ -62,13 +62,8 @@ namespace VstsLogAnalyticsFunction.Tests
 
 
             // Act
-            await AgentPoolScanFunction.Run(
-                new TimerInfo(null, null), 
-                logAnalyticsClient.Object, 
-                client.Object,
-                mockHttp.ToHttpClient(),
-                aadManager.Object,
-                new Mock<ILogger>().Object);
+            var function = new AgentPoolScanFunction(logAnalyticsClient.Object, client.Object, mockHttp.ToHttpClient(), aadManager.Object);
+            await function.Run(new TimerInfo(null, null), new Mock<ILogger>().Object);
 
             // Assert
             client

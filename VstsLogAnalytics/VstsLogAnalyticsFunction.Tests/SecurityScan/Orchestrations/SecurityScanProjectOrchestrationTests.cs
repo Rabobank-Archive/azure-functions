@@ -5,13 +5,11 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using SecurePipelineScan.Rules.Reports;
 using SecurePipelineScan.VstsService.Response;
-using VstsLogAnalyticsFunction.SecurityScan.Activites;
-using VstsLogAnalyticsFunction.SecurityScan.Orchestrations;
 using Xunit;
 
 namespace VstsLogAnalyticsFunction.Tests.SecurityScan.Orchestrations
 {
-    public class GetAllProjectTasksTest
+    public class SecurityScanProjectOrchestrationTests
     {
         [Fact]
         public async System.Threading.Tasks.Task RunWithHasTwoProjectsShouldCallActivityAsyncForEachProject()
@@ -21,10 +19,12 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan.Orchestrations
             durableOrchestrationContextMock.Setup(context => context.GetInput<List<Project>>()).Returns(ProjectsTestHelper.CreateMultipleProjectsResponse().ToList());
 
             //Act
-            await GetAllProjectTasks.Run(durableOrchestrationContextMock.Object, new Mock<ILogger>().Object);
+
+            var fun = new SecurityScanProjectOrchestration();
+            await fun.Run(durableOrchestrationContextMock.Object, new Mock<ILogger>().Object);
             
             //Assert
-            durableOrchestrationContextMock.Verify(x => x.CallActivityAsync<IEnumerable<SecurityReport>>(nameof(CreateSecurityReport), It.IsAny<Project>()), Times.Exactly(2));
+            durableOrchestrationContextMock.Verify(x => x.CallActivityAsync<IEnumerable<SecurityReport>>(nameof(SecurityScanProjectActivity), It.IsAny<Project>()), Times.Exactly(2));
         }
         
         

@@ -1,5 +1,4 @@
-﻿using Microsoft.Azure.Services.AppAuthentication;
-using Microsoft.Azure.WebJobs.Host.Config;
+﻿using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Hosting;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,40 +12,34 @@ using System.Net.Http;
 using VstsLogAnalytics.Client;
 using VstsLogAnalytics.Common;
 
-[assembly: WebJobsStartup(typeof(WebJobsExtensionStartup), "VstsLogAnalyticsFunction")]
+[assembly: WebJobsStartup(typeof(VstsLogAnalyticsFunction.Startup))]
 
-namespace VstsLogAnalytics.Common
+namespace VstsLogAnalyticsFunction
 {
-    public class InjectConfiguration : IExtensionConfigProvider
+    class Startup : IWebJobsStartup
     {
-        public void Initialize(ExtensionConfigContext context)
+        public void Configure(IWebJobsBuilder builder)
         {
-            var services = new ServiceCollection();
-            RegisterServices(services);
-            var serviceProvider = services.BuildServiceProvider(true);
-
-            context
-                .AddBindingRule<InjectAttribute>()
-                .Bind(new InjectBindingProvider(serviceProvider));
+            RegisterServices(builder.Services);
         }
 
         private void RegisterServices(IServiceCollection services)
         {
             var workspace = Environment.GetEnvironmentVariable("logAnalyticsWorkspace", EnvironmentVariableTarget.Process);
             var key = Environment.GetEnvironmentVariable("logAnalyticsKey", EnvironmentVariableTarget.Process);
-            services.AddSingleton<ILogAnalyticsClient>(_ => new LogAnalyticsClient(workspace, key));
+            services.AddSingleton<ILogAnalyticsClient>(new LogAnalyticsClient(workspace, key));
 
             var vstsPat = Environment.GetEnvironmentVariable("vstsPat", EnvironmentVariableTarget.Process);
 
-            services.AddSingleton<IVstsRestClient>(_ => new VstsRestClient("somecompany", vstsPat));
-            services.AddSingleton<HttpClient>();
-            services.AddSingleton<IAzureServiceTokenProviderWrapper,AzureServiceTokenProviderWrapper>();
+            services.AddSingleton<IVstsRestClient>(new VstsRestClient("somecompany", vstsPat));
+            services.AddSingleton<HttpClient>(new HttpClient());
+            services.AddSingleton<IAzureServiceTokenProviderWrapper, AzureServiceTokenProviderWrapper>();
 
             services.AddScoped<IMemoryCache>(_ => new MemoryCache(new MemoryCacheOptions()));
             services.AddTransient<IProjectScan<SecurityReport>, SecurityReportScan>();
             services.AddTransient<IServiceHookScan<ReleaseDeploymentCompletedReport>, ReleaseDeploymentScan>();
             services.AddTransient<IServiceHookScan<BuildScanReport>, BuildScan>();
-            services.AddTransient<IProjectScan<IEnumerable<RepositoryReport>>, RepositoryScan>();
+            services.AddTransient<IProjectScan<IEnumerable<RepositoryReport>>, SecurePipelineScan.Rules.RepositoryScan>();
             services.AddTransient<IServiceEndpointValidator, ServiceEndpointValidator>();
         }
     }

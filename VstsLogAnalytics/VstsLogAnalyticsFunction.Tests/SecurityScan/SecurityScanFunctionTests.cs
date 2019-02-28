@@ -1,17 +1,14 @@
-using System;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Timers;
 using Microsoft.Extensions.Logging;
 using Moq;
 using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Response;
-using VstsLogAnalyticsFunction.SecurityScan;
-using VstsLogAnalyticsFunction.SecurityScan.Orchestrations;
 using Xunit;
 
 namespace VstsLogAnalyticsFunction.Tests.SecurityScan
 {
-    public class SecurityScanStartTest
+    public class SecurityScanFunctionTests
     {
         [Fact]
         public async System.Threading.Tasks.Task RunShouldCallGetProjectsExactlyOnce()
@@ -27,7 +24,8 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan
             clientMock.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Multiple<Project>>>())).Returns(projects);
 
             //Act
-            await SecurityScanStart.Run(timerInfoMock, orchestrationClientMock.Object, clientMock.Object, logMock.Object);
+            SecurityScanFunction fun = new SecurityScanFunction(clientMock.Object);
+            await fun.Run(timerInfoMock, orchestrationClientMock.Object, logMock.Object);
             
             //Assert
             clientMock.Verify(x => x.Get(It.IsAny<IVstsRestRequest<Multiple<Project>>>()), Times.Exactly(1));
@@ -48,10 +46,11 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan
             clientMock.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Multiple<Project>>>())).Returns(projects);
 
             //Act
-            await SecurityScanStart.Run(timerInfoMock, orchestrationClientMock.Object, clientMock.Object, logMock.Object);
+            SecurityScanFunction fun = new SecurityScanFunction(clientMock.Object);
+            await fun.Run(timerInfoMock, orchestrationClientMock.Object, logMock.Object);
             
             //Assert
-            orchestrationClientMock.Verify(x => x.StartNewAsync(nameof(GetAllProjectTasks), It.IsAny<object>()), Times.AtLeastOnce());
+            orchestrationClientMock.Verify(x => x.StartNewAsync(nameof(SecurityScanProjectOrchestration), It.IsAny<object>()), Times.AtLeastOnce());
 
         }
 

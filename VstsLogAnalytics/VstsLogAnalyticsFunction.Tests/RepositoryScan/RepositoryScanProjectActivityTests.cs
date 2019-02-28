@@ -10,7 +10,6 @@ using SecurePipelineScan.Rules.Reports;
 using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Response;
 using VstsLogAnalytics.Client;
-using VstsLogAnalyticsFunction.RepositoryScan;
 using Xunit;
 using Report = VstsLogAnalyticsFunction.ExtensionDataReports<SecurePipelineScan.Rules.Reports.RepositoryReport>;
 
@@ -46,11 +45,8 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
             var logger = new Mock<ILogger>();
 
             //Act
-            await  RepositoryScanProjectActivity.Run(
-                context.Object,
-                analytics.Object,
-                scan.Object,
-                azure.Object,
+            RepositoryScanProjectActivity fun = new RepositoryScanProjectActivity(analytics.Object, scan.Object, azure.Object);
+            await fun.Run(context.Object,
                 logger.Object);
 
             //Assert
@@ -58,42 +54,6 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
               x.AddCustomLogJsonAsync(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<string>()), Times.AtLeastOnce());
             
             azure.Verify();
-        }
-
-        [Fact]
-        public async System.Threading.Tasks.Task RunWithNoLogAnalyticsClientShouldThrowArgumentNullException()
-        {
-            //Arrange
-            var scan = new Mock<IProjectScan<IEnumerable<RepositoryReport>>>(MockBehavior.Strict);
-            var durableActivityContextBaseMock = new Mock<DurableActivityContextBase>();
-            var iLoggerMock = new Mock<ILogger>();
-            var azure = new Mock<IVstsRestClient>();
-
-            //Act + assert
-            var ex = await Assert.ThrowsAsync<ArgumentNullException>(async () => await RepositoryScanProjectActivity.Run(
-                durableActivityContextBaseMock.Object,
-                null,
-                scan.Object,
-                azure.Object,
-                iLoggerMock.Object));
-        }
-
-        [Fact]
-        public async System.Threading.Tasks.Task RunWithNoScannerShouldThrowArgumentNullException()
-        {
-            //Arrange
-            var logAnalyticsClientMock = new Mock<ILogAnalyticsClient>();
-            var durableActivityContextBaseMock = new Mock<DurableActivityContextBase>();
-            var iLoggerMock = new Mock<ILogger>();
-            var azure = new Mock<IVstsRestClient>();
-
-            //Act + assert
-            var ex = await Assert.ThrowsAsync<ArgumentNullException>(async () => await RepositoryScanProjectActivity.Run(
-                durableActivityContextBaseMock.Object,
-                logAnalyticsClientMock.Object,
-                null,
-                azure.Object,
-                iLoggerMock.Object));
         }
     }
        

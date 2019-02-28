@@ -35,11 +35,9 @@ namespace VstsLogAnalyticsFunction.Tests
                 
 
             var json = ReleaseDeploymentCompletedJson();
-            await ReleaseDeploymentCompletedFunction.Run(
+            var fun = new ReleaseDeploymentCompletedFunction(logAnalyticsClient.Object, client.Object, azDoClient.Object);
+            await fun.Run(
                 json, 
-                logAnalyticsClient.Object,
-                client.Object,
-                azDoClient.Object,
                 new Mock<Microsoft.Extensions.Logging.ILogger>().Object
             );
 

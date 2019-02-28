@@ -14,25 +14,34 @@ using System.Linq;
 
 namespace VstsLogAnalyticsFunction
 {
-    public static class ReleaseDeploymentCompletedFunction
+    public class ReleaseDeploymentCompletedFunction
     {
+        private readonly ILogAnalyticsClient _client;
+        private readonly IServiceHookScan<ReleaseDeploymentCompletedReport> _scan;
+        private readonly IVstsRestClient _azuredo;
+
+        public ReleaseDeploymentCompletedFunction(ILogAnalyticsClient client,
+            IServiceHookScan<ReleaseDeploymentCompletedReport> scan,
+            IVstsRestClient azuredo)
+        {
+            _client = client;
+            _scan = scan;
+            _azuredo = azuredo;
+        }
+
+
         [FunctionName(nameof(ReleaseDeploymentCompletedFunction))]
-        public static async System.Threading.Tasks.Task Run(
+        public async System.Threading.Tasks.Task Run(
             [QueueTrigger("releasedeploymentcompleted", Connection = "connectionString")]string releaseCompleted,
-            [Inject] ILogAnalyticsClient logAnalyticsClient,
-            [Inject] IServiceHookScan<ReleaseDeploymentCompletedReport> scan,
-            [Inject] IVstsRestClient azDoClient,
             ILogger log)
         {
-            if (logAnalyticsClient == null) throw new ArgumentNullException(nameof(logAnalyticsClient));
-            if (scan == null) throw new ArgumentNullException(nameof(scan));
 
             log.LogInformation($"Queuetriggered {nameof(ReleaseDeploymentCompletedFunction)} by Azure Storage queue");
             log.LogInformation($"release: {releaseCompleted}");
 
-            var report = scan.Completed(JObject.Parse(releaseCompleted));
+            var report = _scan.Completed(JObject.Parse(releaseCompleted));
 
-            var releaseReports = azDoClient.Get(
+            var releaseReports = _azuredo.Get(
                     SecurePipelineScan.VstsService.Requests.ExtensionManagement.ExtensionData<ExtensionDataReports<ReleaseDeploymentCompletedReport>>("tas", "tas",
             "Releases",report.Project));
 
@@ -44,12 +53,12 @@ namespace VstsLogAnalyticsFunction
             }
 
             log.LogInformation($"Add release information to Azure DevOps Compliancy logging: {report.Project}");
-            azDoClient.Put(
+            _azuredo.Put(
                 SecurePipelineScan.VstsService.Requests.ExtensionManagement.ExtensionData<ExtensionDataReports<ReleaseDeploymentCompletedReport>>("tas", "tas",
                     "Releases"), new ExtensionDataReports<ReleaseDeploymentCompletedReport> { Reports = releases, Id = report.Project });
 
             log.LogInformation("Done retrieving deployment information. Send to log analytics");
-            await logAnalyticsClient.AddCustomLogJsonAsync("DeploymentStatus", report, "Date");
+            await _client.AddCustomLogJsonAsync("DeploymentStatus", report, "Date");
         }
     }
 }
