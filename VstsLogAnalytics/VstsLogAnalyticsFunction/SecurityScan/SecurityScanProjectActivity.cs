@@ -33,12 +33,27 @@ namespace VstsLogAnalyticsFunction
             if (project == null) throw new Exception("No Project found in parameter DurableActivityContextBase");
 
             log.LogInformation($"Creating SecurityReport for project {project.Name}");
-            var report = _scan.Execute(project.Name, DateTime.Now);
+            var dateTimeUtcNow = DateTime.UtcNow;
+            var report = _scan.Execute(project.Name, dateTimeUtcNow);
 
             try
             {
                 log.LogInformation($"Writing SecurityReport for project {project.Name} to Azure DevOps");
                 await _client.AddCustomLogJsonAsync("SecurityScanReport", report, "Date");
+                
+                foreach (var applicationGroupPermissions in report.GlobalPermissions)
+                {
+                    await _client.AddCustomLogJsonAsync(
+                        "SecurityScanReport",
+                        new
+                        {
+                            ApplicationGroupPermissions = applicationGroupPermissions, 
+                            projectName = report.ProjectName,
+                            Date = dateTimeUtcNow
+                        }, 
+                        "Date"
+                        );
+                }
             }
             catch (Exception ex)
             {
