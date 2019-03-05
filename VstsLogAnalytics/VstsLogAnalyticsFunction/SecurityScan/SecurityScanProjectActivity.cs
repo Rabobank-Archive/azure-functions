@@ -48,6 +48,7 @@ namespace VstsLogAnalyticsFunction
                         new
                         {
                             ApplicationGroupPermissions = applicationGroupPermissions, 
+                            isCompliant = applicationGroupPermissions.IsCompliant,
                             projectName = report.ProjectName,
                             Date = dateTimeUtcNow
                         }, 
