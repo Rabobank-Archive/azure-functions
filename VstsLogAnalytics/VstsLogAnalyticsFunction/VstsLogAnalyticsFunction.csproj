@@ -15,6 +15,7 @@
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage" Version="3.0.3" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.25" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.DurableTask" Version="1.7.1" />
+    <PackageReference Include="SecurePipelineScan.Rules" Version="0.0.1.100960" />
     <PackageReference Include="WindowsAzure.Storage" Version="9.3.3" />
   </ItemGroup>
   <ItemGroup>
@@ -43,10 +44,6 @@
   <Target Name="CopyExtensionsJson" AfterTargets="_GenerateFunctionsAndCopyContentFiles">
     <Message Importance="High" Text="Overwritting extensions.json file with one from build." />
 
-    <Copy Condition="$(_IsFunctionsSdkBuild) == 'true' AND Exists('$(_FunctionsExtensionsDir)\extensions.json')"
-          SourceFiles="$(_FunctionsExtensionsDir)\extensions.json"
-          DestinationFiles="$(PublishDir)bin\extensions.json"
-          OverwriteReadOnlyFiles="true"
-          ContinueOnError="true"/>
+    <Copy Condition="$(_IsFunctionsSdkBuild) == 'true' AND Exists('$(_FunctionsExtensionsDir)\extensions.json')" SourceFiles="$(_FunctionsExtensionsDir)\extensions.json" DestinationFiles="$(PublishDir)bin\extensions.json" OverwriteReadOnlyFiles="true" ContinueOnError="true" />
   </Target>
 </Project>

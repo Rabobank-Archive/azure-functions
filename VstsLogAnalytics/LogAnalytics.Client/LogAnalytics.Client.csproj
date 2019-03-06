@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.25" />
+    <PackageReference Include="SecurePipelineScan.Rules" Version="0.0.1.100960" />
   </ItemGroup>
 
 </Project>
