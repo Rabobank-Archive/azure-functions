@@ -29,9 +29,6 @@ namespace VstsLogAnalyticsFunction
             var tasks = new List<Task<IEnumerable<SecurityReport>>>();
             foreach (var project in projects)
             {     
-                
-                    
-                
                 log.LogInformation($"Create securityReport for {project.Name}");
                 
                 tasks.Add(
@@ -41,11 +38,9 @@ namespace VstsLogAnalyticsFunction
                 );
                 
                 await context.CreateTimer(nextCheck, CancellationToken.None);
-                nextCheck.AddSeconds(5.0);
+                nextCheck = nextCheck.AddSeconds(5.0);
             }
-            
-             await Task.WhenAll(tasks);
-
+            await Task.WhenAll(tasks);
             return tasks.SelectMany(task => task.Result).ToList();
         }
     }
