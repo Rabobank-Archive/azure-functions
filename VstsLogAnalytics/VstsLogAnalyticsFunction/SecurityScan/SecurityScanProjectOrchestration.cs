@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
@@ -18,13 +20,17 @@ namespace VstsLogAnalyticsFunction
         )
 
         {
+            var nextCheck = DateTime.UtcNow;
+            
             var projects = context.GetInput<List<Response.Project>>();
             
             log.LogInformation($"Creating tasks for every project total amount of projects {projects.Count()}");
             
             var tasks = new List<Task<IEnumerable<SecurityReport>>>();
             foreach (var project in projects)
-            {
+            {     
+                
+                    
                 
                 log.LogInformation($"Create securityReport for {project.Name}");
                 
@@ -33,9 +39,12 @@ namespace VstsLogAnalyticsFunction
                         nameof(SecurityScanProjectActivity),
                         project)
                 );
+                
+                await context.CreateTimer(nextCheck, CancellationToken.None);
+                nextCheck.AddSeconds(5.0);
             }
-
-            await Task.WhenAll(tasks);
+            
+             await Task.WhenAll(tasks);
 
             return tasks.SelectMany(task => task.Result).ToList();
         }
