@@ -9,7 +9,7 @@ namespace VstsLogAnalytics.Common
     {
         private readonly IVstsRestClient vstsRestClient;
         private TimeSpan Window { get; set; } = TimeSpan.FromSeconds(60);
-        private readonly int threshold = 100;
+        private readonly int threshold = 500;
 
         private ConcurrentQueue<DateTime> queue = new ConcurrentQueue<DateTime>();
 
@@ -42,7 +42,7 @@ namespace VstsLogAnalytics.Common
             while (queue.Count > threshold)
             {
                 DequeueNotInWindow();
-                Thread.Sleep(TimeSpan.FromSeconds(3));
+                Thread.Sleep(TimeSpan.FromSeconds(1));
             }
         }
 
