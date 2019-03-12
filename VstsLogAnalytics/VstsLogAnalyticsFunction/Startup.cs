@@ -31,7 +31,7 @@ namespace VstsLogAnalyticsFunction
 
             var vstsPat = Environment.GetEnvironmentVariable("vstsPat", EnvironmentVariableTarget.Process);
 
-            services.AddSingleton<IVstsRestClient>(_ => new VstsRestRatedClient(new VstsRestClient("somecompany", vstsPat)));
+            services.AddSingleton<IVstsRestClient>(_ => new VstsRestClient("somecompany", vstsPat));
             services.AddSingleton<HttpClient>(new HttpClient());
             services.AddSingleton<IAzureServiceTokenProviderWrapper, AzureServiceTokenProviderWrapper>();
 

@@ -38,7 +38,7 @@ namespace VstsLogAnalyticsFunction
                 );
                 
                 await context.CreateTimer(nextCheck, CancellationToken.None);
-                nextCheck = nextCheck.AddSeconds(5.0);
+                nextCheck = nextCheck.AddSeconds(1.0);
             }
             await Task.WhenAll(tasks);
             return tasks.SelectMany(task => task.Result).ToList();
