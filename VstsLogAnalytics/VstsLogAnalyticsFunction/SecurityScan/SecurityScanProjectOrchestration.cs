@@ -29,7 +29,7 @@ namespace VstsLogAnalyticsFunction
             int currentProject = 0;
             int parallelBatchIndex = 0;
             int batch = 1;
-            int maxParallel = 10;
+            int maxParallel = 50;
 
             while (currentProject < numberOfProjects)
             {
