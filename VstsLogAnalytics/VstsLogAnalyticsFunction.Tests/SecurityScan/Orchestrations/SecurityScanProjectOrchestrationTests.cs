@@ -11,12 +11,18 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan.Orchestrations
 {
     public class SecurityScanProjectOrchestrationTests
     {
-        [Fact]
-        public async System.Threading.Tasks.Task RunWithHasTwoProjectsShouldCallActivityAsyncForEachProject()
+      
+        [Theory]
+        [InlineData(2)]
+        [InlineData(9)]
+        [InlineData(10)]
+        [InlineData(11)]
+        
+        public async System.Threading.Tasks.Task RunWithHasTwoProjectsShouldCallActivityAsyncForEachProject(int numberOfProjects)
         {
             //Arrange
             var durableOrchestrationContextMock = new Mock<DurableOrchestrationContextBase>();
-            durableOrchestrationContextMock.Setup(context => context.GetInput<List<Project>>()).Returns(ProjectsTestHelper.CreateMultipleProjectsResponse().ToList());
+            durableOrchestrationContextMock.Setup(context => context.GetInput<List<Project>>()).Returns(ProjectsTestHelper.CreateMultipleProjectsResponse(numberOfProjects).ToList());
 
             //Act
 
@@ -24,9 +30,10 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan.Orchestrations
             await fun.Run(durableOrchestrationContextMock.Object, new Mock<ILogger>().Object);
             
             //Assert
-            durableOrchestrationContextMock.Verify(x => x.CallActivityAsync<IEnumerable<SecurityReport>>(nameof(SecurityScanProjectActivity), It.IsAny<Project>()), Times.Exactly(2));
+            durableOrchestrationContextMock.Verify(x => x.CallActivityAsync<IEnumerable<SecurityReport>>(nameof(SecurityScanProjectActivity), It.IsAny<Project>()),
+                Times.Exactly(numberOfProjects));
         }
-        
+      
         
         
     }

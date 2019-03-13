@@ -19,7 +19,7 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan
             var logMock = new Mock<ILogger>();
             var timerInfoMock = CreateTimerInfoMock();
 
-            var projects = ProjectsTestHelper.CreateMultipleProjectsResponse();
+            var projects = ProjectsTestHelper.CreateMultipleProjectsResponse(1);
             
             clientMock.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Multiple<Project>>>())).Returns(projects);
 
@@ -41,7 +41,7 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan
             var logMock = new Mock<ILogger>();
             var timerInfoMock = CreateTimerInfoMock();
 
-            var projects = ProjectsTestHelper.CreateMultipleProjectsResponse();
+            var projects = ProjectsTestHelper.CreateMultipleProjectsResponse(2);
             
             clientMock.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Multiple<Project>>>())).Returns(projects);
 

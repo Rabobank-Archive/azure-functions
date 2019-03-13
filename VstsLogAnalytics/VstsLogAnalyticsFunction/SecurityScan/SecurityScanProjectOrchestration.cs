@@ -19,28 +19,38 @@ namespace VstsLogAnalyticsFunction
             ILogger log
         )
 
-        {
-            var nextCheck = DateTime.UtcNow;
-            
+        {   
             var projects = context.GetInput<List<Response.Project>>();
+            var numberOfProjects = projects.Count;
             
-            log.LogInformation($"Creating tasks for every project total amount of projects {projects.Count()}");
+            log.LogInformation($"Creating tasks for every project total amount of projects {numberOfProjects}");
             
             var tasks = new List<Task<IEnumerable<SecurityReport>>>();
-            foreach (var project in projects)
-            {     
-                log.LogInformation($"Create securityReport for {project.Name}");
+            int currentProject = 0;
+            int parallelBatchIndex = 0;
+            int batch = 1;
+            int maxParallel = 10;
+
+            while (currentProject < numberOfProjects)
+            {
+                while (currentProject < numberOfProjects && parallelBatchIndex < maxParallel)
+                {
+                    parallelBatchIndex++;
+                    var project = projects[currentProject];
+                    log.LogInformation($"Create securityReport for {project.Name}");
+                    log.LogInformation($"Project nr {currentProject}, batch number {batch}, project {parallelBatchIndex} of {maxParallel}");
                 
-                tasks.Add(
-                    context.CallActivityAsync<IEnumerable<SecurityReport>>(
-                        nameof(SecurityScanProjectActivity),
-                        project)
-                );
-                
-                await context.CreateTimer(nextCheck, CancellationToken.None);
-                nextCheck = nextCheck.AddSeconds(1.0);
+                    tasks.Add(
+                        context.CallActivityAsync<IEnumerable<SecurityReport>>(
+                            nameof(SecurityScanProjectActivity),
+                            project)
+                    );
+                    currentProject++;
+                }
+                parallelBatchIndex = 0;
+                batch++;
+                await Task.WhenAll(tasks);
             }
-            await Task.WhenAll(tasks);
             return tasks.SelectMany(task => task.Result).ToList();
         }
     }
