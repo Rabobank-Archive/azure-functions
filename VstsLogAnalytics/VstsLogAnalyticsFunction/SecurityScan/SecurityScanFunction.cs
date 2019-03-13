@@ -21,7 +21,7 @@ namespace VstsLogAnalyticsFunction
         public async Task Run(
             [TimerTrigger("0 17 3 * * *", RunOnStartup=false)]
             TimerInfo timerInfo,
-            [OrchestrationClient(TaskHub = "SecurityScanFunction")] DurableOrchestrationClientBase orchestrationClientBase,
+            [OrchestrationClient] DurableOrchestrationClientBase orchestrationClientBase,
             ILogger log)
         {
             var projects = _azuredo.Get(Project.Projects()).Value;
