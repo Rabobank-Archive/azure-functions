@@ -9,7 +9,7 @@ namespace VstsLogAnalytics.Common
     {
         private readonly IVstsRestClient vstsRestClient;
         private TimeSpan Window { get; set; } = TimeSpan.FromSeconds(60);
-        private readonly int threshold = 500;
+        private readonly int threshold = 300;
 
         private ConcurrentQueue<DateTime> queue = new ConcurrentQueue<DateTime>();
 
