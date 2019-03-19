@@ -8,8 +8,8 @@ namespace VstsLogAnalytics.Common
     public class VstsRestRatedClient : IVstsRestClient
     {
         private readonly IVstsRestClient vstsRestClient;
-        private TimeSpan Window { get; set; } = TimeSpan.FromSeconds(60);
-        private readonly int threshold = 3000;
+        private TimeSpan Window { get; set; } = TimeSpan.FromSeconds(3600);
+        private readonly int threshold = 3600;
 
         private ConcurrentQueue<DateTime> queue = new ConcurrentQueue<DateTime>();
 
