@@ -4,6 +4,7 @@ using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Flurl.Http;
 using Newtonsoft.Json;
 
 namespace VstsLogAnalytics.Client
@@ -13,14 +14,18 @@ namespace VstsLogAnalytics.Client
     /// </summary>
     public class LogAnalyticsClient : ILogAnalyticsClient
     {
-        private string _workspace;
-        private string _key;
-        private HttpClient _httpClient = new HttpClient();
+        private readonly string _workspace;
+        private readonly string _key;
+        private readonly HttpClient _httpClient;
 
         public LogAnalyticsClient(string workspace, string key)
         {
             _workspace = workspace;
             _key = key;
+            
+//            
+//            _httpClient.DefaultRequestHeaders.Clear();
+//            _httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
         }
 
         public async Task AddCustomLogJsonAsync(string logName, object input, string timefield)
@@ -53,23 +58,17 @@ namespace VstsLogAnalytics.Client
         // Send a request to the POST API endpoint
         private async Task PostData(string logname, string signature, string date, string json, string timefield)
         {
-            string url = "https://" + _workspace + ".ods.opinsights.azure.com/api/logs?api-version=2016-04-01";
+            var url = "https://" + _workspace + ".ods.opinsights.azure.com/api/logs?api-version=2016-04-01";
 
-            var client = _httpClient;
+            var content = new StringContent(json, Encoding.UTF8);
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-            client.DefaultRequestHeaders.Clear();
-            client.DefaultRequestHeaders.Add("Accept", "application/json");
-            client.DefaultRequestHeaders.Add("Log-Type", logname);
-            client.DefaultRequestHeaders.Add("Authorization", signature);
-            client.DefaultRequestHeaders.Add("x-ms-date", date);
-            client.DefaultRequestHeaders.Add("time-generated-field", timefield);
-
-            var httpContent = new StringContent(json, Encoding.UTF8);
-            httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-            var response = await client.PostAsync(new Uri(url), httpContent);
-
-            var responseContent = response.Content;
-            await responseContent.ReadAsStringAsync();
+            await url
+                .WithHeader("Authorization", signature)
+                .WithHeader("Log-Type", logname)
+                .WithHeader("x-ms-date", date)
+                .WithHeader("time-generated-field", timefield)
+                .PostAsync(content);
         }
     }
 }
