@@ -16,7 +16,7 @@ using VstsLogAnalytics.Common;
 
 namespace VstsLogAnalyticsFunction
 {
-    class Startup : IWebJobsStartup
+    internal class Startup : IWebJobsStartup
     {
         public void Configure(IWebJobsBuilder builder)
         {
@@ -39,8 +39,19 @@ namespace VstsLogAnalyticsFunction
             services.AddTransient<IProjectScan<SecurityReport>, SecurityReportScan>();
             services.AddTransient<IServiceHookScan<ReleaseDeploymentCompletedReport>, ReleaseDeploymentScan>();
             services.AddTransient<IServiceHookScan<BuildScanReport>, BuildScan>();
-            services.AddTransient<IProjectScan<IEnumerable<RepositoryReport>>, SecurePipelineScan.Rules.RepositoryScan>();
+            services.AddTransient<IProjectScan<IEnumerable<RepositoryReport>>, RepositoryScan>();
             services.AddTransient<IServiceEndpointValidator, ServiceEndpointValidator>();
+
+            var extensionName = Environment.GetEnvironmentVariable("extensionName", EnvironmentVariableTarget.Process) ?? "tastest";
+            var organisation = Environment.GetEnvironmentVariable("organisation", EnvironmentVariableTarget.Process) ?? "somecompany-test";
+
+            var config = new AzureDevOpsConfig
+            {
+                ExtensionName = extensionName,
+                Organisation = organisation,
+            };
+
+            services.AddSingleton<IAzureDevOpsConfig>(config);
         }
     }
 }
