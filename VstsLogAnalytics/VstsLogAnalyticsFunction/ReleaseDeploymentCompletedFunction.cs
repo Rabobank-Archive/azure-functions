@@ -49,6 +49,13 @@ namespace VstsLogAnalyticsFunction
 
             if (releaseReports != null && releaseReports.Reports != null)
             {
+                foreach (var release in releaseReports.Reports)
+                {
+                    if (release.CreatedDate < new DateTime(2019, 4, 3))
+                    {
+                        release.UsesManagedAgentsOnly = null;
+                    }
+                }
                 releases.AddRange(releaseReports.Reports.Take(49));
             }
 
