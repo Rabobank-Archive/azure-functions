@@ -15,7 +15,7 @@
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage" Version="3.0.3" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.25" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.DurableTask" Version="1.7.1" />
-    <PackageReference Include="SecurePipelineScan.Rules" Version="0.0.1.118777">
+    <PackageReference Include="SecurePipelineScan.Rules" Version="0.0.1.119625">
       <IncludeAssets>all</IncludeAssets>
     </PackageReference>
     <PackageReference Include="WindowsAzure.Storage" Version="9.3.3" />
