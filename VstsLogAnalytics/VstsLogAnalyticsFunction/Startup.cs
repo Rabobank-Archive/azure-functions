@@ -25,13 +25,16 @@ namespace VstsLogAnalyticsFunction
 
         private void RegisterServices(IServiceCollection services)
         {
-            var workspace = Environment.GetEnvironmentVariable("logAnalyticsWorkspace", EnvironmentVariableTarget.Process);
+            var workspace =
+                Environment.GetEnvironmentVariable("logAnalyticsWorkspace", EnvironmentVariableTarget.Process);
             var key = Environment.GetEnvironmentVariable("logAnalyticsKey", EnvironmentVariableTarget.Process);
             services.AddSingleton<ILogAnalyticsClient>(new LogAnalyticsClient(workspace, key));
 
             var vstsPat = Environment.GetEnvironmentVariable("vstsPat", EnvironmentVariableTarget.Process);
+            var organization = Environment.GetEnvironmentVariable("organization", EnvironmentVariableTarget.Process);
 
-            services.AddSingleton<IVstsRestClient>(new VstsRestClient("somecompany", vstsPat));
+            services.AddSingleton<IVstsRestClient>(new VstsRestClient(organization, vstsPat));
+
             services.AddSingleton<HttpClient>(new HttpClient());
             services.AddSingleton<IAzureServiceTokenProviderWrapper, AzureServiceTokenProviderWrapper>();
 
