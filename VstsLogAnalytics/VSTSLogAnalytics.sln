@@ -16,9 +16,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VstsLogAnalyticsFunction.Te
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VstsLogAnalytics.Common", "VstsLogAnalytics.Common\VstsLogAnalytics.Common.csproj", "{CB13A477-0AAB-4B97-8557-692B8E308D94}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VstsLogAnalytics.Common.Tests", "VstsLogAnalytics.Common.Tests\VstsLogAnalytics.Common.Tests.csproj", "{15D7091A-55B6-47B2-AFAD-389B2EAEF568}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VstsLogAnalytics.Common.Tests", "VstsLogAnalytics.Common.Tests\VstsLogAnalytics.Common.Tests.csproj", "{15D7091A-55B6-47B2-AFAD-389B2EAEF568}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LogAnalytics.Client.Tests", "LogAnalytics.Client.Tests\LogAnalytics.Client.Tests.csproj", "{B2422B37-BDD1-4B4B-B090-9E6EFB6FFAF0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LogAnalytics.Client.Tests", "LogAnalytics.Client.Tests\LogAnalytics.Client.Tests.csproj", "{B2422B37-BDD1-4B4B-B090-9E6EFB6FFAF0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
