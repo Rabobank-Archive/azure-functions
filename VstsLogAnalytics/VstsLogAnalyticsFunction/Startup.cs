@@ -9,6 +9,7 @@ using SecurePipelineScan.VstsService;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using SecurePipelineScan.Rules.Security;
 using VstsLogAnalytics.Client;
 using VstsLogAnalytics.Common;
 
@@ -31,7 +32,7 @@ namespace VstsLogAnalyticsFunction
             services.AddSingleton<ILogAnalyticsClient>(new LogAnalyticsClient(workspace, key));
 
             var vstsPat = Environment.GetEnvironmentVariable("vstsPat", EnvironmentVariableTarget.Process);
-            var organization = Environment.GetEnvironmentVariable("organization", EnvironmentVariableTarget.Process);
+            var organization = Environment.GetEnvironmentVariable("organization", EnvironmentVariableTarget.Process) ?? "somecompany-test";
 
             services.AddSingleton<IVstsRestClient>(new VstsRestClient(organization, vstsPat));
 
@@ -39,22 +40,21 @@ namespace VstsLogAnalyticsFunction
             services.AddSingleton<IAzureServiceTokenProviderWrapper, AzureServiceTokenProviderWrapper>();
 
             services.AddScoped<IMemoryCache>(_ => new MemoryCache(new MemoryCacheOptions()));
-            services.AddTransient<IProjectScan<SecurityReport>, SecurityReportScan>();
             services.AddTransient<IServiceHookScan<ReleaseDeploymentCompletedReport>, ReleaseDeploymentScan>();
             services.AddTransient<IServiceHookScan<BuildScanReport>, BuildScan>();
             services.AddTransient<IProjectScan<IEnumerable<RepositoryReport>>, RepositoryScan>();
             services.AddTransient<IServiceEndpointValidator, ServiceEndpointValidator>();
 
             var extensionName = Environment.GetEnvironmentVariable("extensionName", EnvironmentVariableTarget.Process) ?? "tastest";
-            var organisation = Environment.GetEnvironmentVariable("organisation", EnvironmentVariableTarget.Process) ?? "somecompany-test";
 
             var config = new AzureDevOpsConfig
             {
                 ExtensionName = extensionName,
-                Organisation = organisation,
+                Organisation = organization,
             };
 
             services.AddSingleton<IAzureDevOpsConfig>(config);
+            services.AddSingleton<IRuleSets, RuleSets>();
         }
     }
 }

@@ -1,23 +1,22 @@
-
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Requests;
 
-namespace VstsLogAnalyticsFunction
+namespace VstsLogAnalyticsFunction.GlobalPermissionsScan
 {
-    public class SecurityScanFunction
+    public class GlobalPermissionsScanFunction
     {
 
         private readonly IVstsRestClient _azuredo;
 
-        public SecurityScanFunction(IVstsRestClient azuredo)
+        public GlobalPermissionsScanFunction(IVstsRestClient azuredo)
         {
             _azuredo = azuredo;
         }
 
-        [FunctionName(nameof(SecurityScanFunction))]
+        [FunctionName(nameof(GlobalPermissionsScanFunction))]
         public async Task Run(
             [TimerTrigger("0 17 3 * * *", RunOnStartup=false)]
             TimerInfo timerInfo,
@@ -26,7 +25,7 @@ namespace VstsLogAnalyticsFunction
         {
             var projects = _azuredo.Get(Project.Projects()).Value;
 
-            var instanceId = await orchestrationClientBase.StartNewAsync(nameof(SecurityScanProjectOrchestration), projects);
+            var instanceId = await orchestrationClientBase.StartNewAsync(nameof(GlobalPermissionsScanProjectOrchestration), projects);
             log.LogInformation($"Started orchestration with ID = '{instanceId}'.");
         }
     }

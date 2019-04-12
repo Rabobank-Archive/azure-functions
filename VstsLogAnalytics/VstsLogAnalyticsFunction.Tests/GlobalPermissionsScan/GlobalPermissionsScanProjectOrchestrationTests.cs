@@ -3,13 +3,13 @@ using System.Linq;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Moq;
-using SecurePipelineScan.Rules.Reports;
 using SecurePipelineScan.VstsService.Response;
+using VstsLogAnalyticsFunction.GlobalPermissionsScan;
 using Xunit;
 
-namespace VstsLogAnalyticsFunction.Tests.SecurityScan.Orchestrations
+namespace VstsLogAnalyticsFunction.Tests.GlobalPermissionsScan
 {
-    public class SecurityScanProjectOrchestrationTests
+    public class GlobalPermissionsScanProjectOrchestrationTests
     {
       
         [Theory]
@@ -26,11 +26,11 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan.Orchestrations
 
             //Act
 
-            var fun = new SecurityScanProjectOrchestration();
+            var fun = new GlobalPermissionsScanProjectOrchestration();
             await fun.Run(durableOrchestrationContextMock.Object, new Mock<ILogger>().Object);
             
             //Assert
-            durableOrchestrationContextMock.Verify(x => x.CallActivityAsync<IEnumerable<SecurityReport>>(nameof(SecurityScanProjectActivity), It.IsAny<Project>()),
+            durableOrchestrationContextMock.Verify(x => x.CallActivityAsync(nameof(GlobalPermissionsScanProjectActivity), It.IsAny<Project>()),
                 Times.Exactly(numberOfProjects));
         }
       

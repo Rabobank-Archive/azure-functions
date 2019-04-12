@@ -1,17 +1,19 @@
+using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Timers;
 using Microsoft.Extensions.Logging;
 using Moq;
 using SecurePipelineScan.VstsService;
-using SecurePipelineScan.VstsService.Response;
+using VstsLogAnalyticsFunction.GlobalPermissionsScan;
+using Response = SecurePipelineScan.VstsService.Response;
 using Xunit;
 
-namespace VstsLogAnalyticsFunction.Tests.SecurityScan
+namespace VstsLogAnalyticsFunction.Tests.GlobalPermissionsScan
 {
     public class SecurityScanFunctionTests
     {
         [Fact]
-        public async System.Threading.Tasks.Task RunShouldCallGetProjectsExactlyOnce()
+        public async Task RunShouldCallGetProjectsExactlyOnce()
         {
             //Arrange
             var orchestrationClientMock = new Mock<DurableOrchestrationClientBase>();
@@ -21,19 +23,19 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan
 
             var projects = ProjectsTestHelper.CreateMultipleProjectsResponse(1);
             
-            clientMock.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Multiple<Project>>>())).Returns(projects);
+            clientMock.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Response.Multiple<Response.Project>>>())).Returns(projects);
 
             //Act
-            SecurityScanFunction fun = new SecurityScanFunction(clientMock.Object);
+            GlobalPermissionsScanFunction fun = new GlobalPermissionsScanFunction(clientMock.Object);
             await fun.Run(timerInfoMock, orchestrationClientMock.Object, logMock.Object);
             
             //Assert
-            clientMock.Verify(x => x.Get(It.IsAny<IVstsRestRequest<Multiple<Project>>>()), Times.Exactly(1));
+            clientMock.Verify(x => x.Get(It.IsAny<IVstsRestRequest<Response.Multiple<Response.Project>>>()), Times.Exactly(1));
 
         }
 
         [Fact]
-        public async System.Threading.Tasks.Task RunShouldCallOrchestrationFunctionExactlyOnce()
+        public async Task RunShouldCallOrchestrationFunctionExactlyOnce()
         {
             //Arrange       
             var orchestrationClientMock = new Mock<DurableOrchestrationClientBase>();
@@ -43,14 +45,14 @@ namespace VstsLogAnalyticsFunction.Tests.SecurityScan
 
             var projects = ProjectsTestHelper.CreateMultipleProjectsResponse(2);
             
-            clientMock.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Multiple<Project>>>())).Returns(projects);
+            clientMock.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Response.Multiple<Response.Project>>>())).Returns(projects);
 
             //Act
-            SecurityScanFunction fun = new SecurityScanFunction(clientMock.Object);
+            GlobalPermissionsScanFunction fun = new GlobalPermissionsScanFunction(clientMock.Object);
             await fun.Run(timerInfoMock, orchestrationClientMock.Object, logMock.Object);
             
             //Assert
-            orchestrationClientMock.Verify(x => x.StartNewAsync(nameof(SecurityScanProjectOrchestration), It.IsAny<object>()), Times.AtLeastOnce());
+            orchestrationClientMock.Verify(x => x.StartNewAsync(nameof(GlobalPermissionsScanProjectOrchestration), It.IsAny<object>()), Times.AtLeastOnce());
 
         }
 
