@@ -81,11 +81,10 @@ namespace VstsLogAnalyticsFunction.GlobalPermissionsScan
                 var extensionData = new GlobalPermissionsExtensionData
                 {
                     Id = project.Name,
-                    Etag = -1,
-                    EvaluatedDate = dateTimeUtcNow,
-                    EvaluatedRules = evaluatedRules.Select(r => new EvaluatedRule
+                    Date = dateTimeUtcNow,
+                    Reports = evaluatedRules.Select(r => new EvaluatedRule
                     {
-                        rule = r.description,
+                        description = r.description,
                         status = r.status
                     }).ToList()
                 };

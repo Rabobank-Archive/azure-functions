@@ -5,6 +5,7 @@ namespace VstsLogAnalyticsFunction
 {
     public class ExtensionDataReports<TReport> : ExtensionData
     {
+        
         public IList<TReport> Reports { get; set; }
     }
 }
