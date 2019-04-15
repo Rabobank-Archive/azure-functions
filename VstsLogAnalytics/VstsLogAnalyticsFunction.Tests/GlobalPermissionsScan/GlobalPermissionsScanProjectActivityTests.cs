@@ -8,11 +8,9 @@ using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
 using VstsLogAnalytics.Client;
 using Xunit;
-using Response = SecurePipelineScan.VstsService.Response;
 using Project = SecurePipelineScan.VstsService.Response.Project;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
-using SecurePipelineScan.VstsService.Requests;
 using VstsLogAnalyticsFunction.GlobalPermissionsScan;
 using VstsLogAnalyticsFunction.Model;
 
@@ -42,8 +40,8 @@ namespace VstsLogAnalyticsFunction.Tests.GlobalPermissionsScan
 
             var durableActivityContextBaseMock = new Mock<DurableActivityContextBase>();
             durableActivityContextBaseMock
-                .Setup(x => x.GetInput<Response.Project>())
-                .Returns(fixture.Create<Response.Project>());
+                .Setup(x => x.GetInput<Project>())
+                .Returns(fixture.Create<Project>());
 
             var durableOrchestrationClient = new Mock<DurableOrchestrationClientBase>();
             durableOrchestrationClient
@@ -121,8 +119,8 @@ namespace VstsLogAnalyticsFunction.Tests.GlobalPermissionsScan
                     It.IsAny<GlobalPermissionsExtensionData>()));
 
             var rule = new Mock<IProjectRule>();
-            var ruleSets = new Mock<IRuleSets>();
-            ruleSets
+            var rulesProvider = new Mock<IRulesProvider>();
+            rulesProvider
                 .Setup(x => x.GlobalPermissions(It.IsAny<IVstsRestClient>()))
                 .Returns(new[] { rule.Object });
 
