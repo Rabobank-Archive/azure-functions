@@ -8,9 +8,9 @@ namespace VstsLogAnalyticsFunction
 {
     public class StatusFunction
     {
-        private readonly IAzureDevOpsConfig config;
+        private readonly IEnvironmentConfig config;
 
-        public StatusFunction(IAzureDevOpsConfig config)
+        public StatusFunction(IEnvironmentConfig config)
         {
             this.config = config;
         }

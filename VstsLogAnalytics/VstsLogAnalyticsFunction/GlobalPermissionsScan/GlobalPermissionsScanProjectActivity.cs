@@ -16,12 +16,12 @@ namespace VstsLogAnalyticsFunction.GlobalPermissionsScan
     {
         private readonly ILogAnalyticsClient _client;
         private readonly IVstsRestClient _azuredo;
-        private readonly IAzureDevOpsConfig _azuredoConfig;
+        private readonly IEnvironmentConfig _azuredoConfig;
         private readonly IRuleSets _ruleSets;
 
         public GlobalPermissionsScanProjectActivity(ILogAnalyticsClient client,
             IVstsRestClient azuredo,
-            IAzureDevOpsConfig azuredoConfig,
+            IEnvironmentConfig azuredoConfig,
             IRuleSets ruleSets)
         {
             _client = client;
@@ -84,8 +84,9 @@ namespace VstsLogAnalyticsFunction.GlobalPermissionsScan
                     Date = dateTimeUtcNow,
                     Reports = evaluatedRules.Select(r => new EvaluatedRule
                     {
-                        description = r.description,
-                        status = r.status
+                        Description = r.description,
+                        Status = r.status,
+                        ReconcileUrl = $"https://{_azuredoConfig.FunctionAppHostname}/{_azuredoConfig.Organisation}/{project.Name}/globalpermissions/{r.rule}"
                     }).ToList()
                 };
                 _azuredo.Put(ExtensionManagement.ExtensionData<GlobalPermissionsExtensionData>("tas",
