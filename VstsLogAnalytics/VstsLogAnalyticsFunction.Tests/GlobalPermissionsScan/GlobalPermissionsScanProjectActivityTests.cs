@@ -136,7 +136,7 @@ namespace VstsLogAnalyticsFunction.Tests.GlobalPermissionsScan
             clientMock
                 .Verify(x => x.Put(It.IsAny<IVstsRestRequest<GlobalPermissionsExtensionData>>(), 
                     It.Is<GlobalPermissionsExtensionData>(d => 
-                        d.Reports.Any(r => r.ReconcileUrl == $"https://{azDoConfig.FunctionAppHostname}/{azDoConfig.Organisation}/dummyproj/globalpermissions/{ruleName}"))));
+                        d.Reports.Any(r => r.ReconcileUrl == $"https://{azDoConfig.FunctionAppHostname}/api/reconcile/{azDoConfig.Organisation}/dummyproj/globalpermissions/{ruleName}"))));
 
 
         }

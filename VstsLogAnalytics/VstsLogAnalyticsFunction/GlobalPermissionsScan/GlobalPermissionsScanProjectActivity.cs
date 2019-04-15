@@ -86,7 +86,7 @@ namespace VstsLogAnalyticsFunction.GlobalPermissionsScan
                     {
                         Description = r.description,
                         Status = r.status,
-                        ReconcileUrl = $"https://{_azuredoConfig.FunctionAppHostname}/{_azuredoConfig.Organisation}/{project.Name}/globalpermissions/{r.rule}"
+                        ReconcileUrl = $"https://{_azuredoConfig.FunctionAppHostname}/api/reconcile/{_azuredoConfig.Organisation}/{project.Name}/globalpermissions/{r.rule}"
                     }).ToList()
                 };
                 _azuredo.Put(ExtensionManagement.ExtensionData<GlobalPermissionsExtensionData>("tas",
