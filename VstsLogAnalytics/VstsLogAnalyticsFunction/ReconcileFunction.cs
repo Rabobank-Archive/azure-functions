@@ -23,8 +23,7 @@ namespace VstsLogAnalyticsFunction
         }
 
         [FunctionName(nameof(ReconcileFunction))]
-        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, Route = "reconcile/{organization}/{project}/globalpermissions/{ruleName}")]HttpRequestMessage request,
-            DurableOrchestrationContextBase context,
+        public IActionResult Run([HttpTrigger(AuthorizationLevel.Anonymous, Route = "{organization}/{project}/globalpermissions/{ruleName}")]HttpRequestMessage request,
             string organization, 
             string project, 
             string ruleName)
@@ -40,10 +39,6 @@ namespace VstsLogAnalyticsFunction
             }
             
             rule.Reconcile(project);
-            await context.CallActivityAsync(
-                nameof(GlobalPermissionsScanProjectActivity),
-                new Project {Name = project});
-            
             return new OkResult();
         }
     }
