@@ -58,7 +58,7 @@ namespace VstsLogAnalyticsFunction
             };
 
             services.AddSingleton<IEnvironmentConfig>(config);
-            services.AddSingleton<IRuleSets, RuleSets>();
+            services.AddSingleton<IRulesProvider, RulesProvider>();
         }
     }
 }
