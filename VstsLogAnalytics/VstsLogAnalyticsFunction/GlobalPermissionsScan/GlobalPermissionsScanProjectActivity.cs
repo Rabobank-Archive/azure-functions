@@ -17,17 +17,17 @@ namespace VstsLogAnalyticsFunction.GlobalPermissionsScan
         private readonly ILogAnalyticsClient _client;
         private readonly IVstsRestClient _azuredo;
         private readonly IAzureDevOpsConfig _azuredoConfig;
-        private readonly IRuleSets _ruleSets;
+        private readonly IRulesProvider _rulesProvider;
 
         public GlobalPermissionsScanProjectActivity(ILogAnalyticsClient client,
             IVstsRestClient azuredo,
             IAzureDevOpsConfig azuredoConfig,
-            IRuleSets ruleSets)
+            IRulesProvider rulesProvider)
         {
             _client = client;
             _azuredo = azuredo;
             _azuredoConfig = azuredoConfig;
-            _ruleSets = ruleSets;
+            _rulesProvider = rulesProvider;
         }
 
         [FunctionName(nameof(GlobalPermissionsScanProjectActivity))]
@@ -44,7 +44,7 @@ namespace VstsLogAnalyticsFunction.GlobalPermissionsScan
             log.LogInformation($"Creating preventive analysis log for project {project.Name}");
             var dateTimeUtcNow = DateTime.UtcNow;
 
-            var globalPermissionsRuleset = _ruleSets.GlobalPermissions(_azuredo);
+            var globalPermissionsRuleset = _rulesProvider.GlobalPermissions(_azuredo);
 
             var evaluatedRules = globalPermissionsRuleset.Select(r => new
             {

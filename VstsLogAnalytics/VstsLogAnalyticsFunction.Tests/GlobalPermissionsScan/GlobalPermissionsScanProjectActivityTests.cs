@@ -30,7 +30,7 @@ namespace VstsLogAnalyticsFunction.Tests.GlobalPermissionsScan
                 .Setup(x => x.Evaluate(It.IsAny<string>()))
                 .Returns(true);
 
-            var ruleSets = new Mock<IRuleSets>();
+            var ruleSets = new Mock<IRulesProvider>();
             ruleSets
                 .Setup(x => x.GlobalPermissions(It.IsAny<IVstsRestClient>()))
                 .Returns(new [] { rule.Object });
@@ -79,13 +79,13 @@ namespace VstsLogAnalyticsFunction.Tests.GlobalPermissionsScan
                 .Setup(x => x.Evaluate(It.IsAny<string>()))
                 .Returns(true);
 
-            var ruleSets = new Mock<IRuleSets>();
-            ruleSets
+            var rulesProvider = new Mock<IRulesProvider>();
+            rulesProvider
                 .Setup(x => x.GlobalPermissions(It.IsAny<IVstsRestClient>()))
                 .Returns(new [] { rule.Object });
 
             //Act
-            GlobalPermissionsScanProjectActivity fun = new GlobalPermissionsScanProjectActivity(logAnalyticsClient.Object, clientMock.Object, fixture.Create<IAzureDevOpsConfig>(), ruleSets.Object);
+            GlobalPermissionsScanProjectActivity fun = new GlobalPermissionsScanProjectActivity(logAnalyticsClient.Object, clientMock.Object, fixture.Create<IAzureDevOpsConfig>(), rulesProvider.Object);
 
             var ex = await Assert.ThrowsAsync<Exception>(async () => await fun.Run(
                 durableActivityContextBaseMock.Object,
