@@ -6,7 +6,7 @@ namespace VstsLogAnalyticsFunction.Model
 {
     public class EvaluatedRule
     {
-        public string rule { get; set; }
+        public string description { get; set; }
         public bool status { get; set; }
     }
 }

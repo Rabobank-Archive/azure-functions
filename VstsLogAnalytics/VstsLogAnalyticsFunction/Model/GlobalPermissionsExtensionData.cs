@@ -1,13 +1,9 @@
-﻿using SecurePipelineScan.VstsService.Response;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System;
 
 namespace VstsLogAnalyticsFunction.Model
 {
-    public class GlobalPermissionsExtensionData : ExtensionData
+    public class GlobalPermissionsExtensionData : ExtensionDataReports<EvaluatedRule>
     {
-        public List<EvaluatedRule> EvaluatedRules { get; internal set; }
-        public DateTime EvaluatedDate { get; internal set; }
+        public DateTime Date { get; internal set; }
     }
 }
