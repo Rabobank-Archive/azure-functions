@@ -23,7 +23,7 @@ namespace VstsLogAnalyticsFunction
         }
 
         [FunctionName(nameof(ReconcileFunction))]
-        public IActionResult Run([HttpTrigger(AuthorizationLevel.Anonymous, Route = "{organization}/{project}/globalpermissions/{ruleName}")]HttpRequestMessage request,
+        public IActionResult Run([HttpTrigger(AuthorizationLevel.Anonymous, Route = "reconcile/{organization}/{project}/globalpermissions/{ruleName}")]HttpRequestMessage request,
             string organization, 
             string project, 
             string ruleName)
