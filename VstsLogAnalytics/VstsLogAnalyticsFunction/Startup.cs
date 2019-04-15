@@ -46,14 +46,18 @@ namespace VstsLogAnalyticsFunction
             services.AddTransient<IServiceEndpointValidator, ServiceEndpointValidator>();
 
             var extensionName = Environment.GetEnvironmentVariable("extensionName", EnvironmentVariableTarget.Process) ?? "tastest";
-
-            var config = new AzureDevOpsConfig
+            var functionAppUrl =
+                Environment.GetEnvironmentVariable("WEBSITE_HOSTNAME", EnvironmentVariableTarget.Process) ??
+                "https://azdoanalyticsdev.azurewebsites.net";
+            
+            var config = new EnvironmentConfig
             {
                 ExtensionName = extensionName,
                 Organisation = organization,
+                FunctionAppHostname = functionAppUrl
             };
 
-            services.AddSingleton<IAzureDevOpsConfig>(config);
+            services.AddSingleton<IEnvironmentConfig>(config);
             services.AddSingleton<IRulesProvider, RulesProvider>();
         }
     }
