@@ -1,10 +1,13 @@
 using System.Linq;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
+using SecurePipelineScan.VstsService.Response;
+using VstsLogAnalyticsFunction.GlobalPermissionsScan;
 
 namespace VstsLogAnalyticsFunction
 {
@@ -20,7 +23,8 @@ namespace VstsLogAnalyticsFunction
         }
 
         [FunctionName(nameof(ReconcileFunction))]
-        public IActionResult Run([HttpTrigger(AuthorizationLevel.Anonymous, Route = "{organization}/{project}/globalpermissions/{ruleName}")]HttpRequestMessage request,
+        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, Route = "reconcile/{organization}/{project}/globalpermissions/{ruleName}")]HttpRequestMessage request,
+            DurableOrchestrationContextBase context,
             string organization, 
             string project, 
             string ruleName)
@@ -36,6 +40,10 @@ namespace VstsLogAnalyticsFunction
             }
             
             rule.Reconcile(project);
+            await context.CallActivityAsync(
+                nameof(GlobalPermissionsScanProjectActivity),
+                new Project {Name = project});
+            
             return new OkResult();
         }
     }
