@@ -6,7 +6,7 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
 
-namespace VstsLogAnalyticsFunction.Tests
+namespace VstsLogAnalyticsFunction
 {
     public class ReconcileFunction
     {
@@ -19,6 +19,7 @@ namespace VstsLogAnalyticsFunction.Tests
             _ruleProvider = ruleProvider;
         }
 
+        [FunctionName(nameof(ReconcileFunction))]
         public IActionResult Run([HttpTrigger(AuthorizationLevel.Anonymous, Route = "{organization}/{project}/globalpermissions/{ruleName}")]HttpRequestMessage request,
             string organization, 
             string project, 
