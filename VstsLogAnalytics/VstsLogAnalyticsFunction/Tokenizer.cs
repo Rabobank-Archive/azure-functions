@@ -1,28 +1,56 @@
 using System;
-using Microsoft.AspNet.Identity;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
 
 namespace VstsLogAnalyticsFunction
 {
     public interface ITokenizer
     {
-        bool Validate(string url, string token);
-        string Create(string url);
+        ClaimsPrincipal Principal(string token);
+        string Token(params Claim[] claims);
     }
 
     public class Tokenizer : ITokenizer
     {
-        private readonly Guid _secret;
-        private readonly PasswordHasher _hasher = new PasswordHasher();
+        private readonly byte[] _key;
 
-        public Tokenizer(Guid secret) => 
-            _secret = secret;
+        public Tokenizer(string secret)
+        {
+            if (secret == null) throw new ArgumentNullException(nameof(secret));
+            _key = Encoding.ASCII.GetBytes(secret);
+        }
 
-        public bool Validate(string url, string token) => 
-            _hasher.VerifyHashedPassword(token, IncludeSecret(url)) == PasswordVerificationResult.Success;
+        public ClaimsPrincipal Principal(string token)
+        {
+            var parameters = new TokenValidationParameters
+            {
+                RequireSignedTokens = true,
+                ValidateAudience = false,
+                ValidateIssuer = false,
+                ValidateIssuerSigningKey = true,
+                ValidateLifetime = true,
+                IssuerSigningKeys = new[] {new SymmetricSecurityKey(_key)}
+            };
+            
+            var handler = new JwtSecurityTokenHandler();
+            return handler.ValidateToken(token, parameters, out _);
+        }
 
-        public string Create(string url) => 
-            _hasher.HashPassword(IncludeSecret(url));
+        public string Token(params Claim[] claims)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var descriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddDays(7),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(_key),
+                    SecurityAlgorithms.HmacSha256Signature)
+            };
 
-        private string IncludeSecret(string url) => url + _secret;
+            var token = handler.CreateToken(descriptor);
+            return handler.WriteToken(token);
+        }
     }
 }

@@ -14,12 +14,14 @@ namespace VstsLogAnalyticsFunction
     public class ReconcileFunction
     {
         private readonly IRulesProvider _ruleProvider;
+        private readonly ITokenizer _tokenizer;
         private readonly IVstsRestClient _client;
 
-        public ReconcileFunction(IVstsRestClient client, IRulesProvider ruleProvider)
+        public ReconcileFunction(IVstsRestClient client, IRulesProvider ruleProvider, ITokenizer tokenizer)
         {
             _client = client;
             _ruleProvider = ruleProvider;
+            _tokenizer = tokenizer;
         }
 
         [FunctionName(nameof(ReconcileFunction))]
@@ -28,6 +30,13 @@ namespace VstsLogAnalyticsFunction
             string project, 
             string ruleName)
         {
+            var principal = _tokenizer.Principal(request.Headers.Authorization.Parameter);
+            if (principal ==  null || 
+                !principal.HasClaim("project", project) ||
+                !principal.HasClaim("organization", organization))
+            {
+                return new UnauthorizedResult();
+            }
             var rule = _ruleProvider
                 .GlobalPermissions(_client)
                 .OfType<IProjectReconcile>()
