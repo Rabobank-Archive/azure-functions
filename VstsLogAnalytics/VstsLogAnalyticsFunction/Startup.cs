@@ -36,7 +36,7 @@ namespace VstsLogAnalyticsFunction
 
             services.AddSingleton<IVstsRestClient>(new VstsRestClient(organization, vstsPat));
 
-            services.AddSingleton<HttpClient>(new HttpClient());
+            services.AddSingleton(new HttpClient());
             services.AddSingleton<IAzureServiceTokenProviderWrapper, AzureServiceTokenProviderWrapper>();
 
             services.AddScoped<IMemoryCache>(_ => new MemoryCache(new MemoryCacheOptions()));
@@ -59,6 +59,7 @@ namespace VstsLogAnalyticsFunction
 
             services.AddSingleton<IEnvironmentConfig>(config);
             services.AddSingleton<IRulesProvider, RulesProvider>();
+            services.AddSingleton<ITokenizer>(new Tokenizer(Environment.GetEnvironmentVariable("TOKEN_SECRET")));
         }
     }
 }

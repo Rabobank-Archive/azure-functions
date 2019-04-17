@@ -1,5 +1,7 @@
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using SecurePipelineScan.Rules.Security;
@@ -26,8 +28,16 @@ namespace VstsLogAnalyticsFunction.Tests
                 .Setup(x => x.GlobalPermissions(It.IsAny<IVstsRestClient>()))
                 .Returns(new[] { rule.Object });
             
-            var function = new ReconcileFunction(null, ruleProvider.Object);
-            function.Run(new Mock<HttpRequestMessage>().Object, 
+            var tokenizer = new Mock<ITokenizer>();
+            tokenizer
+                .Setup(x => x.Principal(It.IsAny<string>()))
+                .Returns(PrincipalWithClaims());
+            
+            var request = new HttpRequestMessage();
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
+            
+            var function = new ReconcileFunction(null, ruleProvider.Object, tokenizer.Object);
+            function.Run(request, 
                 "somecompany", 
                 "TAS", 
                 rule.Object.GetType().Name);
@@ -43,8 +53,16 @@ namespace VstsLogAnalyticsFunction.Tests
                 .Setup(x => x.GlobalPermissions(It.IsAny<IVstsRestClient>()))
                 .Returns(Enumerable.Empty<IProjectRule>());
             
-            var function = new ReconcileFunction(null, ruleProvider.Object);
-            var result = function.Run(new Mock<HttpRequestMessage>().Object, 
+            var tokenizer = new Mock<ITokenizer>();
+            tokenizer
+                .Setup(x => x.Principal(It.IsAny<string>()))
+                .Returns(PrincipalWithClaims());
+            
+            var request = new HttpRequestMessage();
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
+            
+            var function = new ReconcileFunction(null, ruleProvider.Object, tokenizer.Object);
+            var result = function.Run(request, 
                 "somecompany", 
                 "TAS", 
                 "some-non-existing-rule").ShouldBeOfType<NotFoundObjectResult>();
@@ -54,5 +72,69 @@ namespace VstsLogAnalyticsFunction.Tests
                 .ToString()
                 .ShouldContain("Rule not found");
         }
+
+        [Fact]
+        public void RejectsCallIfTokenDoesntMatch()
+        {
+            var ruleProvider = new Mock<IRulesProvider>();
+            var tokenizer = new Mock<ITokenizer>();
+            tokenizer
+                .Setup(x => x.Principal(It.IsAny<string>()))
+                .Returns(() => null);
+
+            var request = new HttpRequestMessage();
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
+            
+            var function = new ReconcileFunction(null, ruleProvider.Object, tokenizer.Object);
+            function.Run(request , 
+                "somecompany", 
+                "TAS", 
+                "some-non-existing-rule").ShouldBeOfType<UnauthorizedResult>();
+        }
+        
+        [Fact]
+        public void RejectsCallIfScopeDoesntMatch()
+        {
+            var ruleProvider = new Mock<IRulesProvider>();
+            var tokenizer = new Mock<ITokenizer>();
+            tokenizer
+                .Setup(x => x.Principal(It.IsAny<string>()))
+                .Returns(PrincipalWithClaims("CCC"));
+
+            var request = new HttpRequestMessage();
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
+            
+            var function = new ReconcileFunction(null, ruleProvider.Object, tokenizer.Object);
+            function.Run(request , 
+                "somecompany", 
+                "TAS", 
+                "some-non-existing-rule").ShouldBeOfType<UnauthorizedResult>();
+        }
+        
+        [Fact]
+        public void RejectsCallIfOrganizationDoesntMatch()
+        {
+            var ruleProvider = new Mock<IRulesProvider>();
+            var tokenizer = new Mock<ITokenizer>();
+            tokenizer
+                .Setup(x => x.Principal(It.IsAny<string>()))
+                .Returns(PrincipalWithClaims());
+
+            var request = new HttpRequestMessage();
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
+            
+            var function = new ReconcileFunction(null, ruleProvider.Object, tokenizer.Object);
+            function.Run(request , 
+                "some-other-organization", 
+                "TAS", 
+                "some-non-existing-rule").ShouldBeOfType<UnauthorizedResult>();
+        }
+
+        private static ClaimsPrincipal PrincipalWithClaims(string project = "TAS") => 
+            new ClaimsPrincipal(new ClaimsIdentity(new[]
+            {
+                new Claim("organization", "somecompany"),
+                new Claim("project", project)
+            }));
     }
 }
