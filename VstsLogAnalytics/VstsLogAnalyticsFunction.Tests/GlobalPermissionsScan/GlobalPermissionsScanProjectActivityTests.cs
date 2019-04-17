@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Security.Claims;
 using AutoFixture;
 using AutoFixture.AutoMoq;
 using Microsoft.Azure.WebJobs;
@@ -54,18 +55,19 @@ namespace VstsLogAnalyticsFunction.Tests.GlobalPermissionsScan
                     .Create());
 
             //Act
-            GlobalPermissionsScanProjectActivity fun = new GlobalPermissionsScanProjectActivity(
-                logAnalyticsClient.Object, fixture.Create<IVstsRestClient>(), fixture.Create<IEnvironmentConfig>(),
-                ruleSets.Object);
+            var fun = new GlobalPermissionsScanProjectActivity(
+                logAnalyticsClient.Object, 
+                fixture.Create<IVstsRestClient>(), 
+                fixture.Create<EnvironmentConfig>(),
+                ruleSets.Object,
+                new Mock<ITokenizer>().Object);
             await fun.Run(
                 durableActivityContextBaseMock.Object,
                 iLoggerMock.Object);
 
             //Assert
-            rule
-                .Verify(x => x.Evaluate(It.IsAny<string>()), Times.AtLeastOnce());
-            logAnalyticsClient
-                .Verify(x => x.AddCustomLogJsonAsync("preventive_analysis_log", It.IsAny<Object>(), It.IsAny<string>()));
+            rule.Verify(x => x.Evaluate(It.IsAny<string>()), Times.AtLeastOnce());
+            logAnalyticsClient.Verify(x => x.AddCustomLogJsonAsync("preventive_analysis_log", It.IsAny<Object>(), It.IsAny<string>()));
         }
 
         [Fact]
@@ -89,7 +91,12 @@ namespace VstsLogAnalyticsFunction.Tests.GlobalPermissionsScan
                 .Returns(new [] { rule.Object });
 
             //Act
-            GlobalPermissionsScanProjectActivity fun = new GlobalPermissionsScanProjectActivity(logAnalyticsClient.Object, clientMock.Object, fixture.Create<IEnvironmentConfig>(), rulesProvider.Object);
+            var fun = new GlobalPermissionsScanProjectActivity(
+                logAnalyticsClient.Object, 
+                clientMock.Object, 
+                fixture.Create<IEnvironmentConfig>(), 
+                rulesProvider.Object,
+                new Mock<ITokenizer>().Object);
 
             var ex = await Assert.ThrowsAsync<Exception>(async () => await fun.Run(
                 durableActivityContextBaseMock.Object,
@@ -100,23 +107,19 @@ namespace VstsLogAnalyticsFunction.Tests.GlobalPermissionsScan
         }
 
         [Fact]
-        public async Task GeneratesReconcileUrl()
+        public async Task GivenGlobalPermissionsAreScanned_WhenReportsArePutInExtensionDataStorage_ThenItShouldHaveReconcileUrlsAndToken()
         {
             //Arrange
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
-            var logAnalyticsClient = new Mock<ILogAnalyticsClient>();
+
             var azDoConfig = fixture.Create<EnvironmentConfig>();
             var durableActivityContextBaseMock = new Mock<DurableActivityContextBase>();
             
             durableActivityContextBaseMock
                 .Setup(x => x.GetInput<Project>())
                 .Returns(new Project {Name = "dummyproj"});
-            
-            var iLoggerMock = new Mock<ILogger>();
+
             var clientMock = new Mock<IVstsRestClient>();
-            clientMock
-                .Setup(x => x.Put(It.IsAny<IVstsPostRequest<GlobalPermissionsExtensionData>>(),
-                    It.IsAny<GlobalPermissionsExtensionData>()));
 
             var rule = new Mock<IProjectRule>();
             var rulesProvider = new Mock<IRulesProvider>();
@@ -124,21 +127,30 @@ namespace VstsLogAnalyticsFunction.Tests.GlobalPermissionsScan
                 .Setup(x => x.GlobalPermissions(It.IsAny<IVstsRestClient>()))
                 .Returns(new[] { rule.Object });
 
+            var tokenizer = new Mock<ITokenizer>();
+            tokenizer
+                .Setup(x => x.Token(It.IsAny<Claim[]>()))
+                .Returns("token");
+
             //Act
-            GlobalPermissionsScanProjectActivity fun = new GlobalPermissionsScanProjectActivity(
-                logAnalyticsClient.Object, clientMock.Object, azDoConfig, rulesProvider.Object);
+            var fun = new GlobalPermissionsScanProjectActivity(
+                new Mock<ILogAnalyticsClient>().Object, 
+                clientMock.Object, 
+                azDoConfig, 
+                rulesProvider.Object,
+                tokenizer.Object);
             await fun.Run(
                 durableActivityContextBaseMock.Object,
-                iLoggerMock.Object);
+                new Mock<ILogger>().Object);
 
             var ruleName = rule.Object.GetType().Name;
 
+            // Assert
             clientMock
                 .Verify(x => x.Put(It.IsAny<IVstsRestRequest<GlobalPermissionsExtensionData>>(), 
                     It.Is<GlobalPermissionsExtensionData>(d => 
-                        d.Reports.Any(r => r.ReconcileUrl == $"https://{azDoConfig.FunctionAppHostname}/api/reconcile/{azDoConfig.Organisation}/dummyproj/globalpermissions/{ruleName}"))));
-
-
+                        d.Reports.Any(r => r.ReconcileUrl == $"https://{azDoConfig.FunctionAppHostname}/api/reconcile/{azDoConfig.Organisation}/dummyproj/globalpermissions/{ruleName}") && 
+                        d.Token == "token")));
         }
     }
 }

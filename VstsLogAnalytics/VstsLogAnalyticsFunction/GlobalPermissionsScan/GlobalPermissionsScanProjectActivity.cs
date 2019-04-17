@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Claims;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
@@ -20,16 +21,19 @@ namespace VstsLogAnalyticsFunction.GlobalPermissionsScan
         private readonly IVstsRestClient _azuredo;
         private readonly IEnvironmentConfig _azuredoConfig;
         private readonly IRulesProvider _rulesProvider;
+        private readonly ITokenizer _tokenizer;
 
         public GlobalPermissionsScanProjectActivity(ILogAnalyticsClient client,
             IVstsRestClient azuredo,
             IEnvironmentConfig azuredoConfig,
-            IRulesProvider rulesProvider)
+            IRulesProvider rulesProvider, 
+            ITokenizer tokenizer)
         {
             _client = client;
             _azuredo = azuredo;
             _azuredoConfig = azuredoConfig;
             _rulesProvider = rulesProvider;
+            _tokenizer = tokenizer;
         }
 
         [FunctionName(nameof(GlobalPermissionsScanProjectActivity))]
@@ -43,7 +47,7 @@ namespace VstsLogAnalyticsFunction.GlobalPermissionsScan
 
             if (project == null) throw new Exception("No Project found in parameter DurableActivityContextBase");
 
-            await Run(project.Name, log);
+            await Run(_azuredoConfig.Organisation, project.Name, log);
         }
 
         [FunctionName("GlobalPermissionsScanProject")]
@@ -54,10 +58,10 @@ namespace VstsLogAnalyticsFunction.GlobalPermissionsScan
             string project,
             ILogger log)
         {
-            await Run(project, log);
+            await Run(organization, project, log);
         }
 
-        private async Task Run(string project, ILogger log)
+        private async Task Run(string organization, string project, ILogger log)
         {
             log.LogInformation($"Creating preventive analysis log for project {project}");
             var dateTimeUtcNow = DateTime.UtcNow;
@@ -101,6 +105,7 @@ namespace VstsLogAnalyticsFunction.GlobalPermissionsScan
                 {
                     Id = project,
                     Date = dateTimeUtcNow,
+                    Token = _tokenizer.Token(new Claim("project", project), new Claim("organization", organization)),
                     Reports = evaluatedRules.Select(r => new EvaluatedRule
                     {
                         Description = r.description,
