@@ -2,6 +2,8 @@ using System;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Claims;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
@@ -37,7 +39,7 @@ namespace VstsLogAnalyticsFunction.GlobalPermissionsScan
         }
 
         [FunctionName(nameof(GlobalPermissionsScanProjectActivity))]
-        public async Task Run(
+        public async Task RunAsActivity(
             [ActivityTrigger] DurableActivityContextBase context,
             ILogger log)
         {
@@ -51,14 +53,23 @@ namespace VstsLogAnalyticsFunction.GlobalPermissionsScan
         }
 
         [FunctionName("GlobalPermissionsScanProject")]
-        public async Task Run(
+        public async Task<IActionResult> RunFromHttp(
             [HttpTrigger(AuthorizationLevel.Anonymous, Route = "scan/{organization}/{project}/globalpermissions")]
             HttpRequestMessage request,
             string organization,
             string project,
             ILogger log)
         {
+            var principal = _tokenizer.Principal(request.Headers.Authorization.Parameter);
+            if (principal == null || 
+                !principal.HasClaim("organization", organization) ||
+                !principal.HasClaim("project", project))
+            {
+                return new UnauthorizedResult();
+            }
+            
             await Run(organization, project, log);
+            return new OkResult();
         }
 
         private async Task Run(string organization, string project, ILogger log)
