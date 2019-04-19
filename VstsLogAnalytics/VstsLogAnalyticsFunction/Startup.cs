@@ -53,11 +53,11 @@ namespace VstsLogAnalyticsFunction
             var config = new EnvironmentConfig
             {
                 ExtensionName = extensionName,
-                Organisation = organization,
+                Organization = organization,
                 FunctionAppHostname = functionAppUrl
             };
 
-            services.AddSingleton<IEnvironmentConfig>(config);
+            services.AddSingleton(config);
             services.AddSingleton<IRulesProvider, RulesProvider>();
             services.AddSingleton<ITokenizer>(new Tokenizer(Environment.GetEnvironmentVariable("TOKEN_SECRET")));
         }

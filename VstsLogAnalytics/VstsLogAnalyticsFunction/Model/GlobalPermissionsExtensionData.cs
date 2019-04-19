@@ -6,5 +6,6 @@ namespace VstsLogAnalyticsFunction.Model
     {
         public DateTime Date { get; internal set; }
         public string Token { get; set; }
+        public string RescanUrl { get; set; }
     }
 }

@@ -98,7 +98,7 @@ namespace VstsLogAnalyticsFunction.Tests.GlobalPermissionsScan
             var fun = new GlobalPermissionsScanProjectActivity(
                 logAnalyticsClient.Object, 
                 clientMock.Object, 
-                fixture.Create<IEnvironmentConfig>(), 
+                fixture.Create<EnvironmentConfig>(), 
                 rulesProvider.Object,
                 new Mock<ITokenizer>().Object);
 
@@ -153,8 +153,9 @@ namespace VstsLogAnalyticsFunction.Tests.GlobalPermissionsScan
             clientMock
                 .Verify(x => x.Put(It.IsAny<IVstsRestRequest<GlobalPermissionsExtensionData>>(), 
                     It.Is<GlobalPermissionsExtensionData>(d => 
-                        d.Reports.Any(r => r.ReconcileUrl == $"https://{azDoConfig.FunctionAppHostname}/api/reconcile/{azDoConfig.Organisation}/dummyproj/globalpermissions/{ruleName}") && 
-                        d.Token == "token")));
+                        d.Reports.Any(r => r.ReconcileUrl == $"https://{azDoConfig.FunctionAppHostname}/api/reconcile/{azDoConfig.Organization}/dummyproj/globalpermissions/{ruleName}") && 
+                        d.Token == "token" &&
+                        d.RescanUrl != null)));
         }
         
         [Fact]
