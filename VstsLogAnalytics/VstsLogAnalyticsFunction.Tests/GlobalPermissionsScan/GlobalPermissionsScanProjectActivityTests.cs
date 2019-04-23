@@ -1,5 +1,7 @@
 using System;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security.Claims;
 using AutoFixture;
 using AutoFixture.AutoMoq;
@@ -12,6 +14,8 @@ using Xunit;
 using Project = SecurePipelineScan.VstsService.Response.Project;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Shouldly;
 using VstsLogAnalyticsFunction.GlobalPermissionsScan;
 using VstsLogAnalyticsFunction.Model;
 
@@ -61,7 +65,7 @@ namespace VstsLogAnalyticsFunction.Tests.GlobalPermissionsScan
                 fixture.Create<EnvironmentConfig>(),
                 ruleSets.Object,
                 new Mock<ITokenizer>().Object);
-            await fun.Run(
+            await fun.RunAsActivity(
                 durableActivityContextBaseMock.Object,
                 iLoggerMock.Object);
 
@@ -94,11 +98,11 @@ namespace VstsLogAnalyticsFunction.Tests.GlobalPermissionsScan
             var fun = new GlobalPermissionsScanProjectActivity(
                 logAnalyticsClient.Object, 
                 clientMock.Object, 
-                fixture.Create<IEnvironmentConfig>(), 
+                fixture.Create<EnvironmentConfig>(), 
                 rulesProvider.Object,
                 new Mock<ITokenizer>().Object);
 
-            var ex = await Assert.ThrowsAsync<Exception>(async () => await fun.Run(
+            var ex = await Assert.ThrowsAsync<Exception>(async () => await fun.RunAsActivity(
                 durableActivityContextBaseMock.Object,
                 iLoggerMock.Object));
 
@@ -139,7 +143,7 @@ namespace VstsLogAnalyticsFunction.Tests.GlobalPermissionsScan
                 azDoConfig, 
                 rulesProvider.Object,
                 tokenizer.Object);
-            await fun.Run(
+            await fun.RunAsActivity(
                 durableActivityContextBaseMock.Object,
                 new Mock<ILogger>().Object);
 
@@ -149,8 +153,46 @@ namespace VstsLogAnalyticsFunction.Tests.GlobalPermissionsScan
             clientMock
                 .Verify(x => x.Put(It.IsAny<IVstsRestRequest<GlobalPermissionsExtensionData>>(), 
                     It.Is<GlobalPermissionsExtensionData>(d => 
-                        d.Reports.Any(r => r.ReconcileUrl == $"https://{azDoConfig.FunctionAppHostname}/api/reconcile/{azDoConfig.Organisation}/dummyproj/globalpermissions/{ruleName}") && 
-                        d.Token == "token")));
+                        d.Reports.Any(r => r.ReconcileUrl == $"https://{azDoConfig.FunctionAppHostname}/api/reconcile/{azDoConfig.Organization}/dummyproj/globalpermissions/{ruleName}") && 
+                        d.Token == "token" &&
+                        d.RescanUrl != null)));
         }
+        
+        [Fact]
+        public async Task RunFromHttp_RejectsCallIfScopeDoesntMatch()
+        {
+            var fixture = new Fixture();
+            var clientMock = new Mock<IVstsRestClient>();
+
+            var rulesProvider = new Mock<IRulesProvider>();
+            var tokenizer = new Mock<ITokenizer>();
+            tokenizer
+                .Setup(x => x.Principal(It.IsAny<string>()))
+                .Returns(PrincipalWithClaims("CCC"));
+
+            var request = new HttpRequestMessage();
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
+            
+            var function = new GlobalPermissionsScanProjectActivity(
+                new Mock<ILogAnalyticsClient>().Object, 
+                clientMock.Object, 
+                fixture.Create<EnvironmentConfig>(), 
+                rulesProvider.Object,
+                tokenizer.Object);
+            
+            var result = await function.RunFromHttp(request , 
+                "somecompany", 
+                "TAS", 
+                new Mock<ILogger>().Object);
+                
+            result.ShouldBeOfType<UnauthorizedResult>();
+        }
+
+        private static ClaimsPrincipal PrincipalWithClaims(string project = "TAS") => 
+            new ClaimsPrincipal(new ClaimsIdentity(new[]
+            {
+                new Claim("organization", "somecompany"),
+                new Claim("project", project)
+            }));
     }
 }

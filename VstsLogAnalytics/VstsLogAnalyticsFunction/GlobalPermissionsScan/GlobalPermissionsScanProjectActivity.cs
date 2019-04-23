@@ -2,6 +2,8 @@ using System;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Claims;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
@@ -19,13 +21,13 @@ namespace VstsLogAnalyticsFunction.GlobalPermissionsScan
     {
         private readonly ILogAnalyticsClient _client;
         private readonly IVstsRestClient _azuredo;
-        private readonly IEnvironmentConfig _azuredoConfig;
+        private readonly EnvironmentConfig _azuredoConfig;
         private readonly IRulesProvider _rulesProvider;
         private readonly ITokenizer _tokenizer;
 
         public GlobalPermissionsScanProjectActivity(ILogAnalyticsClient client,
             IVstsRestClient azuredo,
-            IEnvironmentConfig azuredoConfig,
+            EnvironmentConfig azuredoConfig,
             IRulesProvider rulesProvider, 
             ITokenizer tokenizer)
         {
@@ -37,7 +39,7 @@ namespace VstsLogAnalyticsFunction.GlobalPermissionsScan
         }
 
         [FunctionName(nameof(GlobalPermissionsScanProjectActivity))]
-        public async Task Run(
+        public async Task RunAsActivity(
             [ActivityTrigger] DurableActivityContextBase context,
             ILogger log)
         {
@@ -47,18 +49,27 @@ namespace VstsLogAnalyticsFunction.GlobalPermissionsScan
 
             if (project == null) throw new Exception("No Project found in parameter DurableActivityContextBase");
 
-            await Run(_azuredoConfig.Organisation, project.Name, log);
+            await Run(_azuredoConfig.Organization, project.Name, log);
         }
 
         [FunctionName("GlobalPermissionsScanProject")]
-        public async Task Run(
+        public async Task<IActionResult> RunFromHttp(
             [HttpTrigger(AuthorizationLevel.Anonymous, Route = "scan/{organization}/{project}/globalpermissions")]
             HttpRequestMessage request,
             string organization,
             string project,
             ILogger log)
         {
+            var principal = _tokenizer.Principal(request.Headers.Authorization.Parameter);
+            if (principal == null || 
+                !principal.HasClaim("organization", organization) ||
+                !principal.HasClaim("project", project))
+            {
+                return new UnauthorizedResult();
+            }
+            
             await Run(organization, project, log);
+            return new OkResult();
         }
 
         private async Task Run(string organization, string project, ILogger log)
@@ -106,12 +117,13 @@ namespace VstsLogAnalyticsFunction.GlobalPermissionsScan
                     Id = project,
                     Date = dateTimeUtcNow,
                     Token = _tokenizer.Token(new Claim("project", project), new Claim("organization", organization)),
+                    RescanUrl =  $"https://{_azuredoConfig.FunctionAppHostname}/api/scan/{_azuredoConfig.Organization}/{project}/globalpermissions",
                     Reports = evaluatedRules.Select(r => new EvaluatedRule
                     {
                         Description = r.description,
                         Status = r.status,
                         ReconcileUrl =
-                            $"https://{_azuredoConfig.FunctionAppHostname}/api/reconcile/{_azuredoConfig.Organisation}/{project}/globalpermissions/{r.rule}"
+                            $"https://{_azuredoConfig.FunctionAppHostname}/api/reconcile/{_azuredoConfig.Organization}/{project}/globalpermissions/{r.rule}"
                     }).ToList()
                 };
                 _azuredo.Put(ExtensionManagement.ExtensionData<GlobalPermissionsExtensionData>("tas",
