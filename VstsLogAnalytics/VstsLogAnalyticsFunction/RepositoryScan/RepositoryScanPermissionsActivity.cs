@@ -20,20 +20,18 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
         private readonly ILogAnalyticsClient _client;
         private readonly IVstsRestClient _azuredo;
         private readonly IRulesProvider _rulesProvider;
-        private readonly ITokenizer _tokenizer;
-        private readonly IEnvironmentConfig _azuredoConfig;
+        private readonly EnvironmentConfig _azuredoConfig;
 
         public RepositoryScanPermissionsActivity(ILogAnalyticsClient client,
             IVstsRestClient azuredo,
             IRulesProvider rulesProvider,
-            IEnvironmentConfig azuredoConfig,
+            EnvironmentConfig azuredoConfig,
             ITokenizer tokenizer)
         {
             _client = client;
             _azuredo = azuredo;
             _azuredoConfig = azuredoConfig;
             _rulesProvider = rulesProvider;
-            _tokenizer = tokenizer;
         }
 
         [FunctionName(nameof(RepositoryScanPermissionsActivity))]

@@ -63,7 +63,7 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
                 logAnalyticsClient.Object,
                 azure.Object,
                 ruleSets.Object,
-                new Mock<IEnvironmentConfig>().Object,
+                fixture.Create<EnvironmentConfig>(),
                 new Mock<ITokenizer>().Object);
             await fun.Run(
                 durableActivityContextBaseMock.Object,
@@ -99,7 +99,7 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
                  logAnalyticsClient.Object, 
                  clientMock.Object, 
                  rulesProvider.Object,
-                 fixture.Create<IEnvironmentConfig>(), 
+                 fixture.Create<EnvironmentConfig>(), 
                  new Mock<ITokenizer>().Object);
 
              var ex = await Assert.ThrowsAsync<Exception>(async () => await fun.Run(
