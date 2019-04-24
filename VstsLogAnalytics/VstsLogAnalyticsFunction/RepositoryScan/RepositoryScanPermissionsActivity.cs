@@ -62,17 +62,6 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
             }
         }
 
-//        [FunctionName("GlobalPermissionsScanProject")]
-//        public async Task Run(
-//            [HttpTrigger(AuthorizationLevel.Anonymous, Route = "scan/{organization}/{project}/globalpermissions")]
-//            HttpRequestMessage request,
-//            string organization,
-//            string project,
-//            ILogger log)
-//        {
-//            await Run(organization, project, log);
-//        }
-
         private async Task Run(string organization, string project, string repository, ILogger log)
         {
             log.LogInformation($"Creating preventive analysis log for repository {repository} in project {project}");
@@ -111,31 +100,6 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
                     log.LogError(ex, $"Failed to write report to log analytics: {ex}");
                     throw;
                 }
-            }
-
-            try
-            {
-                var extensionData = new GlobalPermissionsExtensionData
-                {
-                    Id = project,
-                    Date = dateTimeUtcNow,
-                    Token = _tokenizer.Token(new Claim("project", project), new Claim("organization", organization)),
-                    Reports = evaluatedRules.Select(r => new EvaluatedRule
-                    {
-                        Description = r.description,
-                        Status = r.status,
-                        ReconcileUrl =
-                            $"https://{_azuredoConfig.FunctionAppHostname}/api/reconcile/{_azuredoConfig.Organisation}/{project}/globalpermissions/{r.rule}"
-                    }).ToList()
-                };
-                _azuredo.Put(ExtensionManagement.ExtensionData<GlobalPermissionsExtensionData>("tas",
-                    _azuredoConfig.ExtensionName,
-                    "globalpermissions"), extensionData);
-            }
-            catch (Exception ex)
-            {
-                log.LogError(ex, $"Write Extension data failed: {ex}");
-                throw;
             }
         }
     }

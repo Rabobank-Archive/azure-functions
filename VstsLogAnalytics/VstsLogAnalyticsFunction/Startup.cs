@@ -42,7 +42,7 @@ namespace VstsLogAnalyticsFunction
             services.AddScoped<IMemoryCache>(_ => new MemoryCache(new MemoryCacheOptions()));
             services.AddTransient<IServiceHookScan<ReleaseDeploymentCompletedReport>, ReleaseDeploymentScan>();
             services.AddTransient<IServiceHookScan<BuildScanReport>, BuildScan>();
-            services.AddTransient<IProjectScan<IEnumerable<RepositoryReport>>, RepositoryScan>();
+            services.AddTransient<IProjectScan<IEnumerable<RepositoryReport>>, SecurePipelineScan.Rules.RepositoryScan>();
             services.AddTransient<IServiceEndpointValidator, ServiceEndpointValidator>();
 
             var extensionName = Environment.GetEnvironmentVariable("extensionName", EnvironmentVariableTarget.Process) ?? "tastest";
