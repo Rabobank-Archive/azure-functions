@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using SecurePipelineScan.Rules.Reports;
+using VstsLogAnalyticsFunction.RepositoryScan;
 using Response = SecurePipelineScan.VstsService.Response;
 
  namespace VstsLogAnalyticsFunction
@@ -22,7 +23,8 @@ using Response = SecurePipelineScan.VstsService.Response;
             log.LogInformation($"Creating tasks for every project total amount of projects {projects.Count()}");
 
             var tasks = new List<Task<IEnumerable<RepositoryReport>>>();
-            
+            var tasksRepository = new List<Task>();
+
             foreach (var project in projects)
             {
                 log.LogInformation($"Call ActivityReport for project {project.Name}");
@@ -32,9 +34,18 @@ using Response = SecurePipelineScan.VstsService.Response;
                         nameof(RepositoryScanProjectActivity),
                         project)
                 );
+                
+                log.LogInformation($"Create repository Report for {project.Name}");
+
+                tasksRepository.Add(
+                    context.CallActivityAsync(
+                        nameof(RepositoryScanPermissionsActivity),
+                        project)
+                );
             }
 
             await Task.WhenAll(tasks);
+            await Task.WhenAll(tasksRepository);
 
             return tasks.SelectMany(task => task.Result).ToList();
         }

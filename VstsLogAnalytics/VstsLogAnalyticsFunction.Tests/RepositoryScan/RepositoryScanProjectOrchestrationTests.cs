@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using SecurePipelineScan.Rules.Reports;
 using SecurePipelineScan.VstsService.Response;
+using VstsLogAnalyticsFunction.RepositoryScan;
 using Xunit;
 
 namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
@@ -28,6 +29,25 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
             
             //Assert
             durableOrchestrationContextMock.Verify(x => x.CallActivityAsync<IEnumerable<RepositoryReport>>(nameof(RepositoryScanProjectActivity), It.IsAny<Project>()),Times.AtLeastOnce());
+        }
+
+        [Fact]
+        public async System.Threading.Tasks.Task RunShouldCallRepositoryScanPermissionsActivity()
+        {
+            var fixture = new Fixture();
+            fixture.Customize(new AutoMoqCustomization());
+
+            //Arrange
+            var durableOrchestrationContextMock = new Mock<DurableOrchestrationContextBase>();
+            durableOrchestrationContextMock.Setup(context => context.GetInput<Multiple<Project>>()).Returns(fixture.Create<Multiple<Project>>());
+
+            //Act
+            RepositoryScanProjectOrchestration orch = new RepositoryScanProjectOrchestration();
+            await orch.Run(durableOrchestrationContextMock.Object, new Mock<ILogger>().Object);
+            
+            //Assert
+            durableOrchestrationContextMock.Verify(x => x.CallActivityAsync(nameof(RepositoryScanPermissionsActivity), It.IsAny<Project>()),Times.AtLeastOnce());
+            
         }
         
     }
