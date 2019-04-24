@@ -49,7 +49,7 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
                 var repositories = _azuredo.Get(Repository.Repositories(project.Name));
                 foreach (var repository in repositories)
                 {
-                    await Run(project.Name, repository.Name,log);
+                    await Run(project.Name, repository.Name, log);
                 }
             }
             catch (Exception e)
@@ -66,11 +66,9 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
 
             var globalRepositoryPermissions = _rulesProvider.RepositoryRules(_azuredo);
 
-            var repositories = _azuredo.Get(Repository.Repositories(project));
-
             var evaluatedRules = globalRepositoryPermissions.Select(r => new
             {
-                scope = "repositorypermissions",
+                scope = "repository",
                 rule = r.GetType().Name,
                 description = r.Description,
                 status = r.Evaluate(project, repository),
@@ -78,7 +76,8 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
                 evaluatedDate = dateTimeUtcNow
             }).ToList();
 
-            log.LogInformation($"Writing preventive analysis log for repository {repository} in project {project} to Log Analytics Workspace");
+            log.LogInformation(
+                $"Writing preventive analysis log for repository {repository} in project {project} to Log Analytics Workspace");
             foreach (var rule in evaluatedRules)
             {
                 try

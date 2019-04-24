@@ -81,21 +81,3 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
     }
        
 }
-
-//        [Fact]
-//        public async Task shouldGetTheRepositories()
-//        {
-//            var fixture = new Fixture();
-//            fixture.Customize(new AutoMoqCustomization());
-//
-//            //Arrange
-//            var context = new Mock<DurableActivityContextBase>();
-//            context
-//                .Setup(x => x.GetInput<Project>())
-//                .Returns(fixture.Create<Project>);
-//            
-//            var azure = new Mock<IVstsRestClient>();
-//            azure
-//                .Setup(x => x.Get(It.IsAny<VstsRestRequest<Multiple<Repository>>>()))
-//                .Returns(fixture.Create<Multiple<Repository>>);
-//        }

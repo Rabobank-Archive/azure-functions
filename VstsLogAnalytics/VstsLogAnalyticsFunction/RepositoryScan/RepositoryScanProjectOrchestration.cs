@@ -23,7 +23,7 @@ using Response = SecurePipelineScan.VstsService.Response;
             log.LogInformation($"Creating tasks for every project total amount of projects {projects.Count()}");
 
             var tasks = new List<Task<IEnumerable<RepositoryReport>>>();
-            var tasksRepository = new List<Task>();
+            var tasksForRepositoryCheck = new List<Task>();
 
             foreach (var project in projects)
             {
@@ -37,7 +37,7 @@ using Response = SecurePipelineScan.VstsService.Response;
                 
                 log.LogInformation($"Create repository Report for {project.Name}");
 
-                tasksRepository.Add(
+                tasksForRepositoryCheck.Add(
                     context.CallActivityAsync(
                         nameof(RepositoryScanPermissionsActivity),
                         project)
@@ -45,7 +45,7 @@ using Response = SecurePipelineScan.VstsService.Response;
             }
 
             await Task.WhenAll(tasks);
-            await Task.WhenAll(tasksRepository);
+            await Task.WhenAll(tasksForRepositoryCheck);
 
             return tasks.SelectMany(task => task.Result).ToList();
         }
