@@ -21,14 +21,17 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
         private readonly IVstsRestClient _azuredo;
         private readonly IRulesProvider _rulesProvider;
         private readonly ITokenizer _tokenizer;
+        private readonly IEnvironmentConfig _azuredoConfig;
 
         public RepositoryScanPermissionsActivity(ILogAnalyticsClient client,
             IVstsRestClient azuredo,
             IRulesProvider rulesProvider,
+            IEnvironmentConfig azuredoConfig,
             ITokenizer tokenizer)
         {
             _client = client;
             _azuredo = azuredo;
+            _azuredoConfig = azuredoConfig;
             _rulesProvider = rulesProvider;
             _tokenizer = tokenizer;
         }
@@ -96,6 +99,28 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
                     log.LogError(ex, $"Failed to write report to log analytics: {ex}");
                     throw;
                 }
+            }
+            
+            try
+            {
+                var extensionData = new RepositoryExtensionData()
+                {
+                    Id = project,
+                    Date = dateTimeUtcNow,
+                    Reports = evaluatedRules.Select(r => new EvaluatedRule
+                    {
+                        Description = r.description,
+                        Status = r.status
+                    }).ToList()
+                };
+                _azuredo.Put(ExtensionManagement.ExtensionData<RepositoryExtensionData>("tas",
+                    _azuredoConfig.ExtensionName,
+                    "repository"), extensionData);
+            }
+            catch (Exception ex)
+            {
+                log.LogError(ex, $"Write Extension data failed: {ex}");
+                throw;
             }
         }
     }
