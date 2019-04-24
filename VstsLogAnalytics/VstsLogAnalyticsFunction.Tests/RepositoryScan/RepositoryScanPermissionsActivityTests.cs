@@ -68,7 +68,6 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
             var fun = new RepositoryScanPermissionsActivity(
                 logAnalyticsClient.Object, 
                 azure.Object, 
-                fixture.Create<EnvironmentConfig>(),
                 ruleSets.Object,
                 new Mock<ITokenizer>().Object);
             await fun.Run(
