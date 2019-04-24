@@ -25,13 +25,11 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
 
         public RepositoryScanPermissionsActivity(ILogAnalyticsClient client,
             IVstsRestClient azuredo,
-            IEnvironmentConfig azuredoConfig,
             IRulesProvider rulesProvider,
             ITokenizer tokenizer)
         {
             _client = client;
             _azuredo = azuredo;
-            _azuredoConfig = azuredoConfig;
             _rulesProvider = rulesProvider;
             _tokenizer = tokenizer;
         }
@@ -52,7 +50,7 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
                 var repositories = _azuredo.Get(Repository.Repositories(project.Name));
                 foreach (var repository in repositories)
                 {
-                    await Run(_azuredoConfig.Organisation, project.Name, repository.Name,log);
+                    await Run(project.Name, repository.Name,log);
                 }
             }
             catch (Exception e)
@@ -62,7 +60,7 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
             }
         }
 
-        private async Task Run(string organization, string project, string repository, ILogger log)
+        private async Task Run(string project, string repository, ILogger log)
         {
             log.LogInformation($"Creating preventive analysis log for repository {repository} in project {project}");
             var dateTimeUtcNow = DateTime.UtcNow;
