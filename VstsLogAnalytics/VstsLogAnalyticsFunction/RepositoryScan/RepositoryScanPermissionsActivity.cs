@@ -19,7 +19,6 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
     {
         private readonly ILogAnalyticsClient _client;
         private readonly IVstsRestClient _azuredo;
-        private readonly IEnvironmentConfig _azuredoConfig;
         private readonly IRulesProvider _rulesProvider;
         private readonly ITokenizer _tokenizer;
 
