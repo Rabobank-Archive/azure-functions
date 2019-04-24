@@ -25,8 +25,7 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
         public RepositoryScanPermissionsActivity(ILogAnalyticsClient client,
             IVstsRestClient azuredo,
             IRulesProvider rulesProvider,
-            EnvironmentConfig azuredoConfig,
-            ITokenizer tokenizer)
+            EnvironmentConfig azuredoConfig)
         {
             _client = client;
             _azuredo = azuredo;
