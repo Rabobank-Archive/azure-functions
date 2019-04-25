@@ -61,9 +61,8 @@ namespace VstsLogAnalyticsFunction.GlobalPermissionsScan
             ILogger log)
         {
             var principal = _tokenizer.Principal(request.Headers.Authorization.Parameter);
-            if (principal == null || 
-                !principal.HasClaim("organization", organization) ||
-                !principal.HasClaim("project", project))
+            var claim = principal.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
+            if (claim == null)
             {
                 return new UnauthorizedResult();
             }
@@ -116,7 +115,6 @@ namespace VstsLogAnalyticsFunction.GlobalPermissionsScan
                 {
                     Id = project,
                     Date = dateTimeUtcNow,
-                    Token = _tokenizer.Token(new Claim("project", project), new Claim("organization", organization)),
                     RescanUrl =  $"https://{_azuredoConfig.FunctionAppHostname}/api/scan/{_azuredoConfig.Organization}/{project}/globalpermissions",
                     Reports = evaluatedRules.Select(r => new EvaluatedRule
                     {

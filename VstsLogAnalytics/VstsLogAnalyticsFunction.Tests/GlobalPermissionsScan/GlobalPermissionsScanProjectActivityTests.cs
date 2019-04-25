@@ -111,7 +111,7 @@ namespace VstsLogAnalyticsFunction.Tests.GlobalPermissionsScan
         }
 
         [Fact]
-        public async Task GivenGlobalPermissionsAreScanned_WhenReportsArePutInExtensionDataStorage_ThenItShouldHaveReconcileUrlsAndToken()
+        public async Task GivenGlobalPermissionsAreScanned_WhenReportsArePutInExtensionDataStorage_ThenItShouldHaveReconcileUrls()
         {
             //Arrange
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
@@ -131,18 +131,13 @@ namespace VstsLogAnalyticsFunction.Tests.GlobalPermissionsScan
                 .Setup(x => x.GlobalPermissions(It.IsAny<IVstsRestClient>()))
                 .Returns(new[] { rule.Object });
 
-            var tokenizer = new Mock<ITokenizer>();
-            tokenizer
-                .Setup(x => x.Token(It.IsAny<Claim[]>()))
-                .Returns("token");
-
             //Act
             var fun = new GlobalPermissionsScanProjectActivity(
                 new Mock<ILogAnalyticsClient>().Object, 
                 clientMock.Object, 
                 azDoConfig, 
                 rulesProvider.Object,
-                tokenizer.Object);
+                null);
             await fun.RunAsActivity(
                 durableActivityContextBaseMock.Object,
                 new Mock<ILogger>().Object);
@@ -154,30 +149,27 @@ namespace VstsLogAnalyticsFunction.Tests.GlobalPermissionsScan
                 .Verify(x => x.Put(It.IsAny<IVstsRestRequest<GlobalPermissionsExtensionData>>(), 
                     It.Is<GlobalPermissionsExtensionData>(d => 
                         d.Reports.Any(r => r.ReconcileUrl == $"https://{azDoConfig.FunctionAppHostname}/api/reconcile/{azDoConfig.Organization}/dummyproj/globalpermissions/{ruleName}") && 
-                        d.Token == "token" &&
                         d.RescanUrl != null)));
         }
         
         [Fact]
-        public async Task RunFromHttp_RejectsCallIfScopeDoesntMatch()
+        public async Task RunFromHttp_WithoutCredential_Unauthorized()
         {
             var fixture = new Fixture();
-            var clientMock = new Mock<IVstsRestClient>();
 
-            var rulesProvider = new Mock<IRulesProvider>();
             var tokenizer = new Mock<ITokenizer>();
             tokenizer
                 .Setup(x => x.Principal(It.IsAny<string>()))
-                .Returns(PrincipalWithClaims("CCC"));
+                .Returns(new ClaimsPrincipal());
 
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
             
             var function = new GlobalPermissionsScanProjectActivity(
                 new Mock<ILogAnalyticsClient>().Object, 
-                clientMock.Object, 
+                new Mock<IVstsRestClient>().Object, 
                 fixture.Create<EnvironmentConfig>(), 
-                rulesProvider.Object,
+                new Mock<IRulesProvider>().Object,
                 tokenizer.Object);
             
             var result = await function.RunFromHttp(request , 
@@ -187,12 +179,39 @@ namespace VstsLogAnalyticsFunction.Tests.GlobalPermissionsScan
                 
             result.ShouldBeOfType<UnauthorizedResult>();
         }
+        
+        [Fact]
+        public async Task RunFromHttp_WithCredential_OkResult()
+        {
+            var fixture = new Fixture();
 
-        private static ClaimsPrincipal PrincipalWithClaims(string project = "TAS") => 
+            var tokenizer = new Mock<ITokenizer>();
+            tokenizer
+                .Setup(x => x.Principal(It.IsAny<string>()))
+                .Returns(PrincipalWithClaims());
+
+            var request = new HttpRequestMessage();
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
+            
+            var function = new GlobalPermissionsScanProjectActivity(
+                new Mock<ILogAnalyticsClient>().Object, 
+                new Mock<IVstsRestClient>().Object, 
+                fixture.Create<EnvironmentConfig>(), 
+                new Mock<IRulesProvider>().Object,
+                tokenizer.Object);
+            
+            var result = await function.RunFromHttp(request , 
+                "somecompany", 
+                "TAS", 
+                new Mock<ILogger>().Object);
+                
+            result.ShouldBeOfType<OkResult>();
+        }
+
+        private static ClaimsPrincipal PrincipalWithClaims() => 
             new ClaimsPrincipal(new ClaimsIdentity(new[]
             {
-                new Claim("organization", "somecompany"),
-                new Claim("project", project)
+                new Claim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier", "ab84d5a2-4b8d-68df-9ad3-cc9c8884270c")
             }));
     }
 }
