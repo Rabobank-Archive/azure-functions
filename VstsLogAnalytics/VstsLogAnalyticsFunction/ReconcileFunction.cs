@@ -1,13 +1,12 @@
 using System.Linq;
 using System.Net.Http;
-using System.Threading.Tasks;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
-using SecurePipelineScan.VstsService.Response;
-using VstsLogAnalyticsFunction.GlobalPermissionsScan;
+using Requests = SecurePipelineScan.VstsService.Requests;
 
 namespace VstsLogAnalyticsFunction
 {
@@ -30,13 +29,24 @@ namespace VstsLogAnalyticsFunction
             string project, 
             string ruleName)
         {
-            var principal = _tokenizer.Principal(request.Headers.Authorization.Parameter);
-            if (principal ==  null || 
-                !principal.HasClaim("project", project) ||
-                !principal.HasClaim("organization", organization))
+            if (request.Headers.Authorization == null)
             {
                 return new UnauthorizedResult();
             }
+            
+            var principal = _tokenizer.Principal(request.Headers.Authorization.Parameter);
+            var claim = principal.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
+            if (claim == null)
+            {
+                return new UnauthorizedResult();
+            }
+            
+            var permissions = _client.Get(Requests.Permissions.PermissionsGroupProjectId(project, claim.Value));
+            if (!permissions.Security.Permissions.Any(x => x.DisplayName == "Manage project properties" && x.PermissionId == 3))
+            {
+                return new UnauthorizedResult();
+            }
+            
             var rule = _ruleProvider
                 .GlobalPermissions(_client)
                 .OfType<IProjectReconcile>()
