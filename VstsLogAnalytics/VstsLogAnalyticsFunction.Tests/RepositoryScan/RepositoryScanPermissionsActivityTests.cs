@@ -8,6 +8,7 @@ using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Response;
 using VstsLogAnalytics.Client;
+using VstsLogAnalyticsFunction.Model;
 using VstsLogAnalyticsFunction.RepositoryScan;
 using Xunit;
 using Report = VstsLogAnalyticsFunction.ExtensionDataReports<SecurePipelineScan.Rules.Reports.RepositoryReport>;
@@ -18,35 +19,46 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
     public class RepositoryScanPermissionsActivityTests
     {
         [Fact]
-         public async Task RunShouldCallIProjectRuleEvaluateAndStoreToLogAnalytics()
+        public async Task RunShouldCallIProjectRuleEvaluateAndStoreToLogAnalytics()
         {
             //Arrange
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
 
-            var logAnalyticsClient = new Mock<ILogAnalyticsClient>();
-            var iLoggerMock = new Mock<ILogger>();
+            var mocks = new MockRepository(MockBehavior.Strict);
+            var analytics = mocks.Create<ILogAnalyticsClient>();
+            analytics
+                .Setup(x => x.AddCustomLogJsonAsync("preventive_analysis_log", It.IsAny<object>(), "evaluatedDate"))
+                .Returns(Task.CompletedTask)
+                .Verifiable();
 
-            var rule = new Mock<IRepositoryRule>();
+            var rule = mocks.Create<IRepositoryRule>(MockBehavior.Loose);
             rule
                 .Setup(x => x.Evaluate(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(true);
+                .Returns(true)
+                .Verifiable();
 
-            var ruleSets = new Mock<IRulesProvider>();
+            var ruleSets = mocks.Create<IRulesProvider>();
             ruleSets
                 .Setup(x => x.RepositoryRules(It.IsAny<IVstsRestClient>()))
                 .Returns(new [] { rule.Object });
 
 
-            var durableActivityContextBaseMock = new Mock<DurableActivityContextBase>();
-            durableActivityContextBaseMock
+            var durable = mocks.Create<DurableActivityContextBase>();
+            durable
                 .Setup(x => x.GetInput<Project>())
                 .Returns(fixture.Create<Project>());
             
             
-            var azure = new Mock<IVstsRestClient>();
+            var azure = mocks.Create<IVstsRestClient>();
             azure
                 .Setup(x => x.Get(It.IsAny<IVstsRestRequest<Multiple<Repository>>>()))
                 .Returns(fixture.Create<Multiple<Repository>>());
+            azure
+                .Setup(x => x.Put(
+                    It.IsAny<ExtmgmtRequest<RepositoryExtensionData>>(),
+                    It.IsAny<RepositoryExtensionData>()))
+                .Returns(fixture.Create<RepositoryExtensionData>())
+                .Verifiable();
 
             var durableOrchestrationClient = new Mock<DurableOrchestrationClientBase>();
             durableOrchestrationClient
@@ -60,17 +72,16 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
 
             //Act
             var fun = new RepositoryScanPermissionsActivity(
-                logAnalyticsClient.Object,
+                analytics.Object,
                 azure.Object,
                 ruleSets.Object,
                 fixture.Create<EnvironmentConfig>());
             await fun.Run(
-                durableActivityContextBaseMock.Object,
-                iLoggerMock.Object);
+                durable.Object,
+                new Mock<ILogger>().Object);
 
             //Assert
-            rule.Verify(x => x.Evaluate(It.IsAny<string>(), It.IsAny<string>()), Times.AtLeastOnce());
-            logAnalyticsClient.Verify(x => x.AddCustomLogJsonAsync("preventive_analysis_log", It.IsAny<Object>(), It.IsAny<string>()));
+            mocks.Verify();
         }
          
          [Fact]
