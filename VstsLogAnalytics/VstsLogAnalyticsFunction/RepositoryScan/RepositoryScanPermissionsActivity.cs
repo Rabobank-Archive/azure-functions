@@ -1,9 +1,6 @@
 using System;
 using System.Linq;
-using System.Net.Http;
-using System.Security.Claims;
 using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
@@ -42,10 +39,10 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
             if (context == null) throw new ArgumentNullException(nameof(context));
             var project = context.GetInput<Project>() ?? throw new Exception("No Project found in parameter DurableActivityContextBase");
 
-            await Run(project.Name, log);
+            await Run(project.Name);
         }
 
-        private async Task Run(string project, ILogger log)
+        private async Task Run(string project)
         {
             var now = DateTime.UtcNow;
             var rules = _rulesProvider.RepositoryRules(_azuredo);

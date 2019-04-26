@@ -1,6 +1,4 @@
-﻿using Microsoft.Azure.Services.AppAuthentication;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Hosting;
+﻿using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using SecurePipelineScan.VstsService;

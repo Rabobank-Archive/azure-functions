@@ -1,6 +1,5 @@
 using System.Linq;
 using System.Net.Http;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
