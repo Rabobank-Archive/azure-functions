@@ -1,11 +1,16 @@
 using System;
+using System.Collections.Generic;
 
 namespace VstsLogAnalyticsFunction.Model
 {
-    public class RepositoryExtensionData : ExtensionDataReports<EvaluatedRule>
+    public class RepositoriesExtensionData : ExtensionDataReports<RepositoryExtensionData>
     {
-        public DateTime Date { get; internal set; }
-        
-        public string Token { get; set; }   
+        public DateTime Date { get; set; }
+    }
+
+    public class RepositoryExtensionData
+    {
+        public string Item { get; set; }
+        public IList<EvaluatedRule> Rules { get; set; }
     }
 }

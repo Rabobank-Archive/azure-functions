@@ -21,6 +21,7 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
         private readonly IVstsRestClient _azuredo;
         private readonly IRulesProvider _rulesProvider;
         private readonly EnvironmentConfig _azuredoConfig;
+        private readonly string _scope = "repository";
 
         public RepositoryScanPermissionsActivity(ILogAnalyticsClient client,
             IVstsRestClient azuredo,
@@ -34,91 +35,56 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
         }
 
         [FunctionName(nameof(RepositoryScanPermissionsActivity))]
-        public async Task Run(
+        public async Task RunAsActivity(
             [ActivityTrigger] DurableActivityContextBase context,
             ILogger log)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
+            var project = context.GetInput<Project>() ?? throw new Exception("No Project found in parameter DurableActivityContextBase");
 
-            var project = context.GetInput<Project>();
-
-            if (project == null) throw new Exception("No Project found in parameter DurableActivityContextBase");
-
-            try
-            {
-                var repositories = _azuredo.Get(Repository.Repositories(project.Name));
-                foreach (var repository in repositories)
-                {
-                    await Run(project.Name, repository.Name, log);
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
+            await Run(project.Name, log);
         }
 
-        private async Task Run(string project, string repository, ILogger log)
+        private async Task Run(string project, ILogger log)
         {
-            log.LogInformation($"Creating preventive analysis log for repository {repository} in project {project}");
-            var dateTimeUtcNow = DateTime.UtcNow;
+            var now = DateTime.UtcNow;
+            var rules = _rulesProvider.RepositoryRules(_azuredo);
+            var repositories = _azuredo.Get(Repository.Repositories(project));
 
-            var globalRepositoryPermissions = _rulesProvider.RepositoryRules(_azuredo);
-
-            var evaluatedRules = globalRepositoryPermissions.Select(r => new
+            var data = new RepositoriesExtensionData
             {
-                scope = "repository",
-                rule = r.GetType().Name,
-                description = r.Description,
-                status = r.Evaluate(project, repository),
-                project,
-                evaluatedDate = dateTimeUtcNow
-            }).ToList();
-
-            log.LogInformation(
-                $"Writing preventive analysis log for repository {repository} in project {project} to Log Analytics Workspace");
-            foreach (var rule in evaluatedRules)
-            {
-                try
+                Date = now,
+                Reports = repositories.Select(repository => new RepositoryExtensionData
                 {
-                    await _client.AddCustomLogJsonAsync("preventive_analysis_log", new
+                    Item = repository.Name,
+                    Rules = rules.Select(rule => new EvaluatedRule
                     {
-                        rule.scope,
-                        rule.rule,
-                        rule.status,
-                        rule.project,
-                        rule.evaluatedDate
-                    }, "evaluatedDate");
-                }
-                catch (Exception ex)
+                        Name = rule.GetType().Name,
+                        Status = rule.Evaluate(project, repository.Name),
+                        Description = rule.Description
+                    }).ToList()
+                }).ToList()
+            };
+
+            var analytics = 
+                from report in data.Reports
+                from rule in report.Rules
+                select new
                 {
-                    log.LogError(ex, $"Failed to write report to log analytics: {ex}");
-                    throw;
-                }
+                    project,
+                    scope = _scope,
+                    item = report.Item,
+                    rule = rule.Name,
+                    status = rule.Status,
+                    evaluatedDate = now
+                };
+
+            foreach (var item in analytics)
+            {
+                await _client.AddCustomLogJsonAsync("preventive_analysis_log", item, "evaluatedDate");
             }
             
-            try
-            {
-                var extensionData = new RepositoryExtensionData()
-                {
-                    Id = project,
-                    Date = dateTimeUtcNow,
-                    Reports = evaluatedRules.Select(r => new EvaluatedRule
-                    {
-                        Description = r.description,
-                        Status = r.status
-                    }).ToList()
-                };
-                _azuredo.Put(ExtensionManagement.ExtensionData<RepositoryExtensionData>("tas",
-                    _azuredoConfig.ExtensionName,
-                    "repository"), extensionData);
-            }
-            catch (Exception ex)
-            {
-                log.LogError(ex, $"Write Extension data failed: {ex}");
-                throw;
-            }
+            _azuredo.Put(ExtensionManagement.ExtensionData<RepositoriesExtensionData>("tas", _azuredoConfig.ExtensionName, _scope), data);
         }
     }
 }

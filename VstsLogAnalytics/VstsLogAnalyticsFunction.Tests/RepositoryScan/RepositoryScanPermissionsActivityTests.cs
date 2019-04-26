@@ -55,9 +55,9 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
                 .Returns(fixture.Create<Multiple<Repository>>());
             azure
                 .Setup(x => x.Put(
-                    It.IsAny<ExtmgmtRequest<RepositoryExtensionData>>(),
-                    It.IsAny<RepositoryExtensionData>()))
-                .Returns(fixture.Create<RepositoryExtensionData>())
+                    It.IsAny<ExtmgmtRequest<RepositoriesExtensionData>>(),
+                    It.IsAny<RepositoriesExtensionData>()))
+                .Returns((object req, RepositoriesExtensionData data) => data)
                 .Verifiable();
 
             var durableOrchestrationClient = new Mock<DurableOrchestrationClientBase>();
@@ -76,7 +76,7 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
                 azure.Object,
                 ruleSets.Object,
                 fixture.Create<EnvironmentConfig>());
-            await fun.Run(
+            await fun.RunAsActivity(
                 durable.Object,
                 new Mock<ILogger>().Object);
 
@@ -111,7 +111,7 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
                  rulesProvider.Object,
                  fixture.Create<EnvironmentConfig>());
 
-             var ex = await Assert.ThrowsAsync<Exception>(async () => await fun.Run(
+             var ex = await Assert.ThrowsAsync<Exception>(async () => await fun.RunAsActivity(
                  durableActivityContextBaseMock.Object,
                  iLoggerMock.Object));
 
