@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
-using SecurePipelineScan.Rules.Reports;
 using VstsLogAnalyticsFunction.RepositoryScan;
 using Response = SecurePipelineScan.VstsService.Response;
 
@@ -12,42 +11,21 @@ using Response = SecurePipelineScan.VstsService.Response;
     public class RepositoryScanProjectOrchestration
     {
         [FunctionName(nameof(RepositoryScanProjectOrchestration))]
-        public async Task<IEnumerable<RepositoryReport>> Run(
+        public async Task Run(
             [OrchestrationTrigger] DurableOrchestrationContextBase context,
-            ILogger log
-        )
-
+            ILogger log)
         {
             var projects = context.GetInput<Response.Multiple<Response.Project>>();
-
             log.LogInformation($"Creating tasks for every project total amount of projects {projects.Count()}");
 
-            var tasks = new List<Task<IEnumerable<RepositoryReport>>>();
-            var tasksForRepositoryCheck = new List<Task>();
-
+            var tasks = new List<Task>();
             foreach (var project in projects)
             {
                 log.LogInformation($"Call ActivityReport for project {project.Name}");
-
-                tasks.Add(
-                    context.CallActivityAsync<IEnumerable<RepositoryReport>>(
-                        nameof(RepositoryScanProjectActivity),
-                        project)
-                );
-                
-                log.LogInformation($"Create repository Report for {project.Name}");
-
-                tasksForRepositoryCheck.Add(
-                    context.CallActivityAsync(
-                        nameof(RepositoryScanPermissionsActivity),
-                        project)
-                );
+                tasks.Add(context.CallActivityAsync(nameof(RepositoryScanPermissionsActivity), project));
             }
 
             await Task.WhenAll(tasks);
-            await Task.WhenAll(tasksForRepositoryCheck);
-
-            return tasks.SelectMany(task => task.Result).ToList();
         }
     }
 }
