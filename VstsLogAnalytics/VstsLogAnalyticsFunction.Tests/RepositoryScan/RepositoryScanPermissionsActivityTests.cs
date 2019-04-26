@@ -11,7 +11,6 @@ using VstsLogAnalytics.Client;
 using VstsLogAnalyticsFunction.Model;
 using VstsLogAnalyticsFunction.RepositoryScan;
 using Xunit;
-using Report = VstsLogAnalyticsFunction.ExtensionDataReports<SecurePipelineScan.Rules.Reports.RepositoryReport>;
 using Task = System.Threading.Tasks.Task;
 
 namespace VstsLogAnalyticsFunction.Tests.RepositoryScan

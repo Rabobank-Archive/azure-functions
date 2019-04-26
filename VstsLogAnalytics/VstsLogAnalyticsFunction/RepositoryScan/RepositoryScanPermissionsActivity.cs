@@ -50,6 +50,7 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
 
             var data = new RepositoriesExtensionData
             {
+                Id = project,
                 Date = now,
                 Reports = repositories.Select(repository => new RepositoryExtensionData
                 {
@@ -57,7 +58,7 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
                     Rules = rules.Select(rule => new EvaluatedRule
                     {
                         Name = rule.GetType().Name,
-                        Status = rule.Evaluate(project, repository.Name),
+                        Status = rule.Evaluate(project, repository.Id),
                         Description = rule.Description
                     }).ToList()
                 }).ToList()
