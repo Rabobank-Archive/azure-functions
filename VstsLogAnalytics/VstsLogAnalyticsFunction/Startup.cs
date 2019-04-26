@@ -7,7 +7,6 @@ using SecurePipelineScan.Rules.Events;
 using SecurePipelineScan.Rules.Reports;
 using SecurePipelineScan.VstsService;
 using System;
-using System.Collections.Generic;
 using System.Net.Http;
 using SecurePipelineScan.Rules.Security;
 using VstsLogAnalytics.Client;
@@ -17,7 +16,7 @@ using VstsLogAnalytics.Common;
 
 namespace VstsLogAnalyticsFunction
 {
-    internal class Startup : IWebJobsStartup
+    public class Startup : IWebJobsStartup
     {
         public void Configure(IWebJobsBuilder builder)
         {
@@ -42,7 +41,6 @@ namespace VstsLogAnalyticsFunction
             services.AddScoped<IMemoryCache>(_ => new MemoryCache(new MemoryCacheOptions()));
             services.AddTransient<IServiceHookScan<ReleaseDeploymentCompletedReport>, ReleaseDeploymentScan>();
             services.AddTransient<IServiceHookScan<BuildScanReport>, BuildScan>();
-            services.AddTransient<IProjectScan<IEnumerable<RepositoryReport>>, SecurePipelineScan.Rules.RepositoryScan>();
             services.AddTransient<IServiceEndpointValidator, ServiceEndpointValidator>();
 
             var extensionName = Environment.GetEnvironmentVariable("extensionName", EnvironmentVariableTarget.Process) ?? "tastest";
