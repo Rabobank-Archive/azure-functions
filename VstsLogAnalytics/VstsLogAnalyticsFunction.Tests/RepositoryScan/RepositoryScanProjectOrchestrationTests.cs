@@ -1,11 +1,10 @@
-using System.Collections.Generic;
 using AutoFixture;
 using AutoFixture.AutoMoq;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Moq;
-using SecurePipelineScan.Rules.Reports;
 using SecurePipelineScan.VstsService.Response;
+using VstsLogAnalyticsFunction.RepositoryScan;
 using Xunit;
 
 namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
@@ -19,16 +18,19 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
             fixture.Customize(new AutoMoqCustomization());
 
             //Arrange
-            var durableOrchestrationContextMock = new Mock<DurableOrchestrationContextBase>();
-            durableOrchestrationContextMock.Setup(context => context.GetInput<Multiple<Project>>()).Returns(fixture.Create<Multiple<Project>>());
+            var context = new Mock<DurableOrchestrationContextBase>();
+            context
+                .Setup(c => c.GetInput<Multiple<Project>>())
+                .Returns(fixture.Create<Multiple<Project>>());
 
             //Act
-            RepositoryScanProjectOrchestration orch = new RepositoryScanProjectOrchestration();
-            await orch.Run(durableOrchestrationContextMock.Object, new Mock<ILogger>().Object);
+            var target = new RepositoryScanProjectOrchestration();
+            await target.Run(context.Object, new Mock<ILogger>().Object);
             
             //Assert
-            durableOrchestrationContextMock.Verify(x => x.CallActivityAsync<IEnumerable<RepositoryReport>>(nameof(RepositoryScanProjectActivity), It.IsAny<Project>()),Times.AtLeastOnce());
-        }
-        
+            context.Verify(x => 
+                x.CallActivityAsync(nameof(RepositoryScanPermissionsActivity), It.IsAny<Project>()),
+                Times.AtLeast(2));
+        }        
     }
 }

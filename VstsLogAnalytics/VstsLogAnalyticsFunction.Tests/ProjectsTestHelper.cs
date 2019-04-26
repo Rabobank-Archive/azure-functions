@@ -1,12 +1,8 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using AutoFixture;
 using SecurePipelineScan.VstsService.Response;
 using Xunit;
 using Shouldly;
 using Xunit.Abstractions;
-using Response = SecurePipelineScan.VstsService.Response;
 
 
 namespace VstsLogAnalyticsFunction.Tests

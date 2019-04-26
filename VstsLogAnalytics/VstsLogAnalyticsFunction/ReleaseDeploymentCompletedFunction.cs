@@ -2,13 +2,10 @@
 using Microsoft.Extensions.Logging;
 using SecurePipelineScan.VstsService;
 using System;
-using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json.Linq;
-using SecurePipelineScan.Rules;
 using SecurePipelineScan.Rules.Events;
 using SecurePipelineScan.Rules.Reports;
 using VstsLogAnalytics.Client;
-using VstsLogAnalytics.Common;
 using System.Collections.Generic;
 using System.Linq;
 
