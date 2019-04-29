@@ -8,8 +8,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using Microsoft.Azure.Services.AppAuthentication;
+using Unmockable;
 using VstsLogAnalytics.Client;
-using VstsLogAnalytics.Common;
 using Requests = SecurePipelineScan.VstsService.Requests;
 
 namespace VstsLogAnalyticsFunction
@@ -20,12 +21,12 @@ namespace VstsLogAnalyticsFunction
         private readonly ILogAnalyticsClient _logAnalyticsClient;
         private readonly IVstsRestClient _client;
         private readonly HttpClient _http;
-        private readonly IAzureServiceTokenProviderWrapper _tokenProvider;
+        private readonly IUnmockable<AzureServiceTokenProvider> _tokenProvider;
 
         public AgentPoolScanFunction(ILogAnalyticsClient logAnalyticsClient,
             IVstsRestClient client,
             HttpClient http,
-            IAzureServiceTokenProviderWrapper tokenProvider)
+            IUnmockable<AzureServiceTokenProvider> tokenProvider)
         {
             _logAnalyticsClient = logAnalyticsClient;
             _client = client;
@@ -98,9 +99,9 @@ namespace VstsLogAnalyticsFunction
             await _logAnalyticsClient.AddCustomLogJsonAsync("AgentStatus", list, "Date");
         }
 
-        public static async System.Threading.Tasks.Task ReImageAgent(ILogger log, AgentInformation agentInfo, HttpClient client, IAzureServiceTokenProviderWrapper tokenProvider)
+        public static async System.Threading.Tasks.Task ReImageAgent(ILogger log, AgentInformation agentInfo, HttpClient client, IUnmockable<AzureServiceTokenProvider> tokenProvider)
         {
-            var accessToken = await tokenProvider.GetAccessTokenAsync().ConfigureAwait(false);
+            var accessToken = await tokenProvider.Execute(x => x.GetAccessTokenAsync("https://management.azure.com/", null)).ConfigureAwait(false);
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
             var agentStatusJson = await client.GetStringAsync($"https://management.azure.com/subscriptions/f13f81f8-7578-4ca8-83f3-0a845fad3cb5/resourceGroups/{agentInfo.ResourceGroup}/providers/Microsoft.Compute/virtualMachineScaleSets/agents/virtualmachines/{agentInfo.InstanceId}/instanceView?api-version=2018-06-01");

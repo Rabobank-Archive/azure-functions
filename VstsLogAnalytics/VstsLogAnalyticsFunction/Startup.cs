@@ -8,9 +8,10 @@ using SecurePipelineScan.Rules.Reports;
 using SecurePipelineScan.VstsService;
 using System;
 using System.Net.Http;
+using Microsoft.Azure.Services.AppAuthentication;
 using SecurePipelineScan.Rules.Security;
+using Unmockable;
 using VstsLogAnalytics.Client;
-using VstsLogAnalytics.Common;
 
 [assembly: WebJobsStartup(typeof(VstsLogAnalyticsFunction.Startup))]
 
@@ -36,7 +37,7 @@ namespace VstsLogAnalyticsFunction
             services.AddSingleton<IVstsRestClient>(new VstsRestClient(organization, vstsPat));
 
             services.AddSingleton(new HttpClient());
-            services.AddSingleton<IAzureServiceTokenProviderWrapper, AzureServiceTokenProviderWrapper>();
+            services.AddSingleton(new AzureServiceTokenProvider().Wrap());
 
             services.AddScoped<IMemoryCache>(_ => new MemoryCache(new MemoryCacheOptions()));
             services.AddTransient<IServiceHookScan<ReleaseDeploymentCompletedReport>, ReleaseDeploymentScan>();

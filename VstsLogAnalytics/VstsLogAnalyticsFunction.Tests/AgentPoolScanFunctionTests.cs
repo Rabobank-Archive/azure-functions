@@ -9,8 +9,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using Microsoft.Azure.Services.AppAuthentication;
+using Shouldly;
+using Unmockable;
 using VstsLogAnalytics.Client;
-using VstsLogAnalytics.Common;
 using Xunit;
 
 namespace VstsLogAnalyticsFunction.Tests
@@ -46,7 +48,7 @@ namespace VstsLogAnalyticsFunction.Tests
                 .Respond(HttpStatusCode.OK);
 
             var logAnalyticsClient = new Mock<ILogAnalyticsClient>();
-            var aadManager = new Mock<IAzureServiceTokenProviderWrapper>();
+            var tokenProvider = new Intercept<AzureServiceTokenProvider>();
             var client = new Mock<IVstsRestClient>();
 
             client.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Multiple<AgentPoolInfo>>>()))
@@ -57,7 +59,7 @@ namespace VstsLogAnalyticsFunction.Tests
 
 
             // Act
-            var function = new AgentPoolScanFunction(logAnalyticsClient.Object, client.Object, mockHttp.ToHttpClient(), aadManager.Object);
+            var function = new AgentPoolScanFunction(logAnalyticsClient.Object, client.Object, mockHttp.ToHttpClient(), tokenProvider);
             await function.Run(new TimerInfo(null, null), new Mock<ILogger>().Object);
 
             // Assert
@@ -78,7 +80,7 @@ namespace VstsLogAnalyticsFunction.Tests
         public void GetAgentInfoFromNameShouldSplitNamesIntoRightValues()
         {
             //Arrange
-            List<AgentPoolInformation> observedPools = new List<AgentPoolInformation>();
+            var observedPools = new List<AgentPoolInformation>();
             observedPools.Add(new AgentPoolInformation() { PoolName = "Rabo-Build-Azure-Linux", ResourceGroupPrefix = "rg-m01-prd-vstslinuxagents-0" });
             observedPools.Add(new AgentPoolInformation() { PoolName = "Rabo-Build-Azure-Linux-Canary", ResourceGroupPrefix = "rg-m01-prd-vstslinuxcanary-0" });
             observedPools.Add(new AgentPoolInformation() { PoolName = "Rabo-Build-Azure-Linux-Fallback", ResourceGroupPrefix = "rg-m01-prd-vstslinuxfallback-0" });
@@ -115,20 +117,23 @@ namespace VstsLogAnalyticsFunction.Tests
             var postRequest = mockHttp.When(HttpMethod.Post, "https://management.azure.com/subscriptions/f13f81f8-7578-4ca8-83f3-0a845fad3cb5/resourceGroups/*/providers/Microsoft.Compute/virtualMachineScaleSets/agents/virtualmachines/*/reimage?api-version=2018-06-01")
                    .Respond(HttpStatusCode.OK);
 
-            AgentInformation agentInfo = new AgentInformation("rg", 0);
+            var agentInfo = new AgentInformation("rg", 0);
 
-            var aadManager = new Mock<IAzureServiceTokenProviderWrapper>();
+            var tokenProvider = new Intercept<AzureServiceTokenProvider>();
+            tokenProvider
+                .Setup(x => x.GetAccessTokenAsync(Arg.Ignore<string>(), null))
+                .Returns(string.Empty);
 
             //Act
-            await AgentPoolScanFunction.ReImageAgent(log.Object, agentInfo, mockHttp.ToHttpClient(), aadManager.Object);
+            await AgentPoolScanFunction.ReImageAgent(log.Object, agentInfo, mockHttp.ToHttpClient(), tokenProvider);
 
             //Assert
 
             //check if queried status
-            Assert.Equal(1, mockHttp.GetMatchCount(getRequest));
+            mockHttp.GetMatchCount(getRequest).ShouldBe(1);
 
             //check if reimage called
-            Assert.Equal(0, mockHttp.GetMatchCount(postRequest));
+            mockHttp.GetMatchCount(postRequest).ShouldBe(0);
         }
 
         [Fact]
@@ -139,28 +144,30 @@ namespace VstsLogAnalyticsFunction.Tests
             var log = new Mock<ILogger>();
 
             var mockHttp = new MockHttpMessageHandler();
-
             var getRequest = mockHttp.When(HttpMethod.Get, "https://management.azure.com/subscriptions/f13f81f8-7578-4ca8-83f3-0a845fad3cb5/resourceGroups/*/providers/Microsoft.Compute/virtualMachineScaleSets/agents/virtualmachines/*/instanceView?api-version=2018-06-01")
                     .Respond("application/json", "{ \"placementGroupId\": \"f79e82f0-3480-4eb3-a893-5cf9bd74daad\", \"platformUpdateDomain\": 0, \"platformFaultDomain\": 0, \"computerName\": \"agents2q3000000\", \"osName\": \"ubuntu\", \"osVersion\": \"18.04\", \"vmAgent\": { \"vmAgentVersion\": \"2.2.36\", \"statuses\": [ { \"code\": \"ProvisioningState/succeeded\", \"level\": \"Info\", \"displayStatus\": \"Ready\", \"message\": \"Guest Agent is running\", \"time\": \"2019-02-22T08:15:48+00:00\" } ], \"extensionHandlers\": [] }, \"disks\": [ { \"name\": \"agents_agents_0_OsDisk_1_3009fa8e43e144029be77cd72065f6df\", \"statuses\": [ { \"code\": \"ProvisioningState/succeeded\", \"level\": \"Info\", \"displayStatus\": \"Provisioning succeeded\", \"time\": \"2019-02-06T11:45:35.5975265+00:00\" } ] } ], \"statuses\": [ { \"code\": \"ProvisioningState/succeeded\", \"level\": \"Info\", \"displayStatus\": \"Provisioning succeeded\", \"time\": \"2019-02-06T11:46:58.0511995+00:00\" }, { \"code\": \"PowerState/running\", \"level\": \"Info\", \"displayStatus\": \"VM running\" } ] } ");
 
             var postRequest = mockHttp.When(HttpMethod.Post, "https://management.azure.com/subscriptions/f13f81f8-7578-4ca8-83f3-0a845fad3cb5/resourceGroups/*/providers/Microsoft.Compute/virtualMachineScaleSets/agents/virtualmachines/*/reimage?api-version=2018-06-01")
                    .Respond(HttpStatusCode.OK);
 
-            AgentInformation agentInfo = new AgentInformation("rg", 0);
+            var agentInfo = new AgentInformation("rg", 0);
 
 
-            var aadManager = new Mock<IAzureServiceTokenProviderWrapper>();
+            var tokenProvider = new Intercept<AzureServiceTokenProvider>();
+            tokenProvider
+                .Setup(x => x.GetAccessTokenAsync(Arg.Ignore<string>(), null))
+                .Returns(string.Empty);
 
             //Act
-            await AgentPoolScanFunction.ReImageAgent(log.Object, agentInfo, mockHttp.ToHttpClient(), aadManager.Object);
+            await AgentPoolScanFunction.ReImageAgent(log.Object, agentInfo, mockHttp.ToHttpClient(), tokenProvider);
 
             //Assert
 
             //check if queried status
-            Assert.Equal(1, mockHttp.GetMatchCount(getRequest));
+            mockHttp.GetMatchCount(getRequest).ShouldBe(1);
 
             //check if reimage called
-            Assert.Equal(1, mockHttp.GetMatchCount(postRequest));
+            mockHttp.GetMatchCount(postRequest).ShouldBe(1);
         }
     }
 }
