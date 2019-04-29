@@ -18,7 +18,6 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
         private readonly IVstsRestClient _azuredo;
         private readonly IRulesProvider _rulesProvider;
         private readonly EnvironmentConfig _azuredoConfig;
-        private readonly string _scope = "repository";
 
         public RepositoryScanPermissionsActivity(ILogAnalyticsClient client,
             IVstsRestClient azuredo,
@@ -64,25 +63,12 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
                 }).ToList()
             };
 
-            var analytics = 
-                from report in data.Reports
-                from rule in report.Rules
-                select new
-                {
-                    project,
-                    scope = _scope,
-                    item = report.Item,
-                    rule = rule.Name,
-                    status = rule.Status,
-                    evaluatedDate = now
-                };
-
-            foreach (var item in analytics)
+            foreach (var item in data.Flatten())
             {
                 await _client.AddCustomLogJsonAsync("preventive_analysis_log", item, "evaluatedDate");
             }
             
-            _azuredo.Put(ExtensionManagement.ExtensionData<RepositoriesExtensionData>("tas", _azuredoConfig.ExtensionName, _scope), data);
+            _azuredo.Put(ExtensionManagement.ExtensionData<RepositoriesExtensionData>("tas", _azuredoConfig.ExtensionName, "repository"), data);
         }
     }
 }
