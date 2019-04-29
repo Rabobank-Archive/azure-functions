@@ -7,34 +7,27 @@ using Xunit;
 
 namespace VstsLogAnalyticsFunction.Tests
 {
-    public class RepositoriesExtensionDataTests
+    public class GlobalPermissionsExtensionDataTests
     {
         [Fact]
         public void FlattenReport()
         {
             var now = new DateTime(2019, 4, 29, 10, 47, 23);
-            var data = new RepositoriesExtensionData
+            var data = new GlobalPermissionsExtensionData
             {
                 Id = "TAS",
                 Date = now,
                 Reports = new []
                 {
-                    new RepositoryExtensionData
+                    new EvaluatedRule
                     {
-                        Item = "SOx-Compliant-Demo",
-                        Rules = new []
+                        Description =  "Nobody can do anything",
+                        Reconcile = new Reconcile 
                         {
-                            new EvaluatedRule
-                            {
-                                Description =  "Nobody can do anything",
-                                Reconcile = new Reconcile 
-                                {
-                                    Url =  "https://azuredevops.somewhere.azure.com"
-                                },
-                                Name = "NobodyCanDoAnything",
-                                Status =  true
-                            }
-                        }
+                            Url =  "https://azuredevops.somewhere.azure.com"
+                        },
+                        Name = "NobodyCanDoAnything",
+                        Status =  true
                     }
                 }
             };
@@ -42,8 +35,8 @@ namespace VstsLogAnalyticsFunction.Tests
             var expected = new PreventiveLogItem
             {
                 Project = "TAS",
-                Scope = "repository",
-                Item = "SOx-Compliant-Demo",
+                Scope = "globalpermissions",
+                Item = null,
                 Rule = "NobodyCanDoAnything",
                 Status = true,
                 EvaluatedDate = now

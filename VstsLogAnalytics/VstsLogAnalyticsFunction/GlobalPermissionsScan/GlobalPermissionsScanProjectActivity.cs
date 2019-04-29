@@ -18,21 +18,21 @@ namespace VstsLogAnalyticsFunction.GlobalPermissionsScan
 {
     public class GlobalPermissionsScanProjectActivity
     {
-        private readonly ILogAnalyticsClient _client;
+        private readonly ILogAnalyticsClient _analytics;
         private readonly IVstsRestClient _azuredo;
-        private readonly EnvironmentConfig _azuredoConfig;
+        private readonly EnvironmentConfig _config;
         private readonly IRulesProvider _rulesProvider;
         private readonly ITokenizer _tokenizer;
 
-        public GlobalPermissionsScanProjectActivity(ILogAnalyticsClient client,
+        public GlobalPermissionsScanProjectActivity(ILogAnalyticsClient analytics,
             IVstsRestClient azuredo,
-            EnvironmentConfig azuredoConfig,
+            EnvironmentConfig config,
             IRulesProvider rulesProvider, 
             ITokenizer tokenizer)
         {
-            _client = client;
+            _analytics = analytics;
             _azuredo = azuredo;
-            _azuredoConfig = azuredoConfig;
+            _config = config;
             _rulesProvider = rulesProvider;
             _tokenizer = tokenizer;
         }
@@ -43,12 +43,9 @@ namespace VstsLogAnalyticsFunction.GlobalPermissionsScan
             ILogger log)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
+            var project = context.GetInput<Project>() ?? throw new Exception("No Project found in parameter DurableActivityContextBase");
 
-            var project = context.GetInput<Project>();
-
-            if (project == null) throw new Exception("No Project found in parameter DurableActivityContextBase");
-
-            await Run(_azuredoConfig.Organization, project.Name, log);
+            await Run(_config.Organization, project.Name, log);
         }
 
         [FunctionName("GlobalPermissionsScanProject")]
@@ -73,65 +70,38 @@ namespace VstsLogAnalyticsFunction.GlobalPermissionsScan
         private async Task Run(string organization, string project, ILogger log)
         {
             log.LogInformation($"Creating preventive analysis log for project {project}");
-            var dateTimeUtcNow = DateTime.UtcNow;
+            var now = DateTime.UtcNow;
+            var rules = _rulesProvider.GlobalPermissions(_azuredo);
 
-            var globalPermissionsRuleset = _rulesProvider.GlobalPermissions(_azuredo);
-
-            var evaluatedRules = globalPermissionsRuleset.Select(r => new
+            var data = new GlobalPermissionsExtensionData
             {
-                scope = "globalpermissions",
-                rule = r.GetType().Name,
-                description = r.Description,
-                status = r.Evaluate(project),
-                project,
-                evaluatedDate = dateTimeUtcNow
-            }).ToList();
-
-            log.LogInformation($"Writing preventive analysis log for project {project} to Log Analytics Workspace");
-            foreach (var rule in evaluatedRules)
-            {
-                try
+                Id = project,
+                Date = now,
+                RescanUrl =  $"https://{_config.FunctionAppHostname}/api/scan/{_config.Organization}/{project}/globalpermissions",
+                Reports = rules.Select(r => new EvaluatedRule
                 {
-                    await _client.AddCustomLogJsonAsync("preventive_analysis_log", new
-                    {
-                        rule.scope,
-                        rule.rule,
-                        rule.status,
-                        rule.project,
-                        rule.evaluatedDate
-                    }, "evaluatedDate");
-                }
-                catch (Exception ex)
-                {
-                    log.LogError(ex, $"Failed to write report to log analytics: {ex}");
-                    throw;
-                }
+                    Name = r.GetType().Name,
+                    Description = r.Description,
+                    Status = r.Evaluate(project),
+                    Reconcile = ToReconcile(project, r as IProjectReconcile)
+                }).ToList()
+            };
+            
+            _azuredo.Put(ExtensionManagement.ExtensionData<GlobalPermissionsExtensionData>("tas", _config.ExtensionName, "globalpermissions"), data);
+            foreach (var item in data.Flatten())
+            {
+                await _analytics.AddCustomLogJsonAsync("preventive_analysis_log", item, "evaluatedDate");
             }
+            
+        }
 
-            try
+        private Reconcile ToReconcile(string project, IProjectReconcile rule)
+        {
+            return rule != null ? new Reconcile
             {
-                var extensionData = new GlobalPermissionsExtensionData
-                {
-                    Id = project,
-                    Date = dateTimeUtcNow,
-                    RescanUrl =  $"https://{_azuredoConfig.FunctionAppHostname}/api/scan/{_azuredoConfig.Organization}/{project}/globalpermissions",
-                    Reports = evaluatedRules.Select(r => new EvaluatedRule
-                    {
-                        Description = r.description,
-                        Status = r.status,
-                        ReconcileUrl =
-                            $"https://{_azuredoConfig.FunctionAppHostname}/api/reconcile/{_azuredoConfig.Organization}/{project}/globalpermissions/{r.rule}"
-                    }).ToList()
-                };
-                _azuredo.Put(ExtensionManagement.ExtensionData<GlobalPermissionsExtensionData>("tas",
-                    _azuredoConfig.ExtensionName,
-                    "globalpermissions"), extensionData);
-            }
-            catch (Exception ex)
-            {
-                log.LogError(ex, $"Write Extension data failed: {ex}");
-                throw;
-            }
+                Url = $"https://{_config.FunctionAppHostname}/api/reconcile/{_config.Organization}/{project}/globalpermissions/{rule.GetType().Name}",
+                Impact = rule.Impact
+            } : null;
         }
     }
 
