@@ -16,16 +16,11 @@ namespace VstsLogAnalytics.Client
     {
         private readonly string _workspace;
         private readonly string _key;
-        private readonly HttpClient _httpClient;
 
         public LogAnalyticsClient(string workspace, string key)
         {
             _workspace = workspace;
             _key = key;
-            
-//            
-//            _httpClient.DefaultRequestHeaders.Clear();
-//            _httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
         }
 
         public async Task AddCustomLogJsonAsync(string logName, object input, string timefield)

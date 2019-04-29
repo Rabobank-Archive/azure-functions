@@ -4,8 +4,6 @@ using AutoFixture;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
-using VstsLogAnalyticsFunction.GlobalPermissionsScan;
-using VstsLogAnalyticsFunction.RepositoryScan;
 using Xunit;
 
 namespace VstsLogAnalyticsFunction.Tests
