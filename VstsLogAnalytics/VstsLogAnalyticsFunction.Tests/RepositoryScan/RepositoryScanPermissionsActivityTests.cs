@@ -127,6 +127,34 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
          }
          
          [Fact]
+         public async Task RunFromHttp_WithoutCredential_Unauthorized()
+         {
+             var fixture = new Fixture();
+
+             var tokenizer = new Mock<ITokenizer>();
+             tokenizer
+                 .Setup(x => x.Principal(It.IsAny<string>()))
+                 .Returns(new ClaimsPrincipal());
+
+             var request = new HttpRequestMessage();
+             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
+            
+             var function = new RepositoryScanPermissionsActivity(
+                 new Mock<ILogAnalyticsClient>().Object, 
+                 new Mock<IVstsRestClient>().Object, 
+                 new Mock<IRulesProvider>().Object,
+                 fixture.Create<EnvironmentConfig>(), 
+                 tokenizer.Object);
+            
+             var result = await function.RunFromHttp(request , 
+                 "somecompany", 
+                 "TAS", 
+                 new Mock<ILogger>().Object);
+                
+             result.ShouldBeOfType<UnauthorizedResult>();
+         }
+         
+         [Fact]
          public async Task RunFromHttp_WithCredential_OkResult()
          {
              var fixture = new Fixture();
