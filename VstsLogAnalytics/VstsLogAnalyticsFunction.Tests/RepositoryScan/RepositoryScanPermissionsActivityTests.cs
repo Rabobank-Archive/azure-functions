@@ -1,13 +1,19 @@
 using System;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Security.Claims;
 using AutoFixture;
 using AutoFixture.AutoMoq;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Moq;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Response;
+using Shouldly;
 using VstsLogAnalytics.Client;
+using VstsLogAnalyticsFunction.GlobalPermissionsScan;
 using VstsLogAnalyticsFunction.Model;
 using VstsLogAnalyticsFunction.RepositoryScan;
 using Xunit;
@@ -74,7 +80,8 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
                 analytics.Object,
                 azure.Object,
                 ruleSets.Object,
-                fixture.Create<EnvironmentConfig>());
+                fixture.Create<EnvironmentConfig>(),
+                new Mock<ITokenizer>().Object);
             await fun.RunAsActivity(
                 durable.Object,
                 new Mock<ILogger>().Object);
@@ -108,7 +115,8 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
                  logAnalyticsClient.Object, 
                  clientMock.Object, 
                  rulesProvider.Object,
-                 fixture.Create<EnvironmentConfig>());
+                 fixture.Create<EnvironmentConfig>(),
+                 new Mock<ITokenizer>().Object);
 
              var ex = await Assert.ThrowsAsync<Exception>(async () => await fun.RunAsActivity(
                  durableActivityContextBaseMock.Object,
@@ -117,6 +125,47 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
              //Assert
              Assert.Equal("No Project found in parameter DurableActivityContextBase", ex.Message);
          }
+         
+         [Fact]
+         public async Task RunFromHttp_WithCredential_OkResult()
+         {
+             var fixture = new Fixture();
+             var mocks = new MockRepository(MockBehavior.Loose);
+
+
+             var tokenizer = new Mock<ITokenizer>();
+             tokenizer
+                 .Setup(x => x.Principal(It.IsAny<string>()))
+                 .Returns(PrincipalWithClaims());
+
+             var azure = mocks.Create<IVstsRestClient>();
+             azure
+                 .Setup(x => x.Get(It.IsAny<IVstsRestRequest<Multiple<Repository>>>()))
+                 .Returns(fixture.Create<Multiple<Repository>>());
+             
+             var request = new HttpRequestMessage();
+             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
+            
+             var function = new RepositoryScanPermissionsActivity(
+                 new Mock<ILogAnalyticsClient>().Object, 
+                 azure.Object, 
+                 new Mock<IRulesProvider>().Object,
+                 fixture.Create<EnvironmentConfig>(), 
+                 tokenizer.Object);
+            
+             var result = await function.RunFromHttp(request , 
+                 "somecompany", 
+                 "TAS", 
+                 new Mock<ILogger>().Object);
+                
+             result.ShouldBeOfType<OkResult>();
+         }
+         
+         private static ClaimsPrincipal PrincipalWithClaims() => 
+             new ClaimsPrincipal(new ClaimsIdentity(new[]
+             {
+                 new Claim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier", "ab84d5a2-4b8d-68df-9ad3-cc9c8884270c")
+             }));
     }
        
 }

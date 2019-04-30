@@ -1,6 +1,10 @@
 using System;
 using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
@@ -18,16 +22,20 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
         private readonly IVstsRestClient _azuredo;
         private readonly IRulesProvider _rulesProvider;
         private readonly EnvironmentConfig _azuredoConfig;
+        private readonly ITokenizer _tokenizer;
+
 
         public RepositoryScanPermissionsActivity(ILogAnalyticsClient client,
             IVstsRestClient azuredo,
             IRulesProvider rulesProvider,
-            EnvironmentConfig azuredoConfig)
+            EnvironmentConfig azuredoConfig, 
+            ITokenizer tokenizer)
         {
             _client = client;
             _azuredo = azuredo;
             _azuredoConfig = azuredoConfig;
             _rulesProvider = rulesProvider;
+            _tokenizer = tokenizer;
         }
 
         [FunctionName(nameof(RepositoryScanPermissionsActivity))]
@@ -41,6 +49,25 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
             await Run(project.Name);
         }
 
+        [FunctionName("RepositoryScan")]
+        public async Task<IActionResult> RunFromHttp(
+            [HttpTrigger(AuthorizationLevel.Anonymous, Route = "scan/{organization}/{project}/repository")]
+            HttpRequestMessage request,
+            string organization,
+            string project,
+            ILogger log)
+        {
+            var principal = _tokenizer.Principal(request.Headers.Authorization.Parameter);
+            var claim = principal.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
+            if (claim == null)
+            {
+                return new UnauthorizedResult();
+            }
+
+            await Run(project);
+            return new OkResult();
+        }
+
         private async Task Run(string project)
         {
             var now = DateTime.UtcNow;
@@ -51,6 +78,7 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
             {
                 Id = project,
                 Date = now,
+                RescanUrl =  $"https://{_azuredoConfig.FunctionAppHostname}/api/scan/{_azuredoConfig.Organization}/{project}/repository",
                 Reports = repositories.Select(repository => new RepositoryExtensionData
                 {
                     Item = repository.Name,

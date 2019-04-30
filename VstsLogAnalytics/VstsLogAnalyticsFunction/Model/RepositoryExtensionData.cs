@@ -7,6 +7,8 @@ namespace VstsLogAnalyticsFunction.Model
     public class RepositoriesExtensionData : ExtensionDataReports<RepositoryExtensionData>
     {
         public DateTime Date { get; set; }
+        
+        public string RescanUrl { get; set; }
        
         public IEnumerable<PreventiveLogItem> Flatten()
         {
