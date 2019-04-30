@@ -78,6 +78,7 @@ namespace VstsLogAnalyticsFunction.GlobalPermissionsScan
                 Id = project,
                 Date = now,
                 RescanUrl =  $"https://{_config.FunctionAppHostname}/api/scan/{_config.Organization}/{project}/globalpermissions",
+                HasReconcilePermissionUrl = $"https://{_config.FunctionAppHostname}/api/reconcile/{_config.Organization}/{project}/haspermissions",
                 Reports = rules.Select(r => new EvaluatedRule
                 {
                     Name = r.GetType().Name,

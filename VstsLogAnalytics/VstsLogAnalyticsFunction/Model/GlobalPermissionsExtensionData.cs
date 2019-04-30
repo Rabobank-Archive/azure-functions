@@ -8,6 +8,7 @@ namespace VstsLogAnalyticsFunction.Model
     {
         public DateTime Date { get; set; }
         public string RescanUrl { get; set; }
+        public string HasReconcilePermissionUrl { get; set; }
 
         public IEnumerable<PreventiveLogItem> Flatten()
         {
