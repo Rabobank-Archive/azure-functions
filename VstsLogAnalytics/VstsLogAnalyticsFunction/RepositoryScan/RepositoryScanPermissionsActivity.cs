@@ -57,9 +57,7 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
             string project,
             ILogger log)
         {
-            var principal = _tokenizer.Principal(request.Headers.Authorization.Parameter);
-            var claim = principal.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
-            if (claim == null)
+            if (_tokenizer.IdentifierFromClaim(request) == null)
             {
                 return new UnauthorizedResult();
             }

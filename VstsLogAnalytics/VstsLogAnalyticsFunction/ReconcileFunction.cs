@@ -1,12 +1,9 @@
 using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Newtonsoft.Json;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
 using Requests = SecurePipelineScan.VstsService.Requests;
@@ -32,20 +29,8 @@ namespace VstsLogAnalyticsFunction
             string project, 
             string ruleName)
         {
-            if (request.Headers.Authorization == null)
-            {
-                return new UnauthorizedResult();
-            }
-            
-            var principal = _tokenizer.Principal(request.Headers.Authorization.Parameter);
-            var claim = principal.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
-            if (claim == null)
-            {
-                return new UnauthorizedResult();
-            }
-            
-            var permissions = _client.Get(Requests.Permissions.PermissionsGroupProjectId(project, claim.Value));
-            if (!permissions.Security.Permissions.Any(x => x.DisplayName == "Manage project properties" && x.PermissionId == 3))
+            var id = _tokenizer.IdentifierFromClaim(request);
+            if (id == null || !HasPermissionToReconcile(project, id))
             {
                 return new UnauthorizedResult();
             }
@@ -63,30 +48,26 @@ namespace VstsLogAnalyticsFunction
             rule.Reconcile(project);
             return new OkResult();
         }
-        
+
         [FunctionName("HasPermissionToReconcileFunction")]
         public async Task<IActionResult> HasPermission([HttpTrigger(AuthorizationLevel.Anonymous, Route = "reconcile/{organization}/{project}/haspermissions")]HttpRequestMessage request,
             string organization, 
             string project)
         {
-            if (request.Headers.Authorization == null)
+            var id = _tokenizer.IdentifierFromClaim(request);
+            if (id == null)
             {
                 return new UnauthorizedResult();
             }
             
-            var principal = _tokenizer.Principal(request.Headers.Authorization.Parameter);
-            var claim = principal.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
-            if (claim == null)
-            {
-                return new UnauthorizedResult();
-            }
-            
-            var permissions = _client.Get(Requests.Permissions.PermissionsGroupProjectId(project, claim.Value));
-            
-            var responseContent =
-                permissions.Security.Permissions.Any(x =>
-                    x.DisplayName == "Manage project properties" && x.PermissionId == 3);
-            return new OkObjectResult(responseContent);
+            return new OkObjectResult(HasPermissionToReconcile(project, id));
+        }
+
+        private bool HasPermissionToReconcile(string project, string id)
+        {
+            var permissions = _client.Get(Requests.Permissions.PermissionsGroupProjectId(project, id));
+            return permissions.Security.Permissions.Any(x =>
+                x.DisplayName == "Manage project properties" && x.PermissionId == 3);
         }
     }
 }
