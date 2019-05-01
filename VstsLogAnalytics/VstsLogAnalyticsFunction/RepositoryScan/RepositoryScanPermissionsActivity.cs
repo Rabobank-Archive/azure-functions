@@ -46,7 +46,7 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
             if (context == null) throw new ArgumentNullException(nameof(context));
             var project = context.GetInput<Project>() ?? throw new Exception("No Project found in parameter DurableActivityContextBase");
 
-            await Run(project.Name);
+            await Run(project.Name, project.Id);
         }
 
         [FunctionName("RepositoryScan")]
@@ -62,31 +62,34 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
                 return new UnauthorizedResult();
             }
 
-            await Run(project);
+            var properties = _azuredo.Get(SecurePipelineScan.VstsService.Requests.Project.Properties(project));
+            await Run(project, properties.Id);
+            
             return new OkResult();
         }
 
-        private async Task Run(string project)
+        private async Task Run(string projectName, string projectId)
         {
             var now = DateTime.UtcNow;
             var rules = _rulesProvider.RepositoryRules(_azuredo);
-            var repositories = _azuredo.Get(Repository.Repositories(project));
+            var repositories = _azuredo.Get(Repository.Repositories(projectId));
 
             var data = new RepositoriesExtensionData
             {
-                Id = project,
+                Id = projectName,
                 Date = now,
-                RescanUrl =  $"https://{_config.FunctionAppHostname}/api/scan/{_config.Organization}/{project}/repository",
+                RescanUrl =  $"https://{_config.FunctionAppHostname}/api/scan/{_config.Organization}/{projectName}/repository",
+                HasReconcilePermissionUrl = $"https://{_config.FunctionAppHostname}/api/reconcile/{_config.Organization}/{projectId}/haspermissions",
                 Reports = repositories.Select(repository => new RepositoryExtensionData
                 {
                     Item = repository.Name,
                     Rules = rules.Select(rule => new EvaluatedRule
                     {
                         Name = rule.GetType().Name,
-                        Status = rule.Evaluate(project, repository.Id),
+                        Status = rule.Evaluate(projectId, repository.Id),
                         Description = rule.Description,
                         Why = rule.Why,
-                        Reconcile = ToReconcile(project, repository.Id, rule as IRepositoryReconcile)
+                        Reconcile = ToReconcile(projectId, repository.Id, rule as IRepositoryReconcile)
                     }).ToList()
                 }).ToList()
             };

@@ -170,6 +170,10 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
              azure
                  .Setup(x => x.Get(It.IsAny<IVstsRestRequest<Multiple<Repository>>>()))
                  .Returns(fixture.Create<Multiple<Repository>>());
+
+             azure
+                 .Setup(x => x.Get(It.IsAny<IVstsRestRequest<ProjectProperties>>()))
+                 .Returns(fixture.Create<ProjectProperties>());
              
              var request = new HttpRequestMessage();
              request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
