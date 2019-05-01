@@ -41,8 +41,7 @@ namespace VstsLogAnalyticsFunction.Tests
             var client = new Mock<IVstsRestClient>();
             client
                 .Setup(x => x.Get(It.IsAny<IVstsRestRequest<PermissionsProjectId>>()))
-                .Returns(fixture.Create<PermissionsProjectId>())
-                .Verifiable();
+                .Returns(fixture.Create<PermissionsProjectId>());
             
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
@@ -51,7 +50,49 @@ namespace VstsLogAnalyticsFunction.Tests
             function.Reconcile(request, 
                 "somecompany", 
                 "TAS", 
+                "globalpermissions",
                 rule.Object.GetType().Name).ShouldBeOfType<OkResult>();
+            
+            rule.Verify();
+        }
+        
+        [Fact]
+        public void ExistingRepositoryRuleExecutedWhenReconcile()
+        {
+            var fixture = new Fixture();
+            ManageProjectPropertiesPermission(fixture);
+
+            var rule = new Mock<IRepositoryRule>(MockBehavior.Strict);
+            rule
+                .As<IRepositoryReconcile>()
+                .Setup(x => x.Reconcile("TAS", "repository-id"))
+                .Verifiable();
+                
+            var ruleProvider = new Mock<IRulesProvider>();
+            ruleProvider
+                .Setup(x => x.RepositoryRules(It.IsAny<IVstsRestClient>()))
+                .Returns(new[] { rule.Object });
+            
+            var tokenizer = new Mock<ITokenizer>();
+            tokenizer
+                .Setup(x => x.Principal(It.IsAny<string>()))
+                .Returns(PrincipalWithClaims());
+            
+            var client = new Mock<IVstsRestClient>();
+            client
+                .Setup(x => x.Get(It.IsAny<IVstsRestRequest<PermissionsProjectId>>()))
+                .Returns(fixture.Create<PermissionsProjectId>());
+            
+            var request = new HttpRequestMessage();
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
+            
+            var function = new ReconcileFunction(client.Object, ruleProvider.Object, tokenizer.Object);
+            function.Reconcile(request, 
+                "somecompany", 
+                "TAS", 
+                "repository",
+                rule.Object.GetType().Name,
+                "repository-id").ShouldBeOfType<OkResult>();
             
             rule.Verify();
         }
@@ -85,12 +126,44 @@ namespace VstsLogAnalyticsFunction.Tests
             var result = function.Reconcile(request, 
                 "somecompany", 
                 "TAS", 
+                "globalpermissions",
                 "some-non-existing-rule").ShouldBeOfType<NotFoundObjectResult>();
 
             result
                 .Value
                 .ToString()
                 .ShouldContain("Rule not found");
+        }
+        
+        [Fact]
+        public void ScopeNotFound()
+        {
+            var fixture = new Fixture();
+            ManageProjectPropertiesPermission(fixture);
+
+
+            var tokenizer = new Mock<ITokenizer>();
+            tokenizer
+                .Setup(x => x.Principal(It.IsAny<string>()))
+                .Returns(PrincipalWithClaims());
+            
+            var client = new Mock<IVstsRestClient>();
+            client
+                .Setup(x => x.Get(It.IsAny<IVstsRestRequest<PermissionsProjectId>>()))
+                .Returns(fixture.Create<PermissionsProjectId>())
+                .Verifiable();
+            
+            var request = new HttpRequestMessage();
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
+            
+            var function = new ReconcileFunction(client.Object, new Mock<IRulesProvider>().Object, tokenizer.Object);
+            var result = function.Reconcile(request, 
+                "somecompany", 
+                "TAS", 
+                "non-existing-scope",
+                "some-non-existing-rule").ShouldBeOfType<NotFoundObjectResult>();
+
+            result.Value.ShouldBe("non-existing-scope");
         }
 
         [Fact]
@@ -104,6 +177,7 @@ namespace VstsLogAnalyticsFunction.Tests
             function.Reconcile(request , 
                 "somecompany", 
                 "TAS", 
+                "globalpermissions",
                 "some-non-existing-rule").ShouldBeOfType<UnauthorizedResult>();
         }
             
@@ -122,6 +196,7 @@ namespace VstsLogAnalyticsFunction.Tests
             function.Reconcile(request , 
                 "somecompany", 
                 "TAS", 
+                "globalpermissions",
                 "some-non-existing-rule").ShouldBeOfType<UnauthorizedResult>();
         }
         
@@ -150,6 +225,7 @@ namespace VstsLogAnalyticsFunction.Tests
             function.Reconcile(request , 
                 "somecompany", 
                 "TAS", 
+                "globalpermissions",
                 "some-non-existing-rule")
                 .ShouldBeOfType<UnauthorizedResult>();
             

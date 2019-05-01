@@ -21,19 +21,19 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
         private readonly ILogAnalyticsClient _client;
         private readonly IVstsRestClient _azuredo;
         private readonly IRulesProvider _rulesProvider;
-        private readonly EnvironmentConfig _azuredoConfig;
+        private readonly EnvironmentConfig _config;
         private readonly ITokenizer _tokenizer;
 
 
         public RepositoryScanPermissionsActivity(ILogAnalyticsClient client,
             IVstsRestClient azuredo,
             IRulesProvider rulesProvider,
-            EnvironmentConfig azuredoConfig, 
+            EnvironmentConfig config, 
             ITokenizer tokenizer)
         {
             _client = client;
             _azuredo = azuredo;
-            _azuredoConfig = azuredoConfig;
+            _config = config;
             _rulesProvider = rulesProvider;
             _tokenizer = tokenizer;
         }
@@ -76,7 +76,7 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
             {
                 Id = project,
                 Date = now,
-                RescanUrl =  $"https://{_azuredoConfig.FunctionAppHostname}/api/scan/{_azuredoConfig.Organization}/{project}/repository",
+                RescanUrl =  $"https://{_config.FunctionAppHostname}/api/scan/{_config.Organization}/{project}/repository",
                 Reports = repositories.Select(repository => new RepositoryExtensionData
                 {
                     Item = repository.Name,
@@ -85,7 +85,8 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
                         Name = rule.GetType().Name,
                         Status = rule.Evaluate(project, repository.Id),
                         Description = rule.Description,
-                        Why = rule.Why
+                        Why = rule.Why,
+                        Reconcile = ToReconcile(project, repository.Id, rule as IRepositoryReconcile)
                     }).ToList()
                 }).ToList()
             };
@@ -95,7 +96,16 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
                 await _client.AddCustomLogJsonAsync("preventive_analysis_log", item, "evaluatedDate");
             }
             
-            _azuredo.Put(ExtensionManagement.ExtensionData<RepositoriesExtensionData>("tas", _azuredoConfig.ExtensionName, "repository"), data);
+            _azuredo.Put(ExtensionManagement.ExtensionData<RepositoriesExtensionData>("tas", _config.ExtensionName, "repository"), data);
+        }
+
+        private Reconcile ToReconcile(string projectId, string repositoryId, IRepositoryReconcile rule)
+        {
+            return rule != null ? new Reconcile
+            {
+                Url = $"https://{_config.FunctionAppHostname}/api/reconcile/{_config.Organization}/{projectId}/repository/{rule.GetType().Name}/{repositoryId}",
+                Impact =  rule.Impact
+            } : null;
         }
     }
 }

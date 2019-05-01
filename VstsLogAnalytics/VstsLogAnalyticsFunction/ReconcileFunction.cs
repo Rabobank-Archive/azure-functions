@@ -24,17 +24,32 @@ namespace VstsLogAnalyticsFunction
         }
 
         [FunctionName(nameof(ReconcileFunction))]
-        public IActionResult Reconcile([HttpTrigger(AuthorizationLevel.Anonymous, Route = "reconcile/{organization}/{project}/globalpermissions/{ruleName}")]HttpRequestMessage request,
+        public IActionResult Reconcile([HttpTrigger(AuthorizationLevel.Anonymous, Route = "reconcile/{organization}/{project}/{scope}/{ruleName}/{item?}")]HttpRequestMessage request,
             string organization, 
             string project, 
-            string ruleName)
+            string scope,
+            string ruleName,
+            string item = null)
         {
             var id = _tokenizer.IdentifierFromClaim(request);
             if (id == null || !HasPermissionToReconcile(project, id))
             {
                 return new UnauthorizedResult();
             }
-            
+
+            switch (scope)
+            {
+                case "globalpermissions":
+                    return ReconcileGlobalPermissions(project, ruleName);
+                case "repository":
+                    return ReconcileRepository(project, ruleName, item);
+                default:
+                    return new NotFoundObjectResult(scope);
+            }
+        }
+
+        private IActionResult ReconcileGlobalPermissions(string project, string ruleName)
+        {
             var rule = _ruleProvider
                 .GlobalPermissions(_client)
                 .OfType<IProjectReconcile>()
@@ -44,8 +59,24 @@ namespace VstsLogAnalyticsFunction
             {
                 return new NotFoundObjectResult($"Rule not found {ruleName}");
             }
-            
+
             rule.Reconcile(project);
+            return new OkResult();
+        }
+
+        private IActionResult ReconcileRepository(string project, string ruleName, string item)
+        {
+            var rule = _ruleProvider
+                .RepositoryRules(_client)
+                .OfType<IRepositoryReconcile>()
+                .SingleOrDefault(x => x.GetType().Name == ruleName);
+
+            if (rule == null)
+            {
+                return new NotFoundObjectResult($"Rule not found {ruleName}");
+            }
+
+            rule.Reconcile(project, item);
             return new OkResult();
         }
 
