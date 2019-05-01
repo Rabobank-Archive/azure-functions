@@ -84,7 +84,8 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
                     {
                         Name = rule.GetType().Name,
                         Status = rule.Evaluate(project, repository.Id),
-                        Description = rule.Description
+                        Description = rule.Description,
+                        Why = rule.Why
                     }).ToList()
                 }).ToList()
             };

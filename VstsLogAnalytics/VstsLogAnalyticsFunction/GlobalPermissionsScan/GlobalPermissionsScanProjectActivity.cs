@@ -81,6 +81,7 @@ namespace VstsLogAnalyticsFunction.GlobalPermissionsScan
                 {
                     Name = r.GetType().Name,
                     Description = r.Description,
+                    Why = r.Why,
                     Status = r.Evaluate(project),
                     Reconcile = ToReconcile(project, r as IProjectReconcile)
                 }).ToList()
