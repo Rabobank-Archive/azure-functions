@@ -36,7 +36,7 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
                 .Returns(Task.CompletedTask)
                 .Verifiable();
 
-            var rule = mocks.Create<IRepositoryRule>(MockBehavior.Loose);
+            var rule = mocks.Create<IRule>(MockBehavior.Loose);
             rule
                 .Setup(x => x.Evaluate(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(true)
@@ -100,7 +100,7 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
              var iLoggerMock = new Mock<ILogger>();
              var clientMock = new Mock<IVstsRestClient>();
 
-             var rule = new Mock<IRepositoryRule>();
+             var rule = new Mock<IRule>();
              rule
                  .Setup(x => x.Evaluate(It.IsAny<string>(), It.IsAny<string>()))
                  .Returns(true);

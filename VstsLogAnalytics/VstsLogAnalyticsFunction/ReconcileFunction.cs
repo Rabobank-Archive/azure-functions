@@ -43,6 +43,8 @@ namespace VstsLogAnalyticsFunction
                     return ReconcileGlobalPermissions(project, ruleName);
                 case "repository":
                     return ReconcileRepository(project, ruleName, item);
+                case "build":
+                    return ReconcileRepository(project, ruleName, item);
                 default:
                     return new NotFoundObjectResult(scope);
             }
@@ -68,7 +70,7 @@ namespace VstsLogAnalyticsFunction
         {
             var rule = _ruleProvider
                 .RepositoryRules(_client)
-                .OfType<IRepositoryReconcile>()
+                .OfType<IReconcile>()
                 .SingleOrDefault(x => x.GetType().Name == ruleName);
 
             if (rule == null)

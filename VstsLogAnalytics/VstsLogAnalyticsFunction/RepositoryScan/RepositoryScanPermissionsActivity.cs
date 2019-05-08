@@ -89,7 +89,7 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
                         Status = rule.Evaluate(projectId, repository.Id),
                         Description = rule.Description,
                         Why = rule.Why,
-                        Reconcile = ToReconcile(projectId, repository.Id, rule as IRepositoryReconcile)
+                        Reconcile = ToReconcile(projectId, repository.Id, rule as IReconcile)
                     }).ToList()
                 }).ToList()
             };
@@ -102,7 +102,7 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
             _azuredo.Put(ExtensionManagement.ExtensionData<RepositoriesExtensionData>("tas", _config.ExtensionName, "repository"), data);
         }
 
-        private Reconcile ToReconcile(string projectId, string repositoryId, IRepositoryReconcile rule)
+        private Reconcile ToReconcile(string projectId, string repositoryId, IReconcile rule)
         {
             return rule != null ? new Reconcile
             {

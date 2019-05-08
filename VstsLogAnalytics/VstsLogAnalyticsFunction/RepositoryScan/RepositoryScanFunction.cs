@@ -30,8 +30,7 @@ namespace VstsLogAnalyticsFunction
 
                 var projects = _azuredo.Get(Requests.Project.Projects());
                 log.LogInformation($"Projects found: {projects.Count}");
-
-
+                
                 var instanceId = await orchestrationClientBase.StartNewAsync(nameof(RepositoryScanProjectOrchestration), projects);
                 log.LogInformation($"Started orchestration with ID = '{instanceId}'.");
 

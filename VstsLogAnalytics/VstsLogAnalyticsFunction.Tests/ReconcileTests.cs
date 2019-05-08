@@ -62,9 +62,9 @@ namespace VstsLogAnalyticsFunction.Tests
             var fixture = new Fixture();
             ManageProjectPropertiesPermission(fixture);
 
-            var rule = new Mock<IRepositoryRule>(MockBehavior.Strict);
+            var rule = new Mock<IRule>(MockBehavior.Strict);
             rule
-                .As<IRepositoryReconcile>()
+                .As<IReconcile>()
                 .Setup(x => x.Reconcile("TAS", "repository-id"))
                 .Verifiable();
                 
