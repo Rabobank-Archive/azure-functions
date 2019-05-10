@@ -9,7 +9,7 @@ using Xunit;
 
 namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
 {
-    public class RepositoryScanProjectOrchestrationTests
+    public class ItemScanProjectOrchestrationTests
     {
         [Fact]
         public async System.Threading.Tasks.Task RunWithHasTwoProjectsShouldCallActivityAsyncForEachProject()

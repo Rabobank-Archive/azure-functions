@@ -42,13 +42,19 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
                 .Returns(true)
                 .Verifiable();
 
-            var ruleSets = mocks.Create<IRulesProvider>();
-            ruleSets
+            var provider = mocks.Create<IRulesProvider>();
+            provider
                 .Setup(x => x.RepositoryRules(It.IsAny<IVstsRestClient>()))
-                .Returns(new [] { rule.Object });
-            ruleSets
+                .Returns(new [] { rule.Object })
+                .Verifiable();
+            provider
                 .Setup(x => x.BuildRules(It.IsAny<IVstsRestClient>()))
-                .Returns(new[] { rule.Object });
+                .Returns(new[] { rule.Object })
+                .Verifiable();
+            provider
+                .Setup(x => x.ReleaseRules(It.IsAny<IVstsRestClient>()))
+                .Returns(new[] {rule.Object})
+                .Verifiable();
 
             var durable = mocks.Create<DurableActivityContextBase>();
             durable
@@ -62,6 +68,9 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
             azure
                 .Setup(x => x.Get(It.IsAny<IVstsRestRequest<Multiple<BuildDefinition>>>()))
                 .Returns(fixture.Create<Multiple<BuildDefinition>>());
+            azure
+                .Setup(x => x.Get(It.IsAny<IVstsRestRequest<Multiple<ReleaseDefinition>>>()))
+                .Returns(fixture.Create<Multiple<ReleaseDefinition>>());
             azure
                 .Setup(x => x.Put(
                     It.IsAny<ExtmgmtRequest<ItemsExtensionData>>(),
@@ -83,7 +92,7 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
             var fun = new ItemScanPermissionsActivity(
                 analytics.Object,
                 azure.Object,
-                ruleSets.Object,
+                provider.Object,
                 fixture.Create<EnvironmentConfig>(),
                 new Mock<ITokenizer>().Object);
             await fun.RunAsActivity(

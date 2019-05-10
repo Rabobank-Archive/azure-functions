@@ -10,7 +10,7 @@ using Xunit;
 
 namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
 {
-    public class RepositoryScanFunctionTests
+    public class ItemScanFunctionTests
     {
         [Fact]
         public async System.Threading.Tasks.Task GivenThereAreProjectsItShouldStartOrchestration()

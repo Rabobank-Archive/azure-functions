@@ -49,6 +49,7 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
 
             await Run(project.Name, project.Id, "repository");
             await Run(project.Name, project.Id, "build");
+            await Run(project.Name, project.Id, "release");
         }
 
         [FunctionName(nameof(ItemScanPermissionsActivity) + nameof(RunFromHttp))]
@@ -99,6 +100,8 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
                     return CreateReportsForRepositories(projectId, scope);
                 case "build":
                     return CreateReportsForBuildPipelines(projectId, scope);
+                case "release":
+                    return CreateReportsForReleasePipelines(projectId, scope);
                 default:
                     throw new ArgumentException(nameof(scope));
             }
@@ -120,6 +123,18 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
         {
             var rules = _rulesProvider.BuildRules(_azuredo);
             var items = _azuredo.Get(Requests.Builds.BuildDefinitions(projectId));
+            
+            return items.Select(x => new ItemExtensionData
+            {
+                Item = x.Name,
+                Rules = Evaluate(projectId, scope, x.Id, rules)
+            }).ToList();
+        }
+        
+        private IList<ItemExtensionData> CreateReportsForReleasePipelines(string projectId, string scope)
+        {
+            var rules = _rulesProvider.ReleaseRules(_azuredo);
+            var items = _azuredo.Get(Requests.Release.Definitions(projectId));
             
             return items.Select(x => new ItemExtensionData
             {
