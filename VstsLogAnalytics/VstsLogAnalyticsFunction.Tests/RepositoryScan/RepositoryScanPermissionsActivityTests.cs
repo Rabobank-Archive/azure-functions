@@ -46,23 +46,27 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
             ruleSets
                 .Setup(x => x.RepositoryRules(It.IsAny<IVstsRestClient>()))
                 .Returns(new [] { rule.Object });
-
+            ruleSets
+                .Setup(x => x.BuildRules(It.IsAny<IVstsRestClient>()))
+                .Returns(new[] { rule.Object });
 
             var durable = mocks.Create<DurableActivityContextBase>();
             durable
                 .Setup(x => x.GetInput<Project>())
                 .Returns(fixture.Create<Project>());
             
-            
             var azure = mocks.Create<IVstsRestClient>();
             azure
                 .Setup(x => x.Get(It.IsAny<IVstsRestRequest<Multiple<Repository>>>()))
                 .Returns(fixture.Create<Multiple<Repository>>());
             azure
+                .Setup(x => x.Get(It.IsAny<IVstsRestRequest<Multiple<BuildDefinition>>>()))
+                .Returns(fixture.Create<Multiple<BuildDefinition>>());
+            azure
                 .Setup(x => x.Put(
-                    It.IsAny<ExtmgmtRequest<RepositoriesExtensionData>>(),
-                    It.IsAny<RepositoriesExtensionData>()))
-                .Returns((object req, RepositoriesExtensionData data) => data)
+                    It.IsAny<ExtmgmtRequest<ItemsExtensionData>>(),
+                    It.IsAny<ItemsExtensionData>()))
+                .Returns((object req, ItemsExtensionData data) => data)
                 .Verifiable();
 
             var durableOrchestrationClient = new Mock<DurableOrchestrationClientBase>();
@@ -76,7 +80,7 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
                     .Create());
 
             //Act
-            var fun = new RepositoryScanPermissionsActivity(
+            var fun = new ItemScanPermissionsActivity(
                 analytics.Object,
                 azure.Object,
                 ruleSets.Object,
@@ -111,7 +115,7 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
                  .Returns(new [] { rule.Object });
            
              //Act
-             var fun = new RepositoryScanPermissionsActivity(
+             var fun = new ItemScanPermissionsActivity(
                  logAnalyticsClient.Object, 
                  clientMock.Object, 
                  rulesProvider.Object,
@@ -139,7 +143,7 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
              var request = new HttpRequestMessage();
              request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
             
-             var function = new RepositoryScanPermissionsActivity(
+             var function = new ItemScanPermissionsActivity(
                  new Mock<ILogAnalyticsClient>().Object, 
                  new Mock<IVstsRestClient>().Object, 
                  new Mock<IRulesProvider>().Object,
@@ -149,6 +153,7 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
              var result = await function.RunFromHttp(request , 
                  "somecompany", 
                  "TAS", 
+                 "repository",
                  new Mock<ILogger>().Object);
                 
              result.ShouldBeOfType<UnauthorizedResult>();
@@ -178,7 +183,7 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
              var request = new HttpRequestMessage();
              request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
             
-             var function = new RepositoryScanPermissionsActivity(
+             var function = new ItemScanPermissionsActivity(
                  new Mock<ILogAnalyticsClient>().Object, 
                  azure.Object, 
                  new Mock<IRulesProvider>().Object,
@@ -188,6 +193,7 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
              var result = await function.RunFromHttp(request , 
                  "somecompany", 
                  "TAS", 
+                 "repository",
                  new Mock<ILogger>().Object);
                 
              result.ShouldBeOfType<OkResult>();

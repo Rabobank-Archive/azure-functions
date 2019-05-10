@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace VstsLogAnalyticsFunction.Model
 {
-    public class RepositoriesExtensionData : ExtensionDataReports<RepositoryExtensionData>
+    public class ItemsExtensionData : ExtensionDataReports<ItemExtensionData>
     {
         public DateTime Date { get; set; }
         
@@ -12,7 +12,7 @@ namespace VstsLogAnalyticsFunction.Model
         
         public string HasReconcilePermissionUrl { get; set; }
 
-        public IEnumerable<PreventiveLogItem> Flatten()
+        public IEnumerable<PreventiveLogItem> Flatten(string scope)
         {
             return 
                 from report in Reports
@@ -20,7 +20,7 @@ namespace VstsLogAnalyticsFunction.Model
                 select new PreventiveLogItem
                 {
                     Project = Id, 
-                    Scope = "repository",
+                    Scope = scope,
                     Item = report.Item,
                     Rule = rule.Name,
                     Status = rule.Status,
@@ -29,7 +29,7 @@ namespace VstsLogAnalyticsFunction.Model
         }
     }
 
-    public class RepositoryExtensionData
+    public class ItemExtensionData
     {
         public string Item { get; set; }
         public IList<EvaluatedRule> Rules { get; set; }

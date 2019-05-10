@@ -13,13 +13,13 @@ namespace VstsLogAnalyticsFunction.Tests
         public void FlattenReport()
         {
             var now = new DateTime(2019, 4, 29, 10, 47, 23);
-            var data = new RepositoriesExtensionData
+            var data = new ItemsExtensionData
             {
                 Id = "TAS",
                 Date = now,
                 Reports = new []
                 {
-                    new RepositoryExtensionData
+                    new ItemExtensionData
                     {
                         Item = "SOx-Compliant-Demo",
                         Rules = new []
@@ -49,7 +49,7 @@ namespace VstsLogAnalyticsFunction.Tests
                 EvaluatedDate = now
             }.ToExpectedObject();
 
-            var result = data.Flatten().Single();
+            var result = data.Flatten("repository").Single();
             expected.ShouldEqual(result);
         }
     }

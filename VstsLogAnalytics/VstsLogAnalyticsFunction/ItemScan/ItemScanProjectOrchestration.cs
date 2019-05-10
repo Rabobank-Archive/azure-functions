@@ -8,9 +8,9 @@ using Response = SecurePipelineScan.VstsService.Response;
 
  namespace VstsLogAnalyticsFunction
 {
-    public class RepositoryScanProjectOrchestration
+    public class ItemScanProjectOrchestration
     {
-        [FunctionName(nameof(RepositoryScanProjectOrchestration))]
+        [FunctionName(nameof(ItemScanProjectOrchestration))]
         public async Task Run(
             [OrchestrationTrigger] DurableOrchestrationContextBase context,
             ILogger log)
@@ -22,7 +22,7 @@ using Response = SecurePipelineScan.VstsService.Response;
             foreach (var project in projects)
             {
                 log.LogInformation($"Call ActivityReport for project {project.Name}");
-                tasks.Add(context.CallActivityAsync(nameof(RepositoryScanPermissionsActivity), project));
+                tasks.Add(context.CallActivityAsync(nameof(ItemScanPermissionsActivity), project));
             }
 
             await Task.WhenAll(tasks);

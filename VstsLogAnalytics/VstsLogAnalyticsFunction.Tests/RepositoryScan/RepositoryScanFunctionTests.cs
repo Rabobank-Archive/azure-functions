@@ -29,12 +29,12 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
             var timer = CreateTimerInfoMock();
 
             //Act
-            RepositoryScanFunction fun = new RepositoryScanFunction(azure.Object);
+            ItemScanFunction fun = new ItemScanFunction(azure.Object);
             await fun.Run(timer, orchestration.Object, logger.Object);
 
             //Assert
             orchestration.Verify(
-                x => x.StartNewAsync(nameof(RepositoryScanProjectOrchestration), It.IsAny<Multiple<Project>>()), 
+                x => x.StartNewAsync(nameof(ItemScanProjectOrchestration), It.IsAny<Multiple<Project>>()), 
                 Times.Once);
         }
 

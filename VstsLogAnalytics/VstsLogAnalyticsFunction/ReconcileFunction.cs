@@ -44,7 +44,7 @@ namespace VstsLogAnalyticsFunction
                 case "repository":
                     return ReconcileRepository(project, ruleName, item);
                 case "build":
-                    return ReconcileRepository(project, ruleName, item);
+                    return ReconcileBuildPipeline(project, ruleName, item);
                 default:
                     return new NotFoundObjectResult(scope);
             }
@@ -82,8 +82,24 @@ namespace VstsLogAnalyticsFunction
             return new OkResult();
         }
 
+        private IActionResult ReconcileBuildPipeline(string project, string ruleName, string item)
+        {
+            var rule = _ruleProvider
+                .BuildRules(_client)
+                .OfType<IReconcile>()
+                .SingleOrDefault(x => x.GetType().Name == ruleName);
+
+            if (rule == null)
+            {
+                return new NotFoundObjectResult($"Rule not found {ruleName}");
+            }
+
+            rule.Reconcile(project, item);
+            return new OkResult();
+        }
+
         [FunctionName("HasPermissionToReconcileFunction")]
-        public async Task<IActionResult> HasPermission([HttpTrigger(AuthorizationLevel.Anonymous, Route = "reconcile/{organization}/{project}/haspermissions")]HttpRequestMessage request,
+        public IActionResult HasPermission([HttpTrigger(AuthorizationLevel.Anonymous, Route = "reconcile/{organization}/{project}/haspermissions")]HttpRequestMessage request,
             string organization, 
             string project)
         {

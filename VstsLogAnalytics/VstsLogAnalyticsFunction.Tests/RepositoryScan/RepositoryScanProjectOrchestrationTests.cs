@@ -24,12 +24,12 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
                 .Returns(fixture.Create<Multiple<Project>>());
 
             //Act
-            var target = new RepositoryScanProjectOrchestration();
+            var target = new ItemScanProjectOrchestration();
             await target.Run(context.Object, new Mock<ILogger>().Object);
             
             //Assert
             context.Verify(x => 
-                x.CallActivityAsync(nameof(RepositoryScanPermissionsActivity), It.IsAny<Project>()),
+                x.CallActivityAsync(nameof(ItemScanPermissionsActivity), It.IsAny<Project>()),
                 Times.AtLeast(2));
         }        
     }

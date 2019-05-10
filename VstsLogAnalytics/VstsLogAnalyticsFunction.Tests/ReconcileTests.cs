@@ -233,20 +233,19 @@ namespace VstsLogAnalyticsFunction.Tests
         }
         
         [Fact]
-        public async void UnauthorizedWithoutHeaderWhenHasPermission()
+        public void UnauthorizedWithoutHeaderWhenHasPermission()
         {           
             var request = new HttpRequestMessage();
             request.Headers.Authorization = null;
             
             var function = new ReconcileFunction(null, new Mock<IRulesProvider>().Object, new Mock<ITokenizer>().Object);
-            var result = await function.HasPermission(request , 
-                "somecompany", 
-                "TAS");
-            result.ShouldBeOfType<UnauthorizedResult>();
+            function
+                .HasPermission(request, "somecompany","TAS")
+                .ShouldBeOfType<UnauthorizedResult>();
         }
             
         [Fact]
-        public async void UnauthorizedWithoutNameClaimWhenHasPermission()
+        public void UnauthorizedWithoutNameClaimWhenHasPermission()
         {
             var tokenizer = new Mock<ITokenizer>();
             tokenizer
@@ -257,14 +256,13 @@ namespace VstsLogAnalyticsFunction.Tests
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
             
             var function = new ReconcileFunction(null, new Mock<IRulesProvider>().Object, tokenizer.Object);
-            var result = await function.HasPermission(request , 
-                "somecompany", 
-                "TAS");
-            result.ShouldBeOfType<UnauthorizedResult>();
+            function
+                .HasPermission(request,"somecompany", "TAS")
+                .ShouldBeOfType<UnauthorizedResult>();
         }
         
         [Fact]
-        public async void WithoutPermission()
+        public void WithoutPermission()
         {
             var fixture = new Fixture();
             fixture.Customize<Permission>(ctx =>
@@ -285,15 +283,16 @@ namespace VstsLogAnalyticsFunction.Tests
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
             
             var function = new ReconcileFunction(client.Object, new Mock<IRulesProvider>().Object, tokenizer.Object);
-            var result = await function.HasPermission(request,
-                "somecompany",
-                "TAS");
-            result.ShouldBeOfType<OkObjectResult>().Value.ShouldBe(false);
+            function
+                .HasPermission(request,"somecompany","TAS")
+                .ShouldBeOfType<OkObjectResult>()
+                .Value
+                .ShouldBe(false);
             client.Verify();
         }
 
         [Fact]
-        public async void WithPermission()
+        public void WithPermission()
         {
             var fixture = new Fixture();
             ManageProjectPropertiesPermission(fixture);
@@ -313,10 +312,11 @@ namespace VstsLogAnalyticsFunction.Tests
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
             
             var function = new ReconcileFunction(client.Object, new Mock<IRulesProvider>().Object, tokenizer.Object);
-            var result = await function.HasPermission(request,
-                "somecompany",
-                "TAS");
-            result.ShouldBeOfType<OkObjectResult>().Value.ShouldBe(true);
+            function
+                .HasPermission(request,"somecompany","TAS")
+                .ShouldBeOfType<OkObjectResult>()
+                .Value
+                .ShouldBe(true);
             client.Verify();
         }
         
