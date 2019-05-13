@@ -50,8 +50,8 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
             var project = context.GetInput<Response.Project>() ?? throw new Exception("No Project found in parameter DurableActivityContextBase");
 
             await Run(project.Name, project.Id, "repository");
-            await Run(project.Name, project.Id, "build");
-            await Run(project.Name, project.Id, "release");
+            await Run(project.Name, project.Id, "buildpipelines");
+            await Run(project.Name, project.Id, "releasepipelines");
         }
 
         [FunctionName(nameof(ItemScanPermissionsActivity) + nameof(RunFromHttp))]
@@ -81,7 +81,7 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
             {
                 Id = projectName,
                 Date = now,
-                RescanUrl = $"https://{_config.FunctionAppHostname}/api/scan/{_config.Organization}/{projectName}/repository",
+                RescanUrl = $"https://{_config.FunctionAppHostname}/api/scan/{_config.Organization}/{projectName}/{scope}",
                 HasReconcilePermissionUrl = $"https://{_config.FunctionAppHostname}/api/reconcile/{_config.Organization}/{projectId}/haspermissions",
                 Reports = CreateReports(projectId, scope)
             };
@@ -100,9 +100,9 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
             {
                 case "repository":
                     return CreateReportsForRepositories(projectId, scope);
-                case "build":
+                case "buildpipelines":
                     return CreateReportsForBuildPipelines(projectId, scope);
-                case "release":
+                case "releasepipelines":
                     return CreateReportsForReleasePipelines(projectId, scope);
                 default:
                     throw new ArgumentException(nameof(scope));
