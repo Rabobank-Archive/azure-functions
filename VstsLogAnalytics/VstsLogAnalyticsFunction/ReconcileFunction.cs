@@ -1,6 +1,6 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
@@ -42,9 +42,11 @@ namespace VstsLogAnalyticsFunction
                 case "globalpermissions":
                     return ReconcileGlobalPermissions(project, ruleName);
                 case "repository":
-                    return ReconcileRepository(project, ruleName, item);
-                case "build":
-                    return ReconcileBuildPipeline(project, ruleName, item);
+                    return ReconcileItem(project, ruleName, item, _ruleProvider.RepositoryRules(_client));
+                case "buildpipelines":
+                    return ReconcileItem(project, ruleName, item, _ruleProvider.BuildRules(_client));
+                case "releasepipelines":
+                    return ReconcileItem(project, ruleName, item, _ruleProvider.ReleaseRules(_client));
                 default:
                     return new NotFoundObjectResult(scope);
             }
@@ -66,26 +68,9 @@ namespace VstsLogAnalyticsFunction
             return new OkResult();
         }
 
-        private IActionResult ReconcileRepository(string project, string ruleName, string item)
+        private static IActionResult ReconcileItem(string project, string ruleName, string item, IEnumerable<IRule> rules)
         {
-            var rule = _ruleProvider
-                .RepositoryRules(_client)
-                .OfType<IReconcile>()
-                .SingleOrDefault(x => x.GetType().Name == ruleName);
-
-            if (rule == null)
-            {
-                return new NotFoundObjectResult($"Rule not found {ruleName}");
-            }
-
-            rule.Reconcile(project, item);
-            return new OkResult();
-        }
-
-        private IActionResult ReconcileBuildPipeline(string project, string ruleName, string item)
-        {
-            var rule = _ruleProvider
-                .BuildRules(_client)
+            var rule = rules
                 .OfType<IReconcile>()
                 .SingleOrDefault(x => x.GetType().Name == ruleName);
 
@@ -99,7 +84,8 @@ namespace VstsLogAnalyticsFunction
         }
 
         [FunctionName("HasPermissionToReconcileFunction")]
-        public IActionResult HasPermission([HttpTrigger(AuthorizationLevel.Anonymous, Route = "reconcile/{organization}/{project}/haspermissions")]HttpRequestMessage request,
+        public IActionResult HasPermission([HttpTrigger(AuthorizationLevel.Anonymous, 
+            Route = "reconcile/{organization}/{project}/haspermissions")]HttpRequestMessage request,
             string organization, 
             string project)
         {
