@@ -20,6 +20,8 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
 {
     public class ItemScanPermissionsActivity
     {
+        public const string ActivityName = nameof(ItemScanPermissionsActivity) + nameof(RunAsActivity);
+        
         private readonly ILogAnalyticsClient _client;
         private readonly IVstsRestClient _azuredo;
         private readonly IRulesProvider _rulesProvider;
@@ -39,7 +41,7 @@ namespace VstsLogAnalyticsFunction.RepositoryScan
             _tokenizer = tokenizer;
         }
 
-        [FunctionName(nameof(ItemScanPermissionsActivity) + nameof(RunAsActivity))]
+        [FunctionName(ActivityName)]
         public async Task RunAsActivity(
             [ActivityTrigger] DurableActivityContextBase context,
             ILogger log)

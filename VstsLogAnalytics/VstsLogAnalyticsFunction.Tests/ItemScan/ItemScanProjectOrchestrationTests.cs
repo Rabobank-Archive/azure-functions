@@ -29,7 +29,7 @@ namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
             
             //Assert
             context.Verify(x => 
-                x.CallActivityAsync(nameof(ItemScanPermissionsActivity), It.IsAny<Project>()),
+                x.CallActivityAsync(ItemScanPermissionsActivity.ActivityName, It.IsAny<Project>()),
                 Times.AtLeast(2));
         }        
     }
