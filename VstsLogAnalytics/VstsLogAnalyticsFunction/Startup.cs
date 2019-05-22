@@ -47,13 +47,14 @@ namespace VstsLogAnalyticsFunction
             var extensionName = Environment.GetEnvironmentVariable("extensionName", EnvironmentVariableTarget.Process) ?? "tastest";
             var functionAppUrl =
                 Environment.GetEnvironmentVariable("WEBSITE_HOSTNAME", EnvironmentVariableTarget.Process) ??
-                "https://azdoanalyticsdev.azurewebsites.net";
+                throw new ArgumentException("WEBSITE_HOSTNAME");
             
             var config = new EnvironmentConfig
             {
                 ExtensionName = extensionName,
                 Organization = organization,
-                FunctionAppHostname = functionAppUrl
+                FunctionAppHostname = functionAppUrl,
+                StorageAccountConnectionString = Environment.GetEnvironmentVariable("connectionString")
             };
 
             services.AddSingleton(config);
