@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
@@ -45,17 +46,14 @@ namespace VstsLogAnalyticsFunction
                     "tas", 
                     "tas",
                     "BuildReports", 
-                    report.Project));
+                    report.Project)) ?? new ExtensionDataReports<BuildScanReport> { Id = report.Project, Reports = new List<BuildScanReport>() };
 
-            if (reports == null)
-            {
-                reports = new ExtensionDataReports<BuildScanReport>() {Id = report.Project, Reports = new[] {report}};
-            }
-            else
-            {
-                reports.Reports.Insert(0, report);
-                reports.Reports = reports.Reports.Take(50).ToList();
-            }
+            reports.Reports = reports
+                .Reports
+                .Concat(new[]{report})
+                .OrderByDescending(x => x.CreatedDate)
+                .Take(50)
+                .ToList();
 
             _azuredo.Put(
                 Requests.ExtensionManagement.ExtensionData<ExtensionDataReports<BuildScanReport>>("tas", "tas",
