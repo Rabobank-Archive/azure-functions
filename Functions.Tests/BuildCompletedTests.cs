@@ -9,11 +9,11 @@ using SecurePipelineScan.Rules.Events;
 using SecurePipelineScan.Rules.Reports;
 using SecurePipelineScan.VstsService;
 using Shouldly;
-using VstsLogAnalytics.Client;
+using LogAnalytics.Client;
 using Xunit;
-using Report = VstsLogAnalyticsFunction.ExtensionDataReports<SecurePipelineScan.Rules.Reports.BuildScanReport>;
+using Report = Functions.ExtensionDataReports<SecurePipelineScan.Rules.Reports.BuildScanReport>;
 
-namespace VstsLogAnalyticsFunction.Tests
+namespace Functions.Tests
 {
     public class BuildCompletedTests
     {

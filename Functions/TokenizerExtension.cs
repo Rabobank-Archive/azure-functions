@@ -1,7 +1,7 @@
 using System.Net.Http;
 using System.Security.Claims;
 
-namespace VstsLogAnalyticsFunction
+namespace Functions
 {
     internal static class TokenizerExtension
     {

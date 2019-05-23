@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace VstsLogAnalyticsFunction.Model
+namespace Functions.Model
 {
     public class GlobalPermissionsExtensionData : ExtensionDataReports<EvaluatedRule>
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace VstsLogAnalyticsFunction
+namespace Functions
 {
     public class LogAnalyticsReleaseItem
     {

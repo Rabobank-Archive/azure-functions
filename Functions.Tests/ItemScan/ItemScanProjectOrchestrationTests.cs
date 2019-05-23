@@ -1,13 +1,13 @@
 using AutoFixture;
 using AutoFixture.AutoMoq;
+using Functions.RepositoryScan;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Moq;
 using SecurePipelineScan.VstsService.Response;
-using VstsLogAnalyticsFunction.RepositoryScan;
 using Xunit;
 
-namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
+namespace Functions.Tests.RepositoryScan
 {
     public class ItemScanProjectOrchestrationTests
     {

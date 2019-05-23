@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using SecurePipelineScan.VstsService.Response;
 
-namespace VstsLogAnalyticsFunction
+namespace Functions
 {
     public class ExtensionDataReports<TReport> : ExtensionData
     {

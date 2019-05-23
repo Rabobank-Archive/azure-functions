@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
 
-namespace VstsLogAnalyticsFunction.Tests
+namespace Functions.Tests
 {
     public class StartupTests
     {

@@ -1,4 +1,4 @@
-﻿namespace VstsLogAnalyticsFunction
+﻿namespace Functions
 {
     public class AgentInformation
     {

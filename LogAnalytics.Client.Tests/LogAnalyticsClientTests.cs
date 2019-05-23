@@ -1,6 +1,5 @@
 using System.Threading.Tasks;
 using Flurl.Http.Testing;
-using VstsLogAnalytics.Client;
 using Xunit;
 
 namespace LogAnalytics.Client.Tests

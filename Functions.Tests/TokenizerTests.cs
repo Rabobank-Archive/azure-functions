@@ -4,7 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using Shouldly;
 using Xunit;
 
-namespace VstsLogAnalyticsFunction.Tests
+namespace Functions.Tests
 {
     public class TokenizerTests
     {

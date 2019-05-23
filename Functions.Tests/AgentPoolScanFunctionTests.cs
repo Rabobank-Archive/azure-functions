@@ -12,10 +12,10 @@ using System.Net.Http;
 using Microsoft.Azure.Services.AppAuthentication;
 using Shouldly;
 using Unmockable;
-using VstsLogAnalytics.Client;
+using LogAnalytics.Client;
 using Xunit;
 
-namespace VstsLogAnalyticsFunction.Tests
+namespace Functions.Tests
 {
     public class AgentPoolScanFunctionTests
     {

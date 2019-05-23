@@ -8,7 +8,7 @@ using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Response;
 using Xunit;
 
-namespace VstsLogAnalyticsFunction.Tests.RepositoryScan
+namespace Functions.Tests.RepositoryScan
 {
     public class ItemScanFunctionTests
     {

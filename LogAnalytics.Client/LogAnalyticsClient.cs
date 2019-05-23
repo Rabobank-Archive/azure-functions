@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Flurl.Http;
 using Newtonsoft.Json;
 
-namespace VstsLogAnalytics.Client
+namespace LogAnalytics.Client
 {
     /// <summary>
     /// Copied from: https://docs.microsoft.com/en-us/azure/azure-monitor/platform/data-collector-api#c-sample

@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Functions.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
@@ -9,12 +10,11 @@ using Microsoft.Extensions.Logging;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Requests;
-using VstsLogAnalytics.Client;
-using VstsLogAnalyticsFunction.Model;
+using LogAnalytics.Client;
 using Project = SecurePipelineScan.VstsService.Response.Project;
 using Task = System.Threading.Tasks.Task;
 
-namespace VstsLogAnalyticsFunction.GlobalPermissionsScan
+namespace Functions.GlobalPermissionsScan
 {
     public class GlobalPermissionsScanProjectActivity
     {

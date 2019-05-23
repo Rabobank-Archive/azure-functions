@@ -1,14 +1,15 @@
 using System.Threading.Tasks;
+using Functions.GlobalPermissionsScan;
+using Functions.Tests;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Timers;
 using Microsoft.Extensions.Logging;
 using Moq;
 using SecurePipelineScan.VstsService;
-using VstsLogAnalyticsFunction.GlobalPermissionsScan;
 using Response = SecurePipelineScan.VstsService.Response;
 using Xunit;
 
-namespace VstsLogAnalyticsFunction.Tests.GlobalPermissionsScan
+namespace Functions.Tests.GlobalPermissionsScan
 {
     public class SecurityScanFunctionTests
     {

@@ -5,11 +5,11 @@ using System;
 using Newtonsoft.Json.Linq;
 using SecurePipelineScan.Rules.Events;
 using SecurePipelineScan.Rules.Reports;
-using VstsLogAnalytics.Client;
+using LogAnalytics.Client;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace VstsLogAnalyticsFunction
+namespace Functions
 {
     public class ReleaseDeploymentCompletedFunction
     {

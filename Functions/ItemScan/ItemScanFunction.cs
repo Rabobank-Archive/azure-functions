@@ -4,7 +4,7 @@ using SecurePipelineScan.VstsService;
 using System;
 using Requests = SecurePipelineScan.VstsService.Requests;
 
-namespace VstsLogAnalyticsFunction
+namespace Functions
 {
     public class ItemScanFunction
     {

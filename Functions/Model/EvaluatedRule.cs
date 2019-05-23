@@ -1,4 +1,4 @@
-﻿namespace VstsLogAnalyticsFunction.Model
+﻿namespace Functions.Model
 {
     public class EvaluatedRule
     {

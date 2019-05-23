@@ -1,11 +1,10 @@
 using System.Linq;
 using SecurePipelineScan.VstsService.Response;
-using Xunit;
 using Shouldly;
+using Xunit;
 using Xunit.Abstractions;
 
-
-namespace VstsLogAnalyticsFunction.Tests
+namespace Functions.Tests
 {
     public class ProjectsTestHelper
     {

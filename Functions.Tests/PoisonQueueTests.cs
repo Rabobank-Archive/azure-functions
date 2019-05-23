@@ -4,9 +4,8 @@ using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Queue;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
-namespace VstsLogAnalyticsFunction.Tests
+namespace Functions.Tests
 {
     public class PoisonQueueTests
     {
@@ -52,7 +51,7 @@ namespace VstsLogAnalyticsFunction.Tests
         public void SkipIfQueueNameIsEmpty()
         {
             var func = new PoisonQueueFunction(new EnvironmentConfig { StorageAccountConnectionString = "UseDevelopmentStorage=true" });
-            func.Requeue("");
+            func.Requeue(null, "");
         }
     }
 }

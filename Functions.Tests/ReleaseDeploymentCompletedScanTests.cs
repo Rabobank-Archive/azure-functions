@@ -5,15 +5,15 @@ using System.IO;
 using Newtonsoft.Json.Linq;
 using SecurePipelineScan.Rules.Events;
 using SecurePipelineScan.Rules.Reports;
-using VstsLogAnalytics.Client;
+using LogAnalytics.Client;
 using Xunit;
 using SecurePipelineScan.VstsService;
 using System.Linq;
 using System.Threading.Tasks;
 using Shouldly;
-using Report = VstsLogAnalyticsFunction.ExtensionDataReports<SecurePipelineScan.Rules.Reports.ReleaseDeploymentCompletedReport>;
+using Report = Functions.ExtensionDataReports<SecurePipelineScan.Rules.Reports.ReleaseDeploymentCompletedReport>;
 
-namespace VstsLogAnalyticsFunction.Tests
+namespace Functions.Tests
 {
     public class ReleaseDeploymentCompletedScanTests
     {

@@ -1,5 +1,4 @@
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;
@@ -12,7 +11,7 @@ using SecurePipelineScan.VstsService.Response;
 using Shouldly;
 using Xunit;
 
-namespace VstsLogAnalyticsFunction.Tests
+namespace Functions.Tests
 {
     public class ReconcileTests
     {

@@ -1,11 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using ExpectedObjects;
-using VstsLogAnalyticsFunction.Model;
+using Functions.Model;
 using Xunit;
 
-namespace VstsLogAnalyticsFunction.Tests
+namespace Functions.Tests
 {
     public class GlobalPermissionsExtensionDataTests
     {

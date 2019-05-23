@@ -9,18 +9,18 @@ using Microsoft.Azure.WebJobs;
 using Moq;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
-using VstsLogAnalytics.Client;
+using LogAnalytics.Client;
 using Xunit;
 using Project = SecurePipelineScan.VstsService.Response.Project;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 using Flurl;
+using Functions.GlobalPermissionsScan;
+using Functions.Model;
 using Microsoft.AspNetCore.Mvc;
 using Shouldly;
-using VstsLogAnalyticsFunction.GlobalPermissionsScan;
-using VstsLogAnalyticsFunction.Model;
 
-namespace VstsLogAnalyticsFunction.Tests.GlobalPermissionsScan
+namespace Functions.Tests.GlobalPermissionsScan
 {
     public class GlobalPermissionsScanProjectActivityTests
     {

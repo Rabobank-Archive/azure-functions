@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using Response = SecurePipelineScan.VstsService.Response;
 using Task = System.Threading.Tasks.Task;
 
-namespace VstsLogAnalyticsFunction.GlobalPermissionsScan
+namespace Functions.GlobalPermissionsScan
 {
     public class GlobalPermissionsScanProjectOrchestration
     

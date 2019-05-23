@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Requests;
 
-namespace VstsLogAnalyticsFunction.GlobalPermissionsScan
+namespace Functions.GlobalPermissionsScan
 {
     public class GlobalPermissionsScanFunction
     {

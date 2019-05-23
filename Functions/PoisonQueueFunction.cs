@@ -1,9 +1,11 @@
 using System;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Queue;
-using VstsLogAnalyticsFunction;
+using Functions;
+using Microsoft.Azure.WebJobs.Extensions.Http;
 
 public class PoisonQueueFunction
 {
@@ -15,7 +17,9 @@ public class PoisonQueueFunction
     }
 
     [FunctionName(nameof(PoisonQueueFunction))]
-    public void Requeue(string queueName)
+    public async Task Requeue(
+        [HttpTrigger(AuthorizationLevel.Anonymous)]HttpRequestMessage request, 
+        string queueName)
     {
         if (string.IsNullOrEmpty(queueName)) return;
 
@@ -25,7 +29,7 @@ public class PoisonQueueFunction
         var queue = client.GetQueueReference(queueName);
         var poison = client.GetQueueReference($"{queueName}-poison");
 
-        RequeuePoisonMessages(queue, poison);
+        await RequeuePoisonMessages(queue, poison);
     }
     
     public static async Task RequeuePoisonMessages(CloudQueue queue, CloudQueue poison)

@@ -10,10 +10,10 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using Microsoft.Azure.Services.AppAuthentication;
 using Unmockable;
-using VstsLogAnalytics.Client;
+using LogAnalytics.Client;
 using Requests = SecurePipelineScan.VstsService.Requests;
 
-namespace VstsLogAnalyticsFunction
+namespace Functions
 {
 
     public class AgentPoolScanFunction

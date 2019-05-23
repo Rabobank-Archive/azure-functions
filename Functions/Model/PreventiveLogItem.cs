@@ -1,6 +1,6 @@
 using System;
 
-namespace VstsLogAnalyticsFunction.Model
+namespace Functions.Model
 {
     public class PreventiveLogItem
     {

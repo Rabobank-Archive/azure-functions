@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace VstsLogAnalytics.Client
+namespace LogAnalytics.Client
 {
     public interface ILogAnalyticsClient
     {

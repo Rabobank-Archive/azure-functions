@@ -11,11 +11,11 @@ using System.Net.Http;
 using Microsoft.Azure.Services.AppAuthentication;
 using SecurePipelineScan.Rules.Security;
 using Unmockable;
-using VstsLogAnalytics.Client;
+using LogAnalytics.Client;
 
-[assembly: WebJobsStartup(typeof(VstsLogAnalyticsFunction.Startup))]
+[assembly: WebJobsStartup(typeof(Functions.Startup))]
 
-namespace VstsLogAnalyticsFunction
+namespace Functions
 {
     public class Startup : IWebJobsStartup
     {

@@ -7,10 +7,10 @@ using Newtonsoft.Json.Linq;
 using SecurePipelineScan.Rules.Events;
 using SecurePipelineScan.Rules.Reports;
 using SecurePipelineScan.VstsService;
-using VstsLogAnalytics.Client;
+using LogAnalytics.Client;
 using Requests = SecurePipelineScan.VstsService.Requests;
 
-namespace VstsLogAnalyticsFunction
+namespace Functions
 {
     public class BuildCompletedFunction
     {

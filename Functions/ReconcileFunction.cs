@@ -8,7 +8,7 @@ using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
 using Requests = SecurePipelineScan.VstsService.Requests;
 
-namespace VstsLogAnalyticsFunction
+namespace Functions
 {
     public class ReconcileFunction
     {
