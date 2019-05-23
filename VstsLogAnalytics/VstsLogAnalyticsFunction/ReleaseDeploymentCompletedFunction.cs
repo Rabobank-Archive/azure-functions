@@ -43,23 +43,12 @@ namespace VstsLogAnalyticsFunction
             "Releases",report.Project));
 
             var releases = new List<ReleaseDeploymentCompletedReport>{ report };
-
-            if (releaseReports != null && releaseReports.Reports != null)
-            {
-                foreach (var release in releaseReports.Reports)
-                {
-                    if (release.CreatedDate < new DateTime(2019, 4, 3))
-                    {
-                        release.UsesManagedAgentsOnly = null;
-                    }
-                }
-                releases.AddRange(releaseReports.Reports.Take(49));
-            }
+            releases.AddRange(releaseReports?.Reports);
 
             log.LogInformation($"Add release information to Azure DevOps Compliancy logging: {report.Project}");
             _azuredo.Put(
                 SecurePipelineScan.VstsService.Requests.ExtensionManagement.ExtensionData<ExtensionDataReports<ReleaseDeploymentCompletedReport>>("tas", "tas",
-                    "Releases"), new ExtensionDataReports<ReleaseDeploymentCompletedReport> { Reports = releases, Id = report.Project });
+                    "Releases"), new ExtensionDataReports<ReleaseDeploymentCompletedReport> { Reports = releases.OrderByDescending(x => x.CreatedDate).Take(50).ToList(), Id = report.Project });
 
             log.LogInformation("Done retrieving deployment information. Send to log analytics");
             await _client.AddCustomLogJsonAsync("DeploymentStatus", report, "Date");
