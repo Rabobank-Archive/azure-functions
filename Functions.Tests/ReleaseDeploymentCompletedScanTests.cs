@@ -33,7 +33,7 @@ namespace Functions.Tests
 
 
             var azDoClient = new Mock<IVstsRestClient>();
-            azDoClient.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Report>>()))
+            azDoClient.Setup(x => x.Get(It.IsAny<IVstsRequest<Report>>()))
                 .Returns(fixture.Create<Report>());
                 
 
@@ -44,8 +44,8 @@ namespace Functions.Tests
                 new Mock<Microsoft.Extensions.Logging.ILogger>().Object
             );
 
-            azDoClient.Verify(x => x.Get(It.IsAny<IVstsRestRequest<Report>>()), Times.Once);
-            azDoClient.Verify(x => x.Put(It.IsAny<IVstsRestRequest<Report>>(),It.Is<Report>(r => r.Reports.Count == 50)), Times.Once);
+            azDoClient.Verify(x => x.Get(It.IsAny<IVstsRequest<Report>>()), Times.Once);
+            azDoClient.Verify(x => x.Put(It.IsAny<IVstsRequest<Report>>(),It.Is<Report>(r => r.Reports.Count == 50)), Times.Once);
 
             logAnalyticsClient.Verify(x => 
                 x.AddCustomLogJsonAsync(It.IsAny<string>(), report, It.IsAny<string>()), Times.AtLeastOnce());
@@ -69,12 +69,12 @@ namespace Functions.Tests
 
             // Return reports from yesterday and tomorrow from extension data storage
             var azdo = new Mock<IVstsRestClient>();
-            azdo.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Report>>()))
+            azdo.Setup(x => x.Get(It.IsAny<IVstsRequest<Report>>()))
                 .Returns(new Report { Reports = new[]{ yesterday, tomorrow } });
 
             // Capture the result to assert it later on.
-            azdo.Setup(x => x.Put(It.IsAny<IVstsRestRequest<Report>>(), It.IsAny<Report>()))
-                .Callback<IVstsRestRequest, Report>((req, r) => result = r);
+            azdo.Setup(x => x.Put(It.IsAny<IVstsRequest<Report>>(), It.IsAny<Report>()))
+                .Callback<IVstsRequest, Report>((req, r) => result = r);
 
             // Act
             var fun = new ReleaseDeploymentCompletedFunction(new Mock<ILogAnalyticsClient>().Object, client.Object, azdo.Object);

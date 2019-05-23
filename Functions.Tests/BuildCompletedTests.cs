@@ -34,11 +34,11 @@ namespace Functions.Tests
 
             var azuredo = new Mock<IVstsRestClient>();
             azuredo
-                .Setup(x => x.Get(It.IsAny<IVstsRestRequest<Report>>()))
+                .Setup(x => x.Get(It.IsAny<IVstsRequest<Report>>()))
                 .Returns(_fixture.Create<Report>());
             
             azuredo
-                .Setup(x => x.Put(It.IsAny<IVstsRestRequest<Report>>(), It.Is<Report>(r => r.Reports.Count == 4)))
+                .Setup(x => x.Put(It.IsAny<IVstsRequest<Report>>(), It.Is<Report>(r => r.Reports.Count == 4)))
                 .Verifiable();
 
             var function = new BuildCompletedFunction(client.Object, scan.Object, azuredo.Object);
@@ -61,12 +61,12 @@ namespace Functions.Tests
 
             var azuredo = new Mock<IVstsRestClient>();
             azuredo
-                .Setup(x => x.Get(It.IsAny<IVstsRestRequest<Report>>()))
+                .Setup(x => x.Get(It.IsAny<IVstsRequest<Report>>()))
                 .Returns(_fixture.Create<Report>());
             
             azuredo
                 .Setup(x => x.Put(
-                    It.IsAny<IVstsRestRequest<Report>>(),
+                    It.IsAny<IVstsRequest<Report>>(),
                     It.Is<Report>(r => r.Reports.Count == 50)))
                 .Verifiable();
 
@@ -95,12 +95,12 @@ namespace Functions.Tests
 
             // Return reports from yesterday and tomorrow from extension data storage
             var azdo = new Mock<IVstsRestClient>();
-            azdo.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Report>>()))
+            azdo.Setup(x => x.Get(It.IsAny<IVstsRequest<Report>>()))
                 .Returns(new Report { Reports = new[]{ yesterday, tomorrow }.ToList() });
 
             // Capture the result to assert it later on.
-            azdo.Setup(x => x.Put(It.IsAny<IVstsRestRequest<Report>>(), It.IsAny<Report>()))
-                .Callback<IVstsRestRequest, Report>((req, r) => result = r);
+            azdo.Setup(x => x.Put(It.IsAny<IVstsRequest<Report>>(), It.IsAny<Report>()))
+                .Callback<IVstsRequest, Report>((req, r) => result = r);
 
             // Act
             var fun = new BuildCompletedFunction(new Mock<ILogAnalyticsClient>().Object, client.Object, azdo.Object);
@@ -125,7 +125,7 @@ namespace Functions.Tests
             var azuredo = new Mock<IVstsRestClient>();            
             azuredo
                 .Setup(x => x.Put(
-                    It.IsAny<IVstsRestRequest<Report>>(),
+                    It.IsAny<IVstsRequest<Report>>(),
                     It.IsAny<Report>()))
                 .Verifiable();
 

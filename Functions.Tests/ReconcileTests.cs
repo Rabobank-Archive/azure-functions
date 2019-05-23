@@ -39,7 +39,7 @@ namespace Functions.Tests
             
             var client = new Mock<IVstsRestClient>();
             client
-                .Setup(x => x.Get(It.IsAny<IVstsRestRequest<PermissionsProjectId>>()))
+                .Setup(x => x.Get(It.IsAny<IVstsRequest<PermissionsProjectId>>()))
                 .Returns(fixture.Create<PermissionsProjectId>());
             
             var request = new HttpRequestMessage();
@@ -79,7 +79,7 @@ namespace Functions.Tests
             
             var client = new Mock<IVstsRestClient>();
             client
-                .Setup(x => x.Get(It.IsAny<IVstsRestRequest<PermissionsProjectId>>()))
+                .Setup(x => x.Get(It.IsAny<IVstsRequest<PermissionsProjectId>>()))
                 .Returns(fixture.Create<PermissionsProjectId>());
             
             var request = new HttpRequestMessage();
@@ -114,7 +114,7 @@ namespace Functions.Tests
             
             var client = new Mock<IVstsRestClient>();
             client
-                .Setup(x => x.Get(It.IsAny<IVstsRestRequest<PermissionsProjectId>>()))
+                .Setup(x => x.Get(It.IsAny<IVstsRequest<PermissionsProjectId>>()))
                 .Returns(fixture.Create<PermissionsProjectId>())
                 .Verifiable();
             
@@ -148,7 +148,7 @@ namespace Functions.Tests
             
             var client = new Mock<IVstsRestClient>();
             client
-                .Setup(x => x.Get(It.IsAny<IVstsRestRequest<PermissionsProjectId>>()))
+                .Setup(x => x.Get(It.IsAny<IVstsRequest<PermissionsProjectId>>()))
                 .Returns(fixture.Create<PermissionsProjectId>())
                 .Verifiable();
             
@@ -213,7 +213,7 @@ namespace Functions.Tests
 
             var client = new Mock<IVstsRestClient>();
             client
-                .Setup(x => x.Get(It.Is<IVstsRestRequest<PermissionsProjectId>>(req => req.Uri.Contains("ab84d5a2-4b8d-68df-9ad3-cc9c8884270c"))))
+                .Setup(x => x.Get(It.Is<IVstsRequest<PermissionsProjectId>>(req => req.Uri.Contains("ab84d5a2-4b8d-68df-9ad3-cc9c8884270c"))))
                 .Returns(fixture.Create<PermissionsProjectId>())
                 .Verifiable();
             
@@ -274,7 +274,7 @@ namespace Functions.Tests
 
             var client = new Mock<IVstsRestClient>();
             client
-                .Setup(x => x.Get(It.Is<IVstsRestRequest<PermissionsProjectId>>(req => req.Uri.Contains("ab84d5a2-4b8d-68df-9ad3-cc9c8884270c"))))
+                .Setup(x => x.Get(It.Is<IVstsRequest<PermissionsProjectId>>(req => req.Uri.Contains("ab84d5a2-4b8d-68df-9ad3-cc9c8884270c"))))
                 .Returns(fixture.Create<PermissionsProjectId>())
                 .Verifiable();
             
@@ -303,7 +303,7 @@ namespace Functions.Tests
 
             var client = new Mock<IVstsRestClient>();
             client
-                .Setup(x => x.Get(It.Is<IVstsRestRequest<PermissionsProjectId>>(req => req.Uri.Contains("ab84d5a2-4b8d-68df-9ad3-cc9c8884270c"))))
+                .Setup(x => x.Get(It.Is<IVstsRequest<PermissionsProjectId>>(req => req.Uri.Contains("ab84d5a2-4b8d-68df-9ad3-cc9c8884270c"))))
                 .Returns(fixture.Create<PermissionsProjectId>())
                 .Verifiable();
             

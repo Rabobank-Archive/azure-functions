@@ -22,7 +22,7 @@ namespace Functions.Tests.RepositoryScan
             var orchestration = new Mock<DurableOrchestrationClientBase>();
             var azure = new Mock<IVstsRestClient>();
             azure
-                .Setup(x => x.Get(It.IsAny<VstsRestRequest<Multiple<Project>>>()))
+                .Setup(x => x.Get(It.IsAny<IVstsRequest<Multiple<Project>>>()))
                 .Returns(fixture.Create<Multiple<Project>>);    
 
             var logger = new Mock<ILogger>();

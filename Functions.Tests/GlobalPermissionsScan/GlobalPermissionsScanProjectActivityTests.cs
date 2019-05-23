@@ -128,7 +128,7 @@ namespace Functions.Tests.GlobalPermissionsScan
 
             // Assert
             clientMock
-                .Verify(x => x.Put(It.IsAny<IVstsRestRequest<GlobalPermissionsExtensionData>>(), 
+                .Verify(x => x.Put(It.IsAny<IVstsRequest<GlobalPermissionsExtensionData>>(), 
                     It.Is<GlobalPermissionsExtensionData>(d => 
                         d.Reports.Any(r => r.Reconcile != null &&
                                            r.Reconcile.Url == $"https://{config.FunctionAppHostname}/api/reconcile/{config.Organization}/dummyproj/globalpermissions/{ruleName}" &&

@@ -24,14 +24,14 @@ namespace Functions.Tests.GlobalPermissionsScan
 
             var projects = ProjectsTestHelper.CreateMultipleProjectsResponse(1);
             
-            clientMock.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Response.Multiple<Response.Project>>>())).Returns(projects);
+            clientMock.Setup(x => x.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.Project>>>())).Returns(projects);
 
             //Act
             GlobalPermissionsScanFunction fun = new GlobalPermissionsScanFunction(clientMock.Object);
             await fun.Run(timerInfoMock, orchestrationClientMock.Object, logMock.Object);
             
             //Assert
-            clientMock.Verify(x => x.Get(It.IsAny<IVstsRestRequest<Response.Multiple<Response.Project>>>()), Times.Exactly(1));
+            clientMock.Verify(x => x.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.Project>>>()), Times.Exactly(1));
 
         }
 
@@ -46,7 +46,7 @@ namespace Functions.Tests.GlobalPermissionsScan
 
             var projects = ProjectsTestHelper.CreateMultipleProjectsResponse(2);
             
-            clientMock.Setup(x => x.Get(It.IsAny<IVstsRestRequest<Response.Multiple<Response.Project>>>())).Returns(projects);
+            clientMock.Setup(x => x.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.Project>>>())).Returns(projects);
 
             //Act
             GlobalPermissionsScanFunction fun = new GlobalPermissionsScanFunction(clientMock.Object);
