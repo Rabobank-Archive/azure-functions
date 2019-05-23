@@ -15,6 +15,7 @@ namespace VstsLogAnalyticsFunction.Tests
         {
             var fixture = new Fixture();
             Environment.SetEnvironmentVariable("TOKEN_SECRET", fixture.Create<string>());
+            Environment.SetEnvironmentVariable("WEBSITE_HOSTNAME", fixture.Create<string>());
             
             var startup = new Startup();
 

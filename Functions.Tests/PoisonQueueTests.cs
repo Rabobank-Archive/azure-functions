@@ -23,8 +23,10 @@ namespace VstsLogAnalyticsFunction.Tests
             var queue = client.GetQueueReference("some-queue");
             var poison = client.GetQueueReference($"some-poison");
 
-            await queue.CreateIfNotExistsAsync();
-            await poison.CreateIfNotExistsAsync();
+            await queue.CreateAsync();
+            await queue.ClearAsync();
+            await poison.CreateAsync();
+            await poison.ClearAsync();
 
             var content = Guid.NewGuid().ToString();
             await poison.AddMessageAsync(new CloudQueueMessage(content));
@@ -38,14 +40,12 @@ namespace VstsLogAnalyticsFunction.Tests
                 .Result
                 .ShouldBeNull();
             
-            var message = await queue.PeekMessageAsync();
+            var message = await queue.GetMessageAsync();
             message
                 .ShouldNotBeNull();
             message
                 .AsString
                 .ShouldBe(content);
-            
-            await queue.ClearAsync();
         }
 
         [Fact]
