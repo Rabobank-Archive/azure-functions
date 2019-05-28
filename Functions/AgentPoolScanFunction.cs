@@ -55,7 +55,7 @@ namespace Functions
             };
 
             var orgPools = _client.Get(Requests.DistributedTask.OrganizationalAgentPools());
-            var poolsToObserve = orgPools.Value.Where(x => observedPools.Any(p => p.PoolName == x.Name));
+            var poolsToObserve = orgPools.Where(x => observedPools.Any(p => p.PoolName == x.Name));
             var list = new List<LogAnalyticsAgentStatus>();
 
             foreach (var pool in poolsToObserve)

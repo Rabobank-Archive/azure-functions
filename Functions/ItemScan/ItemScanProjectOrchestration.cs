@@ -15,8 +15,8 @@ using Response = SecurePipelineScan.VstsService.Response;
             [OrchestrationTrigger] DurableOrchestrationContextBase context,
             ILogger log)
         {
-            var projects = context.GetInput<Response.Multiple<Response.Project>>();
-            log.LogInformation($"Creating tasks for every project total amount of projects {projects.Count()}");
+            var projects = context.GetInput<IList<Response.Project>>();
+            log.LogInformation($"Creating tasks for every project total amount of projects {projects.Count}");
 
             var tasks = new List<Task>();
             foreach (var project in projects)

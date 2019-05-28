@@ -2,6 +2,7 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using SecurePipelineScan.VstsService;
 using System;
+using System.Linq;
 using Requests = SecurePipelineScan.VstsService.Requests;
 
 namespace Functions
@@ -28,7 +29,7 @@ namespace Functions
             {
                 log.LogInformation($"Item scan timed check start: {DateTime.Now}");
 
-                var projects = _azuredo.Get(Requests.Project.Projects());
+                var projects = _azuredo.Get(Requests.Project.Projects()).ToList();
                 log.LogInformation($"Projects found: {projects.Count}");
                 
                 var instanceId = await orchestrationClientBase.StartNewAsync(nameof(ItemScanProjectOrchestration), projects);
