@@ -21,11 +21,11 @@ namespace Functions.Tests
             var client = new Mock<IVstsRestClient>();
             client
                 .Setup(x => x.Get(It.IsAny<IVstsRequest<Multiple<Project>>>()))
-                .Returns(fixture.Create<Multiple<Project>>())
+                .Returns(fixture.CreateMany<Project>)
                 .Verifiable();
             client
                 .Setup(x => x.Get(It.IsAny<IVstsRequest<Multiple<Hook>>>()))
-                .Returns(fixture.Create<Multiple<Hook>>())
+                .Returns(fixture.CreateMany<Hook>)
                 .Verifiable();
 
             // Act
@@ -72,11 +72,11 @@ namespace Functions.Tests
             var client = new Mock<IVstsRestClient>();
             client
                 .Setup(x => x.Get(It.IsAny<IVstsRequest<Multiple<Project>>>()))
-                .Returns(fixture.Create<Multiple<Project>>())
+                .Returns(fixture.CreateMany<Project>)
                 .Verifiable();
             client
                 .Setup(x => x.Get(It.IsAny<IVstsRequest<Multiple<Hook>>>()))
-                .Returns(fixture.Create<Multiple<Hook>>())
+                .Returns(fixture.CreateMany<Hook>)
                 .Verifiable();
             
             // Act
@@ -113,11 +113,11 @@ namespace Functions.Tests
             var client = new Mock<IVstsRestClient>();
             client
                 .Setup(x => x.Get(It.IsAny<IVstsRequest<Multiple<Project>>>()))
-                .Returns(fixture.Create<Multiple<Project>>())
+                .Returns(fixture.CreateMany<Project>)
                 .Verifiable();
             client
                 .Setup(x => x.Get(It.IsAny<IVstsRequest<Multiple<Hook>>>()))
-                .Returns(fixture.Create<Multiple<Hook>>())
+                .Returns(fixture.CreateMany<Hook>)
                 .Verifiable();
             
             // Act

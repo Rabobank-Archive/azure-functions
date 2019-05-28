@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using AutoFixture;
 using AutoFixture.AutoMoq;
 using Microsoft.Azure.WebJobs;
@@ -23,7 +24,7 @@ namespace Functions.Tests.RepositoryScan
             var azure = new Mock<IVstsRestClient>();
             azure
                 .Setup(x => x.Get(It.IsAny<IVstsRequest<Multiple<Project>>>()))
-                .Returns(fixture.Create<Multiple<Project>>);    
+                .Returns(fixture.CreateMany<Project>);    
 
             var logger = new Mock<ILogger>();
             var timer = CreateTimerInfoMock();
@@ -34,7 +35,7 @@ namespace Functions.Tests.RepositoryScan
 
             //Assert
             orchestration.Verify(
-                x => x.StartNewAsync(nameof(ItemScanProjectOrchestration), It.IsAny<Multiple<Project>>()), 
+                x => x.StartNewAsync(nameof(ItemScanProjectOrchestration), It.IsAny<IEnumerable<Project>>()), 
                 Times.Once);
         }
 

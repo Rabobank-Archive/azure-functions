@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using SecurePipelineScan.VstsService.Response;
 using Shouldly;
@@ -41,7 +42,7 @@ namespace Functions.Tests
             return project;
         }
 
-        public static Multiple<Project> CreateMultipleProjectsResponse(int number)
+        public static IEnumerable<Project> CreateMultipleProjectsResponse(int number)
         {
 //            var items = new List<Project>();
 //            for (int i = 0; i < number; i++)
@@ -49,18 +50,16 @@ namespace Functions.Tests
 //                items.Add(CreateDummyProject());
 //            }
 
-            var items = Enumerable
-                .Range(0, number)
-                .Select(_ => CreateDummyProject());
-             return new Multiple<Project>(items.ToArray());  
+            return Enumerable
+                 .Range(0, number)
+                 .Select(_ => CreateDummyProject());  
         }
 
         [Fact]
         public void CreateMultipleProjectsResponseShouldCreateGivenNumberOfProjects()
         {
             var projects = CreateMultipleProjectsResponse(2);
-            _testOutputHelper.WriteLine(projects.Count.ToString());
-            projects.Count.ShouldBe(2);
+            projects.Count().ShouldBe(2);
 
         }
     }

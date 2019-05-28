@@ -64,13 +64,13 @@ namespace Functions.Tests.RepositoryScan
             var azure = mocks.Create<IVstsRestClient>();
             azure
                 .Setup(x => x.Get(It.IsAny<IVstsRequest<Multiple<Repository>>>()))
-                .Returns(fixture.Create<Multiple<Repository>>());
+                .Returns(fixture.CreateMany<Repository>);
             azure
                 .Setup(x => x.Get(It.IsAny<IVstsRequest<Multiple<BuildDefinition>>>()))
-                .Returns(fixture.Create<Multiple<BuildDefinition>>());
+                .Returns(fixture.CreateMany<BuildDefinition>);
             azure
                 .Setup(x => x.Get(It.IsAny<IVstsRequest<Multiple<ReleaseDefinition>>>()))
-                .Returns(fixture.Create<Multiple<ReleaseDefinition>>());
+                .Returns(fixture.CreateMany<ReleaseDefinition>);
             azure
                 .Setup(x => x.Put(
                     It.IsAny<ExtmgmtRequest<ItemsExtensionData>>(),
@@ -183,7 +183,7 @@ namespace Functions.Tests.RepositoryScan
              var azure = mocks.Create<IVstsRestClient>();
              azure
                  .Setup(x => x.Get(It.IsAny<IVstsRequest<Multiple<Repository>>>()))
-                 .Returns(fixture.Create<Multiple<Repository>>());
+                 .Returns(fixture.CreateMany<Repository>);
 
              azure
                  .Setup(x => x.Get(It.IsAny<IVstsRequest<ProjectProperties>>()))

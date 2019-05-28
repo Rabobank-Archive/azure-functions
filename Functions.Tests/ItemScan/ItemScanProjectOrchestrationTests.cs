@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using AutoFixture;
 using AutoFixture.AutoMoq;
 using Functions.RepositoryScan;
@@ -20,8 +22,8 @@ namespace Functions.Tests.RepositoryScan
             //Arrange
             var context = new Mock<DurableOrchestrationContextBase>();
             context
-                .Setup(c => c.GetInput<Multiple<Project>>())
-                .Returns(fixture.Create<Multiple<Project>>());
+                .Setup(c => c.GetInput<IList<Project>>())
+                .Returns(fixture.CreateMany<Project>().ToList());
 
             //Act
             var target = new ItemScanProjectOrchestration();
