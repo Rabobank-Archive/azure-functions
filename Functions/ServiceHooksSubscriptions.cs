@@ -32,7 +32,7 @@ public class ServiceHooksSubscriptions
 
     private void UpdateServiceSubscriptions(string accountName, string accountKey)
     {
-        var hooks = _client.Get(Hooks.Subscriptions());
+        var hooks = _client.Get(Hooks.Subscriptions()).ToList();
         foreach (var project in _client.Get(Project.Projects()))
         {
             AddHookIfNotSubscribed(
