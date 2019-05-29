@@ -35,17 +35,20 @@ namespace Functions.Tests
             var azDoClient = new Mock<IVstsRestClient>();
             azDoClient.Setup(x => x.Get(It.IsAny<IVstsRequest<Report>>()))
                 .Returns(fixture.Create<Report>());
-                
+
+            var config = fixture.Create<EnvironmentConfig>();
 
             var json = ReleaseDeploymentCompletedJson();
-            var fun = new ReleaseDeploymentCompletedFunction(logAnalyticsClient.Object, client.Object, azDoClient.Object);
+            var fun = new ReleaseDeploymentCompletedFunction(logAnalyticsClient.Object, client.Object, azDoClient.Object, config);
             await fun.Run(
                 json, 
                 new Mock<Microsoft.Extensions.Logging.ILogger>().Object
             );
 
-            azDoClient.Verify(x => x.Get(It.IsAny<IVstsRequest<Report>>()), Times.Once);
-            azDoClient.Verify(x => x.Put(It.IsAny<IVstsRequest<Report>>(),It.Is<Report>(r => r.Reports.Count == 50)), Times.Once);
+            azDoClient.Verify(x => 
+                x.Get(It.Is<IVstsRequest<Report>>(r => r.Uri.Contains(config.ExtensionName))), Times.Once);
+            azDoClient.Verify(x => 
+                x.Put(It.Is<IVstsRequest<Report>>(r => r.Uri.Contains(config.ExtensionName)),It.Is<Report>(r => r.Reports.Count == 50)), Times.Once);
 
             logAnalyticsClient.Verify(x => 
                 x.AddCustomLogJsonAsync(It.IsAny<string>(), report, It.IsAny<string>()), Times.AtLeastOnce());
@@ -77,7 +80,7 @@ namespace Functions.Tests
                 .Callback<IVstsRequest, Report>((req, r) => result = r);
 
             // Act
-            var fun = new ReleaseDeploymentCompletedFunction(new Mock<ILogAnalyticsClient>().Object, client.Object, azdo.Object);
+            var fun = new ReleaseDeploymentCompletedFunction(new Mock<ILogAnalyticsClient>().Object, client.Object, azdo.Object, new EnvironmentConfig());
             await fun.Run(
                 ReleaseDeploymentCompletedJson(), 
                 new Mock<Microsoft.Extensions.Logging.ILogger>().Object

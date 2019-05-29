@@ -16,14 +16,18 @@ namespace Functions
         private readonly ILogAnalyticsClient _client;
         private readonly IServiceHookScan<ReleaseDeploymentCompletedReport> _scan;
         private readonly IVstsRestClient _azuredo;
+        private readonly EnvironmentConfig _config;
 
-        public ReleaseDeploymentCompletedFunction(ILogAnalyticsClient client,
+        public ReleaseDeploymentCompletedFunction(
+            ILogAnalyticsClient client,
             IServiceHookScan<ReleaseDeploymentCompletedReport> scan,
-            IVstsRestClient azuredo)
+            IVstsRestClient azuredo, 
+            EnvironmentConfig config)
         {
             _client = client;
             _scan = scan;
             _azuredo = azuredo;
+            _config = config;
         }
 
 
@@ -39,7 +43,7 @@ namespace Functions
             var report = _scan.Completed(JObject.Parse(releaseCompleted));
 
             var releaseReports = _azuredo.Get(
-                    SecurePipelineScan.VstsService.Requests.ExtensionManagement.ExtensionData<ExtensionDataReports<ReleaseDeploymentCompletedReport>>("tas", "tas",
+                    SecurePipelineScan.VstsService.Requests.ExtensionManagement.ExtensionData<ExtensionDataReports<ReleaseDeploymentCompletedReport>>("tas", _config.ExtensionName,
             "Releases",report.Project));
 
             var releases = new List<ReleaseDeploymentCompletedReport>{ report };
@@ -47,7 +51,7 @@ namespace Functions
 
             log.LogInformation($"Add release information to Azure DevOps Compliancy logging: {report.Project}");
             _azuredo.Put(
-                SecurePipelineScan.VstsService.Requests.ExtensionManagement.ExtensionData<ExtensionDataReports<ReleaseDeploymentCompletedReport>>("tas", "tas",
+                SecurePipelineScan.VstsService.Requests.ExtensionManagement.ExtensionData<ExtensionDataReports<ReleaseDeploymentCompletedReport>>("tas", _config.ExtensionName,
                     "Releases"), new ExtensionDataReports<ReleaseDeploymentCompletedReport> { Reports = releases.OrderByDescending(x => x.CreatedDate).Take(50).ToList(), Id = report.Project });
 
             log.LogInformation("Done retrieving deployment information. Send to log analytics");
