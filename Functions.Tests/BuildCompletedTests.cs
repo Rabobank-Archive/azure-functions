@@ -22,6 +22,7 @@ namespace Functions.Tests
         [Fact]
         public void RunBuildCompletedFunction()
         {
+            var config = _fixture.Create<EnvironmentConfig>();
             var scan = new Mock<IServiceHookScan<BuildScanReport>>();
             scan
                 .Setup(x => x.Completed(It.IsAny<JObject>()))
@@ -34,14 +35,17 @@ namespace Functions.Tests
 
             var azuredo = new Mock<IVstsRestClient>();
             azuredo
-                .Setup(x => x.Get(It.IsAny<IVstsRequest<Report>>()))
-                .Returns(_fixture.Create<Report>());
+                .Setup(x => x.Get(It.Is<IVstsRequest<Report>>(r => r.Uri.Contains(config.ExtensionName))))
+                .Returns(_fixture.Create<Report>())
+                .Verifiable();
             
             azuredo
-                .Setup(x => x.Put(It.IsAny<IVstsRequest<Report>>(), It.Is<Report>(r => r.Reports.Count == 4)))
+                .Setup(x => x.Put(
+                    It.Is<IVstsRequest<Report>>(r => r.Uri.Contains(config.ExtensionName)), 
+                    It.Is<Report>(r => r.Reports.Count == 4)))
                 .Verifiable();
 
-            var function = new BuildCompletedFunction(client.Object, scan.Object, azuredo.Object);
+            var function = new BuildCompletedFunction(client.Object, scan.Object, azuredo.Object, config);
             function.Run(File.ReadAllText(Path.Combine("Assets", "buildcompleted.json")),
                 new Mock<ILogger>().Object);
             
@@ -53,7 +57,6 @@ namespace Functions.Tests
         public void RunBuildCompletedFunction_LimitsReports()
         {
             _fixture.RepeatCount = 50;
-            
             var scan = new Mock<IServiceHookScan<BuildScanReport>>();
             scan
                 .Setup(x => x.Completed(It.IsAny<JObject>()))
@@ -70,7 +73,7 @@ namespace Functions.Tests
                     It.Is<Report>(r => r.Reports.Count == 50)))
                 .Verifiable();
 
-            var function = new BuildCompletedFunction(new Mock<ILogAnalyticsClient>().Object, scan.Object, azuredo.Object);
+            var function = new BuildCompletedFunction(new Mock<ILogAnalyticsClient>().Object, scan.Object, azuredo.Object, new EnvironmentConfig());
             function.Run(File.ReadAllText(Path.Combine("Assets", "buildcompleted.json")),
                 new Mock<ILogger>().Object);
             
@@ -103,7 +106,7 @@ namespace Functions.Tests
                 .Callback<IVstsRequest, Report>((req, r) => result = r);
 
             // Act
-            var fun = new BuildCompletedFunction(new Mock<ILogAnalyticsClient>().Object, client.Object, azdo.Object);
+            var fun = new BuildCompletedFunction(new Mock<ILogAnalyticsClient>().Object, client.Object, azdo.Object, new EnvironmentConfig());
             fun.Run(
                 File.ReadAllText(Path.Combine("Assets", "buildcompleted.json")), 
                 new Mock<ILogger>().Object
@@ -129,7 +132,7 @@ namespace Functions.Tests
                     It.IsAny<Report>()))
                 .Verifiable();
 
-            var function = new BuildCompletedFunction(new Mock<ILogAnalyticsClient>().Object, scan.Object, azuredo.Object);
+            var function = new BuildCompletedFunction(new Mock<ILogAnalyticsClient>().Object, scan.Object, azuredo.Object, new EnvironmentConfig());
             function.Run(File.ReadAllText(Path.Combine("Assets", "buildcompleted.json")),
                 new Mock<ILogger>().Object);
             

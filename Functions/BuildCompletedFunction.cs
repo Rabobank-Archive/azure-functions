@@ -17,14 +17,18 @@ namespace Functions
         private readonly ILogAnalyticsClient _client;
         private readonly IServiceHookScan<BuildScanReport> _scan;
         private readonly IVstsRestClient _azuredo;
+        private readonly EnvironmentConfig _config;
 
-        public BuildCompletedFunction(ILogAnalyticsClient client,
+        public BuildCompletedFunction(
+            ILogAnalyticsClient client,
             IServiceHookScan<BuildScanReport> scan,
-            IVstsRestClient azuredo)
+            IVstsRestClient azuredo, 
+            EnvironmentConfig config)
         {
             _client = client;
             _scan = scan;
             _azuredo = azuredo;
+            _config = config;
         }
 
         [FunctionName(nameof(BuildCompletedFunction))]
@@ -44,7 +48,7 @@ namespace Functions
             var reports = _azuredo.Get(
                 Requests.ExtensionManagement.ExtensionData<ExtensionDataReports<BuildScanReport>>(
                     "tas", 
-                    "tas",
+                    _config.ExtensionName,
                     "BuildReports", 
                     report.Project)) ?? new ExtensionDataReports<BuildScanReport> { Id = report.Project, Reports = new List<BuildScanReport>() };
 
@@ -56,7 +60,7 @@ namespace Functions
                 .ToList();
 
             _azuredo.Put(
-                Requests.ExtensionManagement.ExtensionData<ExtensionDataReports<BuildScanReport>>("tas", "tas",
+                Requests.ExtensionManagement.ExtensionData<ExtensionDataReports<BuildScanReport>>("tas", _config.ExtensionName,
                     "BuildReports", report.Project), reports);
         }
     }
