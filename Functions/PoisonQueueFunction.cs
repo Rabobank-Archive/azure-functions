@@ -18,18 +18,16 @@ public class PoisonQueueFunction
 
     [FunctionName(nameof(PoisonQueueFunction))]
     public async Task Requeue(
-        [HttpTrigger(AuthorizationLevel.Anonymous)]HttpRequestMessage request, 
-        string queueName)
+        [HttpTrigger(AuthorizationLevel.Anonymous, Route = "poison/requeue/{queue}")]HttpRequestMessage request, string queue)
     {
-        if (string.IsNullOrEmpty(queueName)) return;
+        if (string.IsNullOrEmpty(queue)) return;
 
         var storage = CloudStorageAccount.Parse(_config.StorageAccountConnectionString);
         var client = storage.CreateCloudQueueClient();
-            
-        var queue = client.GetQueueReference(queueName);
-        var poison = client.GetQueueReference($"{queueName}-poison");
 
-        await RequeuePoisonMessages(queue, poison);
+        await RequeuePoisonMessages(
+            client.GetQueueReference(queue), 
+        client.GetQueueReference($"{queue}-poison"));
     }
     
     public static async Task RequeuePoisonMessages(CloudQueue queue, CloudQueue poison)
@@ -37,7 +35,9 @@ public class PoisonQueueFunction
         var message = await poison.GetMessageAsync();
         while (message != null)
         {
+            await poison.DeleteMessageAsync(message);
             await queue.AddMessageAsync(message);
+            
             message = await poison.GetMessageAsync();
         }
     }
