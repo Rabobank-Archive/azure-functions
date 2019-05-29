@@ -136,7 +136,7 @@ namespace Functions.RepositoryScan
         private IList<ItemExtensionData> CreateReportsForReleasePipelines(string projectId, string scope)
         {
             var rules = _rulesProvider.ReleaseRules(_azuredo);
-            var items = _azuredo.Get(Requests.Release.Definitions(projectId));
+            var items = _azuredo.Get(Requests.ReleaseManagement.Definitions(projectId));
             
             return items.Select(x => new ItemExtensionData
             {
