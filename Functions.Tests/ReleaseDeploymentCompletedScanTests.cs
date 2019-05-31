@@ -10,6 +10,7 @@ using Xunit;
 using SecurePipelineScan.VstsService;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Shouldly;
 using Report = Functions.ExtensionDataReports<SecurePipelineScan.Rules.Reports.ReleaseDeploymentCompletedReport>;
 
@@ -20,29 +21,29 @@ namespace Functions.Tests
         private readonly IFixture _fixture = new Fixture();
         
         [Fact]
-        public async Task Test()
+        public async Task RunReleaseDeploymentCompletedFunction()
         {
-            var report = _fixture.Create<ReleaseDeploymentCompletedReport>();            
+            _fixture.Customize<Report>(r =>
+                r.With(x => x.Reports, _fixture.CreateMany<ReleaseDeploymentCompletedReport>(50).ToList()));
+            
+            var report = _fixture.Create<ReleaseDeploymentCompletedReport>();
+            var config = _fixture.Create<EnvironmentConfig>();
             var logAnalyticsClient = new Mock<ILogAnalyticsClient>();
-            var client = new Mock<IServiceHookScan<ReleaseDeploymentCompletedReport>>();
-            client
+            var scan = new Mock<IServiceHookScan<ReleaseDeploymentCompletedReport>>();
+            scan
                 .Setup(x => x.Completed(It.IsAny<JObject>()))
                 .Returns(report);
 
-            _fixture.Customize<Report>(r => r.With(x => x.Reports, _fixture.CreateMany<ReleaseDeploymentCompletedReport>(50).ToList()));
-
-
             var azDoClient = new Mock<IVstsRestClient>();
-            azDoClient.Setup(x => x.Get(It.IsAny<IVstsRequest<Report>>()))
+            azDoClient
+                .Setup(x => x.Get(It.IsAny<IVstsRequest<Report>>()))
                 .Returns(_fixture.Create<Report>());
 
-            var config = _fixture.Create<EnvironmentConfig>();
-
             var json = ReleaseDeploymentCompletedJson();
-            var fun = new ReleaseDeploymentCompletedFunction(logAnalyticsClient.Object, client.Object, azDoClient.Object, config);
+            var fun = new ReleaseDeploymentCompletedFunction(logAnalyticsClient.Object, scan.Object, azDoClient.Object, config);
             await fun.Run(
                 json, 
-                new Mock<Microsoft.Extensions.Logging.ILogger>().Object
+                new Mock<ILogger>().Object
             );
 
             azDoClient.Verify(x => 
@@ -52,6 +53,7 @@ namespace Functions.Tests
 
             logAnalyticsClient.Verify(x => 
                 x.AddCustomLogJsonAsync(It.IsAny<string>(), report, It.IsAny<string>()), Times.AtLeastOnce());
+            
         }
 
         [Fact]

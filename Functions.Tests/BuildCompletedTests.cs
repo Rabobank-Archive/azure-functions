@@ -20,37 +20,36 @@ namespace Functions.Tests
         private readonly IFixture _fixture = new Fixture();
         
         [Fact]
-        public void RunBuildCompletedFunction()
+        public async void RunBuildCompletedFunction()
         {
+            _fixture.Customize<Report>(r =>
+                r.With(x => x.Reports, _fixture.CreateMany<BuildScanReport>(50).ToList()));
+            var report = _fixture.Create<BuildScanReport>();
             var config = _fixture.Create<EnvironmentConfig>();
             var scan = new Mock<IServiceHookScan<BuildScanReport>>();
             scan
                 .Setup(x => x.Completed(It.IsAny<JObject>()))
-                .Returns(_fixture.Create<BuildScanReport>());
+                .Returns(report);
             
-            var client = new Mock<ILogAnalyticsClient>();
-            client
-                .Setup(x => x.AddCustomLogJsonAsync(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<string>()))
-                .Verifiable();
+            var logAnalyticsClient = new Mock<ILogAnalyticsClient>();
 
-            var azuredo = new Mock<IVstsRestClient>();
-            azuredo
-                .Setup(x => x.Get(It.Is<IVstsRequest<Report>>(r => r.Uri.Contains(config.ExtensionName))))
-                .Returns(_fixture.Create<Report>())
-                .Verifiable();
-            
-            azuredo
-                .Setup(x => x.Put(
-                    It.Is<IVstsRequest<Report>>(r => r.Uri.Contains(config.ExtensionName)), 
-                    It.Is<Report>(r => r.Reports.Count == 4)))
-                .Verifiable();
+            var azDoClient = new Mock<IVstsRestClient>();
+            azDoClient
+                .Setup(x => x.Get(It.IsAny<IVstsRequest<Report>>()))
+                .Returns(_fixture.Create<Report>());
 
-            var function = new BuildCompletedFunction(client.Object, scan.Object, azuredo.Object, config);
-            function.Run(File.ReadAllText(Path.Combine("Assets", "buildcompleted.json")),
+            var json = File.ReadAllText(Path.Combine("Assets", "buildcompleted.json"));
+            var function = new BuildCompletedFunction(logAnalyticsClient.Object, scan.Object, azDoClient.Object, config);
+            await function.Run(json,
                 new Mock<ILogger>().Object);
             
-            client.Verify();
-            azuredo.Verify();
+            azDoClient.Verify(x =>
+                x.Get(It.Is<IVstsRequest<Report>>(r => r.Uri.Contains(config.ExtensionName))), Times.Once);
+            azDoClient.Verify(x => 
+                x.Put(It.Is<IVstsRequest<Report>>(r => r.Uri.Contains(config.ExtensionName)), It.Is<Report>(r => r.Reports.Count == 50)), Times.Once);
+            
+            logAnalyticsClient.Verify(x => 
+                x.AddCustomLogJsonAsync(It.IsAny<string>(), report, It.IsAny<string>()), Times.AtLeastOnce());
         }
         
         [Fact]
