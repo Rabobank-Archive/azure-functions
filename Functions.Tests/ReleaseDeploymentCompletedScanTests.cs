@@ -17,26 +17,26 @@ namespace Functions.Tests
 {
     public class ReleaseDeploymentCompletedScanTests
     {
+        private readonly IFixture _fixture = new Fixture();
+        
         [Fact]
         public async Task Test()
         {
-            var fixture = new Fixture();
-
-            var report = fixture.Create<ReleaseDeploymentCompletedReport>();            
+            var report = _fixture.Create<ReleaseDeploymentCompletedReport>();            
             var logAnalyticsClient = new Mock<ILogAnalyticsClient>();
             var client = new Mock<IServiceHookScan<ReleaseDeploymentCompletedReport>>();
             client
                 .Setup(x => x.Completed(It.IsAny<JObject>()))
                 .Returns(report);
 
-            fixture.Customize<Report>(r => r.With(x => x.Reports, fixture.CreateMany<ReleaseDeploymentCompletedReport>(50).ToList()));
+            _fixture.Customize<Report>(r => r.With(x => x.Reports, _fixture.CreateMany<ReleaseDeploymentCompletedReport>(50).ToList()));
 
 
             var azDoClient = new Mock<IVstsRestClient>();
             azDoClient.Setup(x => x.Get(It.IsAny<IVstsRequest<Report>>()))
-                .Returns(fixture.Create<Report>());
+                .Returns(_fixture.Create<Report>());
 
-            var config = fixture.Create<EnvironmentConfig>();
+            var config = _fixture.Create<EnvironmentConfig>();
 
             var json = ReleaseDeploymentCompletedJson();
             var fun = new ReleaseDeploymentCompletedFunction(logAnalyticsClient.Object, client.Object, azDoClient.Object, config);
@@ -54,6 +54,36 @@ namespace Functions.Tests
                 x.AddCustomLogJsonAsync(It.IsAny<string>(), report, It.IsAny<string>()), Times.AtLeastOnce());
         }
 
+        [Fact]
+        public async void RunReleaseDeploymentCompletedFunction_FirstUpload()
+        {
+            var report = _fixture.Create<ReleaseDeploymentCompletedReport>();            
+            var logAnalyticsClient = new Mock<ILogAnalyticsClient>();
+            var client = new Mock<IServiceHookScan<ReleaseDeploymentCompletedReport>>();
+            client
+                .Setup(x => x.Completed(It.IsAny<JObject>()))
+                .Returns(report);
+            
+            var azDoClient = new Mock<IVstsRestClient>();
+            azDoClient.Setup(x => x.Get(It.IsAny<IVstsRequest<Report>>()))
+                .Returns((Report) null);
+            azDoClient
+                .Setup(x => x.Put(
+                    It.IsAny<IVstsRequest<Report>>(),
+                    It.IsAny<Report>()))
+                .Verifiable();
+            
+            var config = _fixture.Create<EnvironmentConfig>();
+
+            var json = ReleaseDeploymentCompletedJson();
+            var fun = new ReleaseDeploymentCompletedFunction(logAnalyticsClient.Object, client.Object, azDoClient.Object, config);
+            await fun.Run(
+                json,
+                new Mock<Microsoft.Extensions.Logging.ILogger>().Object
+            );
+            azDoClient.Verify();
+        }
+        
         [Fact]
         public async Task SortedByCreatedDate()
         {

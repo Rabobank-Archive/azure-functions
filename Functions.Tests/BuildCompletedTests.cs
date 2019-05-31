@@ -125,7 +125,9 @@ namespace Functions.Tests
                 .Setup(x => x.Completed(It.IsAny<JObject>()))
                 .Returns(_fixture.Create<BuildScanReport>());
 
-            var azuredo = new Mock<IVstsRestClient>();            
+            var azuredo = new Mock<IVstsRestClient>();    
+            azuredo.Setup(x => x.Get(It.IsAny<IVstsRequest<Report>>()))
+                .Returns((Report) null);
             azuredo
                 .Setup(x => x.Put(
                     It.IsAny<IVstsRequest<Report>>(),

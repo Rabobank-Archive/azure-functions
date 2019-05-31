@@ -8,6 +8,8 @@ using SecurePipelineScan.Rules.Reports;
 using LogAnalytics.Client;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Requests = SecurePipelineScan.VstsService.Requests;
 
 namespace Functions
 {
@@ -32,30 +34,44 @@ namespace Functions
 
 
         [FunctionName(nameof(ReleaseDeploymentCompletedFunction))]
-        public async System.Threading.Tasks.Task Run(
-            [QueueTrigger("releasedeploymentcompleted", Connection = "connectionString")]string releaseCompleted,
+        public async Task Run(
+            [QueueTrigger("releasedeploymentcompleted", Connection = "connectionString")]string data,
             ILogger log)
         {
+            if (data == null) throw new ArgumentNullException(nameof(data));
+            if (log == null) throw new ArgumentNullException(nameof(log));
 
-            log.LogInformation($"Queuetriggered {nameof(ReleaseDeploymentCompletedFunction)} by Azure Storage queue");
-            log.LogInformation($"release: {releaseCompleted}");
-
-            var report = _scan.Completed(JObject.Parse(releaseCompleted));
-
-            var releaseReports = _azuredo.Get(
-                    SecurePipelineScan.VstsService.Requests.ExtensionManagement.ExtensionData<ExtensionDataReports<ReleaseDeploymentCompletedReport>>("tas", _config.ExtensionName,
-            "Releases",report.Project));
-
-            var releases = new List<ReleaseDeploymentCompletedReport>{ report };
-            releases.AddRange(releaseReports?.Reports);
-
-            log.LogInformation($"Add release information to Azure DevOps Compliancy logging: {report.Project}");
-            _azuredo.Put(
-                SecurePipelineScan.VstsService.Requests.ExtensionManagement.ExtensionData<ExtensionDataReports<ReleaseDeploymentCompletedReport>>("tas", _config.ExtensionName,
-                    "Releases"), new ExtensionDataReports<ReleaseDeploymentCompletedReport> { Reports = releases.OrderByDescending(x => x.CreatedDate).Take(50).ToList(), Id = report.Project });
-
-            log.LogInformation("Done retrieving deployment information. Send to log analytics");
+            var report = _scan.Completed(JObject.Parse(data));
             await _client.AddCustomLogJsonAsync("DeploymentStatus", report, "Date");
+            UpdateExtensionData(report);
+        }
+
+        private void UpdateExtensionData(ReleaseDeploymentCompletedReport report)
+        {
+            var reports = _azuredo.Get(
+                                     Requests.ExtensionManagement
+                                         .ExtensionData<ExtensionDataReports<ReleaseDeploymentCompletedReport>>(
+                                             "tas",
+                                             _config.ExtensionName,
+
+                                             "Releases",
+                                             report.Project)) ??
+                                 new ExtensionDataReports<ReleaseDeploymentCompletedReport>
+                                 {
+                                     Id = report.Project, Reports = new List<ReleaseDeploymentCompletedReport>()
+                                 };
+
+            reports.Reports = reports
+                .Reports
+                .Concat(new[]{report})
+                .OrderByDescending(x => x.CreatedDate)
+                .Take(50)
+                .ToList();
+
+            _azuredo.Put(
+                Requests.ExtensionManagement.ExtensionData<ExtensionDataReports<ReleaseDeploymentCompletedReport>>(
+                    "tas", _config.ExtensionName,
+                    "Releases", report.Project), reports);
         }
     }
 }

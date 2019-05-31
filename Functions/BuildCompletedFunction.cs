@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
@@ -32,25 +33,28 @@ namespace Functions
         }
 
         [FunctionName(nameof(BuildCompletedFunction))]
-        public void Run([QueueTrigger("buildcompleted", Connection = "connectionString")]
-            string data, ILogger log)
+        public async Task Run(
+            [QueueTrigger("buildcompleted", Connection = "connectionString")]string data, 
+            ILogger log)
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
             if (log == null) throw new ArgumentNullException(nameof(log));
             
             var report = _scan.Completed(JObject.Parse(data));
-            _client.AddCustomLogJsonAsync(nameof(BuildCompletedFunction), report, "Date");
+            await _client.AddCustomLogJsonAsync(nameof(BuildCompletedFunction), report, "Date");
             UpdateExtensionData(report);
         }
 
         private void UpdateExtensionData(BuildScanReport report)
         {
             var reports = _azuredo.Get(
-                Requests.ExtensionManagement.ExtensionData<ExtensionDataReports<BuildScanReport>>(
-                    "tas", 
-                    _config.ExtensionName,
-                    "BuildReports", 
-                    report.Project)) ?? new ExtensionDataReports<BuildScanReport> { Id = report.Project, Reports = new List<BuildScanReport>() };
+                              Requests.ExtensionManagement.ExtensionData<ExtensionDataReports<BuildScanReport>>(
+                                  "tas",
+                                  _config.ExtensionName,
+                                  "BuildReports",
+                                  report.Project)) ??
+                          new ExtensionDataReports<BuildScanReport>
+                              {Id = report.Project, Reports = new List<BuildScanReport>()};
 
             reports.Reports = reports
                 .Reports
@@ -60,7 +64,8 @@ namespace Functions
                 .ToList();
 
             _azuredo.Put(
-                Requests.ExtensionManagement.ExtensionData<ExtensionDataReports<BuildScanReport>>("tas", _config.ExtensionName,
+                Requests.ExtensionManagement.ExtensionData<ExtensionDataReports<BuildScanReport>>(
+                    "tas", _config.ExtensionName,
                     "BuildReports", report.Project), reports);
         }
     }
