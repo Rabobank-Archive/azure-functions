@@ -22,7 +22,9 @@ using Response = SecurePipelineScan.VstsService.Response;
             foreach (var project in projects)
             {
                 log.LogInformation($"Call ActivityReport for project {project.Name}");
-                tasks.Add(context.CallActivityAsync(ItemScanPermissionsActivity.ActivityName, project));
+                tasks.Add(context.CallActivityAsync(ItemScanPermissionsActivity.ActivityNameRepos, project));
+                tasks.Add(context.CallActivityAsync(ItemScanPermissionsActivity.ActivityNameBuilds, project));
+                tasks.Add(context.CallActivityAsync(ItemScanPermissionsActivity.ActivityNameReleases, project));
             }
 
             await Task.WhenAll(tasks);

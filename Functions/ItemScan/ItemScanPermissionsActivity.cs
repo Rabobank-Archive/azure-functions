@@ -20,8 +20,10 @@ namespace Functions.RepositoryScan
 {
     public class ItemScanPermissionsActivity
     {
-        public const string ActivityName = nameof(ItemScanPermissionsActivity) + nameof(RunAsActivity);
-        
+        public const string ActivityNameRepos = nameof(ItemScanPermissionsActivity) + nameof(RunAsActivityRepos);
+        public const string ActivityNameBuilds = nameof(ItemScanPermissionsActivity) + nameof(RunAsActivityBuilds);
+        public const string ActivityNameReleases = nameof(ItemScanPermissionsActivity) + nameof(RunAsActivityReleases);
+
         private readonly ILogAnalyticsClient _client;
         private readonly IVstsRestClient _azuredo;
         private readonly IRulesProvider _rulesProvider;
@@ -40,20 +42,40 @@ namespace Functions.RepositoryScan
             _rulesProvider = rulesProvider;
             _tokenizer = tokenizer;
         }
-
-        [FunctionName(ActivityName)]
-        public async Task RunAsActivity(
+        
+        [FunctionName(ActivityNameRepos)]
+        public async Task RunAsActivityRepos(
             [ActivityTrigger] DurableActivityContextBase context,
             ILogger log)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             var project = context.GetInput<Response.Project>() ?? throw new Exception("No Project found in parameter DurableActivityContextBase");
 
-            await Task.WhenAll(
-                Run(project.Name, project.Id, "repository"), 
-                Run(project.Name, project.Id, "buildpipelines"),
-                Run(project.Name, project.Id, "releasepipelines"));
+            await Run(project.Name, project.Id, "repository");
         }
+
+        [FunctionName(ActivityNameBuilds)]
+        public async Task RunAsActivityBuilds(
+            [ActivityTrigger] DurableActivityContextBase context,
+            ILogger log)
+        {
+            if (context == null) throw new ArgumentNullException(nameof(context));
+            var project = context.GetInput<Response.Project>() ?? throw new Exception("No Project found in parameter DurableActivityContextBase");
+
+            await Run(project.Name, project.Id, "buildpipelines");
+        }
+
+        [FunctionName(ActivityNameReleases)]
+        public async Task RunAsActivityReleases(
+            [ActivityTrigger] DurableActivityContextBase context,
+            ILogger log)
+        {
+            if (context == null) throw new ArgumentNullException(nameof(context));
+            var project = context.GetInput<Response.Project>() ?? throw new Exception("No Project found in parameter DurableActivityContextBase");
+
+            await Run(project.Name, project.Id, "releasepipelines");
+        }
+
 
         [FunctionName(nameof(ItemScanPermissionsActivity) + nameof(RunFromHttp))]
         public async Task<IActionResult> RunFromHttp(
