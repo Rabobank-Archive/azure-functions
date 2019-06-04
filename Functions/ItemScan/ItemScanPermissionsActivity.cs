@@ -49,9 +49,10 @@ namespace Functions.RepositoryScan
             if (context == null) throw new ArgumentNullException(nameof(context));
             var project = context.GetInput<Response.Project>() ?? throw new Exception("No Project found in parameter DurableActivityContextBase");
 
-            await Run(project.Name, project.Id, "repository");
-            await Run(project.Name, project.Id, "buildpipelines");
-            await Run(project.Name, project.Id, "releasepipelines");
+            await Task.WhenAll(
+                Run(project.Name, project.Id, "repository"), 
+                Run(project.Name, project.Id, "buildpipelines"),
+                Run(project.Name, project.Id, "releasepipelines"));
         }
 
         [FunctionName(nameof(ItemScanPermissionsActivity) + nameof(RunFromHttp))]
