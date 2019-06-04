@@ -34,7 +34,7 @@ namespace Functions
             var vstsPat = Environment.GetEnvironmentVariable("vstsPat", EnvironmentVariableTarget.Process);
             var organization = Environment.GetEnvironmentVariable("organization", EnvironmentVariableTarget.Process) ?? "somecompany-test";
 
-            services.AddSingleton<IVstsRestClient>(new VstsRestClient(organization, vstsPat));
+            services.AddSingleton<IVstsRestClient>(new VstsRestClient(organization, vstsPat, new RestClientFactory()));
 
             services.AddSingleton(new HttpClient());
             services.AddSingleton(new AzureServiceTokenProvider().Wrap());
