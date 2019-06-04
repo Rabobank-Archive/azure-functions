@@ -41,8 +41,11 @@ namespace Functions
             if (log == null) throw new ArgumentNullException(nameof(log));
             
             var report = _scan.Completed(JObject.Parse(data));
-            await _client.AddCustomLogJsonAsync(nameof(BuildCompletedFunction), report, "Date");
-            UpdateExtensionData(report);
+            if (report != null)
+            {
+                await _client.AddCustomLogJsonAsync(nameof(BuildCompletedFunction), report, "Date");
+                UpdateExtensionData(report);
+            }
         }
 
         private void UpdateExtensionData(BuildScanReport report)
