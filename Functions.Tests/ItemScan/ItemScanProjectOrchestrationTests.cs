@@ -31,7 +31,7 @@ namespace Functions.Tests.RepositoryScan
             
             //Assert
             context.Verify(x => 
-                x.CallActivityAsync(ItemScanPermissionsActivity.ActivityName, It.IsAny<Project>()),
+                x.CallActivityAsync(ItemScanPermissionsActivity.ActivityNameRepos, It.IsAny<Project>()),
                 Times.AtLeast(2));
         }        
     }

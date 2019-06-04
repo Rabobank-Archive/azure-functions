@@ -95,9 +95,16 @@ namespace Functions.Tests.RepositoryScan
                 provider.Object,
                 fixture.Create<EnvironmentConfig>(),
                 new Mock<ITokenizer>().Object);
-            await fun.RunAsActivity(
+            await fun.RunAsActivityRepos(
                 durable.Object,
                 new Mock<ILogger>().Object);
+            await fun.RunAsActivityBuilds(
+                durable.Object,
+                new Mock<ILogger>().Object);
+            await fun.RunAsActivityReleases(
+                durable.Object,
+                new Mock<ILogger>().Object);
+
 
             //Assert
             mocks.Verify();
@@ -131,7 +138,7 @@ namespace Functions.Tests.RepositoryScan
                  fixture.Create<EnvironmentConfig>(),
                  new Mock<ITokenizer>().Object);
 
-             var ex = await Assert.ThrowsAsync<Exception>(async () => await fun.RunAsActivity(
+             var ex = await Assert.ThrowsAsync<Exception>(async () => await fun.RunAsActivityRepos(
                  durableActivityContextBaseMock.Object,
                  iLoggerMock.Object));
 
