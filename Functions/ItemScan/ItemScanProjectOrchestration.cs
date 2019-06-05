@@ -18,16 +18,32 @@ using Response = SecurePipelineScan.VstsService.Response;
             var projects = context.GetInput<IList<Response.Project>>();
             log.LogInformation($"Creating tasks for every project total amount of projects {projects.Count}");
 
-            var tasks = new List<Task>();
+            var tasksRepos = new List<Task>();
+            var tasksBuilds = new List<Task>();
+            var tasksReleases = new List<Task>();
             foreach (var project in projects)
             {
                 log.LogInformation($"Call ActivityReport for project {project.Name}");
-                tasks.Add(context.CallActivityAsync(ItemScanPermissionsActivity.ActivityNameRepos, project));
-                tasks.Add(context.CallActivityAsync(ItemScanPermissionsActivity.ActivityNameBuilds, project));
-                tasks.Add(context.CallActivityAsync(ItemScanPermissionsActivity.ActivityNameReleases, project));
+                tasksRepos.Add(context.CallActivityAsync(ItemScanPermissionsActivity.ActivityNameRepos, project));
             }
 
-            await Task.WhenAll(tasks);
+            await Task.WhenAll(tasksRepos);
+            
+            foreach (var project in projects)
+            {
+                log.LogInformation($"Call ActivityReport for project {project.Name}");
+                tasksBuilds.Add(context.CallActivityAsync(ItemScanPermissionsActivity.ActivityNameBuilds, project));
+            }
+
+            await Task.WhenAll(tasksBuilds);
+            
+            foreach (var project in projects)
+            {
+                log.LogInformation($"Call ActivityReport for project {project.Name}");
+                tasksReleases.Add(context.CallActivityAsync(ItemScanPermissionsActivity.ActivityNameReleases, project));
+            }
+
+            await Task.WhenAll(tasksReleases);
         }
     }
 }
