@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Requests = SecurePipelineScan.VstsService.Requests;
+using Functions.Helpers;
 
 namespace Functions
 {
@@ -43,7 +44,7 @@ namespace Functions
 
             var report = _scan.Completed(JObject.Parse(data));
             await _client.AddCustomLogJsonAsync("DeploymentStatus", report, "Date");
-            UpdateExtensionData(report);
+            RetryHelper.InvalidDocumentVersionPolicy.Execute(() => UpdateExtensionData(report));
         }
 
         private void UpdateExtensionData(ReleaseDeploymentCompletedReport report)

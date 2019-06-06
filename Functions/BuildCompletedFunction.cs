@@ -10,6 +10,7 @@ using SecurePipelineScan.Rules.Reports;
 using SecurePipelineScan.VstsService;
 using LogAnalytics.Client;
 using Requests = SecurePipelineScan.VstsService.Requests;
+using Functions.Helpers;
 
 namespace Functions
 {
@@ -44,7 +45,7 @@ namespace Functions
             if (report != null)
             {
                 await _client.AddCustomLogJsonAsync(nameof(BuildCompletedFunction), report, "Date");
-                UpdateExtensionData(report);
+                RetryHelper.InvalidDocumentVersionPolicy.Execute(() => UpdateExtensionData(report));
             }
         }
 

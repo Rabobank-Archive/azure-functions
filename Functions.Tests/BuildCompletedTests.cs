@@ -18,7 +18,7 @@ namespace Functions.Tests
     public class BuildCompletedTests
     {
         private readonly IFixture _fixture = new Fixture();
-        
+
         [Fact]
         public async void RunBuildCompletedFunction()
         {
@@ -30,7 +30,7 @@ namespace Functions.Tests
             scan
                 .Setup(x => x.Completed(It.IsAny<JObject>()))
                 .Returns(report);
-            
+
             var logAnalyticsClient = new Mock<ILogAnalyticsClient>();
 
             var azDoClient = new Mock<IVstsRestClient>();
@@ -42,16 +42,16 @@ namespace Functions.Tests
             var function = new BuildCompletedFunction(logAnalyticsClient.Object, scan.Object, azDoClient.Object, config);
             await function.Run(json,
                 new Mock<ILogger>().Object);
-            
+
             azDoClient.Verify(x =>
                 x.Get(It.Is<IVstsRequest<Report>>(r => r.Uri.Contains(config.ExtensionName))), Times.Once);
-            azDoClient.Verify(x => 
+            azDoClient.Verify(x =>
                 x.Put(It.Is<IVstsRequest<Report>>(r => r.Uri.Contains(config.ExtensionName)), It.Is<Report>(r => r.Reports.Count == 50)), Times.Once);
-            
-            logAnalyticsClient.Verify(x => 
+
+            logAnalyticsClient.Verify(x =>
                 x.AddCustomLogJsonAsync(It.IsAny<string>(), report, It.IsAny<string>()), Times.AtLeastOnce());
         }
-        
+
         [Fact]
         public void RunBuildCompletedFunction_LimitsReports()
         {
@@ -65,7 +65,7 @@ namespace Functions.Tests
             azuredo
                 .Setup(x => x.Get(It.IsAny<IVstsRequest<Report>>()))
                 .Returns(_fixture.Create<Report>());
-            
+
             azuredo
                 .Setup(x => x.Put(
                     It.IsAny<IVstsRequest<Report>>(),
@@ -75,10 +75,10 @@ namespace Functions.Tests
             var function = new BuildCompletedFunction(new Mock<ILogAnalyticsClient>().Object, scan.Object, azuredo.Object, new EnvironmentConfig());
             function.Run(File.ReadAllText(Path.Combine("Assets", "buildcompleted.json")),
                 new Mock<ILogger>().Object);
-            
+
             azuredo.Verify();
         }
-        
+
         [Fact]
         public void SortedByCreatedDate()
         {
@@ -88,7 +88,7 @@ namespace Functions.Tests
             var today = new BuildScanReport { CreatedDate = DateTime.Now };
             var yesterday = new BuildScanReport { CreatedDate = DateTime.Now.Subtract(TimeSpan.FromDays(1)) };
             var tomorrow = new BuildScanReport { CreatedDate = DateTime.Now.Add(TimeSpan.FromDays(1)) };
-            
+
             // Return new report from today from new scan.
             var client = new Mock<IServiceHookScan<BuildScanReport>>();
             client
@@ -98,7 +98,7 @@ namespace Functions.Tests
             // Return reports from yesterday and tomorrow from extension data storage
             var azdo = new Mock<IVstsRestClient>();
             azdo.Setup(x => x.Get(It.IsAny<IVstsRequest<Report>>()))
-                .Returns(new Report { Reports = new[]{ yesterday, tomorrow }.ToList() });
+                .Returns(new Report { Reports = new[] { yesterday, tomorrow }.ToList() });
 
             // Capture the result to assert it later on.
             azdo.Setup(x => x.Put(It.IsAny<IVstsRequest<Report>>(), It.IsAny<Report>()))
@@ -107,15 +107,14 @@ namespace Functions.Tests
             // Act
             var fun = new BuildCompletedFunction(new Mock<ILogAnalyticsClient>().Object, client.Object, azdo.Object, new EnvironmentConfig());
             fun.Run(
-                File.ReadAllText(Path.Combine("Assets", "buildcompleted.json")), 
+                File.ReadAllText(Path.Combine("Assets", "buildcompleted.json")),
                 new Mock<ILogger>().Object
             );
 
             // Assert
-            result.Reports.ShouldBe(new[]{ tomorrow, today, yesterday });
+            result.Reports.ShouldBe(new[] { tomorrow, today, yesterday });
         }
 
-        
         [Fact]
         public void RunBuildCompletedFunction_FirstUpload()
         {
@@ -124,9 +123,9 @@ namespace Functions.Tests
                 .Setup(x => x.Completed(It.IsAny<JObject>()))
                 .Returns(_fixture.Create<BuildScanReport>());
 
-            var azuredo = new Mock<IVstsRestClient>();    
+            var azuredo = new Mock<IVstsRestClient>();
             azuredo.Setup(x => x.Get(It.IsAny<IVstsRequest<Report>>()))
-                .Returns((Report) null);
+                .Returns((Report)null);
             azuredo
                 .Setup(x => x.Put(
                     It.IsAny<IVstsRequest<Report>>(),
@@ -136,8 +135,40 @@ namespace Functions.Tests
             var function = new BuildCompletedFunction(new Mock<ILogAnalyticsClient>().Object, scan.Object, azuredo.Object, new EnvironmentConfig());
             function.Run(File.ReadAllText(Path.Combine("Assets", "buildcompleted.json")),
                 new Mock<ILogger>().Object);
-            
+
             azuredo.Verify();
+        }
+
+        [Fact]
+        public void RetryUpdateExtensionData()
+        {
+            //Arrange
+            var scan = new Mock<IServiceHookScan<BuildScanReport>>();
+            scan
+                .Setup(x => x.Completed(It.IsAny<JObject>()))
+                .Returns(_fixture.Create<BuildScanReport>());
+
+            var azuredo = new Mock<IVstsRestClient>();
+            azuredo
+                .Setup(x => x.Get(It.IsAny<IVstsRequest<Report>>()))
+                .Returns(_fixture.Create<Report>());
+
+            azuredo
+                .SetupSequence(x => x.Put(It.IsAny<IVstsRequest<Report>>(),
+                It.IsAny<ExtensionDataReports<BuildScanReport>>()))
+                .Throws(new VstsException("InvalidDocumentVersionException", null))
+                .Returns(new Report());
+
+            //Act
+            var function = new BuildCompletedFunction(new Mock<ILogAnalyticsClient>().Object,
+                scan.Object, azuredo.Object, new EnvironmentConfig());
+            function.Run(File.ReadAllText(Path.Combine("Assets", "buildcompleted.json")),
+                new Mock<ILogger>().Object);
+
+            //Assert
+            azuredo.Verify(x =>
+                x.Put(It.IsAny<IVstsRequest<Report>>(),
+                It.IsAny<ExtensionDataReports<BuildScanReport>>()), Times.Exactly(2));
         }
     }
 }
