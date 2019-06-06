@@ -146,26 +146,40 @@ namespace Functions.ItemScan
 
         private IList<ItemExtensionData> CreateReportsForBuildPipelines(string projectId, string scope)
         {
-            var rules = _rulesProvider.BuildRules(_azuredo);
+            var rules = _rulesProvider.BuildRules(_azuredo).ToList();
             var items = _azuredo.Get(Requests.Builds.BuildDefinitions(projectId));
+
+            var evaluationResults = new List<ItemExtensionData>();
             
-            return items.Select(x => new ItemExtensionData
+            // Do this in a loop (instead of in a Select) to avoid parallelism which messes up our sockets
+            foreach (var pipeline in items)
             {
-                Item = x.Name,
-                Rules = Evaluate(projectId, scope, x.Id, rules)
-            }).ToList();
+                evaluationResults.Add(new ItemExtensionData
+                {
+                    Item = pipeline.Name,
+                    Rules = Evaluate(projectId, scope, pipeline.Id, rules)
+                });
+            }
+            return evaluationResults;
         }
         
         private IList<ItemExtensionData> CreateReportsForReleasePipelines(string projectId, string scope)
         {
-            var rules = _rulesProvider.ReleaseRules(_azuredo);
+            var rules = _rulesProvider.ReleaseRules(_azuredo).ToList();
             var items = _azuredo.Get(Requests.ReleaseManagement.Definitions(projectId));
+
+            var evaluationResults = new List<ItemExtensionData>();
             
-            return items.Select(x => new ItemExtensionData
+            // Do this in a loop (instead of in a Select) to avoid parallelism which messes up our sockets
+            foreach (var pipeline in items)
             {
-                Item = x.Name,
-                Rules = Evaluate(projectId, scope, x.Id, rules)
-            }).ToList();
+                evaluationResults.Add(new ItemExtensionData
+                {
+                    Item = pipeline.Name,
+                    Rules = Evaluate(projectId, scope, pipeline.Id, rules)
+                });
+            }
+            return evaluationResults;
         }
 
         private IList<EvaluatedRule> Evaluate(string projectId, string scope, string itemId, IEnumerable<IRule> rules)
