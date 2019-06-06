@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Functions.Model;
+using LogAnalytics.Client;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
@@ -13,10 +13,10 @@ using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
 using Requests = SecurePipelineScan.VstsService.Requests;
 using Response = SecurePipelineScan.VstsService.Response;
-using LogAnalytics.Client;
+using Task = System.Threading.Tasks.Task;
 
 
-namespace Functions.RepositoryScan
+namespace Functions.ItemScan
 {
     public class ItemScanPermissionsActivity
     {

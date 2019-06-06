@@ -2,14 +2,14 @@ using System.Collections.Generic;
 using System.Linq;
 using AutoFixture;
 using AutoFixture.AutoMoq;
-using Functions.RepositoryScan;
+using Functions.ItemScan;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Moq;
 using SecurePipelineScan.VstsService.Response;
 using Xunit;
 
-namespace Functions.Tests.RepositoryScan
+namespace Functions.Tests.ItemScan
 {
     public class ItemScanProjectOrchestrationTests
     {

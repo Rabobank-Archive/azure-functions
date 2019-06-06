@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using AutoFixture;
 using AutoFixture.AutoMoq;
+using Functions.ItemScan;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Timers;
 using Microsoft.Extensions.Logging;
@@ -9,7 +10,7 @@ using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Response;
 using Xunit;
 
-namespace Functions.Tests.RepositoryScan
+namespace Functions.Tests.ItemScan
 {
     public class ItemScanFunctionTests
     {

@@ -1,11 +1,11 @@
+using System;
+using System.Linq;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using SecurePipelineScan.VstsService;
-using System;
-using System.Linq;
 using Requests = SecurePipelineScan.VstsService.Requests;
 
-namespace Functions
+namespace Functions.ItemScan
 {
     public class ItemScanFunction
     {

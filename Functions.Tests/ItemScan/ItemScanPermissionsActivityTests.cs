@@ -4,8 +4,9 @@ using System.Net.Http.Headers;
 using System.Security.Claims;
 using AutoFixture;
 using AutoFixture.AutoMoq;
+using Functions.ItemScan;
 using Functions.Model;
-using Functions.RepositoryScan;
+using LogAnalytics.Client;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
@@ -14,12 +15,10 @@ using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Response;
 using Shouldly;
-using LogAnalytics.Client;
-using Functions.GlobalPermissionsScan;
 using Xunit;
 using Task = System.Threading.Tasks.Task;
 
-namespace Functions.Tests.RepositoryScan
+namespace Functions.Tests.ItemScan
 {
     public class RepositoryScanPermissionsActivityTests
     {
