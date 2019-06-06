@@ -12,10 +12,10 @@ using Microsoft.Azure.Services.AppAuthentication;
 using Unmockable;
 using LogAnalytics.Client;
 using Requests = SecurePipelineScan.VstsService.Requests;
+using Functions.Helpers;
 
 namespace Functions
 {
-
     public class AgentPoolScanFunction
     {
         private readonly ILogAnalyticsClient _logAnalyticsClient;
@@ -54,13 +54,15 @@ namespace Functions
                 new AgentPoolInformation {PoolName = "Rabo-Build-Azure-Windows-Preview", ResourceGroupPrefix = "rg-m01-prd-vstswinpreview-0"},
             };
 
-            var orgPools = _client.Get(Requests.DistributedTask.OrganizationalAgentPools());
+            var orgPools = RetryHelper.ServiceUnavailablePolicy
+                .Execute(() => _client.Get(Requests.DistributedTask.OrganizationalAgentPools()));
             var poolsToObserve = orgPools.Where(x => observedPools.Any(p => p.PoolName == x.Name));
             var list = new List<LogAnalyticsAgentStatus>();
 
             foreach (var pool in poolsToObserve)
             {
-                var agents = _client.Get(Requests.DistributedTask.AgentPoolStatus(pool.Id));
+                var agents = RetryHelper.ServiceUnavailablePolicy
+                    .Execute(() => _client.Get(Requests.DistributedTask.AgentPoolStatus(pool.Id)));
                 foreach (var agent in agents)
                 {
                     var assignedTask = (agent.Status != "online") ? "Offline" : ((agent.AssignedRequest == null) ? "Idle" : agent.AssignedRequest.PlanType);
