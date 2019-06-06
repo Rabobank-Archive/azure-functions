@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Response = SecurePipelineScan.VstsService.Response;
@@ -18,12 +19,35 @@ namespace Functions.ItemScan
 
             foreach (var project in projects)
             {
-                log.LogInformation($"Call ActivityNameRepos for project {project.Name}");
-                await context.CallActivityAsync(ItemScanPermissionsActivity.ActivityNameRepos, project);
-                log.LogInformation($"Call ActivityNameBuilds for project {project.Name}");
-                await context.CallActivityAsync(ItemScanPermissionsActivity.ActivityNameBuilds, project);
-                log.LogInformation($"Call ActivityNameReleases for project {project.Name}");
-                await context.CallActivityAsync(ItemScanPermissionsActivity.ActivityNameReleases, project);
+                try
+                {
+                    log.LogInformation($"Call ActivityNameRepos for project {project.Name}");
+                    await context.CallActivityAsync(ItemScanPermissionsActivity.ActivityNameRepos, project);
+                }
+                catch (Exception ex)
+                {
+                    log.LogCritical(ex, $"Exception occurred in ActivityNameRepos for project {project.Name}");
+                }
+
+                try
+                {
+                    log.LogInformation($"Call ActivityNameBuilds for project {project.Name}");
+                    await context.CallActivityAsync(ItemScanPermissionsActivity.ActivityNameBuilds, project);
+                }
+                catch (Exception ex)
+                {
+                    log.LogCritical(ex, $"Exception occurred in ActivityNameBuilds for project {project.Name}");
+                }
+
+                try
+                {
+                    log.LogInformation($"Call ActivityNameReleases for project {project.Name}");
+                    await context.CallActivityAsync(ItemScanPermissionsActivity.ActivityNameReleases, project);
+                }
+                catch (Exception ex)
+                {
+                    log.LogCritical(ex, $"Exception occurred in ActivityNameReleases for project {project.Name}");
+                }
             }
         }
     }
