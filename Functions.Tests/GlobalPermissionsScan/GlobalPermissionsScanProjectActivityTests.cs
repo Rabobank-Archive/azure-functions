@@ -14,7 +14,6 @@ using Xunit;
 using Project = SecurePipelineScan.VstsService.Response.Project;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
-using Flurl;
 using Functions.GlobalPermissionsScan;
 using Functions.Model;
 using Microsoft.AspNetCore.Mvc;
@@ -35,7 +34,7 @@ namespace Functions.Tests.GlobalPermissionsScan
             var rule = new Mock<IProjectRule>();
             rule
                 .Setup(x => x.Evaluate(It.IsAny<string>()))
-                .Returns(true);
+                .Returns(Task.FromResult(true));
 
             var ruleSets = new Mock<IRulesProvider>();
             ruleSets
@@ -128,7 +127,7 @@ namespace Functions.Tests.GlobalPermissionsScan
 
             // Assert
             clientMock
-                .Verify(x => x.Put(It.IsAny<IVstsRequest<GlobalPermissionsExtensionData>>(), 
+                .Verify(x => x.PutAsync(It.IsAny<IVstsRequest<GlobalPermissionsExtensionData>>(), 
                     It.Is<GlobalPermissionsExtensionData>(d => 
                         d.Reports.Any(r => r.Reconcile != null &&
                                            r.Reconcile.Url == $"https://{config.FunctionAppHostname}/api/reconcile/{config.Organization}/dummyproj/globalpermissions/{ruleName}" &&

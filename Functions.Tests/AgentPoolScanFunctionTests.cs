@@ -4,11 +4,11 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using RichardSzalay.MockHttp;
 using SecurePipelineScan.VstsService;
-using SecurePipelineScan.VstsService.Response;
+using Response = SecurePipelineScan.VstsService.Response;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Microsoft.Azure.Services.AppAuthentication;
 using Shouldly;
 using Unmockable;
@@ -21,23 +21,23 @@ namespace Functions.Tests
     {
 
         [Fact]
-        public async System.Threading.Tasks.Task AgentPoolScanTest()
+        public async Task AgentPoolScanTest()
         {
             // Arrange
             var fixture = new Fixture();
-            var pools =  new[] { 
-            new AgentPoolInfo {Name = "Rabo-Build-Azure-Linux", Id = 1},
-            new AgentPoolInfo {Name = "Rabo-Build-Azure-Linux-Canary", Id = 2},
-            new AgentPoolInfo {Name = "Rabo-Build-Azure-Linux-Fallback", Id = 3},
-            new AgentPoolInfo {Name = "Rabo-Build-Azure-Linux-Preview", Id = 4},
-            new AgentPoolInfo {Name = "Rabo-Build-Azure-Windows", Id = 5},
-            new AgentPoolInfo {Name = "Rabo-Build-Azure-Windows-Canary", Id = 6},
-            new AgentPoolInfo {Name = "Rabo-Build-Azure-Windows-Fallback", Id = 7},
-            new AgentPoolInfo {Name = "Rabo-Build-Azure-Windows-Preview", Id = 8},
-            new AgentPoolInfo {Name = "Rabo-Build-Azure-Windows-NOT-OBSERVED", Id = 9}
+            IEnumerable<Response.AgentPoolInfo> pools =  new[] { 
+            new Response.AgentPoolInfo {Name = "Rabo-Build-Azure-Linux", Id = 1},
+            new Response.AgentPoolInfo {Name = "Rabo-Build-Azure-Linux-Canary", Id = 2},
+            new Response.AgentPoolInfo {Name = "Rabo-Build-Azure-Linux-Fallback", Id = 3},
+            new Response.AgentPoolInfo {Name = "Rabo-Build-Azure-Linux-Preview", Id = 4},
+            new Response.AgentPoolInfo {Name = "Rabo-Build-Azure-Windows", Id = 5},
+            new Response.AgentPoolInfo {Name = "Rabo-Build-Azure-Windows-Canary", Id = 6},
+            new Response.AgentPoolInfo {Name = "Rabo-Build-Azure-Windows-Fallback", Id = 7},
+            new Response.AgentPoolInfo {Name = "Rabo-Build-Azure-Windows-Preview", Id = 8},
+            new Response.AgentPoolInfo {Name = "Rabo-Build-Azure-Windows-NOT-OBSERVED", Id = 9}
         };
 
-        fixture.Customize<AgentStatus>(a => a.With(agent => agent.Status, "online"));
+        fixture.Customize<Response.AgentStatus>(a => a.With(agent => agent.Status, "online"));
 
             var mockHttp = new MockHttpMessageHandler();
 
@@ -51,11 +51,11 @@ namespace Functions.Tests
             var tokenProvider = new Intercept<AzureServiceTokenProvider>();
             var client = new Mock<IVstsRestClient>();
 
-            client.Setup(x => x.Get(It.IsAny<IVstsRequest<Multiple<AgentPoolInfo>>>()))
-                .Returns(pools);
+            client.Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Response.Multiple<Response.AgentPoolInfo>>>()))
+                .Returns(Task.FromResult(pools));
 
-            client.Setup(x => x.Get(It.IsAny<IVstsRequest<Multiple<AgentStatus>>>()))
-                .Returns(fixture.CreateMany<AgentStatus>);
+            client.Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Response.Multiple<Response.AgentStatus>>>()))
+                .Returns(Task.FromResult(fixture.CreateMany<Response.AgentStatus>()));
 
 
             // Act
@@ -64,11 +64,11 @@ namespace Functions.Tests
 
             // Assert
             client
-                .Verify(v => v.Get(It.IsAny<IVstsRequest<Multiple<AgentPoolInfo>>>()), 
+                .Verify(v => v.GetAsync(It.IsAny<IVstsRequest<Response.Multiple<Response.AgentPoolInfo>>>()), 
                     Times.Exactly(1));
 
             client
-                .Verify(v => v.Get(It.IsAny<IVstsRequest<Multiple<AgentStatus>>>()), 
+                .Verify(v => v.GetAsync(It.IsAny<IVstsRequest<Response.Multiple<Response.AgentStatus>>>()), 
                     Times.Exactly(8));
 
             logAnalyticsClient
@@ -91,12 +91,12 @@ namespace Functions.Tests
             observedPools.Add(new AgentPoolInformation() { PoolName = "Rabo-Build-Azure-Windows-Preview", ResourceGroupPrefix = "rg-m01-prd-vstswinpreview-0" });
 
             var fixture = new Fixture();
-            fixture.Customize<AgentStatus>(a => a.With(agent => agent.Name, "linux-agent-canary-1-84432-2296-000000-1"));
+            fixture.Customize<Response.AgentStatus>(a => a.With(agent => agent.Name, "linux-agent-canary-1-84432-2296-000000-1"));
 
-            fixture.Customize<AgentPoolInfo>(a => a.With(pool => pool.Name, "Rabo-Build-Azure-Linux-Canary"));
+            fixture.Customize<Response.AgentPoolInfo>(a => a.With(pool => pool.Name, "Rabo-Build-Azure-Linux-Canary"));
 
-            var result = AgentPoolScanFunction.GetAgentInfoFromName(fixture.Create<AgentStatus>(),
-                                                       fixture.Create<AgentPoolInfo>(),
+            var result = AgentPoolScanFunction.GetAgentInfoFromName(fixture.Create<Response.AgentStatus>(),
+                                                       fixture.Create<Response.AgentPoolInfo>(),
                                                        observedPools);
             Assert.Equal(0, result.InstanceId);
             Assert.Equal("rg-m01-prd-vstslinuxcanary-01", result.ResourceGroup);
@@ -104,7 +104,7 @@ namespace Functions.Tests
         }
 
         [Fact]
-        public async System.Threading.Tasks.Task AgentStillReImagingShouldNotReImageAgain()
+        public async Task AgentStillReImagingShouldNotReImageAgain()
         {
             //Arrange
             var log = new Mock<ILogger>();
@@ -137,7 +137,7 @@ namespace Functions.Tests
         }
 
         [Fact]
-        public async System.Threading.Tasks.Task AgentOfflineShouldCheckStatusAndReImage()
+        public async Task AgentOfflineShouldCheckStatusAndReImage()
         {
 
             //Arrange

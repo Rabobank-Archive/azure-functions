@@ -1,20 +1,20 @@
 ﻿using Polly;
 using Polly.Retry;
-using SecurePipelineScan.VstsService;
 using System;
 using System.Diagnostics;
+using Flurl.Http;
 
 namespace Functions.Helpers
 {
-    public class RetryHelper
+    public static class RetryHelper
     {
-        public static readonly RetryPolicy InvalidDocumentVersionPolicy = Policy
-            .Handle<VstsException>(ex => ex.Message.Contains("InvalidDocumentVersionException"))
-            .Retry(3);
+        public static readonly AsyncRetryPolicy InvalidDocumentVersionPolicy = Policy
+            .Handle<FlurlHttpException>(ex => ex.Message.Contains("InvalidDocumentVersionException"))
+            .RetryAsync(3);
 
-        public static readonly RetryPolicy ServiceUnavailablePolicy = Policy
-            .Handle<VstsException>(ex => ex.Message.Contains("Azure DevOps Services Unavailable"))
-            .WaitAndRetry(9, retryAttempt =>    // Max 9 retry attempts (= 2^9 / 60 = 8,5 minutes)
+        public static readonly AsyncRetryPolicy ServiceUnavailablePolicy = Policy
+            .Handle<FlurlHttpException>(ex => ex.Message.Contains("Azure DevOps Services Unavailable"))
+            .WaitAndRetryAsync(9, retryAttempt =>    // Max 9 retry attempts (= 2^9 / 60 = 8,5 minutes)
                 TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
                 (exception, timeSpan, context) =>
                 {

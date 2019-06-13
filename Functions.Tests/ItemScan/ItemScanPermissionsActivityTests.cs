@@ -38,7 +38,7 @@ namespace Functions.Tests.ItemScan
             var rule = mocks.Create<IRule>(MockBehavior.Loose);
             rule
                 .Setup(x => x.Evaluate(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(true)
+                .Returns(Task.FromResult(true))
                 .Verifiable();
 
             var provider = mocks.Create<IRulesProvider>();
@@ -62,19 +62,19 @@ namespace Functions.Tests.ItemScan
             
             var azure = mocks.Create<IVstsRestClient>();
             azure
-                .Setup(x => x.Get(It.IsAny<IVstsRequest<Multiple<Repository>>>()))
-                .Returns(fixture.CreateMany<Repository>);
+                .Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Multiple<Repository>>>()))
+                .Returns(Task.FromResult(fixture.CreateMany<Repository>()));
             azure
-                .Setup(x => x.Get(It.IsAny<IVstsRequest<Multiple<BuildDefinition>>>()))
-                .Returns(fixture.CreateMany<BuildDefinition>);
+                .Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Multiple<BuildDefinition>>>()))
+                .Returns(Task.FromResult(fixture.CreateMany<BuildDefinition>()));
             azure
-                .Setup(x => x.Get(It.IsAny<IVstsRequest<Multiple<ReleaseDefinition>>>()))
-                .Returns(fixture.CreateMany<ReleaseDefinition>);
+                .Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Multiple<ReleaseDefinition>>>()))
+                .Returns(Task.FromResult(fixture.CreateMany<ReleaseDefinition>()));
             azure
-                .Setup(x => x.Put(
+                .Setup(x => x.PutAsync(
                     It.IsAny<ExtmgmtRequest<ItemsExtensionData>>(),
                     It.IsAny<ItemsExtensionData>()))
-                .Returns((object req, ItemsExtensionData data) => data)
+                .Returns((object req, ItemsExtensionData data) => Task.FromResult(data))
                 .Verifiable();
 
             var durableOrchestrationClient = new Mock<DurableOrchestrationClientBase>();
@@ -122,7 +122,7 @@ namespace Functions.Tests.ItemScan
              var rule = new Mock<IRule>();
              rule
                  .Setup(x => x.Evaluate(It.IsAny<string>(), It.IsAny<string>()))
-                 .Returns(true);
+                 .Returns(Task.FromResult(true));
 
              var rulesProvider = new Mock<IRulesProvider>();
              rulesProvider
@@ -188,12 +188,12 @@ namespace Functions.Tests.ItemScan
 
              var azure = mocks.Create<IVstsRestClient>();
              azure
-                 .Setup(x => x.Get(It.IsAny<IVstsRequest<Multiple<Repository>>>()))
-                 .Returns(fixture.CreateMany<Repository>);
+                 .Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Multiple<Repository>>>()))
+                 .Returns(Task.FromResult(fixture.CreateMany<Repository>()));
 
              azure
-                 .Setup(x => x.Get(It.IsAny<IVstsRequest<ProjectProperties>>()))
-                 .Returns(fixture.Create<ProjectProperties>());
+                 .Setup(x => x.GetAsync(It.IsAny<IVstsRequest<ProjectProperties>>()))
+                 .Returns(Task.FromResult(fixture.Create<ProjectProperties>()));
              
              var request = new HttpRequestMessage();
              request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");

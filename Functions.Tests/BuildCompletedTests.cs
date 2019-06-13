@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using AutoFixture;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -29,14 +30,14 @@ namespace Functions.Tests
             var scan = new Mock<IServiceHookScan<BuildScanReport>>();
             scan
                 .Setup(x => x.Completed(It.IsAny<JObject>()))
-                .Returns(report);
+                .Returns(Task.FromResult(report));
 
             var logAnalyticsClient = new Mock<ILogAnalyticsClient>();
 
             var azDoClient = new Mock<IVstsRestClient>();
             azDoClient
-                .Setup(x => x.Get(It.IsAny<IVstsRequest<Report>>()))
-                .Returns(_fixture.Create<Report>());
+                .Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Report>>()))
+                .Returns(Task.FromResult(_fixture.Create<Report>()));
 
             var json = File.ReadAllText(Path.Combine("Assets", "buildcompleted.json"));
             var function = new BuildCompletedFunction(logAnalyticsClient.Object, scan.Object, azDoClient.Object, config);
@@ -44,9 +45,9 @@ namespace Functions.Tests
                 new Mock<ILogger>().Object);
 
             azDoClient.Verify(x =>
-                x.Get(It.Is<IVstsRequest<Report>>(r => r.Uri.Contains(config.ExtensionName))), Times.Once);
+                x.GetAsync(It.Is<IVstsRequest<Report>>(r => r.Resource.Contains(config.ExtensionName))), Times.Once);
             azDoClient.Verify(x =>
-                x.Put(It.Is<IVstsRequest<Report>>(r => r.Uri.Contains(config.ExtensionName)), It.Is<Report>(r => r.Reports.Count == 50)), Times.Once);
+                x.PutAsync(It.Is<IVstsRequest<Report>>(r => r.Resource.Contains(config.ExtensionName)), It.Is<Report>(r => r.Reports.Count == 50)), Times.Once);
 
             logAnalyticsClient.Verify(x =>
                 x.AddCustomLogJsonAsync(It.IsAny<string>(), report, It.IsAny<string>()), Times.AtLeastOnce());
