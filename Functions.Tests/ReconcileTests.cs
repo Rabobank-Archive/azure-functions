@@ -2,12 +2,13 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using AutoFixture;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
-using SecurePipelineScan.VstsService.Response;
+using Response = SecurePipelineScan.VstsService.Response;
 using Shouldly;
 using Xunit;
 
@@ -16,7 +17,7 @@ namespace Functions.Tests
     public class ReconcileTests
     {
         [Fact]
-        public void ExistingRuleExecutedWhenReconcile()
+        public async Task ExistingRuleExecutedWhenReconcile()
         {
             var fixture = new Fixture();
             ManageProjectPropertiesPermission(fixture);
@@ -25,6 +26,7 @@ namespace Functions.Tests
             rule
                 .As<IProjectReconcile>()
                 .Setup(x => x.Reconcile("TAS"))
+                .Returns(Task.CompletedTask)
                 .Verifiable();
                 
             var ruleProvider = new Mock<IRulesProvider>();
@@ -39,24 +41,24 @@ namespace Functions.Tests
             
             var client = new Mock<IVstsRestClient>();
             client
-                .Setup(x => x.Get(It.IsAny<IVstsRequest<PermissionsProjectId>>()))
-                .Returns(fixture.Create<PermissionsProjectId>());
+                .Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Response.PermissionsProjectId>>()))
+                .Returns(Task.FromResult(fixture.Create<Response.PermissionsProjectId>()));
             
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
             
             var function = new ReconcileFunction(client.Object, ruleProvider.Object, tokenizer.Object);
-            function.Reconcile(request, 
+            (await function.Reconcile(request, 
                 "somecompany", 
                 "TAS", 
                 "globalpermissions",
-                rule.Object.GetType().Name).ShouldBeOfType<OkResult>();
+                rule.Object.GetType().Name)).ShouldBeOfType<OkResult>();
             
             rule.Verify();
         }
         
         [Fact]
-        public void ExistingRepositoryRuleExecutedWhenReconcile()
+        public async Task ExistingRepositoryRuleExecutedWhenReconcile()
         {
             var fixture = new Fixture();
             ManageProjectPropertiesPermission(fixture);
@@ -65,6 +67,7 @@ namespace Functions.Tests
             rule
                 .As<IReconcile>()
                 .Setup(x => x.Reconcile("TAS", "repository-id"))
+                .Returns(Task.CompletedTask)
                 .Verifiable();
                 
             var ruleProvider = new Mock<IRulesProvider>();
@@ -79,25 +82,25 @@ namespace Functions.Tests
             
             var client = new Mock<IVstsRestClient>();
             client
-                .Setup(x => x.Get(It.IsAny<IVstsRequest<PermissionsProjectId>>()))
-                .Returns(fixture.Create<PermissionsProjectId>());
+                .Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Response.PermissionsProjectId>>()))
+                .Returns(Task.FromResult(fixture.Create<Response.PermissionsProjectId>()));
             
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
             
             var function = new ReconcileFunction(client.Object, ruleProvider.Object, tokenizer.Object);
-            function.Reconcile(request, 
+            (await function.Reconcile(request, 
                 "somecompany", 
                 "TAS", 
                 "repository",
                 rule.Object.GetType().Name,
-                "repository-id").ShouldBeOfType<OkResult>();
+                "repository-id")).ShouldBeOfType<OkResult>();
             
             rule.Verify();
         }
 
         [Fact]
-        public void RuleNotFound()
+        public async Task RuleNotFound()
         {
             var fixture = new Fixture();
             ManageProjectPropertiesPermission(fixture);
@@ -114,19 +117,19 @@ namespace Functions.Tests
             
             var client = new Mock<IVstsRestClient>();
             client
-                .Setup(x => x.Get(It.IsAny<IVstsRequest<PermissionsProjectId>>()))
-                .Returns(fixture.Create<PermissionsProjectId>())
+                .Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Response.PermissionsProjectId>>()))
+                .Returns(Task.FromResult(fixture.Create<Response.PermissionsProjectId>()))
                 .Verifiable();
             
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
             
             var function = new ReconcileFunction(client.Object, ruleProvider.Object, tokenizer.Object);
-            var result = function.Reconcile(request, 
+            var result = (await function.Reconcile(request, 
                 "somecompany", 
                 "TAS", 
                 "globalpermissions",
-                "some-non-existing-rule").ShouldBeOfType<NotFoundObjectResult>();
+                "some-non-existing-rule")).ShouldBeOfType<NotFoundObjectResult>();
 
             result
                 .Value
@@ -135,7 +138,7 @@ namespace Functions.Tests
         }
         
         [Fact]
-        public void ScopeNotFound()
+        public async Task ScopeNotFound()
         {
             var fixture = new Fixture();
             ManageProjectPropertiesPermission(fixture);
@@ -148,40 +151,40 @@ namespace Functions.Tests
             
             var client = new Mock<IVstsRestClient>();
             client
-                .Setup(x => x.Get(It.IsAny<IVstsRequest<PermissionsProjectId>>()))
-                .Returns(fixture.Create<PermissionsProjectId>())
+                .Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Response.PermissionsProjectId>>()))
+                .Returns(Task.FromResult(fixture.Create<Response.PermissionsProjectId>()))
                 .Verifiable();
             
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
             
             var function = new ReconcileFunction(client.Object, new Mock<IRulesProvider>().Object, tokenizer.Object);
-            var result = function.Reconcile(request, 
+            var result = (await function.Reconcile(request, 
                 "somecompany", 
                 "TAS", 
                 "non-existing-scope",
-                "some-non-existing-rule").ShouldBeOfType<NotFoundObjectResult>();
+                "some-non-existing-rule")).ShouldBeOfType<NotFoundObjectResult>();
 
             result.Value.ShouldBe("non-existing-scope");
         }
 
         [Fact]
-        public void UnauthorizedWithoutHeaderWhenReconcile()
+        public async Task UnauthorizedWithoutHeaderWhenReconcile()
         {
             var ruleProvider = new Mock<IRulesProvider>();
             var request = new HttpRequestMessage();
             request.Headers.Authorization = null;
             
             var function = new ReconcileFunction(null, ruleProvider.Object, new Mock<ITokenizer>().Object);
-            function.Reconcile(request , 
+            (await function.Reconcile(request , 
                 "somecompany", 
                 "TAS", 
                 "globalpermissions",
-                "some-non-existing-rule").ShouldBeOfType<UnauthorizedResult>();
+                "some-non-existing-rule")).ShouldBeOfType<UnauthorizedResult>();
         }
             
         [Fact]
-        public void UnauthorizedWithoutNameClaimWhenReconcile()
+        public async Task UnauthorizedWithoutNameClaimWhenReconcile()
         {
             var tokenizer = new Mock<ITokenizer>();
             tokenizer
@@ -192,18 +195,18 @@ namespace Functions.Tests
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
             
             var function = new ReconcileFunction(null, new Mock<IRulesProvider>().Object, tokenizer.Object);
-            function.Reconcile(request , 
+            (await function.Reconcile(request , 
                 "somecompany", 
                 "TAS", 
                 "globalpermissions",
-                "some-non-existing-rule").ShouldBeOfType<UnauthorizedResult>();
+                "some-non-existing-rule")).ShouldBeOfType<UnauthorizedResult>();
         }
         
         [Fact]
-        public void UnauthorizedWithoutPermissionWhenReconcile()
+        public async Task UnauthorizedWithoutPermissionWhenReconcile()
         {
             var fixture = new Fixture();
-            fixture.Customize<Permission>(ctx =>
+            fixture.Customize<Response.Permission>(ctx =>
                 ctx.With(x => x.DisplayName, "Manage project properties"));
                         
             var tokenizer = new Mock<ITokenizer>();
@@ -213,38 +216,39 @@ namespace Functions.Tests
 
             var client = new Mock<IVstsRestClient>();
             client
-                .Setup(x => x.Get(It.Is<IVstsRequest<PermissionsProjectId>>(req => req.Uri.Contains("ab84d5a2-4b8d-68df-9ad3-cc9c8884270c"))))
-                .Returns(fixture.Create<PermissionsProjectId>())
+                .Setup(x => x.GetAsync(It.Is<IVstsRequest<Response.PermissionsProjectId>>(req =>
+                    req.QueryParams.Values.Contains("ab84d5a2-4b8d-68df-9ad3-cc9c8884270c"))))
+                .Returns(Task.FromResult(fixture.Create<Response.PermissionsProjectId>()))
                 .Verifiable();
             
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
             
             var function = new ReconcileFunction(client.Object, new Mock<IRulesProvider>().Object, tokenizer.Object);
-            function.Reconcile(request , 
+            (await function.Reconcile(request , 
                 "somecompany", 
                 "TAS", 
                 "globalpermissions",
-                "some-non-existing-rule")
+                "some-non-existing-rule"))
                 .ShouldBeOfType<UnauthorizedResult>();
             
             client.Verify();
         }
         
         [Fact]
-        public void UnauthorizedWithoutHeaderWhenHasPermission()
+        public async Task UnauthorizedWithoutHeaderWhenHasPermission()
         {           
             var request = new HttpRequestMessage();
             request.Headers.Authorization = null;
             
             var function = new ReconcileFunction(null, new Mock<IRulesProvider>().Object, new Mock<ITokenizer>().Object);
-            function
-                .HasPermission(request, "somecompany","TAS")
+            (await function
+                .HasPermission(request, "somecompany","TAS"))
                 .ShouldBeOfType<UnauthorizedResult>();
         }
             
         [Fact]
-        public void UnauthorizedWithoutNameClaimWhenHasPermission()
+        public async Task UnauthorizedWithoutNameClaimWhenHasPermission()
         {
             var tokenizer = new Mock<ITokenizer>();
             tokenizer
@@ -255,16 +259,16 @@ namespace Functions.Tests
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
             
             var function = new ReconcileFunction(null, new Mock<IRulesProvider>().Object, tokenizer.Object);
-            function
-                .HasPermission(request,"somecompany", "TAS")
+            (await function
+                .HasPermission(request,"somecompany", "TAS"))
                 .ShouldBeOfType<UnauthorizedResult>();
         }
         
         [Fact]
-        public void WithoutPermission()
+        public async Task WithoutPermission()
         {
             var fixture = new Fixture();
-            fixture.Customize<Permission>(ctx =>
+            fixture.Customize<Response.Permission>(ctx =>
                 ctx.With(x => x.DisplayName, "Manage project properties"));
                         
             var tokenizer = new Mock<ITokenizer>();
@@ -274,16 +278,17 @@ namespace Functions.Tests
 
             var client = new Mock<IVstsRestClient>();
             client
-                .Setup(x => x.Get(It.Is<IVstsRequest<PermissionsProjectId>>(req => req.Uri.Contains("ab84d5a2-4b8d-68df-9ad3-cc9c8884270c"))))
-                .Returns(fixture.Create<PermissionsProjectId>())
+                .Setup(x => x.GetAsync(It.Is<IVstsRequest<Response.PermissionsProjectId>>(req =>
+                    req.QueryParams.Values.Contains("ab84d5a2-4b8d-68df-9ad3-cc9c8884270c"))))
+                .Returns(Task.FromResult(fixture.Create<Response.PermissionsProjectId>()))
                 .Verifiable();
             
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
             
             var function = new ReconcileFunction(client.Object, new Mock<IRulesProvider>().Object, tokenizer.Object);
-            function
-                .HasPermission(request,"somecompany","TAS")
+            (await function
+                .HasPermission(request,"somecompany","TAS"))
                 .ShouldBeOfType<OkObjectResult>()
                 .Value
                 .ShouldBe(false);
@@ -291,7 +296,7 @@ namespace Functions.Tests
         }
 
         [Fact]
-        public void WithPermission()
+        public async Task WithPermission()
         {
             var fixture = new Fixture();
             ManageProjectPropertiesPermission(fixture);
@@ -303,16 +308,17 @@ namespace Functions.Tests
 
             var client = new Mock<IVstsRestClient>();
             client
-                .Setup(x => x.Get(It.Is<IVstsRequest<PermissionsProjectId>>(req => req.Uri.Contains("ab84d5a2-4b8d-68df-9ad3-cc9c8884270c"))))
-                .Returns(fixture.Create<PermissionsProjectId>())
+                .Setup(x => x.GetAsync(It.Is<IVstsRequest<Response.PermissionsProjectId>>(req =>
+                    req.QueryParams.Values.Contains("ab84d5a2-4b8d-68df-9ad3-cc9c8884270c"))))
+                .Returns(Task.FromResult(fixture.Create<Response.PermissionsProjectId>()))
                 .Verifiable();
             
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
             
             var function = new ReconcileFunction(client.Object, new Mock<IRulesProvider>().Object, tokenizer.Object);
-            function
-                .HasPermission(request,"somecompany","TAS")
+            (await function
+                .HasPermission(request,"somecompany","TAS"))
                 .ShouldBeOfType<OkObjectResult>()
                 .Value
                 .ShouldBe(true);
@@ -321,7 +327,7 @@ namespace Functions.Tests
         
         private static void ManageProjectPropertiesPermission(IFixture fixture)
         {
-            fixture.Customize<Permission>(ctx => ctx
+            fixture.Customize<Response.Permission>(ctx => ctx
                 .With(x => x.DisplayName, "Manage project properties")
                 .With(x => x.PermissionId, 3));
         }
