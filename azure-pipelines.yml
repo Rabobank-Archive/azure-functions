@@ -26,7 +26,7 @@ steps:
     displayName: Test
     inputs:
       command: test
-      arguments: '--configuration release'
+      arguments: '--configuration release /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[xunit*]*"'
 
   - script: docker rm -f azurite
     displayName: docker rm azurite
@@ -45,3 +45,15 @@ steps:
       PathtoPublish: '$(build.artifactstagingdirectory)'
       ArtifactName: 'vsts-webhook-function'
 
+  - script: |
+      dotnet tool install dotnet-reportgenerator-globaltool --tool-path tools --ignore-failed-sources 
+      ./tools/reportgenerator -reports:"*/coverage.opencover.xml" -reporttypes:"HtmlInline_AzurePipelines;cobertura" -targetDir:reports
+    displayName: Generate code coverage reports
+    condition: succeededOrFailed()
+
+  - task: PublishCodeCoverageResults@1
+    inputs:
+      summaryFileLocation: $(Build.SourcesDirectory)/reports/Cobertura.xml
+      reportDirectory: $(Build.SourcesDirectory)/reports
+      codecoverageTool: cobertura
+    condition: succeededOrFailed()
