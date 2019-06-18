@@ -25,8 +25,8 @@ namespace Functions.Tests.ItemScan
             var orchestration = new Mock<DurableOrchestrationClientBase>();
             var azure = new Mock<IVstsRestClient>();
             azure
-                .Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Response.Multiple<Response.Project>>>()))
-                .Returns(Task.FromResult(fixture.CreateMany<Response.Project>()));    
+                .Setup(x => x.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.Project>>>()))
+                .Returns(fixture.CreateMany<Response.Project>());    
 
             var logger = new Mock<ILogger>();
             var timer = CreateTimerInfoMock();

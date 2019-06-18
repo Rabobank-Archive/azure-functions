@@ -20,12 +20,12 @@ namespace Functions.Tests
             var fixture = new Fixture();
             var client = new Mock<IVstsRestClient>();
             client
-                .Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Response.Multiple<Response.Project>>>()))
-                .Returns(Task.FromResult(fixture.CreateMany<Response.Project>()))
+                .Setup(x => x.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.Project>>>()))
+                .Returns(fixture.CreateMany<Response.Project>())
                 .Verifiable();
             client
-                .Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Response.Multiple<Response.Hook>>>()))
-                .Returns(Task.FromResult(fixture.CreateMany<Response.Hook>()))
+                .Setup(x => x.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.Hook>>>()))
+                .Returns(fixture.CreateMany<Response.Hook>())
                 .Verifiable();
 
             // Act
@@ -71,12 +71,12 @@ namespace Functions.Tests
             
             var client = new Mock<IVstsRestClient>();
             client
-                .Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Response.Multiple<Response.Project>>>()))
-                .Returns(Task.FromResult(fixture.CreateMany<Response.Project>()))
+                .Setup(x => x.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.Project>>>()))
+                .Returns(fixture.CreateMany<Response.Project>())
                 .Verifiable();
             client
-                .Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Response.Multiple<Response.Hook>>>()))
-                .Returns(Task.FromResult(fixture.CreateMany<Response.Hook>()))
+                .Setup(x => x.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.Hook>>>()))
+                .Returns(fixture.CreateMany<Response.Hook>())
                 .Verifiable();
             
             // Act
@@ -112,12 +112,12 @@ namespace Functions.Tests
             
             var client = new Mock<IVstsRestClient>();
             client
-                .Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Response.Multiple<Response.Project>>>()))
-                .Returns(Task.FromResult(fixture.CreateMany<Response.Project>()))
+                .Setup(x => x.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.Project>>>()))
+                .Returns(fixture.CreateMany<Response.Project>())
                 .Verifiable();
             client
-                .Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Response.Multiple<Response.Hook>>>()))
-                .Returns(Task.FromResult(fixture.CreateMany<Response.Hook>()))
+                .Setup(x => x.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.Hook>>>()))
+                .Returns(fixture.CreateMany<Response.Hook>())
                 .Verifiable();
             
             // Act

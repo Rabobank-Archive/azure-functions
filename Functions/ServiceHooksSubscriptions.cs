@@ -34,8 +34,8 @@ namespace Functions
 
         private async Task UpdateServiceSubscriptions(string accountName, string accountKey)
         {
-            var hooks = (await _client.GetAsync(Hooks.Subscriptions())).ToList();
-            foreach (var project in await _client.GetAsync(Project.Projects()))
+            var hooks = _client.Get(Hooks.Subscriptions()).ToList();
+            foreach (var project in _client.Get(Project.Projects()))
             {
                 await AddHookIfNotSubscribed(
                     Hooks.AddHookSubscription(), 

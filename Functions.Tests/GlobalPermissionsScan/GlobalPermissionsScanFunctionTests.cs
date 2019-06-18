@@ -23,8 +23,8 @@ namespace Functions.Tests.GlobalPermissionsScan
 
             var projects = ProjectsTestHelper.CreateMultipleProjectsResponse(1);
             
-            clientMock.Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Response.Multiple<Response.Project>>>()))
-                .Returns(Task.FromResult(projects));
+            clientMock.Setup(x => x.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.Project>>>()))
+                .Returns(projects);
 
             //Act
             GlobalPermissionsScanFunction fun = new GlobalPermissionsScanFunction(clientMock.Object);
@@ -46,8 +46,8 @@ namespace Functions.Tests.GlobalPermissionsScan
 
             var projects = ProjectsTestHelper.CreateMultipleProjectsResponse(2);
             
-            clientMock.Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Response.Multiple<Response.Project>>>()))
-                .Returns(Task.FromResult(projects));
+            clientMock.Setup(x => x.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.Project>>>()))
+                .Returns(projects);
 
             //Act
             GlobalPermissionsScanFunction fun = new GlobalPermissionsScanFunction(clientMock.Object);

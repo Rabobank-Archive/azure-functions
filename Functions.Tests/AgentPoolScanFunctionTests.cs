@@ -51,11 +51,11 @@ namespace Functions.Tests
             var tokenProvider = new Intercept<AzureServiceTokenProvider>();
             var client = new Mock<IVstsRestClient>();
 
-            client.Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Response.Multiple<Response.AgentPoolInfo>>>()))
-                .Returns(Task.FromResult(pools));
+            client.Setup(x => x.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.AgentPoolInfo>>>()))
+                .Returns(pools);
 
-            client.Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Response.Multiple<Response.AgentStatus>>>()))
-                .Returns(Task.FromResult(fixture.CreateMany<Response.AgentStatus>()));
+            client.Setup(x => x.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.AgentStatus>>>()))
+                .Returns(fixture.CreateMany<Response.AgentStatus>());
 
 
             // Act
@@ -64,11 +64,11 @@ namespace Functions.Tests
 
             // Assert
             client
-                .Verify(v => v.GetAsync(It.IsAny<IVstsRequest<Response.Multiple<Response.AgentPoolInfo>>>()), 
+                .Verify(v => v.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.AgentPoolInfo>>>()), 
                     Times.Exactly(1));
 
             client
-                .Verify(v => v.GetAsync(It.IsAny<IVstsRequest<Response.Multiple<Response.AgentStatus>>>()), 
+                .Verify(v => v.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.AgentStatus>>>()), 
                     Times.Exactly(8));
 
             logAnalyticsClient

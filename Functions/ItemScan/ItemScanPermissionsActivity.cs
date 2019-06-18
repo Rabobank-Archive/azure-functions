@@ -135,7 +135,7 @@ namespace Functions.ItemScan
         private async Task<IList<ItemExtensionData>> CreateReportsForRepositories(string projectId, string scope)
         {
             var rules = _rulesProvider.RepositoryRules(_azuredo);
-            var items = await _azuredo.GetAsync(Requests.Repository.Repositories(projectId));
+            var items = _azuredo.Get(Requests.Repository.Repositories(projectId));
             
             return await Task.WhenAll(items.Select(async x => new ItemExtensionData
             {
@@ -147,7 +147,7 @@ namespace Functions.ItemScan
         private async Task<IList<ItemExtensionData>> CreateReportsForBuildPipelines(string projectId, string scope)
         {
             var rules = _rulesProvider.BuildRules(_azuredo).ToList();
-            var items = await _azuredo.GetAsync(Requests.Builds.BuildDefinitions(projectId));
+            var items = _azuredo.Get(Requests.Builds.BuildDefinitions(projectId));
 
             var evaluationResults = new List<ItemExtensionData>();
             
@@ -166,7 +166,7 @@ namespace Functions.ItemScan
         private async Task<IList<ItemExtensionData>> CreateReportsForReleasePipelines(string projectId, string scope)
         {
             var rules = _rulesProvider.ReleaseRules(_azuredo).ToList();
-            var items = await _azuredo.GetAsync(Requests.ReleaseManagement.Definitions(projectId));
+            var items = _azuredo.Get(Requests.ReleaseManagement.Definitions(projectId));
 
             var evaluationResults = new List<ItemExtensionData>();
             
