@@ -2,6 +2,7 @@
 using Polly.Retry;
 using System;
 using System.Diagnostics;
+using System.Net;
 using Flurl.Http;
 
 namespace Functions.Helpers
@@ -9,8 +10,8 @@ namespace Functions.Helpers
     public static class RetryHelper
     {
         public static readonly AsyncRetryPolicy InvalidDocumentVersionPolicy = Policy
-            .Handle<FlurlHttpException>(ex => ex.Message.Contains("InvalidDocumentVersionException"))
-            .RetryAsync(3);
+            .Handle<FlurlHttpException>(ex => ex.Call.HttpStatus == HttpStatusCode.BadRequest)
+            .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(5));
 
         public static readonly AsyncRetryPolicy ServiceUnavailablePolicy = Policy
             .Handle<FlurlHttpException>(ex => ex.Message.Contains("Azure DevOps Services Unavailable"))

@@ -1,6 +1,8 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using AutoFixture;
 using AutoFixture.AutoMoq;
@@ -149,6 +151,8 @@ namespace Functions.Tests
         public async Task RetryUpdateExtensionData()
         {
             _fixture.Customize(new AutoMoqCustomization());
+            _fixture.Customize<HttpRequestMessage>(r => r.With(x => x.Method, HttpMethod.Put));
+            _fixture.Customize<HttpResponseMessage>(r => r.With(x => x.StatusCode, HttpStatusCode.BadRequest));
             
             //Arrange
             var scan = new Mock<IServiceHookScan<BuildScanReport>>();
@@ -164,7 +168,7 @@ namespace Functions.Tests
             azuredo
                 .SetupSequence(x => x.PutAsync(It.IsAny<IVstsRequest<Report>>(),
                 It.IsAny<ExtensionDataReports<BuildScanReport>>()))
-                .Throws(new FlurlHttpException(_fixture.Create<HttpCall>(), "InvalidDocumentVersionException", _fixture.Create<Exception>()))
+                .Throws(new FlurlHttpException(_fixture.Create<HttpCall>(), "Some message", _fixture.Create<Exception>()))
                 .Returns(Task.FromResult(new Report()));
 
             //Act
