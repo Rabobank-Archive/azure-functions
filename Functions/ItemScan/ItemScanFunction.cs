@@ -29,7 +29,7 @@ namespace Functions.ItemScan
             {
                 log.LogInformation($"Item scan timed check start: {DateTime.Now}");
 
-                var projects = _azuredo.Get(Requests.Project.Projects()).ToList();
+                var projects = (_azuredo.Get(Requests.Project.Projects())).ToList();
                 log.LogInformation($"Projects found: {projects.Count}");
                 
                 var instanceId = await orchestrationClientBase.StartNewAsync(nameof(ItemScanProjectOrchestration), projects);

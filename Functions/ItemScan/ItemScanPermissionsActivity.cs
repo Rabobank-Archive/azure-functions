@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Functions.Model;
 using LogAnalytics.Client;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing.Internal;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
@@ -59,7 +58,7 @@ namespace Functions.ItemScan
                 await Run(project.Name, project.Id, "repository", log);
                 log.LogInformation($"Executed {ActivityNameRepos} for project {project.Name}");
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 log.LogInformation($"Execution failed {ActivityNameRepos} for project {project.Name}");
             }
@@ -80,7 +79,7 @@ namespace Functions.ItemScan
                 await Run(project.Name, project.Id, "buildpipelines", log);
                 log.LogInformation($"Executed {ActivityNameBuilds} for project {project.Name}");
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 log.LogInformation($"Execution failed {ActivityNameBuilds} for project {project.Name}");
             }
@@ -101,7 +100,7 @@ namespace Functions.ItemScan
                 await Run(project.Name, project.Id, "releasepipelines", log);
                 log.LogInformation($"Executed {ActivityNameReleases} for project {project.Name}");
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 log.LogInformation($"Execution failed {ActivityNameReleases} for project {project.Name}");
             }
@@ -122,7 +121,7 @@ namespace Functions.ItemScan
                 return new UnauthorizedResult();
             }
 
-            var properties = _azuredo.Get(Requests.Project.Properties(project));
+            var properties = await _azuredo.GetAsync(Requests.Project.Properties(project));
 
             await Run(project, properties.Id, scope, log);
             return new OkResult();
@@ -138,47 +137,47 @@ namespace Functions.ItemScan
                 Date = now,
                 RescanUrl = $"https://{_config.FunctionAppHostname}/api/scan/{_config.Organization}/{projectName}/{scope}",
                 HasReconcilePermissionUrl = $"https://{_config.FunctionAppHostname}/api/reconcile/{_config.Organization}/{projectId}/haspermissions",
-                Reports = CreateReports(projectId, scope)
+                Reports = await CreateReports(projectId, scope)
             };
 
             foreach (var item in data.Flatten(scope))
             {
                 await _client.AddCustomLogJsonAsync("preventive_analysis_log", item, "evaluatedDate");
             }
+
+            await _azuredo.PutAsync(Requests.ExtensionManagement.ExtensionData<ItemsExtensionData>("tas", _config.ExtensionName, scope), data);
                         
-            _azuredo.Put(Requests.ExtensionManagement.ExtensionData<ItemsExtensionData>("tas", _config.ExtensionName, scope), data);
-            
             log.LogInformation($"Executed ItemScanPermissionActivity with scope {scope} for project {projectName}");
         }
 
-        private IList<ItemExtensionData> CreateReports(string projectId, string scope)
+        private async Task<IList<ItemExtensionData>> CreateReports(string projectId, string scope)
         {
             switch (scope)
             {
                 case "repository":
-                    return CreateReportsForRepositories(projectId, scope);
+                    return await CreateReportsForRepositories(projectId, scope);
                 case "buildpipelines":
-                    return CreateReportsForBuildPipelines(projectId, scope);
+                    return await CreateReportsForBuildPipelines(projectId, scope);
                 case "releasepipelines":
-                    return CreateReportsForReleasePipelines(projectId, scope);
+                    return await CreateReportsForReleasePipelines(projectId, scope);
                 default:
                     throw new ArgumentException(nameof(scope));
             }
         }
 
-        private IList<ItemExtensionData> CreateReportsForRepositories(string projectId, string scope)
+        private async Task<IList<ItemExtensionData>> CreateReportsForRepositories(string projectId, string scope)
         {
             var rules = _rulesProvider.RepositoryRules(_azuredo);
             var items = _azuredo.Get(Requests.Repository.Repositories(projectId));
             
-            return items.Select(x => new ItemExtensionData
+            return await Task.WhenAll(items.Select(async x => new ItemExtensionData
             {
                 Item = x.Name,
-                Rules = Evaluate(projectId, scope, x.Id, rules)
-            }).ToList();
+                Rules = await Evaluate(projectId, scope, x.Id, rules)
+            }).ToList());
         }
 
-        private IList<ItemExtensionData> CreateReportsForBuildPipelines(string projectId, string scope)
+        private async Task<IList<ItemExtensionData>> CreateReportsForBuildPipelines(string projectId, string scope)
         {
             var rules = _rulesProvider.BuildRules(_azuredo).ToList();
             var items = _azuredo.Get(Requests.Builds.BuildDefinitions(projectId));
@@ -191,13 +190,13 @@ namespace Functions.ItemScan
                 evaluationResults.Add(new ItemExtensionData
                 {
                     Item = pipeline.Name,
-                    Rules = Evaluate(projectId, scope, pipeline.Id, rules)
+                    Rules = await Evaluate(projectId, scope, pipeline.Id, rules)
                 });
             }
             return evaluationResults;
         }
         
-        private IList<ItemExtensionData> CreateReportsForReleasePipelines(string projectId, string scope)
+        private async Task<IList<ItemExtensionData>> CreateReportsForReleasePipelines(string projectId, string scope)
         {
             var rules = _rulesProvider.ReleaseRules(_azuredo).ToList();
             var items = _azuredo.Get(Requests.ReleaseManagement.Definitions(projectId));
@@ -210,22 +209,22 @@ namespace Functions.ItemScan
                 evaluationResults.Add(new ItemExtensionData
                 {
                     Item = pipeline.Name,
-                    Rules = Evaluate(projectId, scope, pipeline.Id, rules)
+                    Rules = await Evaluate(projectId, scope, pipeline.Id, rules)
                 });
             }
             return evaluationResults;
         }
 
-        private IList<EvaluatedRule> Evaluate(string projectId, string scope, string itemId, IEnumerable<IRule> rules)
+        private async Task<IList<EvaluatedRule>> Evaluate(string projectId, string scope, string itemId, IEnumerable<IRule> rules)
         {
-            return rules.Select(rule => new EvaluatedRule
+            return await Task.WhenAll(rules.Select(async rule => new EvaluatedRule
             {
                 Name = rule.GetType().Name,
-                Status = rule.Evaluate(projectId, itemId),
+                Status = await rule.Evaluate(projectId, itemId),
                 Description = rule.Description,
                 Why = rule.Why,
                 Reconcile = ToReconcile(projectId, scope, itemId, rule as IReconcile)
-            }).ToList();
+            }).ToList());
         }
 
         private Reconcile ToReconcile(string projectId, string scope, string itemId, IReconcile rule)

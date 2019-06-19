@@ -87,17 +87,17 @@ namespace Functions.GlobalPermissionsScan
                 Date = now,
                 RescanUrl =  $"https://{_config.FunctionAppHostname}/api/scan/{_config.Organization}/{project}/globalpermissions",
                 HasReconcilePermissionUrl = $"https://{_config.FunctionAppHostname}/api/reconcile/{_config.Organization}/{project}/haspermissions",
-                Reports = rules.Select(r => new EvaluatedRule
+                Reports = await Task.WhenAll(rules.Select(async r => new EvaluatedRule
                 {
                     Name = r.GetType().Name,
                     Description = r.Description,
                     Why = r.Why,
-                    Status = r.Evaluate(project),
+                    Status = await r.Evaluate(project),
                     Reconcile = ToReconcile(project, r as IProjectReconcile)
-                }).ToList()
+                }).ToList())
             };
             
-            _azuredo.Put(ExtensionManagement.ExtensionData<GlobalPermissionsExtensionData>("tas", _config.ExtensionName, "globalpermissions"), data);
+            await _azuredo.PutAsync(ExtensionManagement.ExtensionData<GlobalPermissionsExtensionData>("tas", _config.ExtensionName, "globalpermissions"), data);
             foreach (var item in data.Flatten())
             {
                 await _analytics.AddCustomLogJsonAsync("preventive_analysis_log", item, "evaluatedDate");

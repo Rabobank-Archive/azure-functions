@@ -23,7 +23,7 @@ namespace Functions.GlobalPermissionsScan
             [OrchestrationClient] DurableOrchestrationClientBase orchestrationClientBase,
             ILogger log)
         {
-            var projects = _azuredo.Get(Project.Projects());
+            var projects = await _azuredo.GetAsync(Project.Projects());
 
             var instanceId = await orchestrationClientBase.StartNewAsync(nameof(GlobalPermissionsScanProjectOrchestration), projects);
             log.LogInformation($"Started orchestration with ID = '{instanceId}'.");

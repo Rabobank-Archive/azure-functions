@@ -1,7 +1,9 @@
 using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Queue;
+using Moq;
 using Shouldly;
 using Xunit;
 
@@ -20,7 +22,7 @@ namespace Functions.Tests
             var client = storage.CreateCloudQueueClient();
             
             var queue = client.GetQueueReference("some-queue");
-            var poison = client.GetQueueReference($"some-poison");
+            var poison = client.GetQueueReference($"some-queue-poison");
 
             await queue.CreateAsync();
             await queue.ClearAsync();
@@ -31,7 +33,8 @@ namespace Functions.Tests
             await poison.AddMessageAsync(new CloudQueueMessage(content));
             
             // Act
-            await PoisonQueueFunction.RequeuePoisonMessages(queue, poison);
+            var function = new PoisonQueueFunction(new EnvironmentConfig { StorageAccountConnectionString  = "UseDevelopmentStorage=true" });
+            await function.Requeue(null, "some-queue", new Mock<ILogger>().Object);
 
             // Assert
             poison
@@ -51,7 +54,7 @@ namespace Functions.Tests
         public void SkipIfQueueNameIsEmpty()
         {
             var func = new PoisonQueueFunction(new EnvironmentConfig { StorageAccountConnectionString = "UseDevelopmentStorage=true" });
-            func.Requeue(null, "");
+            func.Requeue(null, "", new Mock<ILogger>().Object);
         }
     }
 }

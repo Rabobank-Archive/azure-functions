@@ -20,7 +20,7 @@ namespace Functions.GlobalPermissionsScan
             log.LogInformation($"Creating tasks for every project total amount of projects {projects.Count}");
             
             var tasks = new List<Task>();
-            int currentProject = 1;
+            var currentProject = 1;
 
             foreach(var project in projects)
             {

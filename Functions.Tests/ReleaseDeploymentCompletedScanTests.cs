@@ -32,12 +32,12 @@ namespace Functions.Tests
             var scan = new Mock<IServiceHookScan<ReleaseDeploymentCompletedReport>>();
             scan
                 .Setup(x => x.Completed(It.IsAny<JObject>()))
-                .Returns(report);
+                .Returns(Task.FromResult(report));
 
             var azDoClient = new Mock<IVstsRestClient>();
             azDoClient
-                .Setup(x => x.Get(It.IsAny<IVstsRequest<Report>>()))
-                .Returns(_fixture.Create<Report>());
+                .Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Report>>()))
+                .Returns(Task.FromResult(_fixture.Create<Report>()));
 
             var json = ReleaseDeploymentCompletedJson();
             var fun = new ReleaseDeploymentCompletedFunction(logAnalyticsClient.Object, scan.Object, azDoClient.Object, config);
@@ -47,13 +47,13 @@ namespace Functions.Tests
             );
 
             azDoClient.Verify(x => 
-                x.Get(It.Is<IVstsRequest<Report>>(r => r.Uri.Contains(config.ExtensionName))), Times.Once);
+                x.GetAsync(It.Is<IVstsRequest<Report>>(r => r.Resource.Contains(config.ExtensionName))), Times.Once);
             azDoClient.Verify(x => 
-                x.Put(It.Is<IVstsRequest<Report>>(r => r.Uri.Contains(config.ExtensionName)),It.Is<Report>(r => r.Reports.Count == 50)), Times.Once);
+                x.PutAsync(It.Is<IVstsRequest<Report>>(r => r.Resource.Contains(config.ExtensionName)),
+                    It.Is<Report>(r => r.Reports.Count == 50)), Times.Once);
 
             logAnalyticsClient.Verify(x => 
                 x.AddCustomLogJsonAsync(It.IsAny<string>(), report, It.IsAny<string>()), Times.AtLeastOnce());
-            
         }
 
         [Fact]
@@ -64,15 +64,16 @@ namespace Functions.Tests
             var client = new Mock<IServiceHookScan<ReleaseDeploymentCompletedReport>>();
             client
                 .Setup(x => x.Completed(It.IsAny<JObject>()))
-                .Returns(report);
+                .Returns(Task.FromResult(report));
             
             var azDoClient = new Mock<IVstsRestClient>();
-            azDoClient.Setup(x => x.Get(It.IsAny<IVstsRequest<Report>>()))
-                .Returns((Report) null);
+            azDoClient.Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Report>>()))
+                .Returns(Task.FromResult((Report) null));
             azDoClient
-                .Setup(x => x.Put(
+                .Setup(x => x.PutAsync(
                     It.IsAny<IVstsRequest<Report>>(),
                     It.IsAny<Report>()))
+                .Returns(Task.FromResult(_fixture.Create<ExtensionDataReports<ReleaseDeploymentCompletedReport>>()))
                 .Verifiable();
             
             var config = _fixture.Create<EnvironmentConfig>();
@@ -81,7 +82,7 @@ namespace Functions.Tests
             var fun = new ReleaseDeploymentCompletedFunction(logAnalyticsClient.Object, client.Object, azDoClient.Object, config);
             await fun.Run(
                 json,
-                new Mock<Microsoft.Extensions.Logging.ILogger>().Object
+                new Mock<ILogger>().Object
             );
             azDoClient.Verify();
         }
@@ -100,22 +101,23 @@ namespace Functions.Tests
             var client = new Mock<IServiceHookScan<ReleaseDeploymentCompletedReport>>();
             client
                 .Setup(x => x.Completed(It.IsAny<JObject>()))
-                .Returns(today);
+                .Returns(Task.FromResult(today));
 
             // Return reports from yesterday and tomorrow from extension data storage
             var azdo = new Mock<IVstsRestClient>();
-            azdo.Setup(x => x.Get(It.IsAny<IVstsRequest<Report>>()))
-                .Returns(new Report { Reports = new[]{ yesterday, tomorrow } });
+            azdo.Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Report>>()))
+                .Returns(Task.FromResult(new Report { Reports = new[]{ yesterday, tomorrow } }));
 
             // Capture the result to assert it later on.
-            azdo.Setup(x => x.Put(It.IsAny<IVstsRequest<Report>>(), It.IsAny<Report>()))
+            azdo.Setup(x => x.PutAsync(It.IsAny<IVstsRequest<Report>>(), It.IsAny<Report>()))
+                .Returns(Task.FromResult(_fixture.Create<ExtensionDataReports<ReleaseDeploymentCompletedReport>>()))
                 .Callback<IVstsRequest, Report>((req, r) => result = r);
 
             // Act
             var fun = new ReleaseDeploymentCompletedFunction(new Mock<ILogAnalyticsClient>().Object, client.Object, azdo.Object, new EnvironmentConfig());
             await fun.Run(
                 ReleaseDeploymentCompletedJson(), 
-                new Mock<Microsoft.Extensions.Logging.ILogger>().Object
+                new Mock<ILogger>().Object
             );
 
             // Assert

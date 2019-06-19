@@ -41,17 +41,17 @@ namespace Functions
             if (data == null) throw new ArgumentNullException(nameof(data));
             if (log == null) throw new ArgumentNullException(nameof(log));
             
-            var report = _scan.Completed(JObject.Parse(data));
+            var report = await _scan.Completed(JObject.Parse(data));
             if (report != null)
             {
                 await _client.AddCustomLogJsonAsync(nameof(BuildCompletedFunction), report, "Date");
-                RetryHelper.InvalidDocumentVersionPolicy.Execute(() => UpdateExtensionData(report));
+                await RetryHelper.InvalidDocumentVersionPolicy.ExecuteAsync(() => UpdateExtensionData(report));
             }
         }
 
-        private void UpdateExtensionData(BuildScanReport report)
+        private async Task UpdateExtensionData(BuildScanReport report)
         {
-            var reports = _azuredo.Get(
+            var reports = await _azuredo.GetAsync(
                               Requests.ExtensionManagement.ExtensionData<ExtensionDataReports<BuildScanReport>>(
                                   "tas",
                                   _config.ExtensionName,
@@ -67,7 +67,7 @@ namespace Functions
                 .Take(50)
                 .ToList();
 
-            _azuredo.Put(
+            await _azuredo.PutAsync(
                 Requests.ExtensionManagement.ExtensionData<ExtensionDataReports<BuildScanReport>>(
                     "tas", _config.ExtensionName,
                     "BuildReports", report.Project), reports);

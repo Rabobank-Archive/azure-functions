@@ -54,19 +54,19 @@ namespace Functions
                 new AgentPoolInformation {PoolName = "Rabo-Build-Azure-Windows-Preview", ResourceGroupPrefix = "rg-m01-prd-vstswinpreview-0"},
             };
 
-            var orgPools = RetryHelper.ServiceUnavailablePolicy
+            var orgPools = RetryHelper.SyncServiceUnavailablePolicy
                 .Execute(() => _client.Get(Requests.DistributedTask.OrganizationalAgentPools()));
             var poolsToObserve = orgPools.Where(x => observedPools.Any(p => p.PoolName == x.Name));
             var list = new List<LogAnalyticsAgentStatus>();
 
             foreach (var pool in poolsToObserve)
             {
-                var agents = RetryHelper.ServiceUnavailablePolicy
+                var agents = RetryHelper.SyncServiceUnavailablePolicy
                     .Execute(() => _client.Get(Requests.DistributedTask.AgentPoolStatus(pool.Id)));
                 foreach (var agent in agents)
                 {
                     var assignedTask = (agent.Status != "online") ? "Offline" : ((agent.AssignedRequest == null) ? "Idle" : agent.AssignedRequest.PlanType);
-                    int statusCode = 0;
+                    int statusCode;
                     switch (assignedTask)
                     {
                         case "Idle": statusCode = 1; break;

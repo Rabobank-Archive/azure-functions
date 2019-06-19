@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using AutoFixture;
 using AutoFixture.AutoMoq;
 using Functions.ItemScan;
@@ -7,7 +8,7 @@ using Microsoft.Azure.WebJobs.Extensions.Timers;
 using Microsoft.Extensions.Logging;
 using Moq;
 using SecurePipelineScan.VstsService;
-using SecurePipelineScan.VstsService.Response;
+using Response = SecurePipelineScan.VstsService.Response;
 using Xunit;
 
 namespace Functions.Tests.ItemScan
@@ -15,7 +16,7 @@ namespace Functions.Tests.ItemScan
     public class ItemScanFunctionTests
     {
         [Fact]
-        public async System.Threading.Tasks.Task GivenThereAreProjectsItShouldStartOrchestration()
+        public async Task GivenThereAreProjectsItShouldStartOrchestration()
         {
             var fixture = new Fixture();
             fixture.Customize(new AutoMoqCustomization());
@@ -24,8 +25,8 @@ namespace Functions.Tests.ItemScan
             var orchestration = new Mock<DurableOrchestrationClientBase>();
             var azure = new Mock<IVstsRestClient>();
             azure
-                .Setup(x => x.Get(It.IsAny<IVstsRequest<Multiple<Project>>>()))
-                .Returns(fixture.CreateMany<Project>);    
+                .Setup(x => x.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.Project>>>()))
+                .Returns(fixture.CreateMany<Response.Project>());    
 
             var logger = new Mock<ILogger>();
             var timer = CreateTimerInfoMock();
@@ -36,7 +37,7 @@ namespace Functions.Tests.ItemScan
 
             //Assert
             orchestration.Verify(
-                x => x.StartNewAsync(nameof(ItemScanProjectOrchestration), It.IsAny<IEnumerable<Project>>()), 
+                x => x.StartNewAsync(nameof(ItemScanProjectOrchestration), It.IsAny<IEnumerable<Response.Project>>()), 
                 Times.Once);
         }
 
