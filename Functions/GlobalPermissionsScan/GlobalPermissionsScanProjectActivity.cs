@@ -45,7 +45,17 @@ namespace Functions.GlobalPermissionsScan
             if (context == null) throw new ArgumentNullException(nameof(context));
             var project = context.GetInput<Project>() ?? throw new Exception("No Project found in parameter DurableActivityContextBase");
 
-            await Run(_config.Organization, project.Name, log);
+            log.LogInformation($"Executing GlobalPermissionsScanProjectActivity for project {project.Name}");
+
+            try
+            {
+                await Run(_config.Organization, project.Name, log);
+                log.LogInformation($"Executed GlobalPermissionsScanProjectActivity for project {project.Name}");
+            }
+            catch (Exception e)
+            {
+                log.LogInformation($"Execution failed GlobalPermissionsScanProjectActivity for project {project.Name}");
+            }
         }
 
         [FunctionName("GlobalPermissionsScanProject")]
@@ -67,7 +77,7 @@ namespace Functions.GlobalPermissionsScan
 
         private async Task Run(string organization, string project, ILogger log)
         {
-            log.LogInformation($"Creating preventive analysis log for project {project}");
+            log.LogInformation($"Creating Global Permissions preventive analysis log for project {project}");
             var now = DateTime.UtcNow;
             var rules = _rulesProvider.GlobalPermissions(_azuredo);
 
@@ -92,7 +102,6 @@ namespace Functions.GlobalPermissionsScan
             {
                 await _analytics.AddCustomLogJsonAsync("preventive_analysis_log", item, "evaluatedDate");
             }
-            
         }
 
         private Reconcile ToReconcile(string project, IProjectReconcile rule)
