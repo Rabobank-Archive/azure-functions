@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Functions.Model;
 using LogAnalytics.Client;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing.Internal;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
@@ -51,7 +52,17 @@ namespace Functions.ItemScan
             if (context == null) throw new ArgumentNullException(nameof(context));
             var project = context.GetInput<Response.Project>() ?? throw new Exception("No Project found in parameter DurableActivityContextBase");
 
-            await Run(project.Name, project.Id, "repository");
+            log.LogInformation($"Executing {ActivityNameRepos} for project {project.Name}");
+
+            try
+            {
+                await Run(project.Name, project.Id, "repository", log);
+                log.LogInformation($"Executed {ActivityNameRepos} for project {project.Name}");
+            }
+            catch (Exception e)
+            {
+                log.LogInformation($"Execution failed {ActivityNameRepos} for project {project.Name}");
+            }
         }
 
         [FunctionName(ActivityNameBuilds)]
@@ -62,7 +73,17 @@ namespace Functions.ItemScan
             if (context == null) throw new ArgumentNullException(nameof(context));
             var project = context.GetInput<Response.Project>() ?? throw new Exception("No Project found in parameter DurableActivityContextBase");
 
-            await Run(project.Name, project.Id, "buildpipelines");
+            log.LogInformation($"Executing {ActivityNameBuilds} for project {project.Name}");
+            
+            try
+            {
+                await Run(project.Name, project.Id, "buildpipelines", log);
+                log.LogInformation($"Executed {ActivityNameBuilds} for project {project.Name}");
+            }
+            catch (Exception e)
+            {
+                log.LogInformation($"Execution failed {ActivityNameBuilds} for project {project.Name}");
+            }
         }
 
         [FunctionName(ActivityNameReleases)]
@@ -73,7 +94,17 @@ namespace Functions.ItemScan
             if (context == null) throw new ArgumentNullException(nameof(context));
             var project = context.GetInput<Response.Project>() ?? throw new Exception("No Project found in parameter DurableActivityContextBase");
 
-            await Run(project.Name, project.Id, "releasepipelines");
+            log.LogInformation($"Executing {ActivityNameReleases} for project {project.Name}");
+            
+            try
+            {
+                await Run(project.Name, project.Id, "releasepipelines", log);
+                log.LogInformation($"Executed {ActivityNameReleases} for project {project.Name}");
+            }
+            catch (Exception e)
+            {
+                log.LogInformation($"Execution failed {ActivityNameReleases} for project {project.Name}");
+            }
         }
 
 
@@ -93,12 +124,13 @@ namespace Functions.ItemScan
 
             var properties = _azuredo.Get(Requests.Project.Properties(project));
 
-            await Run(project, properties.Id, scope);
+            await Run(project, properties.Id, scope, log);
             return new OkResult();
         }
 
-        private async Task Run(string projectName, string projectId, string scope)
+        private async Task Run(string projectName, string projectId, string scope, ILogger log)
         {
+            
             var now = DateTime.UtcNow;
             var data = new ItemsExtensionData
             {
@@ -113,8 +145,10 @@ namespace Functions.ItemScan
             {
                 await _client.AddCustomLogJsonAsync("preventive_analysis_log", item, "evaluatedDate");
             }
-
+                        
             _azuredo.Put(Requests.ExtensionManagement.ExtensionData<ItemsExtensionData>("tas", _config.ExtensionName, scope), data);
+            
+            log.LogInformation($"Executed ItemScanPermissionActivity with scope {scope} for project {projectName}");
         }
 
         private IList<ItemExtensionData> CreateReports(string projectId, string scope)
