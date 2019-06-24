@@ -31,8 +31,7 @@ namespace Functions.Tests.GlobalPermissionsScan
             await fun.Run(timerInfoMock, orchestrationClientMock.Object, logMock.Object);
             
             //Assert
-            clientMock.Verify(x => x.GetAsync(It.IsAny<IVstsRequest<Response.Multiple<Response.Project>>>()), Times.Exactly(1));
-
+            clientMock.Verify(x => x.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.Project>>>()), Times.Exactly(1));
         }
 
         [Fact]

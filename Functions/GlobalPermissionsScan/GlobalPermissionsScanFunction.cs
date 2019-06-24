@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
@@ -23,8 +24,8 @@ namespace Functions.GlobalPermissionsScan
             [OrchestrationClient] DurableOrchestrationClientBase orchestrationClientBase,
             ILogger log)
         {
-            var projects = await _azuredo.GetAsync(Project.Projects());
-
+            var projects = _azuredo.Get(Project.Projects()).ToList();
+            
             var instanceId = await orchestrationClientBase.StartNewAsync(nameof(GlobalPermissionsScanProjectOrchestration), projects);
             log.LogInformation($"Started orchestration with ID = '{instanceId}'.");
         }
