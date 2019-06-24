@@ -45,7 +45,7 @@ namespace Functions
             if (report != null)
             {
                 await _client.AddCustomLogJsonAsync(nameof(BuildCompletedFunction), report, "Date");
-                await RetryHelper.InvalidDocumentVersionPolicy.ExecuteAsync(() => UpdateExtensionData(report));
+                await RetryHelper.ExecuteInvalidDocumentVersionPolicy(_config.Organization,() => UpdateExtensionData(report));
             }
         }
 

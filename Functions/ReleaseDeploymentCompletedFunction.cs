@@ -44,7 +44,7 @@ namespace Functions
 
             var report = await _scan.Completed(JObject.Parse(data));
             await _client.AddCustomLogJsonAsync("DeploymentStatus", report, "Date");
-            await RetryHelper.InvalidDocumentVersionPolicy.ExecuteAsync(() => UpdateExtensionData(report));
+            await RetryHelper.ExecuteInvalidDocumentVersionPolicy(_config.Organization,() => UpdateExtensionData(report));
         }
 
         private async Task UpdateExtensionData(ReleaseDeploymentCompletedReport report)
