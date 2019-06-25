@@ -16,7 +16,8 @@ namespace Functions.GlobalPermissionsScan
         )
         {   
             var project = context.GetInput<Response.Project>();
-            
+            context.SetCustomStatus(new ScanOrchestratorStatus() { Project = project.Name });
+
             await context.CallActivityAsync(nameof(GlobalPermissionsScanProjectActivity), project);
         }
     }
