@@ -10,7 +10,6 @@ using Microsoft.Extensions.Logging;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Requests;
-using LogAnalytics.Client;
 using Project = SecurePipelineScan.VstsService.Response.Project;
 using Task = System.Threading.Tasks.Task;
 
@@ -18,19 +17,16 @@ namespace Functions.GlobalPermissionsScan
 {
     public class GlobalPermissionsScanProjectActivity
     {
-        private readonly ILogAnalyticsClient _analytics;
         private readonly IVstsRestClient _azuredo;
         private readonly EnvironmentConfig _config;
         private readonly IRulesProvider _rulesProvider;
         private readonly ITokenizer _tokenizer;
 
-        public GlobalPermissionsScanProjectActivity(ILogAnalyticsClient analytics,
-            IVstsRestClient azuredo,
+        public GlobalPermissionsScanProjectActivity(IVstsRestClient azuredo,
             EnvironmentConfig config,
             IRulesProvider rulesProvider, 
             ITokenizer tokenizer)
         {
-            _analytics = analytics;
             _azuredo = azuredo;
             _config = config;
             _rulesProvider = rulesProvider;
@@ -89,11 +85,6 @@ namespace Functions.GlobalPermissionsScan
                 }).ToList())
             };
             
-            foreach (var item in data.Flatten())
-            {
-                await _analytics.AddCustomLogJsonAsync("preventive_analysis_log", item, "evaluatedDate");
-            }
-
             return data;
         }
 

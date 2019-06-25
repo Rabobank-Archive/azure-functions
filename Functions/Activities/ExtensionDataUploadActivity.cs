@@ -10,10 +10,10 @@ using SecurePipelineScan.VstsService.Requests;
 
 namespace Functions
 {
-    class ExtensionDataUploadActivity
+    public class ExtensionDataUploadActivity
     {
-        private IVstsRestClient _azuredo;
-        private EnvironmentConfig _config;
+        private readonly IVstsRestClient _azuredo;
+        private readonly EnvironmentConfig _config;
 
         public ExtensionDataUploadActivity(IVstsRestClient azuredo,
             EnvironmentConfig config)
@@ -23,8 +23,7 @@ namespace Functions
         }
 
         [FunctionName(nameof(ExtensionDataUploadActivity))]
-        public async Task Run([ActivityTrigger] ExtensionDataUploadActivityRequest request,
-            ILogger log)
+        public async Task Run([ActivityTrigger] ExtensionDataUploadActivityRequest request)
         {
             await _azuredo.PutAsync(ExtensionManagement.ExtensionData<GlobalPermissionsExtensionData>("tas", _config.ExtensionName, request.Scope), request.Data);
         }

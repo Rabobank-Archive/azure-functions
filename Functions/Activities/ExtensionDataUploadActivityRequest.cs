@@ -2,7 +2,7 @@
 
 namespace Functions
 {
-    internal class ExtensionDataUploadActivityRequest
+    public class ExtensionDataUploadActivityRequest
     {
         public GlobalPermissionsExtensionData Data { get; set; }
         public string Scope { get; set; }

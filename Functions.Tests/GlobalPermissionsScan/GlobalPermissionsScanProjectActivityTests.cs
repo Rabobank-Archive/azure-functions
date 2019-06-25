@@ -15,7 +15,6 @@ using Project = SecurePipelineScan.VstsService.Response.Project;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 using Functions.GlobalPermissionsScan;
-using Functions.Model;
 using Microsoft.AspNetCore.Mvc;
 using Shouldly;
 
@@ -28,8 +27,6 @@ namespace Functions.Tests.GlobalPermissionsScan
         {
             //Arrange
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
-
-            var analytics = new Mock<ILogAnalyticsClient>();
 
             var rule = new Mock<IProjectRule>();
             rule
@@ -48,7 +45,6 @@ namespace Functions.Tests.GlobalPermissionsScan
 
             //Act
             var fun = new GlobalPermissionsScanProjectActivity(
-                analytics.Object, 
                 fixture.Create<IVstsRestClient>(), 
                 fixture.Create<EnvironmentConfig>(),
                 ruleSets.Object,
@@ -60,8 +56,6 @@ namespace Functions.Tests.GlobalPermissionsScan
 
             //Assert
             rule.Verify(x => x.Evaluate(It.IsAny<string>()), Times.AtLeastOnce());
-            analytics
-                .Verify(x => x.AddCustomLogJsonAsync("preventive_analysis_log", It.IsAny<Object>(), It.IsAny<string>()), Times.Exactly((2)));
         }
 
         [Fact]
@@ -72,7 +66,6 @@ namespace Functions.Tests.GlobalPermissionsScan
 
             //Act
             var fun = new GlobalPermissionsScanProjectActivity(
-                new Mock<ILogAnalyticsClient>().Object, 
                 new Mock<IVstsRestClient>().Object, 
                 fixture.Create<EnvironmentConfig>(), 
                 new Mock<IRulesProvider>().Object,
@@ -114,7 +107,6 @@ namespace Functions.Tests.GlobalPermissionsScan
 
             //Act
             var fun = new GlobalPermissionsScanProjectActivity(
-                new Mock<ILogAnalyticsClient>().Object, 
                 clientMock.Object, 
                 config, 
                 rulesProvider.Object,
@@ -147,7 +139,6 @@ namespace Functions.Tests.GlobalPermissionsScan
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
             
             var function = new GlobalPermissionsScanProjectActivity(
-                new Mock<ILogAnalyticsClient>().Object, 
                 new Mock<IVstsRestClient>().Object, 
                 fixture.Create<EnvironmentConfig>(), 
                 new Mock<IRulesProvider>().Object,
@@ -175,7 +166,6 @@ namespace Functions.Tests.GlobalPermissionsScan
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
             
             var function = new GlobalPermissionsScanProjectActivity(
-                new Mock<ILogAnalyticsClient>().Object, 
                 new Mock<IVstsRestClient>().Object, 
                 fixture.Create<EnvironmentConfig>(), 
                 new Mock<IRulesProvider>().Object,
