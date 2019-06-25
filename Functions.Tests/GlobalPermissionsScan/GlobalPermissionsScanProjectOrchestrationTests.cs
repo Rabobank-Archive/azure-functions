@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Functions.GlobalPermissionsScan;
+using Functions.Model;
 using Functions.Tests;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
@@ -26,7 +27,7 @@ namespace Functions.Tests.GlobalPermissionsScan
             await fun.Run(durableOrchestrationContextMock.Object, new Mock<ILogger>().Object);
             
             //Assert
-            durableOrchestrationContextMock.Verify(x => x.CallActivityAsync(nameof(GlobalPermissionsScanProjectActivity), It.IsAny<Project>()),
+            durableOrchestrationContextMock.Verify(x => x.CallActivityAsync<GlobalPermissionsExtensionData>(nameof(GlobalPermissionsScanProjectActivity), It.IsAny<Project>()),
                 Times.Once);
         }
       

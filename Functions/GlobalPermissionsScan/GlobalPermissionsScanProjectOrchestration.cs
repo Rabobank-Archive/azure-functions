@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Functions.Model;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Response = SecurePipelineScan.VstsService.Response;
@@ -18,7 +19,11 @@ namespace Functions.GlobalPermissionsScan
             var project = context.GetInput<Response.Project>();
             context.SetCustomStatus(new ScanOrchestratorStatus() { Project = project.Name });
 
-            await context.CallActivityAsync(nameof(GlobalPermissionsScanProjectActivity), project);
+            var data = await context.CallActivityAsync<GlobalPermissionsExtensionData>
+                (nameof(GlobalPermissionsScanProjectActivity), project);
+
+            await context.CallActivityAsync(nameof(ExtensionDataUploadActivity),
+                new ExtensionDataUploadActivityRequest {Data = data, Scope = "globalpermissions"});
         }
     }
 }

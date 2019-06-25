@@ -38,24 +38,14 @@ namespace Functions.GlobalPermissionsScan
         }
 
         [FunctionName(nameof(GlobalPermissionsScanProjectActivity))]
-        public async Task RunAsActivity(
+        public async Task<GlobalPermissionsExtensionData> RunAsActivity(
             [ActivityTrigger] DurableActivityContextBase context,
             ILogger log)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             var project = context.GetInput<Project>() ?? throw new Exception("No Project found in parameter DurableActivityContextBase");
 
-            log.LogInformation($"Executing GlobalPermissionsScanProjectActivity for project {project.Name}");
-
-            try
-            {
-                await Run(_config.Organization, project.Name, log);
-                log.LogInformation($"Executed GlobalPermissionsScanProjectActivity for project {project.Name}");
-            }
-            catch (Exception)
-            {
-                log.LogInformation($"Execution failed GlobalPermissionsScanProjectActivity for project {project.Name}");
-            }
+            return await Run(_config.Organization, project.Name, log);
         }
 
         [FunctionName("GlobalPermissionsScanProject")]
@@ -71,11 +61,13 @@ namespace Functions.GlobalPermissionsScan
                 return new UnauthorizedResult();
             }
             
-            await Run(organization, project, log);
+            var data = await Run(organization, project, log);
+            await _azuredo.PutAsync(ExtensionManagement.ExtensionData<GlobalPermissionsExtensionData>("tas", _config.ExtensionName, "globalpermissions"), data);
+
             return new OkResult();
         }
 
-        private async Task Run(string organization, string project, ILogger log)
+        private async Task<GlobalPermissionsExtensionData> Run(string organization, string project, ILogger log)
         {
             log.LogInformation($"Creating Global Permissions preventive analysis log for project {project}");
             var now = DateTime.UtcNow;
@@ -97,11 +89,12 @@ namespace Functions.GlobalPermissionsScan
                 }).ToList())
             };
             
-            await _azuredo.PutAsync(ExtensionManagement.ExtensionData<GlobalPermissionsExtensionData>("tas", _config.ExtensionName, "globalpermissions"), data);
             foreach (var item in data.Flatten())
             {
                 await _analytics.AddCustomLogJsonAsync("preventive_analysis_log", item, "evaluatedDate");
             }
+
+            return data;
         }
 
         private Reconcile ToReconcile(string project, IProjectReconcile rule)

@@ -119,20 +119,18 @@ namespace Functions.Tests.GlobalPermissionsScan
                 config, 
                 rulesProvider.Object,
                 null);
-            await fun.RunAsActivity(
+            var result = await fun.RunAsActivity(
                 durable.Object,
                 new Mock<ILogger>().Object);
 
             var ruleName = rule.Object.GetType().Name;
 
             // Assert
-            clientMock
-                .Verify(x => x.PutAsync(It.IsAny<IVstsRequest<GlobalPermissionsExtensionData>>(), 
-                    It.Is<GlobalPermissionsExtensionData>(d => 
-                        d.Reports.Any(r => r.Reconcile != null &&
-                                           r.Reconcile.Url == $"https://{config.FunctionAppHostname}/api/reconcile/{config.Organization}/dummyproj/globalpermissions/{ruleName}" &&
-                                           r.Reconcile.Impact.Any()) && 
-                        d.RescanUrl != null)));
+            result.Reports.ShouldContain(r => r.Reconcile != null &&
+                                    r.Reconcile.Url ==
+                                    $"https://{config.FunctionAppHostname}/api/reconcile/{config.Organization}/dummyproj/globalpermissions/{ruleName}" &&
+                                    r.Reconcile.Impact.Any());
+           result.RescanUrl.ShouldNotBeNull();
         }
         
         [Fact]
