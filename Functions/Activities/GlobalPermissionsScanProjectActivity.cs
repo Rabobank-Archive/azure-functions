@@ -35,33 +35,13 @@ namespace Functions.GlobalPermissionsScan
 
         [FunctionName(nameof(GlobalPermissionsScanProjectActivity))]
         public async Task<GlobalPermissionsExtensionData> RunAsActivity(
-            [ActivityTrigger] DurableActivityContextBase context,
+            [ActivityTrigger] string project,
             ILogger log)
         {
-            if (context == null) throw new ArgumentNullException(nameof(context));
-            var project = context.GetInput<Project>() ?? throw new Exception("No Project found in parameter DurableActivityContextBase");
-
-            return await Run(_config.Organization, project.Name, log);
+            return await Run(_config.Organization, project, log);
         }
 
-        [FunctionName("GlobalPermissionsScanProject")]
-        public async Task<IActionResult> RunFromHttp(
-            [HttpTrigger(AuthorizationLevel.Anonymous, Route = "scan/{organization}/{project}/globalpermissions")]
-            HttpRequestMessage request,
-            string organization,
-            string project,
-            ILogger log)
-        {
-            if (_tokenizer.IdentifierFromClaim(request) == null)
-            {
-                return new UnauthorizedResult();
-            }
-            
-            var data = await Run(organization, project, log);
-            await _azuredo.PutAsync(ExtensionManagement.ExtensionData<GlobalPermissionsExtensionData>("tas", _config.ExtensionName, "globalpermissions"), data);
-
-            return new OkResult();
-        }
+        
 
         private async Task<GlobalPermissionsExtensionData> Run(string organization, string project, ILogger log)
         {

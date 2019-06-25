@@ -28,7 +28,7 @@ namespace Functions.Tests.GlobalPermissionsScan
 
             //Act
             var fun = new GlobalPermissionsScanStarter(clientMock.Object);
-            await fun.Run(timerInfoMock, orchestrationClientMock.Object, logMock.Object);
+            await fun.Run(timerInfoMock, orchestrationClientMock.Object);
             
             //Assert
             clientMock.Verify(x => x.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.Project>>>()), Times.Exactly(1));
@@ -40,7 +40,6 @@ namespace Functions.Tests.GlobalPermissionsScan
             //Arrange       
             var orchestrationClientMock = new Mock<DurableOrchestrationClientBase>();
             var clientMock = new Mock<IVstsRestClient>();
-            var logMock = new Mock<ILogger>();
             var timerInfoMock = CreateTimerInfoMock();
 
             var projects = ProjectsTestHelper.CreateMultipleProjectsResponse(2);
@@ -50,7 +49,7 @@ namespace Functions.Tests.GlobalPermissionsScan
 
             //Act
             var fun = new GlobalPermissionsScanStarter(clientMock.Object);
-            await fun.Run(timerInfoMock, orchestrationClientMock.Object, logMock.Object);
+            await fun.Run(timerInfoMock, orchestrationClientMock.Object);
             
             //Assert
             orchestrationClientMock.Verify(
@@ -66,8 +65,5 @@ namespace Functions.Tests.GlobalPermissionsScan
             var timerInfoMock = new TimerInfo(timerScheduleMock.Object, scheduleStatusMock.Object);
             return timerInfoMock;
         }
-
-       
-        
     }
 }
