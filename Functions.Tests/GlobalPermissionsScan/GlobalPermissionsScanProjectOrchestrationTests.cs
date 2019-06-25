@@ -13,17 +13,12 @@ namespace Functions.Tests.GlobalPermissionsScan
     public class GlobalPermissionsScanProjectOrchestrationTests
     {
       
-        [Theory]
-        [InlineData(2)]
-        [InlineData(9)]
-        [InlineData(10)]
-        [InlineData(11)]
-        
-        public async System.Threading.Tasks.Task RunWithHasTwoProjectsShouldCallActivityAsyncForEachProject(int numberOfProjects)
+        [Fact]
+        public async System.Threading.Tasks.Task ShouldCallActivityAsyncForProject()
         {
             //Arrange
             var durableOrchestrationContextMock = new Mock<DurableOrchestrationContextBase>();
-            durableOrchestrationContextMock.Setup(context => context.GetInput<List<Project>>()).Returns(ProjectsTestHelper.CreateMultipleProjectsResponse(numberOfProjects).ToList());
+            durableOrchestrationContextMock.Setup(context => context.GetInput<Project>()).Returns(new Project());
 
             //Act
 
@@ -32,7 +27,7 @@ namespace Functions.Tests.GlobalPermissionsScan
             
             //Assert
             durableOrchestrationContextMock.Verify(x => x.CallActivityAsync(nameof(GlobalPermissionsScanProjectActivity), It.IsAny<Project>()),
-                Times.Exactly(numberOfProjects));
+                Times.Once);
         }
       
         

@@ -52,7 +52,7 @@ namespace Functions.GlobalPermissionsScan
                 await Run(_config.Organization, project.Name, log);
                 log.LogInformation($"Executed GlobalPermissionsScanProjectActivity for project {project.Name}");
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 log.LogInformation($"Execution failed GlobalPermissionsScanProjectActivity for project {project.Name}");
             }

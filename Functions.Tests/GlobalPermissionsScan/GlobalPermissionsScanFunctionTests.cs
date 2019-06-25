@@ -27,7 +27,7 @@ namespace Functions.Tests.GlobalPermissionsScan
                 .Returns(projects);
 
             //Act
-            GlobalPermissionsScanFunction fun = new GlobalPermissionsScanFunction(clientMock.Object);
+            var fun = new GlobalPermissionsScanStarter(clientMock.Object);
             await fun.Run(timerInfoMock, orchestrationClientMock.Object, logMock.Object);
             
             //Assert
@@ -49,7 +49,7 @@ namespace Functions.Tests.GlobalPermissionsScan
                 .Returns(projects);
 
             //Act
-            GlobalPermissionsScanFunction fun = new GlobalPermissionsScanFunction(clientMock.Object);
+            var fun = new GlobalPermissionsScanStarter(clientMock.Object);
             await fun.Run(timerInfoMock, orchestrationClientMock.Object, logMock.Object);
             
             //Assert

@@ -7,17 +7,17 @@ using SecurePipelineScan.VstsService.Requests;
 
 namespace Functions.GlobalPermissionsScan
 {
-    public class GlobalPermissionsScanFunction
+    public class GlobalPermissionsScanStarter
     {
 
         private readonly IVstsRestClient _azuredo;
 
-        public GlobalPermissionsScanFunction(IVstsRestClient azuredo)
+        public GlobalPermissionsScanStarter(IVstsRestClient azuredo)
         {
             _azuredo = azuredo;
         }
 
-        [FunctionName(nameof(GlobalPermissionsScanFunction))]
+        [FunctionName(nameof(GlobalPermissionsScanStarter))]
         public async Task Run(
             [TimerTrigger("0 17 3 * * *", RunOnStartup=false)]
             TimerInfo timerInfo,
@@ -25,9 +25,12 @@ namespace Functions.GlobalPermissionsScan
             ILogger log)
         {
             var projects = _azuredo.Get(Project.Projects()).ToList();
-            
-            var instanceId = await orchestrationClientBase.StartNewAsync(nameof(GlobalPermissionsScanProjectOrchestration), projects);
-            log.LogInformation($"Started orchestration with ID = '{instanceId}'.");
+
+            foreach (var project in projects)
+            {
+                log.LogInformation($"Create Global Permissions Report for {project.Name}");
+                await orchestrationClientBase.StartNewAsync(nameof(GlobalPermissionsScanProjectOrchestration), project);
+            }
         }
     }
 }

@@ -15,26 +15,9 @@ namespace Functions.GlobalPermissionsScan
             ILogger log
         )
         {   
-            var projects = context.GetInput<List<Response.Project>>();
+            var project = context.GetInput<Response.Project>();
             
-            log.LogInformation($"Creating tasks for every project total amount of projects {projects.Count}");
-            
-            var tasks = new List<Task>();
-            var currentProject = 1;
-
-            foreach(var project in projects)
-            {
-                log.LogInformation($"Create Global Permissions Report for {project.Name}");
-                log.LogInformation($"Project nr {currentProject} of {projects.Count}");
-                
-                tasks.Add(
-                    context.CallActivityAsync(
-                        nameof(GlobalPermissionsScanProjectActivity),
-                        project)
-                );
-                currentProject++;
-            }
-            await Task.WhenAll(tasks);
+            await context.CallActivityAsync(nameof(GlobalPermissionsScanProjectActivity), project);
         }
     }
 }
