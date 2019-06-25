@@ -21,16 +21,12 @@ namespace Functions.GlobalPermissionsScan
         public async Task Run(
             [TimerTrigger("0 17 3 * * *", RunOnStartup=false)]
             TimerInfo timerInfo,
-            [OrchestrationClient] DurableOrchestrationClientBase orchestrationClientBase,
-            ILogger log)
+            [OrchestrationClient] DurableOrchestrationClientBase orchestrationClientBase)
         {
             var projects = _azuredo.Get(Project.Projects()).ToList();
 
-            foreach (var project in projects)
-            {
-                log.LogInformation($"Create Global Permissions Report for {project.Name}");
-                await orchestrationClientBase.StartNewAsync(nameof(GlobalPermissionsScanProjectOrchestration), project);
-            }
+            await Task.WhenAll(projects.Select(p =>
+                orchestrationClientBase.StartNewAsync(nameof(GlobalPermissionsScanProjectOrchestration), p)));
         }
     }
 }
