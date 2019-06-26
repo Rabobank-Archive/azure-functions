@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Functions.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
@@ -104,6 +105,33 @@ namespace Functions
             var permissions = await _client.GetAsync(Requests.Permissions.PermissionsGroupProjectId(project, id));
             return permissions.Security.Permissions.Any(x =>
                 x.DisplayName == "Manage project properties" && x.PermissionId == 3);
+        }
+
+        public static Reconcile ReconcileFromRule(IReconcile rule, 
+            EnvironmentConfig environmentConfig, 
+            string projectId,
+            string scope, 
+            string itemId)
+        {
+            return rule != null ? new Reconcile
+            {
+                Url = $"https://{environmentConfig.FunctionAppHostname}/api/reconcile/{environmentConfig.Organization}/{projectId}/{scope}/{rule.GetType().Name}/{itemId}",
+                Impact =  rule.Impact
+            } : null;
+        }
+
+        public static Reconcile ReconcileFromRule(EnvironmentConfig environmentConfig, string project, IProjectReconcile rule)
+        {
+            return rule != null ? new Reconcile
+            {
+                Url = $"https://{environmentConfig.FunctionAppHostname}/api/reconcile/{environmentConfig.Organization}/{project}/globalpermissions/{rule.GetType().Name}",
+                Impact = rule.Impact
+            } : null;
+        }
+
+        public static string HasReconcilePermissionUrl(EnvironmentConfig environmentConfig, string projectId)
+        {
+            return $"https://{environmentConfig.FunctionAppHostname}/api/reconcile/{environmentConfig.Organization}/{projectId}/haspermissions";
         }
     }
 }

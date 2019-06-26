@@ -16,7 +16,7 @@ using SecurePipelineScan.VstsService;
 using Shouldly;
 using LogAnalytics.Client;
 using Xunit;
-using Report = Functions.ExtensionDataReports<SecurePipelineScan.Rules.Reports.BuildScanReport>;
+using Report = Functions.Model.ExtensionDataReports<SecurePipelineScan.Rules.Reports.BuildScanReport>;
 
 namespace Functions.Tests
 {
@@ -77,7 +77,7 @@ namespace Functions.Tests
                 .Setup(x => x.PutAsync(
                     It.IsAny<IVstsRequest<Report>>(),
                     It.Is<Report>(r => r.Reports.Count == 50)))
-                .Returns(Task.FromResult(_fixture.Create<ExtensionDataReports<BuildScanReport>>()))
+                .Returns(Task.FromResult(_fixture.Create<Report>()))
                 .Verifiable();
 
             var function = new BuildCompletedFunction(new Mock<ILogAnalyticsClient>().Object, scan.Object,
@@ -111,7 +111,7 @@ namespace Functions.Tests
 
             // Capture the result to assert it later on.
             azdo.Setup(x => x.PutAsync(It.IsAny<IVstsRequest<Report>>(), It.IsAny<Report>()))
-                .Returns(Task.FromResult(_fixture.Create<ExtensionDataReports<BuildScanReport>>()))
+                .Returns(Task.FromResult(_fixture.Create<Report>()))
                 .Callback<IVstsRequest, Report>((req, r) => result = r);
 
             // Act
@@ -141,7 +141,7 @@ namespace Functions.Tests
                 .Setup(x => x.PutAsync(
                     It.IsAny<IVstsRequest<Report>>(),
                     It.IsAny<Report>()))
-                .Returns(Task.FromResult(_fixture.Create<ExtensionDataReports<BuildScanReport>>()))
+                .Returns(Task.FromResult(_fixture.Create<Report>()))
                 .Verifiable();
 
             var function = new BuildCompletedFunction(new Mock<ILogAnalyticsClient>().Object, scan.Object,
@@ -178,7 +178,7 @@ namespace Functions.Tests
 
             azuredo
                 .SetupSequence(x => x.PutAsync(It.IsAny<IVstsRequest<Report>>(),
-                    It.IsAny<ExtensionDataReports<BuildScanReport>>()))
+                    It.IsAny<Report>()))
                 .Throws(new FlurlHttpException(_fixture.Create<HttpCall>(), "Some message",
                     _fixture.Create<Exception>()))
                 .Returns(Task.FromResult(new Report()));
@@ -192,7 +192,7 @@ namespace Functions.Tests
             //Assert
             azuredo.Verify(x =>
                 x.PutAsync(It.IsAny<IVstsRequest<Report>>(),
-                    It.IsAny<ExtensionDataReports<BuildScanReport>>()), Times.Exactly(2));
+                    It.IsAny<Report>()), Times.Exactly(2));
         }
     }
 }

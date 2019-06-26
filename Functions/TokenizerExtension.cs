@@ -1,5 +1,4 @@
 using System.Net.Http;
-using System.Security.Claims;
 
 namespace Functions
 {

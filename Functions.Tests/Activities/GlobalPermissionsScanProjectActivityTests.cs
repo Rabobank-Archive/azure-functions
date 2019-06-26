@@ -1,16 +1,15 @@
 using System.Linq;
+using System.Threading.Tasks;
 using AutoFixture;
 using AutoFixture.AutoMoq;
+using Functions.Activities;
 using Moq;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
-using Xunit;
-using Microsoft.Extensions.Logging;
-using System.Threading.Tasks;
-using Functions.GlobalPermissionsScan;
 using Shouldly;
+using Xunit;
 
-namespace Functions.Tests.GlobalPermissionsScan
+namespace Functions.Tests.Activities
 {
     public class GlobalPermissionsScanProjectActivityTests
     {
@@ -34,12 +33,10 @@ namespace Functions.Tests.GlobalPermissionsScan
             var fun = new GlobalPermissionsScanProjectActivity(
                 fixture.Create<IVstsRestClient>(),
                 fixture.Create<EnvironmentConfig>(),
-                ruleSets.Object,
-                new Mock<ITokenizer>().Object);
+                ruleSets.Object);
 
             await fun.RunAsActivity(
-                "Stringproject",
-                new Mock<ILogger>().Object);
+                "Stringproject");
 
             //Assert
             rule.Verify(x => x.Evaluate(It.IsAny<string>()), Times.AtLeastOnce());
@@ -69,11 +66,9 @@ namespace Functions.Tests.GlobalPermissionsScan
             var fun = new GlobalPermissionsScanProjectActivity(
                 clientMock.Object,
                 config,
-                rulesProvider.Object,
-                null);
+                rulesProvider.Object);
             var result = await fun.RunAsActivity(
-                "dummyproj",
-                new Mock<ILogger>().Object);
+                "dummyproj");
 
             var ruleName = rule.Object.GetType().Name;
 

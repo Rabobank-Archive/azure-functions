@@ -51,10 +51,10 @@ namespace Functions.Tests
         }
 
         [Fact]
-        public void SkipIfQueueNameIsEmpty()
+        public async Task SkipIfQueueNameIsEmpty()
         {
             var func = new PoisonQueueFunction(new EnvironmentConfig { StorageAccountConnectionString = "UseDevelopmentStorage=true" });
-            func.Requeue(null, "", new Mock<ILogger>().Object);
+            await func.Requeue(null, "", new Mock<ILogger>().Object);
         }
     }
 }

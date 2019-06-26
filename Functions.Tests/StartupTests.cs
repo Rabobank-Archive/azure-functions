@@ -31,7 +31,8 @@ namespace Functions.Tests
                 .Assembly
                 .GetTypes()
                 .Where(type => type.GetMethods().Any(method =>
-                        method.GetCustomAttributes(typeof(FunctionNameAttribute), false).Any()))
+                        method.GetCustomAttributes(typeof(FunctionNameAttribute), false).Any() &&
+                        !method.IsStatic))
                 .ToList();
                 
             functions.ForEach(f => services.AddScoped(f));

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,12 +5,6 @@ namespace Functions.Model
 {
     public class ItemsExtensionData : ExtensionDataReports<ItemExtensionData>
     {
-        public DateTime Date { get; set; }
-        
-        public string RescanUrl { get; set; }
-        
-        public string HasReconcilePermissionUrl { get; set; }
-
         public IEnumerable<PreventiveLogItem> Flatten(string scope)
         {
             return 

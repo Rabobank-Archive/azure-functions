@@ -6,22 +6,22 @@ using SecurePipelineScan.VstsService.Requests;
 
 namespace Functions.Activities
 {
-    public class ExtensionDataUploadActivity
+    public class ExtensionDataGlobalPermissionsUploadActivity
     {
         private readonly IVstsRestClient _azuredo;
         private readonly EnvironmentConfig _config;
 
-        public ExtensionDataUploadActivity(IVstsRestClient azuredo,
+        public ExtensionDataGlobalPermissionsUploadActivity(IVstsRestClient azuredo,
             EnvironmentConfig config)
         {
             _azuredo = azuredo;
             _config = config;
         }
 
-        [FunctionName(nameof(ExtensionDataUploadActivity))]
+        [FunctionName(nameof(ExtensionDataGlobalPermissionsUploadActivity))]
         public async Task Run([ActivityTrigger] DurableActivityContext inputs)
         {
-            var (data, scope) = inputs.GetInput<(ItemsExtensionData, string)>();
+            var (data, scope) = inputs.GetInput<(GlobalPermissionsExtensionData, string)>();
             await _azuredo.PutAsync(ExtensionManagement.ExtensionData<ExtensionDataReports>("tas", _config.ExtensionName, scope), data);
         }
     }

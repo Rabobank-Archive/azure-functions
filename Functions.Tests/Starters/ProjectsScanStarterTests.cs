@@ -1,16 +1,16 @@
-using System.Threading.Tasks;
-using Functions.GlobalPermissionsScan;
+using Functions.Orchestrators;
+using Functions.Starters;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Timers;
-using Microsoft.Extensions.Logging;
 using Moq;
 using SecurePipelineScan.VstsService;
-using Response = SecurePipelineScan.VstsService.Response;
 using Xunit;
+using Response = SecurePipelineScan.VstsService.Response;
+using Task = System.Threading.Tasks.Task;
 
-namespace Functions.Tests.GlobalPermissionsScan
+namespace Functions.Tests.Starters
 {
-    public class SecurityScanFunctionTests
+    public class ProjectsScanStarterTests
     {
         [Fact]
         public async Task RunShouldCallGetProjectsExactlyOnce()
@@ -18,7 +18,6 @@ namespace Functions.Tests.GlobalPermissionsScan
             //Arrange
             var orchestrationClientMock = new Mock<DurableOrchestrationClientBase>();
             var clientMock = new Mock<IVstsRestClient>();
-            var logMock = new Mock<ILogger>();
             var timerInfoMock = CreateTimerInfoMock();
 
             var projects = ProjectsTestHelper.CreateMultipleProjectsResponse(1);
@@ -27,7 +26,7 @@ namespace Functions.Tests.GlobalPermissionsScan
                 .Returns(projects);
 
             //Act
-            var fun = new GlobalPermissionsScanStarter(clientMock.Object);
+            var fun = new ProjectsScanStarter(clientMock.Object);
             await fun.Run(timerInfoMock, orchestrationClientMock.Object);
             
             //Assert
@@ -48,12 +47,12 @@ namespace Functions.Tests.GlobalPermissionsScan
                 .Returns(projects);
 
             //Act
-            var fun = new GlobalPermissionsScanStarter(clientMock.Object);
+            var fun = new ProjectsScanStarter(clientMock.Object);
             await fun.Run(timerInfoMock, orchestrationClientMock.Object);
             
             //Assert
             orchestrationClientMock.Verify(
-                x => x.StartNewAsync(nameof(GlobalPermissionsScanProjectOrchestration), It.IsAny<object>()),
+                x => x.StartNewAsync(nameof(ProjectScanOrchestration), It.IsAny<object>()),
                 Times.AtLeastOnce());
 
         }

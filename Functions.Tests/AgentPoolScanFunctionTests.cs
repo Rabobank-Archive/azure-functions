@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Functions.Model;
 using Microsoft.Azure.Services.AppAuthentication;
 using Shouldly;
 using Unmockable;

@@ -12,7 +12,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Shouldly;
-using Report = Functions.ExtensionDataReports<SecurePipelineScan.Rules.Reports.ReleaseDeploymentCompletedReport>;
+using Report = Functions.Model.ExtensionDataReports<SecurePipelineScan.Rules.Reports.ReleaseDeploymentCompletedReport>;
 
 namespace Functions.Tests
 {
@@ -73,7 +73,7 @@ namespace Functions.Tests
                 .Setup(x => x.PutAsync(
                     It.IsAny<IVstsRequest<Report>>(),
                     It.IsAny<Report>()))
-                .Returns(Task.FromResult(_fixture.Create<ExtensionDataReports<ReleaseDeploymentCompletedReport>>()))
+                .Returns(Task.FromResult(_fixture.Create<Report>()))
                 .Verifiable();
             
             var config = _fixture.Create<EnvironmentConfig>();
@@ -110,7 +110,7 @@ namespace Functions.Tests
 
             // Capture the result to assert it later on.
             azdo.Setup(x => x.PutAsync(It.IsAny<IVstsRequest<Report>>(), It.IsAny<Report>()))
-                .Returns(Task.FromResult(_fixture.Create<ExtensionDataReports<ReleaseDeploymentCompletedReport>>()))
+                .Returns(Task.FromResult(_fixture.Create<Report>()))
                 .Callback<IVstsRequest, Report>((req, r) => result = r);
 
             // Act

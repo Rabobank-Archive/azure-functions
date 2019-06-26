@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using Functions.LogItems;
+using Functions.Model;
 using Microsoft.Azure.Services.AppAuthentication;
 using Unmockable;
 using LogAnalytics.Client;

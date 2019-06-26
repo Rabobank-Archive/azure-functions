@@ -11,6 +11,7 @@ using SecurePipelineScan.VstsService;
 using LogAnalytics.Client;
 using Requests = SecurePipelineScan.VstsService.Requests;
 using Functions.Helpers;
+using Functions.Model;
 
 namespace Functions
 {
