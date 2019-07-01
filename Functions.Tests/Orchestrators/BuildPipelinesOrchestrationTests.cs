@@ -1,5 +1,7 @@
 using System.Threading.Tasks;
 using AutoFixture;
+using Functions.Activities;
+using Functions.Model;
 using Functions.Orchestrators;
 using Microsoft.Azure.WebJobs;
 using Moq;
@@ -7,7 +9,7 @@ using Xunit;
 
 namespace Functions.Tests.Orchestrators
 {
-    public class ProjectScanOrchestratorTests
+    public class BuildPipelinesOrchestrationTests
     {
       
         [Fact]
@@ -23,23 +25,23 @@ namespace Functions.Tests.Orchestrators
                 .Returns(fixture.Create<string>());
             
             starter
-                .Setup(x => x.CallSubOrchestratorAsync(nameof(GlobalPermissionsOrchestration), It.IsAny<string>()))
-                .Returns(Task.CompletedTask)
+                .Setup(x => x.SetCustomStatus(It.IsAny<object>()));
+
+            starter
+                .Setup(x => x.CallActivityAsync<ItemsExtensionData>(nameof(BuildPipelinesScanActivity), It.IsAny<string>()))
+                .ReturnsAsync(fixture.Create<ItemsExtensionData>())
                 .Verifiable();
 
             starter
-                .Setup(x => x.CallSubOrchestratorAsync(nameof(BuildPipelinesOrchestration), It.IsAny<string>()))
-                .Returns(Task.CompletedTask)
-                .Verifiable();
+                .Setup(x => x.CallActivityAsync(nameof(ExtensionDataUploadActivity), It.IsAny<object>()))
+                .Returns(Task.CompletedTask);
 
             starter
-                .Setup(x => x.CallSubOrchestratorAsync(nameof(ReleasePipelinesOrchestration), It.IsAny<string>()))
-                .Returns(Task.CompletedTask)
-                .Verifiable();
+                .Setup(x => x.CallActivityAsync(nameof(LogAnalyticsUploadActivity), It.IsAny<LogAnalyticsUploadActivityRequest>()))
+                .Returns(Task.CompletedTask);
 
             //Act
-            var fun = new ProjectScanOrchestration();
-            await fun.Run(starter.Object);
+            await BuildPipelinesOrchestration.Run(starter.Object);
             
             //Assert           
             mocks.VerifyAll();
