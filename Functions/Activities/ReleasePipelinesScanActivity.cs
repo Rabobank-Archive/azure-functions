@@ -7,6 +7,7 @@ using Functions.Starters;
 using Microsoft.Azure.WebJobs;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
+using SecurePipelineScan.VstsService.Response;
 using Requests = SecurePipelineScan.VstsService.Requests;
 
 namespace Functions.Activities
@@ -26,16 +27,15 @@ namespace Functions.Activities
 
         [FunctionName(nameof(ReleasePipelinesScanActivity))]
         public async Task<ItemsExtensionData> Run(
-            [ActivityTrigger] string project)
+            [ActivityTrigger] Project project)
         {
-            var id = (await _azuredo.GetAsync(Requests.Project.Properties(project))).Id;
             return new ItemsExtensionData
             {
-                Id = project,
+                Id = project.Name,
                 Date = DateTime.UtcNow,
-                RescanUrl = ProjectScanHttpStarter.RescanUrl(_config, project, "releasepipelines"),
-                HasReconcilePermissionUrl = ReconcileFunction.HasReconcilePermissionUrl(_config, id),
-                Reports = await CreateReports(id)
+                RescanUrl = ProjectScanHttpStarter.RescanUrl(_config, project.Name, "releasepipelines"),
+                HasReconcilePermissionUrl = ReconcileFunction.HasReconcilePermissionUrl(_config, project.Id),
+                Reports = await CreateReports(project.Id)
             };
         }
 

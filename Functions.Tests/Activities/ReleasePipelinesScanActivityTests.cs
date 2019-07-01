@@ -28,19 +28,14 @@ namespace Functions.Tests.Activities
             client
                 .Setup(x => x.Get(It.IsAny<IVstsRequest<Multiple<ReleaseDefinition>>>()))
                 .Returns(fixture.CreateMany<ReleaseDefinition>());
-            
-            client
-                .Setup(x => x.GetAsync(It.IsAny<IVstsRequest<ProjectProperties>>()))
-                .ReturnsAsync(fixture.Create<ProjectProperties>())
-                .Verifiable();
-            
+                      
             // Act
             var activity = new ReleasePipelinesScanActivity(
                 fixture.Create<EnvironmentConfig>(), 
                 client.Object,
                 provider.Object);
             
-            var result = await activity.Run(fixture.Create<string>());
+            var result = await activity.Run(fixture.Create<Project>());
             
             // Assert
             result.RescanUrl.ShouldNotBeNull();

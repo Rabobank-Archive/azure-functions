@@ -6,6 +6,7 @@ using Functions.Activities;
 using Moq;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
+using Response = SecurePipelineScan.VstsService.Response;
 using Shouldly;
 using Xunit;
 
@@ -36,7 +37,7 @@ namespace Functions.Tests.Activities
                 ruleSets.Object);
 
             await fun.RunAsActivity(
-                "Stringproject");
+                fixture.Create<Response.Project>());
 
             //Assert
             rule.Verify(x => x.Evaluate(It.IsAny<string>()), Times.AtLeastOnce());
@@ -49,6 +50,7 @@ namespace Functions.Tests.Activities
             //Arrange
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
             var config = fixture.Create<EnvironmentConfig>();
+            var dummyproj = fixture.Create<Response.Project>();
             var clientMock = new Mock<IVstsRestClient>();
 
             var rule = new Mock<IProjectRule>();
@@ -68,14 +70,14 @@ namespace Functions.Tests.Activities
                 config,
                 rulesProvider.Object);
             var result = await fun.RunAsActivity(
-                "dummyproj");
+                dummyproj);
 
             var ruleName = rule.Object.GetType().Name;
 
             // Assert
             result.Reports.ShouldContain(r => r.Reconcile != null &&
                                               r.Reconcile.Url ==
-                                              $"https://{config.FunctionAppHostname}/api/reconcile/{config.Organization}/dummyproj/globalpermissions/{ruleName}" &&
+                                              $"https://{config.FunctionAppHostname}/api/reconcile/{config.Organization}/{dummyproj.Name}/globalpermissions/{ruleName}" &&
                                               r.Reconcile.Impact.Any());
             result.RescanUrl.ShouldNotBeNull();
         }

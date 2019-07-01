@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using Functions.Activities;
 using Functions.Model;
 using Microsoft.Azure.WebJobs;
+using Response = SecurePipelineScan.VstsService.Response;
 
 namespace Functions.Orchestrators
 {
@@ -10,8 +11,8 @@ namespace Functions.Orchestrators
         [FunctionName(nameof(GlobalPermissionsOrchestration))]
         public static async Task Run([OrchestrationTrigger]DurableOrchestrationContextBase context)
         {
-            var project = context.GetInput<string>();
-            context.SetCustomStatus(new ScanOrchestratorStatus {Project = project, Scope = "globalpermissions" });
+            var project = context.GetInput<Response.Project>();
+            context.SetCustomStatus(new ScanOrchestratorStatus {Project = project.Name, Scope = "globalpermissions" });
             
             var data = await context.CallActivityAsync<GlobalPermissionsExtensionData>
                 (nameof(GlobalPermissionsScanProjectActivity), project);

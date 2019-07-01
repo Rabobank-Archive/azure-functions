@@ -28,19 +28,14 @@ namespace Functions.Tests.Activities
             client
                 .Setup(x => x.Get(It.IsAny<IVstsRequest<Multiple<BuildDefinition>>>()))
                 .Returns(fixture.CreateMany<BuildDefinition>());
-            
-            client
-                .Setup(x => x.GetAsync(It.IsAny<IVstsRequest<ProjectProperties>>()))
-                .ReturnsAsync(fixture.Create<ProjectProperties>())
-                .Verifiable();
-            
+                       
             // Act
             var activity = new BuildPipelinesScanActivity(
                 fixture.Create<EnvironmentConfig>(), 
                 client.Object,
                 provider.Object);
             
-            var result = await activity.Run(fixture.Create<string>());
+            var result = await activity.Run(fixture.Create<Project>());
             
             // Assert
             result.RescanUrl.ShouldNotBeNull();

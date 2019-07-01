@@ -3,6 +3,7 @@ using AutoFixture;
 using Functions.Orchestrators;
 using Microsoft.Azure.WebJobs;
 using Moq;
+using Response = SecurePipelineScan.VstsService.Response;
 using Xunit;
 
 namespace Functions.Tests.Orchestrators
@@ -19,26 +20,26 @@ namespace Functions.Tests.Orchestrators
             
             var starter = mocks.Create<DurableOrchestrationContextBase>();
             starter
-                .Setup(x => x.GetInput<string>())
-                .Returns(fixture.Create<string>());
+                .Setup(x => x.GetInput<Response.Project>())
+                .Returns(fixture.Create<Response.Project>());
             
             starter
-                .Setup(x => x.CallSubOrchestratorAsync(nameof(GlobalPermissionsOrchestration), It.IsAny<string>()))
+                .Setup(x => x.CallSubOrchestratorAsync(nameof(GlobalPermissionsOrchestration), It.IsAny<Response.Project>()))
                 .Returns(Task.CompletedTask)
                 .Verifiable();
 
             starter
-                .Setup(x => x.CallSubOrchestratorAsync(nameof(RepositoriesOrchestration), It.IsAny<string>()))
+                .Setup(x => x.CallSubOrchestratorAsync(nameof(RepositoriesOrchestration), It.IsAny<Response.Project>()))
                 .Returns(Task.CompletedTask)
                 .Verifiable();
 
             starter
-                .Setup(x => x.CallSubOrchestratorAsync(nameof(BuildPipelinesOrchestration), It.IsAny<string>()))
+                .Setup(x => x.CallSubOrchestratorAsync(nameof(BuildPipelinesOrchestration), It.IsAny<Response.Project>()))
                 .Returns(Task.CompletedTask)
                 .Verifiable();
 
             starter
-                .Setup(x => x.CallSubOrchestratorAsync(nameof(ReleasePipelinesOrchestration), It.IsAny<string>()))
+                .Setup(x => x.CallSubOrchestratorAsync(nameof(ReleasePipelinesOrchestration), It.IsAny<Response.Project>()))
                 .Returns(Task.CompletedTask)
                 .Verifiable();
 

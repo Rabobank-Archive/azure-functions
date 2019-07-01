@@ -5,6 +5,7 @@ using Functions.Model;
 using Functions.Orchestrators;
 using Microsoft.Azure.WebJobs;
 using Moq;
+using Response = SecurePipelineScan.VstsService.Response;
 using Xunit;
 
 namespace Functions.Tests.Orchestrators
@@ -21,14 +22,14 @@ namespace Functions.Tests.Orchestrators
             
             var starter = mocks.Create<DurableOrchestrationContextBase>();
             starter
-                .Setup(x => x.GetInput<string>())
-                .Returns(fixture.Create<string>());
+                .Setup(x => x.GetInput<Response.Project>())
+                .Returns(fixture.Create<Response.Project>());
             
             starter
                 .Setup(x => x.SetCustomStatus(It.IsAny<object>()));
             
             starter
-                .Setup(x => x.CallActivityAsync<ItemsExtensionData>(nameof(RepositoriesScanActivity), It.IsAny<string>()))
+                .Setup(x => x.CallActivityAsync<ItemsExtensionData>(nameof(RepositoriesScanActivity), It.IsAny<Response.Project>()))
                 .ReturnsAsync(fixture.Create<ItemsExtensionData>())
                 .Verifiable();
 

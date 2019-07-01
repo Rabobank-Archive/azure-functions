@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Functions.Starters;
 using System.Linq;
+using SecurePipelineScan.VstsService.Response;
 
 namespace Functions.Activities
 {
@@ -26,16 +27,15 @@ namespace Functions.Activities
 
         [FunctionName(nameof(BuildPipelinesScanActivity))]
         public async Task<ItemsExtensionData> Run(
-            [ActivityTrigger] string project)
+            [ActivityTrigger] Project project)
         {
-            var id = (await _azuredo.GetAsync(Requests.Project.Properties(project))).Id;
             return new ItemsExtensionData
             {
-                Id = project,
+                Id = project.Name,
                 Date = DateTime.UtcNow,
-                RescanUrl = ProjectScanHttpStarter.RescanUrl(_config, project, "buildpipelines"),
-                HasReconcilePermissionUrl = ReconcileFunction.HasReconcilePermissionUrl(_config, id),
-                Reports = await CreateReports(id)
+                RescanUrl = ProjectScanHttpStarter.RescanUrl(_config, project.Name, "buildpipelines"),
+                HasReconcilePermissionUrl = ReconcileFunction.HasReconcilePermissionUrl(_config, project.Id),
+                Reports = await CreateReports(project.Id)
             };
         }
 
