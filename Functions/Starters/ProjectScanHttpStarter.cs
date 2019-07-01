@@ -37,9 +37,9 @@ namespace Functions.Starters
             {
                 return new HttpResponseMessage(HttpStatusCode.Unauthorized);
             }
-            
+
             var instanceId = await starter.StartNewAsync(Orchestration(scope), project);
-            return await starter.WaitForCompletionOrCreateCheckStatusResponseAsync(request, instanceId, TimeSpan.FromSeconds(60));
+            return await starter.WaitForCompletionOrCreateCheckStatusResponseAsync(request, instanceId, TimeSpan.FromSeconds(180));
         }
 
         private static string Orchestration(string scope) => 
