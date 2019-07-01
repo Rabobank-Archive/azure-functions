@@ -16,6 +16,7 @@ namespace Functions.Starters
         private static readonly IDictionary<string, string> Scopes = new Dictionary<string, string>
         {
             ["globalpermissions"] = nameof(GlobalPermissionsOrchestration),
+            ["repository"] = nameof(RepositoriesOrchestration),
             ["buildpipelines"] = nameof(BuildPipelinesOrchestration),
             ["releasepipelines"] = nameof(ReleasePipelinesOrchestration)
         };

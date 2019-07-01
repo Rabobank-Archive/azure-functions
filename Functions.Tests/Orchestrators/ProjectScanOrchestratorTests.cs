@@ -28,6 +28,11 @@ namespace Functions.Tests.Orchestrators
                 .Verifiable();
 
             starter
+                .Setup(x => x.CallSubOrchestratorAsync(nameof(RepositoriesOrchestration), It.IsAny<string>()))
+                .Returns(Task.CompletedTask)
+                .Verifiable();
+
+            starter
                 .Setup(x => x.CallSubOrchestratorAsync(nameof(BuildPipelinesOrchestration), It.IsAny<string>()))
                 .Returns(Task.CompletedTask)
                 .Verifiable();

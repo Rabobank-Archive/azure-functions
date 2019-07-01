@@ -11,6 +11,7 @@ namespace Functions.Orchestrators
         {   
             var project = context.GetInput<string>();
             await context.CallSubOrchestratorAsync(nameof(GlobalPermissionsOrchestration), project);
+            await context.CallSubOrchestratorAsync(nameof(RepositoriesOrchestration), project);
             await context.CallSubOrchestratorAsync(nameof(BuildPipelinesOrchestration), project);
             await context.CallSubOrchestratorAsync(nameof(ReleasePipelinesOrchestration), project);
         }

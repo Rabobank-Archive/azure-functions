@@ -84,7 +84,55 @@ namespace Functions.Tests.Starters
 
             mock.Verify(x => x .StartNewAsync(nameof(GlobalPermissionsOrchestration), "TAS"));
         }
-        
+
+        [Fact]
+        public async Task RepositoryScopeTest()
+        {
+            var tokenizer = new Mock<ITokenizer>();
+            tokenizer
+                .Setup(x => x.Principal(It.IsAny<string>()))
+                .Returns(PrincipalWithClaims());
+
+            var request = new HttpRequestMessage();
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
+
+
+            var mock = new Mock<DurableOrchestrationClientBase>();
+            var function = new ProjectScanHttpStarter(tokenizer.Object);
+            await function.Run(request,
+                "somecompany",
+                "TAS",
+                "repository",
+                mock.Object
+            );
+
+            mock.Verify(x => x.StartNewAsync(nameof(RepositoriesOrchestration), "TAS"));
+        }
+
+        [Fact]
+        public async Task BuildPipelinesScopeTest()
+        {
+            var tokenizer = new Mock<ITokenizer>();
+            tokenizer
+                .Setup(x => x.Principal(It.IsAny<string>()))
+                .Returns(PrincipalWithClaims());
+
+            var request = new HttpRequestMessage();
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
+
+
+            var mock = new Mock<DurableOrchestrationClientBase>();
+            var function = new ProjectScanHttpStarter(tokenizer.Object);
+            await function.Run(request,
+                "somecompany",
+                "TAS",
+                "buildpipelines",
+                mock.Object
+            );
+
+            mock.Verify(x => x.StartNewAsync(nameof(BuildPipelinesOrchestration), "TAS"));
+        }
+
         [Fact]
         public async Task ReleasePipelinesScopeTest()
         {
