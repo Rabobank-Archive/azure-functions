@@ -7,6 +7,7 @@ namespace Functions.Orchestrators
 {
     public static class ReleasePipelinesOrchestration
     {
+        [FunctionName(nameof(ReleasePipelinesOrchestration))]
         public static async Task Run([OrchestrationTrigger]DurableOrchestrationContextBase context)
         {
             var project = context.GetInput<string>();

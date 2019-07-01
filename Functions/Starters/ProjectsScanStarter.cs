@@ -23,7 +23,7 @@ namespace Functions.Starters
             TimerInfo timerInfo,
             [OrchestrationClient] DurableOrchestrationClientBase orchestrationClientBase)
         {
-            var projects = _azuredo.Get(Project.Projects()).ToList();
+            var projects = _azuredo.Get(Project.Projects()).Select(p => p.Name).ToList();
 
             await Task.WhenAll(projects.Select(p =>
                 orchestrationClientBase.StartNewAsync(nameof(ProjectScanOrchestration), p)));
