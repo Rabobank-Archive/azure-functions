@@ -11,7 +11,7 @@ using Task = System.Threading.Tasks.Task;
 
 namespace Functions.Tests.Activities
 {
-    public class ReleasePipelinesScanActivityTests
+    public class RepositoryScanActivityTests
     {
         [Fact]
         public async Task EvaluatesRulesAndReturnsReport()
@@ -20,7 +20,7 @@ namespace Functions.Tests.Activities
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
             var provider = new Mock<IRulesProvider>();
             provider
-                .Setup(x => x.ReleaseRules(It.IsAny<IVstsRestClient>()))
+                .Setup(x => x.RepositoryRules(It.IsAny<IVstsRestClient>()))
                 .Returns(fixture.CreateMany<IRule>())
                 .Verifiable();
             
