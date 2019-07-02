@@ -1,10 +1,10 @@
-﻿using Polly;
+﻿using Flurl.Http;
+using Polly;
 using Polly.Retry;
+using SecurePipelineScan.VstsService;
 using System;
 using System.Net;
 using System.Threading.Tasks;
-using Flurl.Http;
-using SecurePipelineScan.VstsService;
 
 namespace Functions.Helpers
 {

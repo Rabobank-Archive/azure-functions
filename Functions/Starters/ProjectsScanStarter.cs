@@ -1,9 +1,9 @@
-using System.Linq;
-using System.Threading.Tasks;
 using Functions.Orchestrators;
 using Microsoft.Azure.WebJobs;
 using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Requests;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Functions.Starters
 {

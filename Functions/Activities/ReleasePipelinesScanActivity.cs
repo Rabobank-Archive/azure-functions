@@ -1,13 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Functions.Model;
 using Functions.Starters;
 using Microsoft.Azure.WebJobs;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Response;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Requests = SecurePipelineScan.VstsService.Requests;
 
 namespace Functions.Activities
@@ -54,7 +54,7 @@ namespace Functions.Activities
                     Rules = await rules.Evaluate(_config, projectId, "releasepipelines", pipeline.Id)
                 });
             }
-            
+
             return evaluationResults;
         }
     }

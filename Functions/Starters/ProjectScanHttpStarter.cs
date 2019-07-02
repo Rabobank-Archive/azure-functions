@@ -1,13 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Net.Http;
-using System.Threading.Tasks;
 using Functions.Orchestrators;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Requests;
+using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace Functions.Starters
 {
@@ -46,7 +46,7 @@ namespace Functions.Starters
 
             var projectObject = await _azuredo.GetAsync(Project.ProjectByName(project));
 
-            if(projectObject == null)
+            if (projectObject == null)
             {
                 return new HttpResponseMessage(HttpStatusCode.NotFound);
             }
@@ -55,10 +55,10 @@ namespace Functions.Starters
             return await starter.WaitForCompletionOrCreateCheckStatusResponseAsync(request, instanceId, TimeSpan.FromSeconds(180));
         }
 
-        private static string Orchestration(string scope) => 
+        private static string Orchestration(string scope) =>
             Scopes.TryGetValue(scope, out var value) ? value : throw new ArgumentException(nameof(scope));
 
-        public static string RescanUrl(EnvironmentConfig environmentConfig, string project, string scope) => 
+        public static string RescanUrl(EnvironmentConfig environmentConfig, string project, string scope) =>
             $"https://{environmentConfig.FunctionAppHostname}/api/scan/{environmentConfig.Organization}/{project}/{scope}";
     }
 }

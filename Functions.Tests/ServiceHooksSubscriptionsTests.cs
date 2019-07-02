@@ -1,10 +1,10 @@
-using System.Threading.Tasks;
 using AutoFixture;
 using Moq;
 using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Requests;
-using Response = SecurePipelineScan.VstsService.Response;
+using System.Threading.Tasks;
 using Xunit;
+using Response = SecurePipelineScan.VstsService.Response;
 
 namespace Functions.Tests
 {
@@ -30,7 +30,7 @@ namespace Functions.Tests
 
             // Act
             var function = new ServiceHooksSubscriptions(
-                new EnvironmentConfig { StorageAccountConnectionString =  StorageAccountConnectionString }, 
+                new EnvironmentConfig { StorageAccountConnectionString = StorageAccountConnectionString },
                 client.Object);
 
             await function.Run(null);
@@ -38,21 +38,21 @@ namespace Functions.Tests
             // Assert
             client
                 .Verify(x => x.PostAsync(
-                    It.IsAny<IVstsRequest<Hooks.Add.Body, Response.Hook>>(), 
-                    It.Is<Hooks.Add.Body>(b => 
+                    It.IsAny<IVstsRequest<Hooks.Add.Body, Response.Hook>>(),
+                    It.Is<Hooks.Add.Body>(b =>
                         b.ConsumerInputs.QueueName == "buildcompleted" &&
-                        b.ConsumerInputs.AccountName == AccountName && 
+                        b.ConsumerInputs.AccountName == AccountName &&
                         b.ConsumerInputs.AccountKey == "aG9pCg==")));
 
             client
                 .Verify(x => x.PostAsync(
-                    It.IsAny<IVstsRequest<Hooks.Add.Body, Response.Hook>>(), 
-                    It.Is<Hooks.Add.Body>(b => 
+                    It.IsAny<IVstsRequest<Hooks.Add.Body, Response.Hook>>(),
+                    It.Is<Hooks.Add.Body>(b =>
                         b.ConsumerInputs.QueueName == "releasedeploymentcompleted" &&
                         b.ConsumerInputs.AccountName == AccountName &&
                         b.ConsumerInputs.AccountKey == "aG9pCg==")));
         }
-        
+
         [Fact]
         public async Task SkipBuildCompletedHook_WhenAlreadySubscribed()
         {
@@ -60,7 +60,7 @@ namespace Functions.Tests
             var fixture = new Fixture();
             fixture
                 .Customize<Response.Project>(ctx => ctx.With(p => p.Id, "project-id"));
-            
+
             fixture.Customize<Response.PublisherInputs>(ctx => ctx
                 .With(h => h.ProjectId, "project-id"));
             fixture.Customize<Response.ConsumerInputs>(ctx => ctx
@@ -68,7 +68,7 @@ namespace Functions.Tests
                 .With(h => h.AccountName, AccountName));
             fixture.Customize<Response.Hook>(ctx => ctx
                 .With(h => h.EventType, "build.complete"));
-            
+
             var client = new Mock<IVstsRestClient>();
             client
                 .Setup(x => x.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.Project>>>()))
@@ -78,10 +78,10 @@ namespace Functions.Tests
                 .Setup(x => x.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.Hook>>>()))
                 .Returns(fixture.CreateMany<Response.Hook>())
                 .Verifiable();
-            
+
             // Act
             var function = new ServiceHooksSubscriptions(
-                new EnvironmentConfig { StorageAccountConnectionString =  StorageAccountConnectionString }, 
+                new EnvironmentConfig { StorageAccountConnectionString = StorageAccountConnectionString },
                 client.Object);
 
             await function.Run(null);
@@ -89,11 +89,11 @@ namespace Functions.Tests
             // Assert
             client.Verify();
             client.Verify(x => x.PostAsync(
-                    It.IsAny<IVstsRequest<Hooks.Add.Body, Response.Hook>>(), 
-                    It.Is<Hooks.Add.Body>(b => b.EventType == "build.complete")), 
+                    It.IsAny<IVstsRequest<Hooks.Add.Body, Response.Hook>>(),
+                    It.Is<Hooks.Add.Body>(b => b.EventType == "build.complete")),
                 Times.Never());
         }
-        
+
         [Fact]
         public async Task SkipReleaseDeploymentCompletedHook_WhenAlreadySubscribed()
         {
@@ -101,7 +101,7 @@ namespace Functions.Tests
             var fixture = new Fixture();
             fixture
                 .Customize<Response.Project>(ctx => ctx.With(p => p.Id, "project-id"));
-            
+
             fixture.Customize<Response.PublisherInputs>(ctx => ctx
                 .With(h => h.ProjectId, "project-id"));
             fixture.Customize<Response.ConsumerInputs>(ctx => ctx
@@ -109,7 +109,7 @@ namespace Functions.Tests
                 .With(h => h.AccountName, AccountName));
             fixture.Customize<Response.Hook>(ctx => ctx
                 .With(h => h.EventType, "ms.vss-release.deployment-completed-event"));
-            
+
             var client = new Mock<IVstsRestClient>();
             client
                 .Setup(x => x.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.Project>>>()))
@@ -119,10 +119,10 @@ namespace Functions.Tests
                 .Setup(x => x.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.Hook>>>()))
                 .Returns(fixture.CreateMany<Response.Hook>())
                 .Verifiable();
-            
+
             // Act
             var function = new ServiceHooksSubscriptions(
-                new EnvironmentConfig { StorageAccountConnectionString =  StorageAccountConnectionString }, 
+                new EnvironmentConfig { StorageAccountConnectionString = StorageAccountConnectionString },
                 client.Object);
 
             await function.Run(null);
@@ -130,8 +130,8 @@ namespace Functions.Tests
             // Assert
             client.Verify();
             client.Verify(x => x.PostAsync(
-                    It.IsAny<IVstsRequest<Hooks.Add.Body, Response.Hook>>(), 
-                    It.Is<Hooks.Add.Body>(b => b.EventType == "ms.vss-release.deployment-completed-event")), 
+                    It.IsAny<IVstsRequest<Hooks.Add.Body, Response.Hook>>(),
+                    It.Is<Hooks.Add.Body>(b => b.EventType == "ms.vss-release.deployment-completed-event")),
                 Times.Never());
         }
     }

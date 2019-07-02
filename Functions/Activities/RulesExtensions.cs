@@ -1,17 +1,17 @@
+using Functions.Model;
+using SecurePipelineScan.Rules.Security;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Functions.Model;
-using SecurePipelineScan.Rules.Security;
 
 namespace Functions.Activities
 {
     internal static class RulesExtensions
     {
         public static async Task<IList<EvaluatedRule>> Evaluate(this IEnumerable<IRule> rules,
-            EnvironmentConfig environmentConfig, 
-            string projectId, 
-            string scope, 
+            EnvironmentConfig environmentConfig,
+            string projectId,
+            string scope,
             string itemId)
         {
             return await Task.WhenAll(rules.Select(async rule => new EvaluatedRule

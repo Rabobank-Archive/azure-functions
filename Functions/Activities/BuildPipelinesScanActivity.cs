@@ -1,14 +1,14 @@
 ﻿using Functions.Model;
+using Functions.Starters;
 using Microsoft.Azure.WebJobs;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
-using Requests = SecurePipelineScan.VstsService.Requests;
+using SecurePipelineScan.VstsService.Response;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using Functions.Starters;
 using System.Linq;
-using SecurePipelineScan.VstsService.Response;
+using System.Threading.Tasks;
+using Requests = SecurePipelineScan.VstsService.Requests;
 
 namespace Functions.Activities
 {

@@ -1,7 +1,7 @@
-using System.Threading.Tasks;
 using Functions.Activities;
 using Functions.Model;
 using Microsoft.Azure.WebJobs;
+using System.Threading.Tasks;
 using Response = SecurePipelineScan.VstsService.Response;
 
 namespace Functions.Orchestrators
@@ -12,7 +12,7 @@ namespace Functions.Orchestrators
         public static async Task Run([OrchestrationTrigger]DurableOrchestrationContextBase context)
         {
             var project = context.GetInput<Response.Project>();
-            context.SetCustomStatus(new ScanOrchestratorStatus {Project = project.Name, Scope = "buildpipelines"});
+            context.SetCustomStatus(new ScanOrchestratorStatus { Project = project.Name, Scope = "buildpipelines" });
 
             var data = await context.CallActivityAsync<ItemsExtensionData>(
                 nameof(BuildPipelinesScanActivity), project);

@@ -1,18 +1,18 @@
-using System;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Security.Claims;
-using System.Threading.Tasks;
 using AutoFixture;
 using Functions.Orchestrators;
 using Functions.Starters;
 using Microsoft.Azure.WebJobs;
 using Moq;
 using SecurePipelineScan.VstsService;
-using Response = SecurePipelineScan.VstsService.Response;
 using Shouldly;
+using System;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using Xunit;
+using Response = SecurePipelineScan.VstsService.Response;
 
 namespace Functions.Tests.Starters
 {
@@ -69,7 +69,7 @@ namespace Functions.Tests.Starters
                 mock.Object
             );
 
-            mock.Verify(x => x .WaitForCompletionOrCreateCheckStatusResponseAsync(request,It.IsAny<string>(),It.IsAny<TimeSpan>()));
+            mock.Verify(x => x.WaitForCompletionOrCreateCheckStatusResponseAsync(request, It.IsAny<string>(), It.IsAny<TimeSpan>()));
             client.Verify();
         }
 
@@ -135,7 +135,7 @@ namespace Functions.Tests.Starters
                 mock.Object
             );
 
-            mock.Verify(x => x .StartNewAsync(nameof(GlobalPermissionsOrchestration), project));
+            mock.Verify(x => x.StartNewAsync(nameof(GlobalPermissionsOrchestration), project));
         }
 
         [Fact]
@@ -232,7 +232,7 @@ namespace Functions.Tests.Starters
                 mock.Object
             );
 
-            mock.Verify(x => x .StartNewAsync(nameof(ReleasePipelinesOrchestration), project));
+            mock.Verify(x => x.StartNewAsync(nameof(ReleasePipelinesOrchestration), project));
         }
 
         private static ClaimsPrincipal PrincipalWithClaims() =>

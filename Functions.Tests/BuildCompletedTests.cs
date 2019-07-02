@@ -1,12 +1,7 @@
-using System;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Threading.Tasks;
 using AutoFixture;
 using AutoFixture.AutoMoq;
 using Flurl.Http;
+using LogAnalytics.Client;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Newtonsoft.Json.Linq;
@@ -14,7 +9,12 @@ using SecurePipelineScan.Rules.Events;
 using SecurePipelineScan.Rules.Reports;
 using SecurePipelineScan.VstsService;
 using Shouldly;
-using LogAnalytics.Client;
+using System;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Xunit;
 using Report = Functions.Model.ExtensionDataReports<SecurePipelineScan.Rules.Reports.BuildScanReport>;
 
@@ -94,9 +94,9 @@ namespace Functions.Tests
             // Arrange
             Report result = null;
 
-            var today = new BuildScanReport {CreatedDate = DateTime.Now};
-            var yesterday = new BuildScanReport {CreatedDate = DateTime.Now.Subtract(TimeSpan.FromDays(1))};
-            var tomorrow = new BuildScanReport {CreatedDate = DateTime.Now.Add(TimeSpan.FromDays(1))};
+            var today = new BuildScanReport { CreatedDate = DateTime.Now };
+            var yesterday = new BuildScanReport { CreatedDate = DateTime.Now.Subtract(TimeSpan.FromDays(1)) };
+            var tomorrow = new BuildScanReport { CreatedDate = DateTime.Now.Add(TimeSpan.FromDays(1)) };
 
             // Return new report from today from new scan.
             var client = new Mock<IServiceHookScan<BuildScanReport>>();
@@ -107,7 +107,7 @@ namespace Functions.Tests
             // Return reports from yesterday and tomorrow from extension data storage
             var azdo = new Mock<IVstsRestClient>();
             azdo.Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Report>>()))
-                .Returns(Task.FromResult(new Report {Reports = new[] {yesterday, tomorrow}.ToList()}));
+                .Returns(Task.FromResult(new Report { Reports = new[] { yesterday, tomorrow }.ToList() }));
 
             // Capture the result to assert it later on.
             azdo.Setup(x => x.PutAsync(It.IsAny<IVstsRequest<Report>>(), It.IsAny<Report>()))
@@ -123,7 +123,7 @@ namespace Functions.Tests
             );
 
             // Assert
-            result.Reports.ShouldBe(new[] {tomorrow, today, yesterday});
+            result.Reports.ShouldBe(new[] { tomorrow, today, yesterday });
         }
 
         [Fact]
@@ -136,7 +136,7 @@ namespace Functions.Tests
 
             var azuredo = new Mock<IVstsRestClient>();
             azuredo.Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Report>>()))
-                .Returns(Task.FromResult((Report) null));
+                .Returns(Task.FromResult((Report)null));
             azuredo
                 .Setup(x => x.PutAsync(
                     It.IsAny<IVstsRequest<Report>>(),

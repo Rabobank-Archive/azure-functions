@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Flurl.Http;
+using Newtonsoft.Json;
+using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using Flurl.Http;
-using Newtonsoft.Json;
 
 namespace LogAnalytics.Client
 {
@@ -26,7 +26,7 @@ namespace LogAnalytics.Client
         public async Task AddCustomLogJsonAsync(string logName, object input, string timefield)
         {
             var json = JsonConvert.SerializeObject(input);
-            
+
             // Create a hash for the API signature
             var datestring = DateTime.UtcNow.ToString("r");
             var jsonBytes = Encoding.UTF8.GetBytes(json);

@@ -7,17 +7,17 @@ namespace Functions.Model
     {
         public IEnumerable<PreventiveLogItem> Flatten(string scope)
         {
-            return 
+            return
                 from report in Reports
                 from rule in report.Rules
                 select new PreventiveLogItem
                 {
-                    Project = Id, 
+                    Project = Id,
                     Scope = scope,
                     Item = report.Item,
                     Rule = rule.Name,
                     Status = rule.Status,
-                    EvaluatedDate = Date    
+                    EvaluatedDate = Date
                 };
         }
     }

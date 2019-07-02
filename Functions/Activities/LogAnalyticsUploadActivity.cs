@@ -1,6 +1,6 @@
-﻿using System.Threading.Tasks;
-using LogAnalytics.Client;
+﻿using LogAnalytics.Client;
 using Microsoft.Azure.WebJobs;
+using System.Threading.Tasks;
 
 namespace Functions.Activities
 {
@@ -12,7 +12,7 @@ namespace Functions.Activities
         {
             _analytics = analytics;
         }
-        
+
         [FunctionName(nameof(LogAnalyticsUploadActivity))]
         public async Task Run([ActivityTrigger] LogAnalyticsUploadActivityRequest request)
         {

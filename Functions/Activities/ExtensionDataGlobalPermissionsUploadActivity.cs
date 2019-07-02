@@ -1,8 +1,8 @@
-﻿using System.Threading.Tasks;
-using Functions.Model;
+﻿using Functions.Model;
 using Microsoft.Azure.WebJobs;
 using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Requests;
+using System.Threading.Tasks;
 
 namespace Functions.Activities
 {

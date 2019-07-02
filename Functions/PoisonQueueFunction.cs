@@ -1,10 +1,10 @@
-using System.Net.Http;
-using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Queue;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace Functions
 {
@@ -24,14 +24,14 @@ namespace Functions
             ILogger log)
         {
             if (string.IsNullOrEmpty(queue)) return;
-        
+
             log.LogInformation($"Requeue from: {queue}");
 
             var storage = CloudStorageAccount.Parse(_config.StorageAccountConnectionString);
             var client = storage.CreateCloudQueueClient();
 
             await RequeuePoisonMessages(
-                client.GetQueueReference(queue), 
+                client.GetQueueReference(queue),
                 client.GetQueueReference($"{queue}-poison"),
                 log);
         }
@@ -43,10 +43,10 @@ namespace Functions
             {
                 log.LogInformation($"Requeue message with id: {message.Id}");
                 await queue.AddMessageAsync(message);
-            
+
                 message = await poison.GetMessageAsync();
             }
-        
+
             log.LogInformation($"Done");
         }
     }

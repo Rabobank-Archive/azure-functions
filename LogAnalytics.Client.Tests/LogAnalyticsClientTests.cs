@@ -1,5 +1,5 @@
-using System.Threading.Tasks;
 using Flurl.Http.Testing;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace LogAnalytics.Client.Tests
@@ -29,7 +29,7 @@ namespace LogAnalytics.Client.Tests
                     .WithHeader("Authorization")
                     .WithHeader("Log-Type", "bla")
                     .WithHeader("x-ms-date")
-                    .WithHeader("time-generated-field","asdf")
+                    .WithHeader("time-generated-field", "asdf")
                     .WithContentType("application/json");
             }
         }

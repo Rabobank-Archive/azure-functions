@@ -21,14 +21,14 @@ namespace Functions.Tests.Starters
             var timerInfoMock = CreateTimerInfoMock();
 
             var projects = ProjectsTestHelper.CreateMultipleProjectsResponse(1);
-            
+
             clientMock.Setup(x => x.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.Project>>>()))
                 .Returns(projects);
 
             //Act
             var fun = new ProjectsScanStarter(clientMock.Object);
             await fun.Run(timerInfoMock, orchestrationClientMock.Object);
-            
+
             //Assert
             clientMock.Verify(x => x.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.Project>>>()), Times.Exactly(1));
         }
@@ -42,14 +42,14 @@ namespace Functions.Tests.Starters
             var timerInfoMock = CreateTimerInfoMock();
 
             var projects = ProjectsTestHelper.CreateMultipleProjectsResponse(2);
-            
+
             clientMock.Setup(x => x.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.Project>>>()))
                 .Returns(projects);
 
             //Act
             var fun = new ProjectsScanStarter(clientMock.Object);
             await fun.Run(timerInfoMock, orchestrationClientMock.Object);
-            
+
             //Assert
             orchestrationClientMock.Verify(
                 x => x.StartNewAsync(nameof(ProjectScanOrchestration), It.IsAny<object>()),

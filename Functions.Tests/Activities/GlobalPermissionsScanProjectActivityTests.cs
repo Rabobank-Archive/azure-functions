@@ -1,14 +1,14 @@
-using System.Linq;
-using System.Threading.Tasks;
 using AutoFixture;
 using AutoFixture.AutoMoq;
 using Functions.Activities;
 using Moq;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
-using Response = SecurePipelineScan.VstsService.Response;
 using Shouldly;
+using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
+using Response = SecurePipelineScan.VstsService.Response;
 
 namespace Functions.Tests.Activities
 {
@@ -28,7 +28,7 @@ namespace Functions.Tests.Activities
             var ruleSets = new Mock<IRulesProvider>();
             ruleSets
                 .Setup(x => x.GlobalPermissions(It.IsAny<IVstsRestClient>()))
-                .Returns(new[] {rule.Object, rule.Object});
+                .Returns(new[] { rule.Object, rule.Object });
 
             //Act
             var fun = new GlobalPermissionsScanProjectActivity(
@@ -57,12 +57,12 @@ namespace Functions.Tests.Activities
             rule
                 .As<IProjectReconcile>()
                 .Setup(x => x.Impact)
-                .Returns(new[] {"just some action"});
+                .Returns(new[] { "just some action" });
 
             var rulesProvider = new Mock<IRulesProvider>();
             rulesProvider
                 .Setup(x => x.GlobalPermissions(It.IsAny<IVstsRestClient>()))
-                .Returns(new[] {rule.Object});
+                .Returns(new[] { rule.Object });
 
             //Act
             var fun = new GlobalPermissionsScanProjectActivity(

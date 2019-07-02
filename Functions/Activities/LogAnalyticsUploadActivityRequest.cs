@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using Functions.Model;
+﻿using Functions.Model;
+using System.Collections.Generic;
 
 namespace Functions.Activities
 {

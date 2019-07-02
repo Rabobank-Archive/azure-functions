@@ -1,6 +1,6 @@
+using SecurePipelineScan.VstsService.Response;
 using System;
 using System.Collections.Generic;
-using SecurePipelineScan.VstsService.Response;
 
 namespace Functions.Model
 {
@@ -13,7 +13,7 @@ namespace Functions.Model
 
     public class ExtensionDataReports<TReport> : ExtensionDataReports
     {
-        
+
         public IList<TReport> Reports { get; set; }
     }
 }

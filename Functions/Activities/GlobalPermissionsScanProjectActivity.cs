@@ -1,13 +1,12 @@
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using Functions.Model;
 using Functions.Starters;
 using Microsoft.Azure.WebJobs;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
-using SecurePipelineScan.VstsService.Response;
-using Task = System.Threading.Tasks.Task;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Response = SecurePipelineScan.VstsService.Response;
 
 namespace Functions.Activities
 {
@@ -27,7 +26,7 @@ namespace Functions.Activities
         }
 
         [FunctionName(nameof(GlobalPermissionsScanProjectActivity))]
-        public async Task<GlobalPermissionsExtensionData> RunAsActivity([ActivityTrigger] Project project)
+        public async Task<GlobalPermissionsExtensionData> RunAsActivity([ActivityTrigger] Response.Project project)
         {
             var now = DateTime.UtcNow;
             var rules = _rulesProvider.GlobalPermissions(_azuredo);
@@ -47,7 +46,7 @@ namespace Functions.Activities
                     Reconcile = ReconcileFunction.ReconcileFromRule(_config, project.Name, r as IProjectReconcile)
                 }).ToList())
             };
-            
+
             return data;
         }
     }

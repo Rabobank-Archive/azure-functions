@@ -1,4 +1,8 @@
-﻿using Microsoft.Azure.WebJobs;
+﻿using Functions.LogItems;
+using Functions.Model;
+using LogAnalytics.Client;
+using Microsoft.Azure.Services.AppAuthentication;
+using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using SecurePipelineScan.VstsService;
@@ -8,11 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using Functions.LogItems;
-using Functions.Model;
-using Microsoft.Azure.Services.AppAuthentication;
 using Unmockable;
-using LogAnalytics.Client;
 using Requests = SecurePipelineScan.VstsService.Requests;
 
 namespace Functions
@@ -108,7 +108,7 @@ namespace Functions
 
             var agentStatusJson = await client.GetStringAsync($"https://management.azure.com/subscriptions/f13f81f8-7578-4ca8-83f3-0a845fad3cb5/resourceGroups/{agentInfo.ResourceGroup}/providers/Microsoft.Compute/virtualMachineScaleSets/agents/virtualmachines/{agentInfo.InstanceId}/instanceView?api-version=2018-06-01");
             dynamic status = JObject.Parse(agentStatusJson);
-            
+
             if (status.statuses[0].code == "ProvisioningState/updating")
             {
                 log.LogInformation($"Agent already being re-imaged: {agentInfo.ResourceGroup} - {agentInfo.InstanceId}");

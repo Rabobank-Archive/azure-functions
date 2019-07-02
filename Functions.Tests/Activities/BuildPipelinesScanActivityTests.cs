@@ -4,10 +4,10 @@ using Functions.Activities;
 using Moq;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
-using SecurePipelineScan.VstsService.Response;
 using Shouldly;
+using System.Threading.Tasks;
 using Xunit;
-using Task = System.Threading.Tasks.Task;
+using Response = SecurePipelineScan.VstsService.Response;
 
 namespace Functions.Tests.Activities
 {
@@ -23,24 +23,24 @@ namespace Functions.Tests.Activities
                 .Setup(x => x.ReleaseRules(It.IsAny<IVstsRestClient>()))
                 .Returns(fixture.CreateMany<IRule>())
                 .Verifiable();
-            
+
             var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
             client
-                .Setup(x => x.Get(It.IsAny<IVstsRequest<Multiple<BuildDefinition>>>()))
-                .Returns(fixture.CreateMany<BuildDefinition>());
-                       
+                .Setup(x => x.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.BuildDefinition>>>()))
+                .Returns(fixture.CreateMany<Response.BuildDefinition>());
+
             // Act
             var activity = new BuildPipelinesScanActivity(
-                fixture.Create<EnvironmentConfig>(), 
+                fixture.Create<EnvironmentConfig>(),
                 client.Object,
                 provider.Object);
-            
-            var result = await activity.Run(fixture.Create<Project>());
-            
+
+            var result = await activity.Run(fixture.Create<Response.Project>());
+
             // Assert
             result.RescanUrl.ShouldNotBeNull();
             result.Reports.ShouldNotBeEmpty();
-            
+
             client.VerifyAll();
         }
     }

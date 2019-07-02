@@ -1,10 +1,10 @@
-using System;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Queue;
 using Moq;
 using Shouldly;
+using System;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Functions.Tests
@@ -20,7 +20,7 @@ namespace Functions.Tests
             //   b) docker run --rm -p 10001:10001 arafato/azurite
             var storage = CloudStorageAccount.Parse("UseDevelopmentStorage=true");
             var client = storage.CreateCloudQueueClient();
-            
+
             var queue = client.GetQueueReference("some-queue");
             var poison = client.GetQueueReference($"some-queue-poison");
 
@@ -31,9 +31,9 @@ namespace Functions.Tests
 
             var content = Guid.NewGuid().ToString();
             await poison.AddMessageAsync(new CloudQueueMessage(content));
-            
+
             // Act
-            var function = new PoisonQueueFunction(new EnvironmentConfig { StorageAccountConnectionString  = "UseDevelopmentStorage=true" });
+            var function = new PoisonQueueFunction(new EnvironmentConfig { StorageAccountConnectionString = "UseDevelopmentStorage=true" });
             await function.Requeue(null, "some-queue", new Mock<ILogger>().Object);
 
             // Assert
@@ -41,7 +41,7 @@ namespace Functions.Tests
                 .PeekMessageAsync()
                 .Result
                 .ShouldBeNull();
-            
+
             var message = await queue.GetMessageAsync();
             message
                 .ShouldNotBeNull();

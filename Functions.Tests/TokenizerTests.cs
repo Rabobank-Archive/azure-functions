@@ -1,7 +1,7 @@
-using System;
-using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 using Shouldly;
+using System;
+using System.Security.Claims;
 using Xunit;
 
 namespace Functions.Tests
@@ -29,7 +29,7 @@ namespace Functions.Tests
             tokenizer1.Principal(token).ShouldNotBeNull();
             Assert.Throws<SecurityTokenInvalidSignatureException>(() => tokenizer2.Principal(token));
         }
-        
+
         [Fact]
         public void ThrowOnNullSecret()
         {
