@@ -35,14 +35,14 @@ namespace Functions.Activities
                 Date = DateTime.UtcNow,
                 RescanUrl = ProjectScanHttpStarter.RescanUrl(_config, project.Name, "releasepipelines"),
                 HasReconcilePermissionUrl = ReconcileFunction.HasReconcilePermissionUrl(_config, project.Id),
-                Reports = await CreateReports(project.Id)
+                Reports = await CreateReports(project)
             };
         }
 
-        private async Task<IList<ItemExtensionData>> CreateReports(string projectId)
+        private async Task<IList<ItemExtensionData>> CreateReports(Project project)
         {
             var rules = _rulesProvider.ReleaseRules(_azuredo).ToList();
-            var items = _azuredo.Get(Requests.ReleaseManagement.Definitions(projectId));
+            var items = _azuredo.Get(Requests.ReleaseManagement.Definitions(project.Id));
 
             // Do this in a loop (instead of in a Select) to avoid parallelism which messes up our sockets
             var evaluationResults = new List<ItemExtensionData>();
@@ -51,7 +51,7 @@ namespace Functions.Activities
                 evaluationResults.Add(new ItemExtensionData
                 {
                     Item = pipeline.Name,
-                    Rules = await rules.Evaluate(_config, projectId, "releasepipelines", pipeline.Id)
+                    Rules = await rules.Evaluate(_config, project.Id, "releasepipelines", pipeline.Id)
                 });
             }
 

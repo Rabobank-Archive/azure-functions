@@ -35,14 +35,14 @@ namespace Functions.Activities
                 Date = DateTime.UtcNow,
                 RescanUrl = ProjectScanHttpStarter.RescanUrl(_config, project.Name, "buildpipelines"),
                 HasReconcilePermissionUrl = ReconcileFunction.HasReconcilePermissionUrl(_config, project.Id),
-                Reports = await CreateReports(project.Id)
+                Reports = await CreateReports(project)
             };
         }
 
-        private async Task<IList<ItemExtensionData>> CreateReports(string projectId)
+        private async Task<IList<ItemExtensionData>> CreateReports(Project project)
         {
             var rules = _rulesProvider.BuildRules(_azuredo).ToList();
-            var items = _azuredo.Get(Requests.Builds.BuildDefinitions(projectId));
+            var items = _azuredo.Get(Requests.Builds.BuildDefinitions(project.Id));
 
             var evaluationResults = new List<ItemExtensionData>();
 
@@ -52,7 +52,7 @@ namespace Functions.Activities
                 evaluationResults.Add(new ItemExtensionData
                 {
                     Item = pipeline.Name,
-                    Rules = await rules.Evaluate(_config, projectId, "buildpipelines", pipeline.Id)
+                    Rules = await rules.Evaluate(_config, project.Id, "buildpipelines", pipeline.Id)
                 }); ;
             }
             return evaluationResults;
