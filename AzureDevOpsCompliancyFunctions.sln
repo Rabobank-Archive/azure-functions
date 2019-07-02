@@ -5,8 +5,6 @@ VisualStudioVersion = 15.0.28010.2016
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Functions", "Functions\Functions.csproj", "{74667D48-0D4F-49AD-9BF5-899198AD4FA2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LogAnalytics.Client", "LogAnalytics.Client\LogAnalytics.Client.csproj", "{47CF5D5C-E846-4E9E-B7D6-2B6587C91DDF}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{974D9CB3-B265-4904-B5AB-808549B7EC8E}"
 	ProjectSection(SolutionItems) = preProject
 		NuGet.Config = NuGet.Config
@@ -15,8 +13,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Functions.Tests", "Functions.Tests\Functions.Tests.csproj", "{0D4398D2-2E84-4D5E-8E85-845F3C5C1E99}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LogAnalytics.Client.Tests", "LogAnalytics.Client.Tests\LogAnalytics.Client.Tests.csproj", "{B2422B37-BDD1-4B4B-B090-9E6EFB6FFAF0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -28,18 +24,10 @@ Global
 		{74667D48-0D4F-49AD-9BF5-899198AD4FA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{74667D48-0D4F-49AD-9BF5-899198AD4FA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{74667D48-0D4F-49AD-9BF5-899198AD4FA2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{47CF5D5C-E846-4E9E-B7D6-2B6587C91DDF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{47CF5D5C-E846-4E9E-B7D6-2B6587C91DDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{47CF5D5C-E846-4E9E-B7D6-2B6587C91DDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{47CF5D5C-E846-4E9E-B7D6-2B6587C91DDF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0D4398D2-2E84-4D5E-8E85-845F3C5C1E99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0D4398D2-2E84-4D5E-8E85-845F3C5C1E99}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0D4398D2-2E84-4D5E-8E85-845F3C5C1E99}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0D4398D2-2E84-4D5E-8E85-845F3C5C1E99}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B2422B37-BDD1-4B4B-B090-9E6EFB6FFAF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B2422B37-BDD1-4B4B-B090-9E6EFB6FFAF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B2422B37-BDD1-4B4B-B090-9E6EFB6FFAF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B2422B37-BDD1-4B4B-B090-9E6EFB6FFAF0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
