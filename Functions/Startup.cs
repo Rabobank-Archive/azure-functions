@@ -1,17 +1,17 @@
-﻿using Microsoft.Azure.WebJobs;
+﻿using LogAnalytics.Client;
+using Microsoft.Azure.Services.AppAuthentication;
+using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Hosting;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using SecurePipelineScan.Rules;
 using SecurePipelineScan.Rules.Events;
 using SecurePipelineScan.Rules.Reports;
+using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
 using System;
 using System.Net.Http;
-using Microsoft.Azure.Services.AppAuthentication;
-using SecurePipelineScan.Rules.Security;
 using Unmockable;
-using LogAnalytics.Client;
 
 [assembly: WebJobsStartup(typeof(Functions.Startup))]
 
@@ -48,7 +48,7 @@ namespace Functions
             var functionAppUrl =
                 Environment.GetEnvironmentVariable("WEBSITE_HOSTNAME", EnvironmentVariableTarget.Process) ??
                 throw new ArgumentException("WEBSITE_HOSTNAME");
-            
+
             var config = new EnvironmentConfig
             {
                 ExtensionName = extensionName,

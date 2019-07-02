@@ -1,16 +1,17 @@
-﻿using Microsoft.Azure.WebJobs;
+﻿using Functions.Helpers;
+using Functions.Model;
+using LogAnalytics.Client;
+using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
-using SecurePipelineScan.VstsService;
-using System;
 using Newtonsoft.Json.Linq;
 using SecurePipelineScan.Rules.Events;
 using SecurePipelineScan.Rules.Reports;
-using LogAnalytics.Client;
+using SecurePipelineScan.VstsService;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Requests = SecurePipelineScan.VstsService.Requests;
-using Functions.Helpers;
 
 namespace Functions
 {
@@ -24,7 +25,7 @@ namespace Functions
         public ReleaseDeploymentCompletedFunction(
             ILogAnalyticsClient client,
             IServiceHookScan<ReleaseDeploymentCompletedReport> scan,
-            IVstsRestClient azuredo, 
+            IVstsRestClient azuredo,
             EnvironmentConfig config)
         {
             _client = client;
@@ -44,7 +45,7 @@ namespace Functions
 
             var report = await _scan.Completed(JObject.Parse(data));
             await _client.AddCustomLogJsonAsync("DeploymentStatus", report, "Date");
-            await RetryHelper.ExecuteInvalidDocumentVersionPolicy(_config.Organization,() => UpdateExtensionData(report));
+            await RetryHelper.ExecuteInvalidDocumentVersionPolicy(_config.Organization, () => UpdateExtensionData(report));
         }
 
         private async Task UpdateExtensionData(ReleaseDeploymentCompletedReport report)
@@ -59,12 +60,13 @@ namespace Functions
                                              report.Project)) ??
                                  new ExtensionDataReports<ReleaseDeploymentCompletedReport>
                                  {
-                                     Id = report.Project, Reports = new List<ReleaseDeploymentCompletedReport>()
+                                     Id = report.Project,
+                                     Reports = new List<ReleaseDeploymentCompletedReport>()
                                  };
 
             reports.Reports = reports
                 .Reports
-                .Concat(new[]{report})
+                .Concat(new[] { report })
                 .OrderByDescending(x => x.CreatedDate)
                 .Take(50)
                 .ToList();

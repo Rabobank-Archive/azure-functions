@@ -1,19 +1,20 @@
 ﻿using AutoFixture;
+using Functions.Model;
+using LogAnalytics.Client;
+using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Moq;
 using RichardSzalay.MockHttp;
 using SecurePipelineScan.VstsService;
-using Response = SecurePipelineScan.VstsService.Response;
+using Shouldly;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.Azure.Services.AppAuthentication;
-using Shouldly;
 using Unmockable;
-using LogAnalytics.Client;
 using Xunit;
+using Response = SecurePipelineScan.VstsService.Response;
 
 namespace Functions.Tests
 {
@@ -25,7 +26,7 @@ namespace Functions.Tests
         {
             // Arrange
             var fixture = new Fixture();
-            IEnumerable<Response.AgentPoolInfo> pools =  new[] { 
+            IEnumerable<Response.AgentPoolInfo> pools = new[] {
             new Response.AgentPoolInfo {Name = "Rabo-Build-Azure-Linux", Id = 1},
             new Response.AgentPoolInfo {Name = "Rabo-Build-Azure-Linux-Canary", Id = 2},
             new Response.AgentPoolInfo {Name = "Rabo-Build-Azure-Linux-Fallback", Id = 3},
@@ -37,7 +38,7 @@ namespace Functions.Tests
             new Response.AgentPoolInfo {Name = "Rabo-Build-Azure-Windows-NOT-OBSERVED", Id = 9}
         };
 
-        fixture.Customize<Response.AgentStatus>(a => a.With(agent => agent.Status, "online"));
+            fixture.Customize<Response.AgentStatus>(a => a.With(agent => agent.Status, "online"));
 
             var mockHttp = new MockHttpMessageHandler();
 
@@ -64,15 +65,15 @@ namespace Functions.Tests
 
             // Assert
             client
-                .Verify(v => v.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.AgentPoolInfo>>>()), 
+                .Verify(v => v.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.AgentPoolInfo>>>()),
                     Times.Exactly(1));
 
             client
-                .Verify(v => v.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.AgentStatus>>>()), 
+                .Verify(v => v.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.AgentStatus>>>()),
                     Times.Exactly(8));
 
             logAnalyticsClient
-                .Verify(x => x.AddCustomLogJsonAsync(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<string>()), 
+                .Verify(x => x.AddCustomLogJsonAsync(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<string>()),
                     Times.Exactly(1));
         }
 

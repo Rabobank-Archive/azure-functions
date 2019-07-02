@@ -1,4 +1,4 @@
-﻿namespace Functions
+﻿namespace Functions.Model
 {
     public class AgentPoolInformation
     {

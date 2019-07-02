@@ -1,8 +1,8 @@
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Functions
 {
@@ -31,9 +31,9 @@ namespace Functions
                 ValidateIssuer = false,
                 ValidateIssuerSigningKey = true,
                 ValidateLifetime = true,
-                IssuerSigningKeys = new[] {new SymmetricSecurityKey(_key)}
+                IssuerSigningKeys = new[] { new SymmetricSecurityKey(_key) }
             };
-            
+
             var handler = new JwtSecurityTokenHandler();
             return handler.ValidateToken(token, parameters, out _);
         }

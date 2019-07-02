@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Functions
+namespace Functions.LogItems
 {
     internal class LogAnalyticsAgentStatus
     {

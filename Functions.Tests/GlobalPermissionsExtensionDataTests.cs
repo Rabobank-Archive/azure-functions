@@ -1,7 +1,7 @@
-using System;
-using System.Linq;
 using ExpectedObjects;
 using Functions.Model;
+using System;
+using System.Linq;
 using Xunit;
 
 namespace Functions.Tests
@@ -16,12 +16,12 @@ namespace Functions.Tests
             {
                 Id = "TAS",
                 Date = now,
-                Reports = new []
+                Reports = new[]
                 {
                     new EvaluatedRule
                     {
                         Description =  "Nobody can do anything",
-                        Reconcile = new Reconcile 
+                        Reconcile = new Reconcile
                         {
                             Url =  "https://azuredevops.somewhere.azure.com"
                         },
