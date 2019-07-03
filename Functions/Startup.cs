@@ -1,5 +1,4 @@
-﻿using LogAnalytics.Client;
-using Microsoft.Azure.Services.AppAuthentication;
+﻿using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Hosting;
 using Microsoft.Extensions.Caching.Memory;
@@ -11,6 +10,7 @@ using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
 using System;
 using System.Net.Http;
+using LogAnalytics.Client;
 using Unmockable;
 
 [assembly: WebJobsStartup(typeof(Functions.Startup))]
