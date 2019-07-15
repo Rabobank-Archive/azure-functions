@@ -12,7 +12,7 @@ namespace Functions.Orchestrators
         public static async Task Run([OrchestrationTrigger]DurableOrchestrationContextBase context)
         {
             var project = context.GetInput<Response.Project>();
-            context.SetCustomStatus(new ScanOrchestratorStatus { Project = project.Name, Scope = "repository" });
+            context.SetCustomStatus(new ScanOrchestrationStatus { Project = project.Name, Scope = "repository" });
 
             var data = await context.CallActivityAsync<ItemsExtensionData>(
                 nameof(RepositoriesScanActivity), project);

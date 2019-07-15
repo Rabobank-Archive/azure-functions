@@ -34,7 +34,7 @@ namespace Functions.Tests.Starters
         }
 
         [Fact]
-        public async Task RunShouldCallOrchestrationFunctionExactlyOnce()
+        public async Task RunShouldCallSupervisorFunctionExactlyOnce()
         {
             //Arrange       
             var orchestrationClientMock = new Mock<DurableOrchestrationClientBase>();
@@ -52,9 +52,8 @@ namespace Functions.Tests.Starters
 
             //Assert
             orchestrationClientMock.Verify(
-                x => x.StartNewAsync(nameof(ProjectScanOrchestration), It.IsAny<object>()),
-                Times.AtLeastOnce());
-
+                x => x.StartNewAsync(nameof(ProjectScanSupervisor), It.IsAny<object>()),
+                Times.Once());
         }
 
         private static TimerInfo CreateTimerInfoMock()

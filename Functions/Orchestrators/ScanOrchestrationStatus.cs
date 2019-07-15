@@ -1,6 +1,6 @@
 namespace Functions.Orchestrators
 {
-    public class ScanOrchestratorStatus
+    public class ScanOrchestrationStatus
     {
         public string Project { get; set; }
         public string Scope { get; set; }
