@@ -12,7 +12,7 @@ namespace Functions.Orchestrators
         public static async Task Run([OrchestrationTrigger]DurableOrchestrationContextBase context)
         {
             var project = context.GetInput<Response.Project>();
-            context.SetCustomStatus(new ScanOrchestratorStatus { Project = project.Name, Scope = "globalpermissions" });
+            context.SetCustomStatus(new ScanOrchestrationStatus { Project = project.Name, Scope = "globalpermissions" });
 
             var data = await context.CallActivityAsync<GlobalPermissionsExtensionData>
                 (nameof(GlobalPermissionsScanProjectActivity), project);

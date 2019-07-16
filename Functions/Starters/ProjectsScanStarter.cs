@@ -24,9 +24,7 @@ namespace Functions.Starters
             [OrchestrationClient] DurableOrchestrationClientBase orchestrationClientBase)
         {
             var projects = _azuredo.Get(Project.Projects()).ToList();
-
-            await Task.WhenAll(projects.Select(p =>
-                orchestrationClientBase.StartNewAsync(nameof(ProjectScanOrchestration), p)));
+            await orchestrationClientBase.StartNewAsync(nameof(ProjectScanSupervisor), projects);
         }
     }
 }
