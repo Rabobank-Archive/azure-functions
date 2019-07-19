@@ -1,4 +1,5 @@
-﻿using Functions.Orchestrators;
+using System;
+using Functions.Orchestrators;
 using Microsoft.Azure.WebJobs;
 using Moq;
 using Response = SecurePipelineScan.VstsService.Response;
@@ -30,7 +31,7 @@ namespace Functions.Tests.Orchestrators
 
             //Assert
             orchestrationClientMock.Verify(
-                x => x.CallSubOrchestratorAsync(nameof(ProjectScanOrchestration), It.IsAny<object>()),
+                x => x.CallSubOrchestratorAsync(nameof(ProjectScanOrchestration), It.IsAny<string>(), It.IsAny<object>()),
                 Times.Exactly(count));
         }
 
