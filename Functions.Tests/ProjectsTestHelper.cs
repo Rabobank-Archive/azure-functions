@@ -2,6 +2,7 @@ using SecurePipelineScan.VstsService.Response;
 using Shouldly;
 using System.Collections.Generic;
 using System.Linq;
+using AutoFixture;
 using Xunit;
 
 namespace Functions.Tests
@@ -23,15 +24,8 @@ namespace Functions.Tests
 
         private static Project CreateDummyProject()
         {
-            var project = new Project
-            {
-                Name = "Dummy project",
-                Id = "1234",
-                Description = "Describe project",
-                Url = "www.url.com"
-            };
-
-            return project;
+            var fixture = new Fixture();
+            return fixture.Create<Project>();
         }
 
         public static IEnumerable<Project> CreateMultipleProjectsResponse(int number)
