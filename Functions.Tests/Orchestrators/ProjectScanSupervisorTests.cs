@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Functions.Orchestrators;
 using Microsoft.Azure.WebJobs;
 using Moq;
@@ -54,6 +54,45 @@ namespace Functions.Tests.Orchestrators
             //Assert
             orchestrationClientMock.Verify(
                 x => x.SetCustomStatus(It.Is<SupervisorOrchestrationStatus>(y => y.TotalProjectCount == count)));
+        }
+
+        [Fact]
+        public async Task SubOrchestrationIdShouldIncludeProjectId()
+        {
+            //Arrange       
+            var projects = ProjectsTestHelper.CreateMultipleProjectsResponse(1).ToList();
+            var orchestrationClientMock = new Mock<DurableOrchestrationContextBase>();
+            orchestrationClientMock.Setup(
+                x => x.GetInput<List<Response.Project>>()).Returns(projects);
+
+            //Act
+            var fun = new ProjectScanSupervisor();
+            await fun.Run(orchestrationClientMock.Object);
+
+            //Assert
+            orchestrationClientMock.Verify(
+                x => x.CallSubOrchestratorAsync(nameof(ProjectScanOrchestration),
+                    It.Is<string>(i => i.Contains(projects.First().Id)), It.IsAny<object>()));
+        }
+        
+        [Fact]
+        public async Task SubOrchestrationIdShouldIncludeParentOrchestrationId()
+        {
+            //Arrange       
+            var projects = ProjectsTestHelper.CreateMultipleProjectsResponse(1).ToList();
+            var orchestrationClientMock = new Mock<DurableOrchestrationContextBase>();
+            orchestrationClientMock.Setup(
+                x => x.GetInput<List<Response.Project>>()).Returns(projects);
+            orchestrationClientMock.SetupGet(x => x.InstanceId).Returns(Guid.NewGuid().ToString());
+
+            //Act
+            var fun = new ProjectScanSupervisor();
+            await fun.Run(orchestrationClientMock.Object);
+
+            //Assert
+            orchestrationClientMock.Verify(
+                x => x.CallSubOrchestratorAsync(nameof(ProjectScanOrchestration),
+                    It.Is<string>(i => i.Contains(orchestrationClientMock.Object.InstanceId)), It.IsAny<object>()));
         }
     }
 }
