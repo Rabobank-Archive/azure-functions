@@ -66,7 +66,7 @@ namespace Functions
                 return new NotFoundObjectResult($"Rule not found {ruleName}");
             }
 
-            await rule.Reconcile(project);
+            await rule.ReconcileAsync(project);
             return new OkResult();
         }
 
@@ -81,7 +81,7 @@ namespace Functions
                 return new NotFoundObjectResult($"Rule not found {ruleName}");
             }
 
-            await rule.Reconcile(project, item);
+            await rule.ReconcileAsync(project, item);
             return new OkResult();
         }
 

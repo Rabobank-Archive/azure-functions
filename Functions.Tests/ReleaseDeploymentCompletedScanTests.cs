@@ -31,7 +31,7 @@ namespace Functions.Tests
             var logAnalyticsClient = new Mock<ILogAnalyticsClient>();
             var scan = new Mock<IServiceHookScan<ReleaseDeploymentCompletedReport>>();
             scan
-                .Setup(x => x.Completed(It.IsAny<JObject>()))
+                .Setup(x => x.GetCompletedReportAsync(It.IsAny<JObject>()))
                 .Returns(Task.FromResult(report));
 
             var azDoClient = new Mock<IVstsRestClient>();
@@ -57,13 +57,13 @@ namespace Functions.Tests
         }
 
         [Fact]
-        public async void RunReleaseDeploymentCompletedFunction_FirstUpload()
+        public async Task RunReleaseDeploymentCompletedFunction_FirstUpload()
         {
             var report = _fixture.Create<ReleaseDeploymentCompletedReport>();
             var logAnalyticsClient = new Mock<ILogAnalyticsClient>();
             var client = new Mock<IServiceHookScan<ReleaseDeploymentCompletedReport>>();
             client
-                .Setup(x => x.Completed(It.IsAny<JObject>()))
+                .Setup(x => x.GetCompletedReportAsync(It.IsAny<JObject>()))
                 .Returns(Task.FromResult(report));
 
             var azDoClient = new Mock<IVstsRestClient>();
@@ -100,7 +100,7 @@ namespace Functions.Tests
             // Return new report from today from new scan.
             var client = new Mock<IServiceHookScan<ReleaseDeploymentCompletedReport>>();
             client
-                .Setup(x => x.Completed(It.IsAny<JObject>()))
+                .Setup(x => x.GetCompletedReportAsync(It.IsAny<JObject>()))
                 .Returns(Task.FromResult(today));
 
             // Return reports from yesterday and tomorrow from extension data storage

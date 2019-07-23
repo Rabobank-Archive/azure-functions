@@ -25,7 +25,7 @@ namespace Functions.Tests
         private readonly IFixture _fixture = new Fixture();
 
         [Fact]
-        public async void RunBuildCompletedFunction()
+        public async Task RunBuildCompletedFunction()
         {
             _fixture.Customize<Report>(r =>
                 r.With(x => x.Reports, _fixture.CreateMany<BuildScanReport>(50).ToList()));
@@ -33,7 +33,7 @@ namespace Functions.Tests
             var config = _fixture.Create<EnvironmentConfig>();
             var scan = new Mock<IServiceHookScan<BuildScanReport>>();
             scan
-                .Setup(x => x.Completed(It.IsAny<JObject>()))
+                .Setup(x => x.GetCompletedReportAsync(It.IsAny<JObject>()))
                 .Returns(Task.FromResult(report));
 
             var logAnalyticsClient = new Mock<ILogAnalyticsClient>();
@@ -65,7 +65,7 @@ namespace Functions.Tests
             _fixture.RepeatCount = 50;
             var scan = new Mock<IServiceHookScan<BuildScanReport>>();
             scan
-                .Setup(x => x.Completed(It.IsAny<JObject>()))
+                .Setup(x => x.GetCompletedReportAsync(It.IsAny<JObject>()))
                 .Returns(Task.FromResult(_fixture.Create<BuildScanReport>()));
 
             var azuredo = new Mock<IVstsRestClient>();
@@ -101,7 +101,7 @@ namespace Functions.Tests
             // Return new report from today from new scan.
             var client = new Mock<IServiceHookScan<BuildScanReport>>();
             client
-                .Setup(x => x.Completed(It.IsAny<JObject>()))
+                .Setup(x => x.GetCompletedReportAsync(It.IsAny<JObject>()))
                 .Returns(Task.FromResult(today));
 
             // Return reports from yesterday and tomorrow from extension data storage
@@ -131,7 +131,7 @@ namespace Functions.Tests
         {
             var scan = new Mock<IServiceHookScan<BuildScanReport>>();
             scan
-                .Setup(x => x.Completed(It.IsAny<JObject>()))
+                .Setup(x => x.GetCompletedReportAsync(It.IsAny<JObject>()))
                 .Returns(Task.FromResult(_fixture.Create<BuildScanReport>()));
 
             var azuredo = new Mock<IVstsRestClient>();
@@ -168,7 +168,7 @@ namespace Functions.Tests
             //Arrange
             var scan = new Mock<IServiceHookScan<BuildScanReport>>();
             scan
-                .Setup(x => x.Completed(It.IsAny<JObject>()))
+                .Setup(x => x.GetCompletedReportAsync(It.IsAny<JObject>()))
                 .Returns(Task.FromResult(_fixture.Create<BuildScanReport>()));
 
             var azuredo = new Mock<IVstsRestClient>();

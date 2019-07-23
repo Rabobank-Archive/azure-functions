@@ -4,12 +4,13 @@ using System.Collections.Generic;
 using System.Linq;
 using AutoFixture;
 using Xunit;
+using System;
 
 namespace Functions.Tests
 {
     public class ProjectsTestHelper
     {
-        public static Project CreateProjectWithParameters(string name, string id, string description, string url)
+        public static Project CreateProjectWithParameters(string name, string id, string description, Uri url)
         {
             var project = new Project
             {

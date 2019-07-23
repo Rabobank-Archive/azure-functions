@@ -53,7 +53,7 @@ namespace Functions.Activities
                 {
                     Item = pipeline.Name,
                     Rules = await rules.Evaluate(_config, project.Id, "buildpipelines", pipeline.Id)
-                }); ;
+                });
             }
             return evaluationResults;
         }

@@ -25,7 +25,7 @@ namespace Functions.Tests
             var rule = new Mock<IProjectRule>(MockBehavior.Strict);
             rule
                 .As<IProjectReconcile>()
-                .Setup(x => x.Reconcile("TAS"))
+                .Setup(x => x.ReconcileAsync("TAS"))
                 .Returns(Task.CompletedTask)
                 .Verifiable();
 
@@ -66,7 +66,7 @@ namespace Functions.Tests
             var rule = new Mock<IRule>(MockBehavior.Strict);
             rule
                 .As<IReconcile>()
-                .Setup(x => x.Reconcile("TAS", "repository-id"))
+                .Setup(x => x.ReconcileAsync("TAS", "repository-id"))
                 .Returns(Task.CompletedTask)
                 .Verifiable();
 

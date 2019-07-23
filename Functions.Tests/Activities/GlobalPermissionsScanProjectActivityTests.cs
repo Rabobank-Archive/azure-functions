@@ -22,7 +22,7 @@ namespace Functions.Tests.Activities
 
             var rule = new Mock<IProjectRule>();
             rule
-                .Setup(x => x.Evaluate(It.IsAny<string>()))
+                .Setup(x => x.EvaluateAsync(It.IsAny<string>()))
                 .Returns(Task.FromResult(true));
 
             var ruleSets = new Mock<IRulesProvider>();
@@ -40,7 +40,7 @@ namespace Functions.Tests.Activities
                 fixture.Create<Response.Project>());
 
             //Assert
-            rule.Verify(x => x.Evaluate(It.IsAny<string>()), Times.AtLeastOnce());
+            rule.Verify(x => x.EvaluateAsync(It.IsAny<string>()), Times.AtLeastOnce());
         }
 
         [Fact]

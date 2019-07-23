@@ -71,8 +71,6 @@ namespace Functions
                         case "Idle": statusCode = 1; break;
                         case "Build": statusCode = 2; break;
                         case "Release": statusCode = 3; break;
-                        // ReSharper disable once RedundantCaseLabel
-                        case "Offline":
                         default: statusCode = 0; break;
                     }
 
