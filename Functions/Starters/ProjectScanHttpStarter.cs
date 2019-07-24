@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Functions.Model;
 
 namespace Functions.Starters
 {
@@ -18,10 +19,10 @@ namespace Functions.Starters
 
         private static readonly IDictionary<string, string> Scopes = new Dictionary<string, string>
         {
-            ["globalpermissions"] = nameof(GlobalPermissionsOrchestration),
-            ["repository"] = nameof(RepositoriesOrchestration),
-            ["buildpipelines"] = nameof(BuildPipelinesOrchestration),
-            ["releasepipelines"] = nameof(ReleasePipelinesOrchestration)
+            [RuleScopes.GlobalPermissions] = nameof(GlobalPermissionsOrchestration),
+            [RuleScopes.Repositories] = nameof(RepositoriesOrchestration),
+            [RuleScopes.BuildPipelines] = nameof(BuildPipelinesOrchestration),
+            [RuleScopes.ReleasePipelines] = nameof(ReleasePipelinesOrchestration)
         };
 
         public ProjectScanHttpStarter(ITokenizer tokenizer, IVstsRestClient azuredo)

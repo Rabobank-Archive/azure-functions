@@ -41,14 +41,14 @@ namespace Functions.Tests
             var expected = new PreventiveLogItem
             {
                 Project = "TAS",
-                Scope = "repository",
+                Scope = RuleScopes.Repositories,
                 Item = "SOx-Compliant-Demo",
                 Rule = "NobodyCanDoAnything",
                 Status = true,
                 EvaluatedDate = now
             }.ToExpectedObject();
 
-            var result = data.Flatten("repository").Single();
+            var result = data.Flatten(RuleScopes.Repositories).Single();
             expected.ShouldEqual(result);
         }
     }

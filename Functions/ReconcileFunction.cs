@@ -41,13 +41,13 @@ namespace Functions
 
             switch (scope)
             {
-                case "globalpermissions":
+                case RuleScopes.GlobalPermissions:
                     return await ReconcileGlobalPermissions(project, ruleName);
-                case "repository":
+                case RuleScopes.Repositories:
                     return await ReconcileItem(project, ruleName, item, _ruleProvider.RepositoryRules(_client));
-                case "buildpipelines":
+                case RuleScopes.BuildPipelines:
                     return await ReconcileItem(project, ruleName, item, _ruleProvider.BuildRules(_client));
-                case "releasepipelines":
+                case RuleScopes.ReleasePipelines:
                     return await ReconcileItem(project, ruleName, item, _ruleProvider.ReleaseRules(_client));
                 default:
                     return new NotFoundObjectResult(scope);

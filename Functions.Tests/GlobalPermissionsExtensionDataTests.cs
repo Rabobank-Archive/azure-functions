@@ -34,7 +34,7 @@ namespace Functions.Tests
             var expected = new PreventiveLogItem
             {
                 Project = "TAS",
-                Scope = "globalpermissions",
+                Scope = RuleScopes.GlobalPermissions,
                 Item = null,
                 Rule = "NobodyCanDoAnything",
                 Status = true,

@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Functions.Model;
 using Xunit;
 using Response = SecurePipelineScan.VstsService.Response;
 
@@ -51,7 +52,7 @@ namespace Functions.Tests
             (await function.Reconcile(request,
                 "somecompany",
                 "TAS",
-                "globalpermissions",
+                RuleScopes.GlobalPermissions,
                 rule.Object.GetType().Name)).ShouldBeOfType<OkResult>();
 
             rule.Verify();
@@ -92,7 +93,7 @@ namespace Functions.Tests
             (await function.Reconcile(request,
                 "somecompany",
                 "TAS",
-                "repository",
+                RuleScopes.Repositories,
                 rule.Object.GetType().Name,
                 "repository-id")).ShouldBeOfType<OkResult>();
 
@@ -128,7 +129,7 @@ namespace Functions.Tests
             var result = (await function.Reconcile(request,
                 "somecompany",
                 "TAS",
-                "globalpermissions",
+                RuleScopes.GlobalPermissions,
                 "some-non-existing-rule")).ShouldBeOfType<NotFoundObjectResult>();
 
             result
@@ -179,7 +180,7 @@ namespace Functions.Tests
             (await function.Reconcile(request,
                 "somecompany",
                 "TAS",
-                "globalpermissions",
+                RuleScopes.GlobalPermissions,
                 "some-non-existing-rule")).ShouldBeOfType<UnauthorizedResult>();
         }
 
@@ -198,7 +199,7 @@ namespace Functions.Tests
             (await function.Reconcile(request,
                 "somecompany",
                 "TAS",
-                "globalpermissions",
+                RuleScopes.GlobalPermissions,
                 "some-non-existing-rule")).ShouldBeOfType<UnauthorizedResult>();
         }
 
@@ -228,7 +229,7 @@ namespace Functions.Tests
             (await function.Reconcile(request,
                 "somecompany",
                 "TAS",
-                "globalpermissions",
+                RuleScopes.GlobalPermissions,
                 "some-non-existing-rule"))
                 .ShouldBeOfType<UnauthorizedResult>();
 

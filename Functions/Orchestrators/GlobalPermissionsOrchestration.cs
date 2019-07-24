@@ -13,13 +13,13 @@ namespace Functions.Orchestrators
         public static async Task Run([OrchestrationTrigger]DurableOrchestrationContextBase context)
         {
             var project = context.GetInput<Response.Project>();
-            context.SetCustomStatus(new ScanOrchestrationStatus { Project = project.Name, Scope = "globalpermissions" });
+            context.SetCustomStatus(new ScanOrchestrationStatus { Project = project.Name, Scope = RuleScopes.GlobalPermissions });
 
             var data = await context.CallActivityAsync<GlobalPermissionsExtensionData>
                 (nameof(GlobalPermissionsScanProjectActivity), project);
 
             await context.CallActivityAsync(
-                nameof(ExtensionDataGlobalPermissionsUploadActivity), (permissions: data, "globalpermissions"));
+                nameof(ExtensionDataGlobalPermissionsUploadActivity), (permissions: data, RuleScopes.GlobalPermissions));
 
             await context.CallActivityAsync(nameof(LogAnalyticsUploadActivity),
                 new LogAnalyticsUploadActivityRequest { PreventiveLogItems = data.Flatten() });

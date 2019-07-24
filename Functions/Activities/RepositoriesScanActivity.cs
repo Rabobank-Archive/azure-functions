@@ -32,7 +32,7 @@ namespace Functions.Activities
             {
                 Id = project.Name,
                 Date = DateTime.UtcNow,
-                RescanUrl = ProjectScanHttpStarter.RescanUrl(_config, project.Name, "repository"),
+                RescanUrl = ProjectScanHttpStarter.RescanUrl(_config, project.Name, RuleScopes.Repositories),
                 HasReconcilePermissionUrl = ReconcileFunction.HasReconcilePermissionUrl(_config, project.Id),
                 Reports = await CreateReports(project)
             };
@@ -49,7 +49,7 @@ namespace Functions.Activities
                 evaluationResults.Add(new ItemExtensionData
                 {
                     Item = repository.Name,
-                    Rules = await rules.Evaluate(_config, project.Id, "repository", repository.Id)
+                    Rules = await rules.Evaluate(_config, project.Id, RuleScopes.Repositories, repository.Id)
                 });
             }
 

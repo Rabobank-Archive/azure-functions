@@ -14,7 +14,7 @@ namespace Functions.Model
                 Rule = rule.Name,
                 Status = rule.Status,
                 EvaluatedDate = Date,
-                Scope = "globalpermissions"
+                Scope = RuleScopes.GlobalPermissions
             });
         }
     }

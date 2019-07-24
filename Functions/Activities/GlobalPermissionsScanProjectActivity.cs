@@ -35,7 +35,7 @@ namespace Functions.Activities
             {
                 Id = project.Name,
                 Date = now,
-                RescanUrl = ProjectScanHttpStarter.RescanUrl(_config, project.Name, "globalpermissions"),
+                RescanUrl = ProjectScanHttpStarter.RescanUrl(_config, project.Name, RuleScopes.GlobalPermissions),
                 HasReconcilePermissionUrl = ReconcileFunction.HasReconcilePermissionUrl(_config, project.Name),
                 Reports = await Task.WhenAll(rules.Select(async r => new EvaluatedRule
                 {

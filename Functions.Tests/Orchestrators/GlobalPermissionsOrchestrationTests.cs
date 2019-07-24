@@ -1,3 +1,4 @@
+using System.Linq;
 using AutoFixture;
 using Functions.Activities;
 using Functions.Model;
@@ -5,6 +6,7 @@ using Functions.Orchestrators;
 using Microsoft.Azure.WebJobs;
 using Moq;
 using System.Threading.Tasks;
+using AzDoCompliancy.CustomStatus;
 using Xunit;
 using Response = SecurePipelineScan.VstsService.Response;
 
@@ -26,7 +28,8 @@ namespace Functions.Tests.Orchestrators
                 .Returns(fixture.Create<Response.Project>());
 
             starter
-                .Setup(x => x.SetCustomStatus(It.IsAny<object>()));
+                .Setup(x => x.SetCustomStatus(It.Is<ScanOrchestrationStatus>(s => s.Scope == RuleScopes.GlobalPermissions)))
+                .Verifiable();
 
             starter
                 .Setup(x => x.CallActivityAsync<GlobalPermissionsExtensionData>(nameof(GlobalPermissionsScanProjectActivity), It.IsAny<Response.Project>()))
@@ -34,11 +37,14 @@ namespace Functions.Tests.Orchestrators
                 .Verifiable();
 
             starter
-                .Setup(x => x.CallActivityAsync(nameof(ExtensionDataGlobalPermissionsUploadActivity), It.IsAny<object>()))
+                .Setup(x => x.CallActivityAsync(nameof(ExtensionDataGlobalPermissionsUploadActivity),
+                    It.Is<(GlobalPermissionsExtensionData data, string scope)>(d =>
+                        d.scope == RuleScopes.GlobalPermissions)))
                 .Returns(Task.CompletedTask);
 
             starter
-                .Setup(x => x.CallActivityAsync(nameof(LogAnalyticsUploadActivity), It.IsAny<LogAnalyticsUploadActivityRequest>()))
+                .Setup(x => x.CallActivityAsync(nameof(LogAnalyticsUploadActivity), It.Is<LogAnalyticsUploadActivityRequest>(l =>
+                    l.PreventiveLogItems.All(p => p.Scope == RuleScopes.GlobalPermissions))))
                 .Returns(Task.CompletedTask);
 
             //Act

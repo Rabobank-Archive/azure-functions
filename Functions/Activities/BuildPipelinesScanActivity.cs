@@ -33,7 +33,7 @@ namespace Functions.Activities
             {
                 Id = project.Name,
                 Date = DateTime.UtcNow,
-                RescanUrl = ProjectScanHttpStarter.RescanUrl(_config, project.Name, "buildpipelines"),
+                RescanUrl = ProjectScanHttpStarter.RescanUrl(_config, project.Name, RuleScopes.BuildPipelines),
                 HasReconcilePermissionUrl = ReconcileFunction.HasReconcilePermissionUrl(_config, project.Id),
                 Reports = await CreateReports(project)
             };
@@ -52,7 +52,7 @@ namespace Functions.Activities
                 evaluationResults.Add(new ItemExtensionData
                 {
                     Item = pipeline.Name,
-                    Rules = await rules.Evaluate(_config, project.Id, "buildpipelines", pipeline.Id)
+                    Rules = await rules.Evaluate(_config, project.Id, RuleScopes.BuildPipelines, pipeline.Id)
                 });
             }
             return evaluationResults;

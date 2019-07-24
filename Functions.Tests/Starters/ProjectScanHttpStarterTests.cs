@@ -11,6 +11,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Functions.Model;
 using Xunit;
 using Response = SecurePipelineScan.VstsService.Response;
 
@@ -34,7 +35,7 @@ namespace Functions.Tests.Starters
             var result = await function.Run(request,
                 "somecompany",
                 "TAS",
-                "globalpermissions",
+                RuleScopes.GlobalPermissions,
                 new Mock<DurableOrchestrationClientBase>().Object
               );
 
@@ -65,7 +66,7 @@ namespace Functions.Tests.Starters
             await function.Run(request,
                 "somecompany",
                 "TAS",
-                "globalpermissions",
+                RuleScopes.GlobalPermissions,
                 mock.Object
             );
 
@@ -96,7 +97,7 @@ namespace Functions.Tests.Starters
             var result = await function.Run(request,
                 "somecompany",
                 "TAS",
-                "globalpermissions",
+                RuleScopes.GlobalPermissions,
                 mock.Object
             );
 
@@ -130,7 +131,7 @@ namespace Functions.Tests.Starters
             await function.Run(request,
                 "somecompany",
                 "TAS",
-                "globalpermissions",
+                RuleScopes.GlobalPermissions,
                 mock.Object
             );
 
@@ -163,7 +164,7 @@ namespace Functions.Tests.Starters
             await function.Run(request,
                 "somecompany",
                 "TAS",
-                "repository",
+                RuleScopes.Repositories,
                 mock.Object
             );
 
@@ -195,7 +196,7 @@ namespace Functions.Tests.Starters
             await function.Run(request,
                 "somecompany",
                 "TAS",
-                "buildpipelines",
+                RuleScopes.BuildPipelines,
                 mock.Object
             );
 
@@ -227,7 +228,7 @@ namespace Functions.Tests.Starters
             await function.Run(request,
                 "somecompany",
                 "TAS",
-                "releasepipelines",
+                RuleScopes.ReleasePipelines,
                 mock.Object
             );
 

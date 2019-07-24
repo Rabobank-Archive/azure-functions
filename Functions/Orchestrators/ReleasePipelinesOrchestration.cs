@@ -13,15 +13,16 @@ namespace Functions.Orchestrators
         public static async Task Run([OrchestrationTrigger]DurableOrchestrationContextBase context)
         {
             var project = context.GetInput<Response.Project>();
-            context.SetCustomStatus(new ScanOrchestrationStatus { Project = project.Name, Scope = "releasepipelines" });
+            context.SetCustomStatus(new ScanOrchestrationStatus { Project = project.Name, Scope = RuleScopes.ReleasePipelines });
 
             var data = await context.CallActivityAsync<ItemsExtensionData>(
                 nameof(ReleasePipelinesScanActivity), project);
 
             await context.CallActivityAsync(nameof(LogAnalyticsUploadActivity),
-                new LogAnalyticsUploadActivityRequest { PreventiveLogItems = data.Flatten(project.Name) });
+                new LogAnalyticsUploadActivityRequest { PreventiveLogItems = data.Flatten(RuleScopes.ReleasePipelines) });
 
-            await context.CallActivityAsync(nameof(ExtensionDataUploadActivity), (releasePipelines: data, "releasepipelines"));
+            await context.CallActivityAsync(nameof(ExtensionDataUploadActivity),
+                (releasePipelines: data, RuleScopes.ReleasePipelines));
         }
     }
 }
