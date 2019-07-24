@@ -76,7 +76,6 @@ namespace Functions.Tests.Starters
         [Fact]
         public async Task RunFromHttp_ProjectNotFound_NotFoundResult()
         {
-            var fixture = new Fixture();
             var tokenizer = new Mock<ITokenizer>();
             tokenizer
                 .Setup(x => x.Principal(It.IsAny<string>()))

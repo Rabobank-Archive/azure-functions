@@ -43,7 +43,7 @@ namespace Functions
             if (data == null) throw new ArgumentNullException(nameof(data));
             if (log == null) throw new ArgumentNullException(nameof(log));
 
-            var report = await _scan.Completed(JObject.Parse(data));
+            var report = await _scan.GetCompletedReportAsync(JObject.Parse(data));
             await _client.AddCustomLogJsonAsync("DeploymentStatus", report, "Date");
             await RetryHelper.ExecuteInvalidDocumentVersionPolicy(_config.Organization, () => UpdateExtensionData(report));
         }
