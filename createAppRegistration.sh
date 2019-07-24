@@ -28,8 +28,8 @@ else
     echo "SPN not found. Going to create service principal for app registration"
     SPNOBJECTID=`az ad sp create --id $APPREGISTRATIONID | jq -r .objectId`
     echo "Created SPN with id '$SPNOBJECTID'"
-    echo "Waiting 10 seconds for SPN to become ready."
-    sleep 10
+    echo "Waiting 30 seconds for SPN to become ready."
+    sleep 30
 fi
 
 echo "Going to assign contributor role to SPN id '$SPNOBJECTID' in subscription '$SUBSCRIPTIONID', resource group '$LOGANALYTICSRESOURCEGROUP' and workspace '$LOGANALYTICSWORKSPACENAME'"
