@@ -10,6 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.gitignore = .gitignore
 		Scripts\aad-required-permissions-manifest.json = Scripts\aad-required-permissions-manifest.json
 		Scripts\createAppRegistration.sh = Scripts\createAppRegistration.sh
+		NuGet.Config = NuGet.Config
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CompletenessCheckFunction.Tests", "CompletenessCheckFunction.tests\CompletenessCheckFunction.Tests.csproj", "{AB2697AC-C303-437E-A8AC-2FA52D696643}"
