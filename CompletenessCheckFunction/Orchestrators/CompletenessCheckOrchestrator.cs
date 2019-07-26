@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using CompletenessCheckFunction.Activities;
 using Microsoft.Azure.WebJobs;
 using System.Threading.Tasks;
@@ -18,10 +19,14 @@ namespace CompletenessCheckFunction.Orchestrators
                 nameof(GetCompletedScansFromLogAnalyticsActivity),
                 null);
 
-            await context.CallActivityAsync<List<OrchestrationInstance>>(
+            var filteredScansToVerify = await context.CallActivityAsync<List<OrchestrationInstance>>(
                 nameof(FilterAlreadyAnalyzedOrchestratorsActivity),
                 new FilterAlreadyAnalyzedOrchestratorsActivityRequest
                     {InstancesToAnalyze = scansToVerify, InstanceIdsAlreadyAnalyzed = alreadyVerifiedScans});
+
+            await Task.WhenAll(filteredScansToVerify.Select(f =>
+                context.CallSubOrchestratorAsync(nameof(SingleAnalysisOrchestrator),
+                    new SingleAnalysisOrchestratorRequest { InstanceToAnalyze = f })));
         }
     }
 }
