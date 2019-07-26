@@ -21,6 +21,7 @@ namespace CompletenessCheckFunction.Tests.Activities
         {
             var fixture = new Fixture();
             fixture.Customize(new AutoNSubstituteCustomization());
+            fixture.Customize<OrchestrationInstance>(o => o.With(i => i.RuntimeStatus, RunTimeStatusses.Completed));
             
             var instances = fixture.CreateMany<OrchestrationInstance>(10).ToList();
             instances[3].Name = "ProjectScanSupervisor";
@@ -48,10 +49,10 @@ namespace CompletenessCheckFunction.Tests.Activities
         {
             var fixture = new Fixture();
             fixture.Customize(new AutoNSubstituteCustomization());
+            fixture.Customize<OrchestrationInstance>(o => o.With(i => i.Name, "ProjectScanSupervisor"));
             
             var instances = fixture.CreateMany<OrchestrationInstance>(10).ToList();
             instances[3].RuntimeStatus = runtimeStatus;
-            instances[3].Name = "ProjectScanSupervisor";
             
             var client = Substitute.For<IDurableFunctionsAdministrationClient>();
             client.Get(Arg.Any<IRestRequest<IEnumerable<OrchestrationInstance>>>()).Returns(instances);

@@ -4,6 +4,7 @@ using CompletenessCheckFunction.Orchestrators;
 using Microsoft.Azure.WebJobs;
 using NSubstitute;
 using System.Threading.Tasks;
+using CompletenessCheckFunction.Requests;
 using DurableFunctionsAdministration.Client.Response;
 using Xunit;
 
@@ -31,6 +32,8 @@ namespace CompletenessCheckFunction.Tests.Orchestrators
             //Assert
             await orchestrationContext.Received().CallActivityAsync<List<OrchestrationInstance>>(nameof(GetOrchestratorsToVerifyActivity), null);
             await orchestrationContext.Received().CallActivityAsync<List<string>>(nameof(GetCompletedScansFromLogAnalyticsActivity), null);
+            await orchestrationContext.Received().CallActivityAsync<List<OrchestrationInstance>>(nameof(FilterAlreadyAnalyzedOrchestratorsActivity),
+                Arg.Any<FilterAlreadyAnalyzedOrchestratorsActivityRequest>());
         }
     }
 }

@@ -2,6 +2,7 @@
 using CompletenessCheckFunction.Activities;
 using Microsoft.Azure.WebJobs;
 using System.Threading.Tasks;
+using CompletenessCheckFunction.Requests;
 using DurableFunctionsAdministration.Client.Response;
 
 namespace CompletenessCheckFunction.Orchestrators
@@ -16,6 +17,11 @@ namespace CompletenessCheckFunction.Orchestrators
             var alreadyVerifiedScans = await context.CallActivityAsync<List<string>>(
                 nameof(GetCompletedScansFromLogAnalyticsActivity),
                 null);
+
+            await context.CallActivityAsync<List<OrchestrationInstance>>(
+                nameof(FilterAlreadyAnalyzedOrchestratorsActivity),
+                new FilterAlreadyAnalyzedOrchestratorsActivityRequest
+                    {InstancesToAnalyze = scansToVerify, InstanceIdsAlreadyAnalyzed = alreadyVerifiedScans});
         }
     }
 }
