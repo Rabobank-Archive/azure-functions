@@ -21,6 +21,15 @@ namespace CompletenessCheckFunction.Orchestrators
                 var allProjectScanOrchestrators =
                     await context.CallActivityAsync<List<OrchestrationInstance>>(nameof(GetCompletedOrchestratorsWithNameActivity),
                     "ProjectScanOrchestration");
+
+                var projectScanOrchestratorsForThisAnalysis =
+                    await context.CallActivityAsync<List<OrchestrationInstance>>(
+                        nameof(FilterOrchestratorsForParentIdActivity),
+                        new FilterOrchestratorsForParentIdActivityRequest
+                        {
+                            ParentId = singleAnalysisRequest.InstanceToAnalyze.InstanceId,
+                            InstancesToFilter = allProjectScanOrchestrators
+                        });
         }
     }
 }
