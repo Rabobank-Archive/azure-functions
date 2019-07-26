@@ -1,4 +1,5 @@
-﻿using Microsoft.Azure.WebJobs;
+﻿using CompletenessCheckFunction.Activities;
+using Microsoft.Azure.WebJobs;
 using System.Threading.Tasks;
 
 namespace CompletenessCheckFunction.Orchestrators
@@ -8,7 +9,8 @@ namespace CompletenessCheckFunction.Orchestrators
         [FunctionName(nameof(CompletenessCheckOrchestrator))]
         public async Task Run([OrchestrationTrigger] DurableOrchestrationContextBase context)
         {
-
+            var data = await context.CallActivityAsync<LogAnalyticsSupervisorData>
+                (nameof(ScanLogAnalyticsActivity), null);
         }
     }
 }

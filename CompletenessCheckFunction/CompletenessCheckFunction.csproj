@@ -16,7 +16,4 @@
       <CopyToPublishDirectory>Never</CopyToPublishDirectory>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Activities\" />
-  </ItemGroup>
 </Project>
