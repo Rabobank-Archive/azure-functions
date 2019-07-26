@@ -14,24 +14,32 @@ namespace CompletenessCheckFunction.Orchestrators
         public async Task Run([OrchestrationTrigger] DurableOrchestrationContextBase context)
         {
             var singleAnalysisRequest = context.GetInput<SingleAnalysisOrchestratorRequest>();
-                var totalProjectCount =(singleAnalysisRequest.InstanceToAnalyze.CustomStatus as SupervisorOrchestrationStatus)?.TotalProjectCount;
-                if (totalProjectCount == null)
-                    return;
-                
-                var allProjectScanOrchestrators =
-                    await context.CallActivityAsync<List<OrchestrationInstance>>(nameof(GetCompletedOrchestratorsWithNameActivity),
+            var totalProjectCount =
+                (singleAnalysisRequest.InstanceToAnalyze.CustomStatus as SupervisorOrchestrationStatus)
+                ?.TotalProjectCount;
+            if (totalProjectCount == null)
+                return;
+
+            var allProjectScanOrchestrators =
+                await context.CallActivityAsync<List<OrchestrationInstance>>(
+                    nameof(GetCompletedOrchestratorsWithNameActivity),
                     "ProjectScanOrchestration");
 
-                var projectScanOrchestratorsForThisAnalysis =
-                    await context.CallActivityAsync<List<OrchestrationInstance>>(
-                        nameof(FilterOrchestratorsForParentIdActivity),
-                        new FilterOrchestratorsForParentIdActivityRequest
-                        {
-                            ParentId = singleAnalysisRequest.InstanceToAnalyze.InstanceId,
-                            InstancesToFilter = allProjectScanOrchestrators
-                        });
+            var projectScanOrchestratorsForThisAnalysis =
+                await context.CallActivityAsync<List<OrchestrationInstance>>(
+                    nameof(FilterOrchestratorsForParentIdActivity),
+                    new FilterOrchestratorsForParentIdActivityRequest
+                    {
+                        ParentId = singleAnalysisRequest.InstanceToAnalyze.InstanceId,
+                        InstancesToFilter = allProjectScanOrchestrators
+                    });
+
+            await context.CallActivityAsync(nameof(UploadAnalysisResultToLogAnalyticsActivity),
+                new UploadAnalysisResultToLogAnalyticsActivityRequest
+                {
+                    TotalProjectCount = (int)totalProjectCount,
+                    ScannedProjectCount = projectScanOrchestratorsForThisAnalysis.Count
+                });
         }
     }
 }
-
-

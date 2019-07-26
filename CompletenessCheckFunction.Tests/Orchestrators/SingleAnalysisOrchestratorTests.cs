@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoFixture;
 using AutoFixture.AutoNSubstitute;
@@ -33,6 +34,10 @@ namespace CompletenessCheckFunction.Tests.Orchestrators
             context.GetInput<SingleAnalysisOrchestratorRequest>().Returns(new SingleAnalysisOrchestratorRequest
                 {InstanceToAnalyze = _fixture.Create<OrchestrationInstance>()});
             
+            context.CallActivityAsync<List<OrchestrationInstance>>(nameof(FilterOrchestratorsForParentIdActivity),
+                    Arg.Any<FilterOrchestratorsForParentIdActivityRequest>())
+                .Returns(_fixture.CreateMany<OrchestrationInstance>().ToList());
+            
             // Act
             var fun = new SingleAnalysisOrchestrator();
             await fun.Run(context);
@@ -41,6 +46,8 @@ namespace CompletenessCheckFunction.Tests.Orchestrators
             await context.Received().CallActivityAsync<List<OrchestrationInstance>>(nameof(GetCompletedOrchestratorsWithNameActivity), "ProjectScanOrchestration");
             await context.Received().CallActivityAsync<List<OrchestrationInstance>>(
                 nameof(FilterOrchestratorsForParentIdActivity), Arg.Any<FilterOrchestratorsForParentIdActivityRequest>());
+            await context.Received().CallActivityAsync(nameof(UploadAnalysisResultToLogAnalyticsActivity),
+                Arg.Any<UploadAnalysisResultToLogAnalyticsActivityRequest>());
         }
         
         [Fact]
