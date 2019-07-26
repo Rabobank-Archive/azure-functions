@@ -14,7 +14,7 @@ namespace CompletenessCheckFunction.Orchestrators
         public async Task Run([OrchestrationTrigger] DurableOrchestrationContextBase context)
         {
             var scansToVerify = await context.CallActivityAsync<List<OrchestrationInstance>>(
-                nameof(GetOrchestratorsToVerifyActivity), null);
+                nameof(GetCompletedOrchestratorsWithNameActivity), "ProjectScanSupervisor");
             var alreadyVerifiedScans = await context.CallActivityAsync<List<string>>(
                 nameof(GetCompletedScansFromLogAnalyticsActivity),
                 null);

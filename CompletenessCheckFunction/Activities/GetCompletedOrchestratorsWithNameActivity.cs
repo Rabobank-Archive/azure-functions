@@ -9,20 +9,20 @@ using Microsoft.Azure.WebJobs;
 
 namespace CompletenessCheckFunction.Activities
 {
-    public class GetOrchestratorsToVerifyActivity
+    public class GetCompletedOrchestratorsWithNameActivity
     {
         private readonly IDurableFunctionsAdministrationClient _client;
         
-        public GetOrchestratorsToVerifyActivity(IDurableFunctionsAdministrationClient client)
+        public GetCompletedOrchestratorsWithNameActivity(IDurableFunctionsAdministrationClient client)
         {
             _client = client ?? throw new ArgumentNullException(nameof(_client));
         }
         
-        [FunctionName(nameof(GetOrchestratorsToVerifyActivity))]
-        public List<OrchestrationInstance> Run([ActivityTrigger] DurableOrchestrationContextBase context)
+        [FunctionName(nameof(GetCompletedOrchestratorsWithNameActivity))]
+        public List<OrchestrationInstance> Run([ActivityTrigger] string name)
         {
             var orchestrators = _client.Get(OrchestrationInstances.List())
-                .Where(i => i.Name == "ProjectScanSupervisor" && i.RuntimeStatus == RunTimeStatusses.Completed)
+                .Where(i => i.Name == name && i.RuntimeStatus == RunTimeStatusses.Completed)
                 .ToList();
             
             return orchestrators;
