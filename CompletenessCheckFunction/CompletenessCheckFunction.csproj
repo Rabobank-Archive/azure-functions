@@ -4,6 +4,7 @@
     <AzureFunctionsVersion>v2</AzureFunctionsVersion>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="AzDoCompliancy.CustomStatus" Version="0.0.1.210662" />
     <PackageReference Include="DurableFunctionsAdministration.Client" Version="0.0.1.210662" />
     <PackageReference Include="LogAnalytics.Client" Version="0.0.1.208034" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.DurableTask" Version="1.8.3" />
