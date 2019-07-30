@@ -25,7 +25,15 @@ steps:
   displayName: 'SonarQube: Prepare analysis on SonarQube'
   inputs:
     SonarQube: 'SonarQube Production On Prem - with token'
-    projectKey: TAS.CompletenessCheckFunction
+    projectKey: Rabobank.TAS.$(Build.DefinitionName)
+    extraProperties: |
+        # Additional properties that will be passed to the scanner, 
+        # Put one key=value per line, example:
+        # sonar.exclusions=**/*.bin
+        #sonar.branch.name=$(Build.SourceBranchName)
+        sonar.cs.vstest.reportsPaths=$(Agent.TempDirectory)/*.trx
+        sonar.cs.vscoveragexml.reportsPaths=$(Agent.TempDirectory)/**/*.coveragexml
+        sonar.buildbreaker.skip=true
 
 # inspired by: https://stackoverflow.com/a/46813196/129269
 - script: |
@@ -36,10 +44,7 @@ steps:
 
     dotnet test --configuration $(buildConfiguration) --logger trx /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:DebugType=Full || goto :error
 
-    dotnet tool install dotnet-sonarscanner --tool-path tools || goto :error
-    tools\dotnet-sonarscanner begin /key:"TAS.CompletenessCheckFunction" /d:sonar.cs.opencover.reportsPaths="**\coverage.opencover.xml" || goto :error
     dotnet build --configuration $(buildConfiguration) || goto :error
-    tools\dotnet-sonarscanner end || goto :error
 
     dotnet publish ./CompletenessCheckFunction --configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)/CompletenessCheckFunction || goto :error
 
@@ -49,11 +54,11 @@ steps:
     :error
     exit /b %errorlevel%
   displayName: 'Build, test'
-  env:
-    VSS_NUGET_EXTERNAL_FEED_ENDPOINTS: '{"endpointCredentials": [{"endpoint":"https://somecompany.pkgs.visualstudio.com/_packaging/TAS/nuget/v3/index.json", "username":".", "password":"$(System.AccessToken)"}]}'
 
-- task: SonarSource.sonarqube.291ed61f-1ee4-45d3-b1b0-bf822d9095ef.SonarQubePublish@4
-  displayName: 'SonarQube: Publish Quality Gate Result'
+- task: SonarSource.sonarqube.6D01813A-9589-4B15-8491-8164AEB38055.SonarQubeAnalyze@4
+  displayName: 'Run Code Analysis'
+# - task: SonarSource.sonarqube.291ed61f-1ee4-45d3-b1b0-bf822d9095ef.SonarQubePublish@4
+#   displayName: 'SonarQube: Publish Quality Gate Result'
 
 #- task: fortifyvsts.hpe-security-fortify-vsts.build-task-fortify-sca.FortifySCA@1
 #  displayName: 'Fortify: local scan'
