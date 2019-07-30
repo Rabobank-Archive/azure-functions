@@ -1,5 +1,7 @@
-﻿using Microsoft.Azure.WebJobs;
+﻿using System.Threading.Tasks;
+using Microsoft.Azure.WebJobs;
 using CompletenessCheckFunction.Requests;
+using CompletenessCheckFunction.Tests.Activities;
 using LogAnalytics.Client;
 using Microsoft.Extensions.Logging;
 using System;
@@ -14,15 +16,30 @@ namespace CompletenessCheckFunction.Activities
         {
             _client = client;
         }
-        
+
         [FunctionName(nameof(UploadAnalysisResultToLogAnalyticsActivity))]
-        public void Run([ActivityTrigger] UploadAnalysisResultToLogAnalyticsActivityRequest request, ILogger _logger)
+        public Task RunAsync([ActivityTrigger] UploadAnalysisResultToLogAnalyticsActivityRequest request, ILogger _logger)
         {
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
 
-            _logger.LogWarning($"Analyzed completeness! Supervisor id: '{request.SupervisorOrchestratorId}', " +
-                $"started at '{request.SupervisorStarted}'. Scanned projects {request.ScannedProjectCount}/{request.TotalProjectCount}");
+            return RunInternalAsync(request, _logger);
+        }
+
+        private async Task RunInternalAsync(UploadAnalysisResultToLogAnalyticsActivityRequest request, ILogger _logger)
+        {
+            var data = new CompletenessAnalysisResult
+            {
+                AnalysisCompleted = request.AnalysisCompleted,
+                SupervisorStarted = request.SupervisorStarted,
+                SupervisorOrchestratorId = request.SupervisorOrchestratorId,
+                TotalProjectCount = request.TotalProjectCount,
+                ScannedProjectCount = request.TotalProjectCount
+            };
+            await _client.AddCustomLogJsonAsync("completeness_log", new[] { data }, "AnalysisCompleted").ConfigureAwait(false);
+
+            _logger.LogInformation(
+                $"Analyzed completeness! Supervisor id: '{request.SupervisorOrchestratorId}', started at '{request.SupervisorStarted}'. Scanned projects {request.ScannedProjectCount}/{request.TotalProjectCount}");
         }
     }
 }
