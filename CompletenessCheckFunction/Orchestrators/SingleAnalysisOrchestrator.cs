@@ -36,8 +36,7 @@ namespace CompletenessCheckFunction.Orchestrators
                     {
                         ParentId = singleAnalysisRequest.InstanceToAnalyze.InstanceId,
                         InstancesToFilter = singleAnalysisRequest.AllProjectScanOrchestrators
-                    })
-                    .ConfigureAwait(false);
+                    });
 
             await context.CallActivityAsync(nameof(UploadAnalysisResultToLogAnalyticsActivity),
                 new UploadAnalysisResultToLogAnalyticsActivityRequest
@@ -47,8 +46,7 @@ namespace CompletenessCheckFunction.Orchestrators
                     TotalProjectCount = (int)totalProjectCount,
                     ScannedProjectCount = projectScanOrchestratorsForThisAnalysis.Count,
                     AnalysisCompleted = context.CurrentUtcDateTime
-                })
-                .ConfigureAwait(false);
+                });
         }
     }
 }

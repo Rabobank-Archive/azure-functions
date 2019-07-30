@@ -14,23 +14,19 @@ namespace CompletenessCheckFunction.Orchestrators
         public async Task RunAsync([OrchestrationTrigger] DurableOrchestrationContextBase context)
         {
             var scansToVerify = await context.CallActivityAsync<List<OrchestrationInstance>>(
-                nameof(GetCompletedOrchestratorsWithNameActivity), "ProjectScanSupervisor")
-                .ConfigureAwait(false);
+                nameof(GetCompletedOrchestratorsWithNameActivity), "ProjectScanSupervisor");
 
             var alreadyVerifiedScans = await context.CallActivityAsync<List<string>>(
-                nameof(GetCompletedScansFromLogAnalyticsActivity), null)
-                .ConfigureAwait(false);
+                nameof(GetCompletedScansFromLogAnalyticsActivity), null);
 
             var filteredScansToVerify = await context.CallActivityAsync<List<OrchestrationInstance>>(
                 nameof(FilterAlreadyAnalyzedOrchestratorsActivity),
                 new FilterAlreadyAnalyzedOrchestratorsActivityRequest
-                { InstancesToAnalyze = scansToVerify, InstanceIdsAlreadyAnalyzed = alreadyVerifiedScans })
-                .ConfigureAwait(false);
+                { InstancesToAnalyze = scansToVerify, InstanceIdsAlreadyAnalyzed = alreadyVerifiedScans });
 
             var allProjectScanOrchestrators =
                 await context.CallActivityAsync<List<OrchestrationInstance>>(
-                    nameof(GetCompletedOrchestratorsWithNameActivity), "ProjectScanOrchestration")
-                .ConfigureAwait(false);
+                    nameof(GetCompletedOrchestratorsWithNameActivity), "ProjectScanOrchestration");
 
             await Task.WhenAll(filteredScansToVerify.Select(f =>
                 context.CallSubOrchestratorAsync(nameof(SingleAnalysisOrchestrator),
@@ -38,8 +34,7 @@ namespace CompletenessCheckFunction.Orchestrators
                     {
                         InstanceToAnalyze = f,
                         AllProjectScanOrchestrators = allProjectScanOrchestrators
-                    })))
-                .ConfigureAwait(false);
+                    })));
         }
     }
 }
