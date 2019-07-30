@@ -24,9 +24,17 @@ namespace CompletenessCheckFunction.Orchestrators
                 new FilterAlreadyAnalyzedOrchestratorsActivityRequest
                     {InstancesToAnalyze = scansToVerify, InstanceIdsAlreadyAnalyzed = alreadyVerifiedScans});
 
+            var allProjectScanOrchestrators =
+                await context.CallActivityAsync<List<OrchestrationInstance>>(
+                    nameof(GetCompletedOrchestratorsWithNameActivity),
+                    "ProjectScanOrchestration");
+
             await Task.WhenAll(filteredScansToVerify.Select(f =>
                 context.CallSubOrchestratorAsync(nameof(SingleAnalysisOrchestrator),
-                    new SingleAnalysisOrchestratorRequest { InstanceToAnalyze = f })));
+                    new SingleAnalysisOrchestratorRequest {
+                        InstanceToAnalyze = f,
+                        AllProjectScanOrchestrators = allProjectScanOrchestrators
+                    })));
         }
     }
 }

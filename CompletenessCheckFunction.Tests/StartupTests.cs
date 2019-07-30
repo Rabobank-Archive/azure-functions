@@ -19,7 +19,10 @@ namespace CompletenessCheckFunction.Tests
             Environment.SetEnvironmentVariable("durableBaseUri", fixture.Create<Uri>().ToString());
             Environment.SetEnvironmentVariable("durableTaskHub", fixture.Create<string>());
             Environment.SetEnvironmentVariable("durableMasterKey", fixture.Create<string>());
-            
+            Environment.SetEnvironmentVariable("tenantId", fixture.Create<string>());
+            Environment.SetEnvironmentVariable("clientId", fixture.Create<string>());
+            Environment.SetEnvironmentVariable("clientSecret", fixture.Create<string>());
+
             var startup = new Startup();
 
             var services = new ServiceCollection();

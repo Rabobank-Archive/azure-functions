@@ -17,7 +17,7 @@ namespace CompletenessCheckFunction.Activities
         [FunctionName(nameof(UploadAnalysisResultToLogAnalyticsActivity))]
         public void Run([ActivityTrigger] UploadAnalysisResultToLogAnalyticsActivityRequest request, ILogger _logger)
         {
-            _logger.LogInformation($"Analyzed completeness! Scanned projects {request.ScannedProjectCount}/{request.TotalProjectCount}");
+            _logger.LogWarning($"Analyzed completeness! Supervisor id: '{request.SupervisorOrchestratorId}', started at '{request.SupervisorStarted}'. Scanned projects {request.ScannedProjectCount}/{request.TotalProjectCount}");
         }
     }
 }
