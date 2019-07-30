@@ -47,7 +47,7 @@ namespace Functions.Tests
                 Rule = "NobodyCanDoAnything",
                 Status = true,
                 EvaluatedDate = now,
-                ScanId = scanId
+                ScanId = "supId"
             }.ToExpectedObject();
 
             var result = data.Flatten(RuleScopes.Repositories, scanId).Single();
