@@ -1,5 +1,9 @@
 pool:
   name: Rabo-Build-Azure-Linux-Preview
+trigger:
+  - master
+variables:
+  buildConfiguration: 'Release'
 
 steps:
 - checkout: self
