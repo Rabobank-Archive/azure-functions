@@ -2,51 +2,91 @@ pool:
   name: Rabo-Build-Azure-Linux-Preview
 
 steps:
-  - task: DotNetCoreInstaller@0
-    displayName: 'Use .NET Core sdk 2.2.203'
-    inputs:
-      version: 2.2.203
-    enabled: false
+- checkout: self
+  clean: true
 
-  - task: DotNetCoreCLI@2
-    displayName: Restore
-    inputs:
-      command: restore
-      vstsFeed: 'ea1adc59-f67e-40d5-8539-4c897a894647'
+- task: DotNetCoreInstaller@0
+displayName: 'Use .NET Core sdk 2.2.203'
+inputs:
+    version: 2.2.203
+enabled: false
 
-  - task: DotNetCoreCLI@2
-    displayName: Build
-    inputs:
-      arguments: '--configuration release'
-      
-  - task: DotNetCoreCLI@2
-    displayName: Test
-    inputs:
-      command: test
-      arguments: '--configuration release /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[xunit*]*"'
+- task: DotNetCoreCLI@2
+  displayName: Restore
+  inputs:
+    command: restore
+    vstsFeed: 'ea1adc59-f67e-40d5-8539-4c897a894647'
+  
+- task: SonarSource.sonarqube.15B84CA1-B62F-4A2A-A403-89B77A063157.SonarQubePrepare@4
+  displayName: 'SonarQube: Prepare analysis on SonarQube'
+  inputs:
+    SonarQube: 'SonarQube Production On Prem - with token'
+    projectKey: TAS.CompletenessCheckFunction
 
-  - task: DotNetCoreCLI@2
-    displayName: Publish
-    inputs:
-      command: publish
-      publishWebProjects: false
-      arguments: '--configuration release --output $(build.artifactstagingdirectory)'
+# inspired by: https://stackoverflow.com/a/46813196/129269
+- script: |
+    #!/bin/bash 2> nul
+    
+    :; set -o errexit
+    :; function goto() { return $?; }
 
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact'
-    inputs:
-      PathtoPublish: '$(build.artifactstagingdirectory)'
-      ArtifactName: 'azdo-compliancy-completeness-function'
+    dotnet test --configuration $(buildConfiguration) --logger trx /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:DebugType=Full || goto :error
 
-  - script: |
-      dotnet tool install dotnet-reportgenerator-globaltool --tool-path tools --ignore-failed-sources 
-      ./tools/reportgenerator -reports:"*/coverage.opencover.xml" -reporttypes:"HtmlInline_AzurePipelines;cobertura" -targetDir:reports
-    displayName: Generate code coverage reports
-    condition: succeededOrFailed()
+    dotnet tool install dotnet-sonarscanner --tool-path tools || goto :error
+    tools\dotnet-sonarscanner begin /key:"TAS.CompletenessCheckFunction" /d:sonar.cs.opencover.reportsPaths="**\coverage.opencover.xml" || goto :error
+    dotnet build --configuration $(buildConfiguration) || goto :error
+    tools\dotnet-sonarscanner end || goto :error
 
-  - task: PublishCodeCoverageResults@1
-    inputs:
-      summaryFileLocation: $(Build.SourcesDirectory)/reports/Cobertura.xml
-      reportDirectory: $(Build.SourcesDirectory)/reports
-      codecoverageTool: cobertura
-    condition: succeededOrFailed()
+    dotnet publish ./CompletenessCheckFunction --configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)/CompletenessCheckFunction || goto :error
+
+    :; exit 0
+    exit /b 0
+  
+    :error
+    exit /b %errorlevel%
+  displayName: 'Build, test'
+
+- task: SonarSource.sonarqube.291ed61f-1ee4-45d3-b1b0-bf822d9095ef.SonarQubePublish@4
+  displayName: 'SonarQube: Publish Quality Gate Result'
+
+#- task: fortifyvsts.hpe-security-fortify-vsts.build-task-fortify-sca.FortifySCA@1
+#  displayName: 'Fortify: local scan'
+#  inputs:
+#    applicationType: other
+#    buildToolOptions: '-dotnet-version 2.1'
+#    fortifyBuildId: test
+#    runFortifyClean: true
+#
+#- script: |
+#    BIRTReportGenerator -template "DISA STIG" -source $(Build.ArtifactStagingDirectory)/sca_artifacts/test.fpr -output "$(Build.ArtifactStagingDirectory)/sca_artifacts/fortify.pdf" -format PDF -showSuppressed --Version "DISA STIG 3.9" -UseFortifyPriorityOrder
+#  displayName: 'Fortify: export PDF report'
+#
+#- task: PublishBuildArtifacts@1
+#  inputs:
+#    pathtoPublish: '$(Build.ArtifactStagingDirectory)/sca_artifacts' 
+#    artifactName: 'sca'
+
+- task: PublishBuildArtifacts@1
+  displayName: publish CompletenessCheckFunction
+  inputs:
+    pathtoPublish: '$(Build.ArtifactStagingDirectory)/CompletenessCheckFunction' 
+    artifactName: 'CompletenessCheckFunction'
+
+- task: PublishTestResults@2
+  inputs:
+    testRunner: VSTest
+    testResultsFiles: '**/*.trx'
+  condition: succeededOrFailed()
+
+- script: |
+    dotnet tool install dotnet-reportgenerator-globaltool --tool-path tools || goto :error
+    tools\reportgenerator -reports:"*\coverage.opencover.xml" -reporttypes:"HtmlInline_AzurePipelines;cobertura" -targetDir:reports
+  displayName: Generate code coverage reports
+  condition: succeededOrFailed()
+
+- task: PublishCodeCoverageResults@1
+  inputs:
+    summaryFileLocation: $(Build.SourcesDirectory)\reports\Cobertura.xml
+    reportDirectory: $(Build.SourcesDirectory)\reports
+    codecoverageTool: cobertura
+  condition: succeededOrFailed()
