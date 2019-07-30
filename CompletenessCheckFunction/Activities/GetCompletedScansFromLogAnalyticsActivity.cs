@@ -14,7 +14,7 @@ namespace CompletenessCheckFunction.Activities
         }
         
         [FunctionName(nameof(GetCompletedScansFromLogAnalyticsActivity))]
-        public List<string> Run([ActivityTrigger] DurableOrchestrationContextBase context)
+        public IList<string> Run([ActivityTrigger] DurableOrchestrationContextBase context)
         {
             // For now return an empty list. This means we'll just analyze everything
             return new List<string>();

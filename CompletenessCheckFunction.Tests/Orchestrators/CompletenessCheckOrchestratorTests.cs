@@ -33,7 +33,7 @@ namespace CompletenessCheckFunction.Tests.Orchestrators
 
             //Act
             var function = new CompletenessCheckOrchestrator();
-            await function.Run(orchestrationContext);
+            await function.RunAsync(orchestrationContext);
 
             //Assert
             await orchestrationContext.Received().CallActivityAsync<List<OrchestrationInstance>>(nameof(GetCompletedOrchestratorsWithNameActivity), "ProjectScanSupervisor");
@@ -59,7 +59,7 @@ namespace CompletenessCheckFunction.Tests.Orchestrators
 
             //Act
             var function = new CompletenessCheckOrchestrator();
-            await function.Run(orchestrationContext);
+            await function.RunAsync(orchestrationContext);
             
             //Assert
             await orchestrationContext.Received(count).CallSubOrchestratorAsync(nameof(SingleAnalysisOrchestrator),

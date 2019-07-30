@@ -40,7 +40,7 @@ namespace CompletenessCheckFunction.Tests.Orchestrators
             
             // Act
             var fun = new SingleAnalysisOrchestrator();
-            await fun.Run(context);
+            await fun.RunAsync(context);
             
             // Assert
             await context.Received().CallActivityAsync<List<OrchestrationInstance>>(
@@ -59,7 +59,7 @@ namespace CompletenessCheckFunction.Tests.Orchestrators
             
             // Act
             var fun = new SingleAnalysisOrchestrator();
-            await fun.Run(context);
+            await fun.RunAsync(context);
             
             // Assert
             await context.DidNotReceive().CallActivityAsync<List<OrchestrationInstance>>(nameof(GetCompletedOrchestratorsWithNameActivity), "ProjectScanOrchestration");

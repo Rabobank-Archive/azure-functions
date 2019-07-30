@@ -19,7 +19,7 @@ namespace CompletenessCheckFunction.Activities
         }
         
         [FunctionName(nameof(GetCompletedOrchestratorsWithNameActivity))]
-        public List<OrchestrationInstance> Run([ActivityTrigger] string name)
+        public IList<OrchestrationInstance> Run([ActivityTrigger] string name)
         {
             var orchestrators = _client.Get(OrchestrationInstances.List())
                 .Where(i => i.Name == name && i.RuntimeStatus == RunTimeStatusses.Completed)

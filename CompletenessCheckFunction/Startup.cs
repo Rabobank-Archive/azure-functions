@@ -13,10 +13,13 @@ namespace CompletenessCheckFunction
     {
         public void Configure(IWebJobsBuilder builder)
         {
+            if (builder == null)
+                throw new ArgumentNullException(nameof(builder));
+
             RegisterServices(builder.Services);
         }
 
-        private void RegisterServices(IServiceCollection services)
+        private static void RegisterServices(IServiceCollection services)
         {
             var tenantId = GetEnvironmentVariable("tenantId");
             var clientId = GetEnvironmentVariable("clientId");

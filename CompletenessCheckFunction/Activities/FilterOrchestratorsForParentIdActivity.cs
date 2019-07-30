@@ -8,8 +8,10 @@ namespace CompletenessCheckFunction.Activities
 {
     public class FilterOrchestratorsForParentIdActivity
     {
+        private const int IdPartsToSubstract = 2;
+
         [FunctionName(nameof(FilterOrchestratorsForParentIdActivity))]
-        public List<OrchestrationInstance> Run([ActivityTrigger] FilterOrchestratorsForParentIdActivityRequest request)
+        public IList<OrchestrationInstance> Run([ActivityTrigger] FilterOrchestratorsForParentIdActivityRequest request)
         {
             return request.InstancesToFilter.Where(i => GetParentId(i.InstanceId) == request.ParentId).ToList();
         }
@@ -17,7 +19,7 @@ namespace CompletenessCheckFunction.Activities
         private static string GetParentId(string instanceId)
         {
             var idParts = instanceId.Split(':');
-            return idParts.Length > 1 ? idParts[idParts.Length - 2] : string.Empty;
+            return idParts.Length > 1 ? idParts[idParts.Length - IdPartsToSubstract] : string.Empty;
         }
     }
 }

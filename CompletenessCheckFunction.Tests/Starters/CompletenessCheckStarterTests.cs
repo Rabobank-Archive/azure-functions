@@ -19,7 +19,7 @@ namespace CompletenessCheckFunction.Tests.Starters
 
             //Act
             var function = new CompletenessCheckStarter();
-            await function.Run(timerInfo, orchestrationClient);
+            await function.RunAsync(timerInfo, orchestrationClient);
 
             //Assert
             await orchestrationClient.Received().StartNewAsync(nameof(CompletenessCheckOrchestrator), Arg.Any<object>());

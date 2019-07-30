@@ -5,13 +5,22 @@ using AzDoCompliancy.CustomStatus;
 using CompletenessCheckFunction.Activities;
 using CompletenessCheckFunction.Requests;
 using DurableFunctionsAdministration.Client.Response;
+using System;
 
 namespace CompletenessCheckFunction.Orchestrators
 {
     public class SingleAnalysisOrchestrator
     {
         [FunctionName(nameof(SingleAnalysisOrchestrator))]
-        public async Task Run([OrchestrationTrigger] DurableOrchestrationContextBase context)
+        public Task RunAsync([OrchestrationTrigger] DurableOrchestrationContextBase context)
+        {
+            if (context == null)
+                throw new ArgumentNullException(nameof(context));
+
+            return RunInternalAsync(context);
+        }
+
+        private async Task RunInternalAsync(DurableOrchestrationContextBase context)
         {
             var singleAnalysisRequest = context.GetInput<SingleAnalysisOrchestratorRequest>();
             var totalProjectCount =
@@ -27,7 +36,8 @@ namespace CompletenessCheckFunction.Orchestrators
                     {
                         ParentId = singleAnalysisRequest.InstanceToAnalyze.InstanceId,
                         InstancesToFilter = singleAnalysisRequest.AllProjectScanOrchestrators
-                    });
+                    })
+                    .ConfigureAwait(false);
 
             await context.CallActivityAsync(nameof(UploadAnalysisResultToLogAnalyticsActivity),
                 new UploadAnalysisResultToLogAnalyticsActivityRequest
@@ -36,7 +46,8 @@ namespace CompletenessCheckFunction.Orchestrators
                     SupervisorStarted = singleAnalysisRequest.InstanceToAnalyze.CreatedTime,
                     TotalProjectCount = (int)totalProjectCount,
                     ScannedProjectCount = projectScanOrchestratorsForThisAnalysis.Count
-                });
+                })
+                .ConfigureAwait(false);
         }
     }
 }
