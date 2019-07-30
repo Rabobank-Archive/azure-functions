@@ -5,7 +5,7 @@ namespace CompletenessCheckFunction.Requests
 {
     public class FilterAlreadyAnalyzedOrchestratorsActivityRequest
     {
-        public IList<OrchestrationInstance> InstancesToAnalyze = new List<OrchestrationInstance>();
-        public IList<string> InstanceIdsAlreadyAnalyzed = new List<string>();
+        public IList<OrchestrationInstance> InstancesToAnalyze { get; set; }
+        public IList<string> InstanceIdsAlreadyAnalyzed { get; set; }
     }
 }
