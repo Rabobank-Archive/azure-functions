@@ -39,7 +39,7 @@ namespace Functions.Tests
                 Item = null,
                 Rule = "NobodyCanDoAnything",
                 Status = true,
-                ScanId = scanId,
+                ScanId = "supId",
                 EvaluatedDate = now
             }.ToExpectedObject();
 
