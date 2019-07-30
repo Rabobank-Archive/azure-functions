@@ -26,6 +26,10 @@ namespace Functions.Tests.Orchestrators
             starter
                 .Setup(x => x.GetInput<Response.Project>())
                 .Returns(fixture.Create<Response.Project>());
+            
+            starter
+                .Setup(x => x.InstanceId)
+                .Returns(fixture.Create<string>());
 
             starter
                 .Setup(x => x.SetCustomStatus(It.Is<ScanOrchestrationStatus>(s => s.Scope == RuleScopes.Repositories)))

@@ -5,7 +5,7 @@ namespace Functions.Model
 {
     public class ItemsExtensionData : ExtensionDataReports<ItemExtensionData>
     {
-        public IEnumerable<PreventiveLogItem> Flatten(string scope)
+        public IEnumerable<PreventiveLogItem> Flatten(string scope, string scanId)
         {
             return
                 from report in Reports
@@ -17,6 +17,7 @@ namespace Functions.Model
                     Item = report.Item,
                     Rule = rule.Name,
                     Status = rule.Status,
+                    ScanId = scanId,
                     EvaluatedDate = Date
                 };
         }

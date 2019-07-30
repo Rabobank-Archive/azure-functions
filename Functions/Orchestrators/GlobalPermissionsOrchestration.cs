@@ -22,7 +22,7 @@ namespace Functions.Orchestrators
                 nameof(ExtensionDataGlobalPermissionsUploadActivity), (permissions: data, RuleScopes.GlobalPermissions));
 
             await context.CallActivityAsync(nameof(LogAnalyticsUploadActivity),
-                new LogAnalyticsUploadActivityRequest { PreventiveLogItems = data.Flatten() });
+                new LogAnalyticsUploadActivityRequest { PreventiveLogItems = data.Flatten(context.InstanceId) });
         }
     }
 }

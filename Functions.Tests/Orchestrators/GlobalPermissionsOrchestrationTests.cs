@@ -21,11 +21,17 @@ namespace Functions.Tests.Orchestrators
             //Arrange
             var fixture = new Fixture();
             var mocks = new MockRepository(MockBehavior.Strict);
+            const string instanceId = "abc";
+
 
             var starter = mocks.Create<DurableOrchestrationContextBase>();
             starter
                 .Setup(x => x.GetInput<Response.Project>())
                 .Returns(fixture.Create<Response.Project>());
+
+            starter
+                .Setup(x => x.InstanceId)
+                .Returns(instanceId);
 
             starter
                 .Setup(x => x.SetCustomStatus(It.Is<ScanOrchestrationStatus>(s => s.Scope == RuleScopes.GlobalPermissions)))
@@ -43,8 +49,16 @@ namespace Functions.Tests.Orchestrators
                 .Returns(Task.CompletedTask);
 
             starter
-                .Setup(x => x.CallActivityAsync(nameof(LogAnalyticsUploadActivity), It.Is<LogAnalyticsUploadActivityRequest>(l =>
-                    l.PreventiveLogItems.All(p => p.Scope == RuleScopes.GlobalPermissions))))
+                .Setup(x => x.CallActivityAsync(
+                    nameof(LogAnalyticsUploadActivity), 
+                    It.Is<LogAnalyticsUploadActivityRequest>(
+                        l =>
+                            l.PreventiveLogItems.All(
+                                p =>
+                                    p.Scope == RuleScopes.GlobalPermissions && p.ScanId == instanceId)
+                            )
+                    )
+                )
                 .Returns(Task.CompletedTask);
 
             //Act

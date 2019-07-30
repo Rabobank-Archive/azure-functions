@@ -10,5 +10,6 @@ namespace Functions.Model
         public string Rule { get; set; }
         public bool Status { get; set; }
         public DateTime EvaluatedDate { get; set; }
+        public string ScanId { get; set; }
     }
 }

@@ -12,6 +12,7 @@ namespace Functions.Tests
         public void FlattenReport()
         {
             var now = new DateTime(2019, 4, 29, 10, 47, 23);
+            var scanId = "supId:projId:scope";
             var data = new ItemsExtensionData
             {
                 Id = "TAS",
@@ -45,10 +46,11 @@ namespace Functions.Tests
                 Item = "SOx-Compliant-Demo",
                 Rule = "NobodyCanDoAnything",
                 Status = true,
-                EvaluatedDate = now
+                EvaluatedDate = now,
+                ScanId = scanId
             }.ToExpectedObject();
 
-            var result = data.Flatten(RuleScopes.Repositories).Single();
+            var result = data.Flatten(RuleScopes.Repositories, scanId).Single();
             expected.ShouldEqual(result);
         }
     }
