@@ -6,10 +6,10 @@ steps:
   clean: true
 
 - task: DotNetCoreInstaller@0
-displayName: 'Use .NET Core sdk 2.2.203'
-inputs:
+  displayName: 'Use .NET Core sdk 2.2.203'
+  inputs:
     version: 2.2.203
-enabled: false
+  enabled: false
 
 - task: DotNetCoreCLI@2
   displayName: Restore
