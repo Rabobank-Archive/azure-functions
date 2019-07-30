@@ -50,7 +50,7 @@ steps:
     exit /b %errorlevel%
   displayName: 'Build, test'
   env:
-    VSS_NUGET_EXTERNAL_FEED_ENDPOINTS: '{"endpointCredentials": [{"endpoint":"https://somecompany.pkgs.visualstudio.com/_packaging/TAS/nuget/v3/index.json", "username":"optional", "password":"$(System.AccessToken)"}]}'
+    VSS_NUGET_EXTERNAL_FEED_ENDPOINTS: '{"endpointCredentials": [{"endpoint":"https://somecompany.pkgs.visualstudio.com/_packaging/TAS/nuget/v3/index.json", "username":".", "password":"$(System.AccessToken)"}]}'
 
 - task: SonarSource.sonarqube.291ed61f-1ee4-45d3-b1b0-bf822d9095ef.SonarQubePublish@4
   displayName: 'SonarQube: Publish Quality Gate Result'
