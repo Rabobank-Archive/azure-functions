@@ -20,23 +20,20 @@ namespace CompletenessCheckFunction.Orchestrators
             if (totalProjectCount == null)
                 return;
 
-            var allProjectScanOrchestrators =
-                await context.CallActivityAsync<List<OrchestrationInstance>>(
-                    nameof(GetCompletedOrchestratorsWithNameActivity),
-                    "ProjectScanOrchestration");
-
             var projectScanOrchestratorsForThisAnalysis =
                 await context.CallActivityAsync<List<OrchestrationInstance>>(
                     nameof(FilterOrchestratorsForParentIdActivity),
                     new FilterOrchestratorsForParentIdActivityRequest
                     {
                         ParentId = singleAnalysisRequest.InstanceToAnalyze.InstanceId,
-                        InstancesToFilter = allProjectScanOrchestrators
+                        InstancesToFilter = singleAnalysisRequest.AllProjectScanOrchestrators
                     });
 
             await context.CallActivityAsync(nameof(UploadAnalysisResultToLogAnalyticsActivity),
                 new UploadAnalysisResultToLogAnalyticsActivityRequest
                 {
+                    SupervisorOrchestratorId = singleAnalysisRequest.InstanceToAnalyze.InstanceId,
+                    SupervisorStarted = singleAnalysisRequest.InstanceToAnalyze.CreatedTime,
                     TotalProjectCount = (int)totalProjectCount,
                     ScannedProjectCount = projectScanOrchestratorsForThisAnalysis.Count
                 });

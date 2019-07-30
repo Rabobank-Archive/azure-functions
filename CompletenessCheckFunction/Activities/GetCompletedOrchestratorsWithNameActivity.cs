@@ -15,7 +15,7 @@ namespace CompletenessCheckFunction.Activities
         
         public GetCompletedOrchestratorsWithNameActivity(IDurableFunctionsAdministrationClient client)
         {
-            _client = client ?? throw new ArgumentNullException(nameof(_client));
+            _client = client ?? throw new ArgumentNullException(nameof(client));
         }
         
         [FunctionName(nameof(GetCompletedOrchestratorsWithNameActivity))]

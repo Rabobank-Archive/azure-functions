@@ -21,12 +21,6 @@ namespace CompletenessCheckFunction.Tests.Orchestrators
             _fixture = new Fixture();
             _fixture.Customize(new AutoNSubstituteCustomization());
         }
-        //GetSupervisorOrchestrators
-        //FilterOnNotYetScanned (later)
-        //Foreach
-        //GetSubOrchestrators
-        //Supervisor.CustomStatus.TotalProjects == GetSubOrchestrators.Where(state=completed).Count
-        //PostResultToLogAnalytics
         
         [Fact]
         public async Task ShouldStartActivitiesForGettingOrchestratorsToAnalyze()
@@ -46,6 +40,7 @@ namespace CompletenessCheckFunction.Tests.Orchestrators
             await orchestrationContext.Received().CallActivityAsync<List<string>>(nameof(GetCompletedScansFromLogAnalyticsActivity), null);
             await orchestrationContext.Received().CallActivityAsync<List<OrchestrationInstance>>(nameof(FilterAlreadyAnalyzedOrchestratorsActivity),
                 Arg.Any<FilterAlreadyAnalyzedOrchestratorsActivityRequest>());
+            await orchestrationContext.Received().CallActivityAsync<List<OrchestrationInstance>>(nameof(GetCompletedOrchestratorsWithNameActivity), "ProjectScanOrchestration");
         }
 
         [Theory]

@@ -43,7 +43,6 @@ namespace CompletenessCheckFunction.Tests.Orchestrators
             await fun.Run(context);
             
             // Assert
-            await context.Received().CallActivityAsync<List<OrchestrationInstance>>(nameof(GetCompletedOrchestratorsWithNameActivity), "ProjectScanOrchestration");
             await context.Received().CallActivityAsync<List<OrchestrationInstance>>(
                 nameof(FilterOrchestratorsForParentIdActivity), Arg.Any<FilterOrchestratorsForParentIdActivityRequest>());
             await context.Received().CallActivityAsync(nameof(UploadAnalysisResultToLogAnalyticsActivity),

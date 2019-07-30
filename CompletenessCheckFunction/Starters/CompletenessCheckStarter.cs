@@ -7,7 +7,7 @@ namespace CompletenessCheckFunction.Starters
     public class CompletenessCheckStarter
     {
         [FunctionName("CompletenessCheckStarter")]
-        public async Task Run([TimerTrigger("0 17 3 * * *", RunOnStartup=false)]
+        public async Task Run([TimerTrigger("0 0 6 * * *", RunOnStartup=false)]
             TimerInfo timerInfo, [OrchestrationClient] DurableOrchestrationClientBase orchestrationClientBase)
         {
             await orchestrationClientBase.StartNewAsync(nameof(CompletenessCheckOrchestrator), null);
