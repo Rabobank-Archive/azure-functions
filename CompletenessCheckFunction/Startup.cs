@@ -18,23 +18,26 @@ namespace CompletenessCheckFunction
 
         private void RegisterServices(IServiceCollection services)
         {
-            var tenantId = Environment.GetEnvironmentVariable("tenantId", EnvironmentVariableTarget.Process);
-            var clientId = Environment.GetEnvironmentVariable("clientId", EnvironmentVariableTarget.Process);
-            var clientSecret = Environment.GetEnvironmentVariable("clientSecret", EnvironmentVariableTarget.Process);
-            var logAnalyticsWorkspace =
-                Environment.GetEnvironmentVariable("logAnalyticsWorkspace", EnvironmentVariableTarget.Process);
-            var logAnalyticsKey = Environment.GetEnvironmentVariable("logAnalyticsKey", EnvironmentVariableTarget.Process);
+            var tenantId = GetEnvironmentVariable("tenantId");
+            var clientId = GetEnvironmentVariable("clientId");
+            var clientSecret = GetEnvironmentVariable("clientSecret");
+            var logAnalyticsWorkspace = GetEnvironmentVariable("logAnalyticsWorkspace");
+                
+            var logAnalyticsKey = GetEnvironmentVariable("logAnalyticsKey");
             services.AddSingleton<ILogAnalyticsClient>(new LogAnalyticsClient(logAnalyticsWorkspace, logAnalyticsKey,
                 new AzureTokenProvider(tenantId, clientId, clientSecret)));
 
-            var durableBaseUri =
-                Environment.GetEnvironmentVariable("durableBaseUri", EnvironmentVariableTarget.Process);
-            var durableTaskHub =
-                Environment.GetEnvironmentVariable("durableTaskHub", EnvironmentVariableTarget.Process);
-            var durableMasterKey =
-                Environment.GetEnvironmentVariable("durableMasterKey", EnvironmentVariableTarget.Process);
+            var durableBaseUri = GetEnvironmentVariable("durableBaseUri");
+            var durableTaskHub = GetEnvironmentVariable("durableTaskHub");
+            var durableMasterKey = GetEnvironmentVariable("durableMasterKey");
             services.AddSingleton<IDurableFunctionsAdministrationClient>(
                 new DurableFunctionsAdministrationClient(new Uri(durableBaseUri), durableTaskHub, durableMasterKey));
+        }
+
+        private static string GetEnvironmentVariable(string variableName)
+        {
+            return Environment.GetEnvironmentVariable(variableName, EnvironmentVariableTarget.Process)
+                   ?? throw new ArgumentNullException(variableName, $"Please provide a valid value for environment variable '{variableName}'");
         }
     }
 }

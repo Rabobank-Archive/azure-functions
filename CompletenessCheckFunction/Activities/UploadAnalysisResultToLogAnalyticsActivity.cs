@@ -1,6 +1,7 @@
 ﻿using Microsoft.Azure.WebJobs;
 using CompletenessCheckFunction.Requests;
 using LogAnalytics.Client;
+using Microsoft.Extensions.Logging;
 
 namespace CompletenessCheckFunction.Activities
 {
@@ -14,9 +15,9 @@ namespace CompletenessCheckFunction.Activities
         }
         
         [FunctionName(nameof(UploadAnalysisResultToLogAnalyticsActivity))]
-        public void Run([ActivityTrigger] UploadAnalysisResultToLogAnalyticsActivityRequest request)
+        public void Run([ActivityTrigger] UploadAnalysisResultToLogAnalyticsActivityRequest request, ILogger _logger)
         {
-            
+            _logger.LogInformation($"Analyzed completeness! Scanned projects {request.ScannedProjectCount}/{request.TotalProjectCount}");
         }
     }
 }
