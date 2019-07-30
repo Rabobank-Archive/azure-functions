@@ -39,9 +39,8 @@ namespace CompletenessCheckFunction.Activities
             await _client.AddCustomLogJsonAsync("completeness_log", new[] { data }, "AnalysisCompleted").ConfigureAwait(false);
 
             _logger.LogInformation(
-                $"Analyzed completeness! Supervisor id: '{request.SupervisorOrchestratorId}', started at '{request.SupervisorStarted}'. Scanned projects {request.ScannedProjectCount}/{request.TotalProjectCount}");
+                $"Analyzed completeness! Supervisor id: '{request.SupervisorOrchestratorId}', started at '{request.SupervisorStarted}'. " +
+                $"Scanned projects {request.ScannedProjectCount}/{request.TotalProjectCount}");
         }
     }
 }
-
-

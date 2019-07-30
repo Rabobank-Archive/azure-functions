@@ -36,7 +36,7 @@ namespace CompletenessCheckFunction.Tests.Activities
         }
         
         [Theory]
-        [InlineData(RunTimeStatusses.Completed, 1)]
+        [InlineData(RunTimeStatusses.Completed, 2)]
         [InlineData(RunTimeStatusses.Failed, 0)]
         [InlineData(RunTimeStatusses.Pending, 0)]
         [InlineData(RunTimeStatusses.Running, 0)]
@@ -50,7 +50,8 @@ namespace CompletenessCheckFunction.Tests.Activities
             
             var instances = fixture.CreateMany<OrchestrationInstance>(10).ToList();
             instances[3].RuntimeStatus = runtimeStatus;
-            
+            instances[6].RuntimeStatus = runtimeStatus;
+
             var client = Substitute.For<IDurableFunctionsAdministrationClient>();
             client.Get(Arg.Any<IRestRequest<IEnumerable<OrchestrationInstance>>>()).Returns(instances);
 

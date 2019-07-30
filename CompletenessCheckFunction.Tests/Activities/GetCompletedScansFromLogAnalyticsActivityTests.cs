@@ -1,6 +1,6 @@
 ﻿namespace CompletenessCheckFunction.Tests.Activities
 {
-    public class GetCompletedScanLogAnalyticsActivityTests
+    public class GetCompletedScansFromLogAnalyticsActivityTests
     {
 
     }
