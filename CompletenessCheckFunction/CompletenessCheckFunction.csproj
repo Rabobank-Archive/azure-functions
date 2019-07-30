@@ -3,6 +3,12 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <AzureFunctionsVersion>v2</AzureFunctionsVersion>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <CodeAnalysisRuleSet>CompletenessCheckFunction.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <CodeAnalysisRuleSet>CompletenessCheckFunction.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="AzDoCompliancy.CustomStatus" Version="0.0.1.210662" />
     <PackageReference Include="DurableFunctionsAdministration.Client" Version="0.0.1.210662" />
