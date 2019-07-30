@@ -1,5 +1,7 @@
-﻿using Microsoft.Azure.WebJobs;
+﻿using System.Threading.Tasks;
+using Microsoft.Azure.WebJobs;
 using CompletenessCheckFunction.Requests;
+using CompletenessCheckFunction.Tests.Activities;
 using LogAnalytics.Client;
 using Microsoft.Extensions.Logging;
 
@@ -15,9 +17,20 @@ namespace CompletenessCheckFunction.Activities
         }
         
         [FunctionName(nameof(UploadAnalysisResultToLogAnalyticsActivity))]
-        public void Run([ActivityTrigger] UploadAnalysisResultToLogAnalyticsActivityRequest request, ILogger _logger)
+        public async Task Run([ActivityTrigger] UploadAnalysisResultToLogAnalyticsActivityRequest request, ILogger _logger)
         {
-            _logger.LogWarning($"Analyzed completeness! Supervisor id: '{request.SupervisorOrchestratorId}', started at '{request.SupervisorStarted}'. Scanned projects {request.ScannedProjectCount}/{request.TotalProjectCount}");
+            var data = new CompletenessAnalysisResult
+            {
+                AnalysisCompleted = request.AnalysisCompleted,
+                SupervisorStarted = request.SupervisorStarted,
+                SupervisorOrchestratorId = request.SupervisorOrchestratorId,
+                TotalProjectCount = request.TotalProjectCount,
+                ScannedProjectCount = request.TotalProjectCount
+            };
+            await _client.AddCustomLogJsonAsync("completeness_log", new[] { data }, "AnalysisCompleted").ConfigureAwait(false);
+            
+            _logger.LogInformation(
+                $"Analyzed completeness! Supervisor id: '{request.SupervisorOrchestratorId}', started at '{request.SupervisorStarted}'. Scanned projects {request.ScannedProjectCount}/{request.TotalProjectCount}");
         }
     }
 }

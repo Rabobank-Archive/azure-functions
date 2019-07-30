@@ -35,7 +35,8 @@ namespace CompletenessCheckFunction.Orchestrators
                     SupervisorOrchestratorId = singleAnalysisRequest.InstanceToAnalyze.InstanceId,
                     SupervisorStarted = singleAnalysisRequest.InstanceToAnalyze.CreatedTime,
                     TotalProjectCount = (int)totalProjectCount,
-                    ScannedProjectCount = projectScanOrchestratorsForThisAnalysis.Count
+                    ScannedProjectCount = projectScanOrchestratorsForThisAnalysis.Count,
+                    AnalysisCompleted = context.CurrentUtcDateTime
                 });
         }
     }
