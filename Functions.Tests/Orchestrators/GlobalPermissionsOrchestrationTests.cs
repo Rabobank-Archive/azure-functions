@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using AzDoCompliancy.CustomStatus;
 using Xunit;
 using Response = SecurePipelineScan.VstsService.Response;
+using static Functions.Helpers.OrchestrationIdHelper;
 
 namespace Functions.Tests.Orchestrators
 {
@@ -21,8 +22,7 @@ namespace Functions.Tests.Orchestrators
             //Arrange
             var fixture = new Fixture();
             var mocks = new MockRepository(MockBehavior.Strict);
-            const string instanceId = "abc";
-
+            const string instanceId = "supervisorId:projectId:scope";
 
             var starter = mocks.Create<DurableOrchestrationContextBase>();
             starter
@@ -55,7 +55,7 @@ namespace Functions.Tests.Orchestrators
                         l =>
                             l.PreventiveLogItems.All(
                                 p =>
-                                    p.Scope == RuleScopes.GlobalPermissions && p.ScanId == instanceId)
+                                    p.Scope == RuleScopes.GlobalPermissions && p.ScanId == "supervisorId")
                             )
                     )
                 )

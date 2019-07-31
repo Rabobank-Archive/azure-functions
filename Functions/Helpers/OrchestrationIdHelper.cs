@@ -7,5 +7,17 @@ namespace Functions.Helpers
 
         public static string CreateProjectScanScopeOrchestrationId(string projectScanOrchestrationId, string scope)
             => $"{projectScanOrchestrationId}:{scope}";
+
+        public static string GetSupervisorId(string instanceId)
+        {
+            string[] ids = instanceId.Split(':');
+                        
+            if (ids.Length < 3)
+            {
+                return null;
+            }
+            
+            return ids[0];
+        }
     }
 }
