@@ -82,6 +82,12 @@ steps:
 #    pathtoPublish: '$(Build.ArtifactStagingDirectory)/sca_artifacts' 
 #    artifactName: 'sca'
 
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: '$(build.sourcesdirectory)/Scripts'
+    Contents: '**'
+    TargetFolder: '$(build.artifactstagingdirectory)/Scripts'
+
 - task: PublishBuildArtifacts@1
   displayName: publish CompletenessCheckFunction
   inputs:
