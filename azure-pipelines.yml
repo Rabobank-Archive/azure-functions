@@ -46,8 +46,6 @@ steps:
 
     dotnet build --configuration $(buildConfiguration) || goto :error
 
-    dotnet publish ./CompletenessCheckFunction --configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)/CompletenessCheckFunction || goto :error
-
     :; exit 0
     exit /b 0
   
@@ -59,6 +57,13 @@ steps:
   displayName: 'Run Code Analysis'
 # - task: SonarSource.sonarqube.291ed61f-1ee4-45d3-b1b0-bf822d9095ef.SonarQubePublish@4
 #   displayName: 'SonarQube: Publish Quality Gate Result'
+
+- task: DotNetCoreCLI@2
+  displayName: Publish
+  inputs:
+    command: publish
+    publishWebProjects: false
+    arguments: '--configuration release --output $(build.artifactstagingdirectory)'
 
 #- task: fortifyvsts.hpe-security-fortify-vsts.build-task-fortify-sca.FortifySCA@1
 #  displayName: 'Fortify: local scan'
@@ -80,7 +85,7 @@ steps:
 - task: PublishBuildArtifacts@1
   displayName: publish CompletenessCheckFunction
   inputs:
-    pathtoPublish: '$(Build.ArtifactStagingDirectory)/CompletenessCheckFunction' 
+    pathtoPublish: '$(Build.ArtifactStagingDirectory)' 
     artifactName: 'CompletenessCheckFunction'
 
 - task: PublishTestResults@2
