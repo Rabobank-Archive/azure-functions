@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using static Functions.Helpers.OrchestrationIdHelper;
 
 namespace Functions.Model
 {
@@ -14,7 +15,7 @@ namespace Functions.Model
                 Rule = rule.Name,
                 Status = rule.Status,
                 EvaluatedDate = Date,
-                ScanId = instanceId.Split(':')[0],
+                ScanId = GetSupervisorId(instanceId), 
                 Scope = RuleScopes.GlobalPermissions
             });
         }
