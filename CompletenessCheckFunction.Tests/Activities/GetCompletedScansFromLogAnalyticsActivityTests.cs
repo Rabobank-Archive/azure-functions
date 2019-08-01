@@ -29,7 +29,7 @@ namespace CompletenessCheckFunction.Tests.Activities
             var response = _fixture.Create<LogAnalyticsQueryResponse>();
 
             var client = Substitute.For<ILogAnalyticsClient>();
-            client.QueryAsync("").ReturnsForAnyArgs(response);
+            client.QueryAsync(Arg.Any<string>()).Returns(response);
 
             // Act
             var fun = new GetCompletedScansFromLogAnalyticsActivity(client);
@@ -54,7 +54,7 @@ namespace CompletenessCheckFunction.Tests.Activities
             response.tables[0].rows = instanceIds;
 
             var client = Substitute.For<ILogAnalyticsClient>();
-            client.QueryAsync("").ReturnsForAnyArgs(response);
+            client.QueryAsync(Arg.Any<string>()).Returns(response);
 
             // Act
             var fun = new GetCompletedScansFromLogAnalyticsActivity(client);
@@ -69,7 +69,7 @@ namespace CompletenessCheckFunction.Tests.Activities
         {
             // Arrange
             var client = Substitute.For<ILogAnalyticsClient>();
-            client.QueryAsync(Arg.Any<string>()).Throws(new Exception());
+            client.QueryAsync(Arg.Any<string>()).Returns((LogAnalyticsQueryResponse)null);
 
             // Act
             var fun = new GetCompletedScansFromLogAnalyticsActivity(client);

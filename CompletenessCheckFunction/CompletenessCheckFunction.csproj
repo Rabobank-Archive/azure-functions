@@ -10,9 +10,9 @@
     <CodeAnalysisRuleSet>CompletenessCheckFunction.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="AzDoCompliancy.CustomStatus" Version="0.0.1.213635" />
-    <PackageReference Include="DurableFunctionsAdministration.Client" Version="0.0.1.213635" />
-    <PackageReference Include="LogAnalytics.Client" Version="0.0.1.213453" />
+    <PackageReference Include="AzDoCompliancy.CustomStatus" Version="0.0.1.218427" />
+    <PackageReference Include="DurableFunctionsAdministration.Client" Version="0.0.1.218427" />
+    <PackageReference Include="LogAnalytics.Client" Version="0.0.1.218427" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.DurableTask" Version="1.8.3" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.29" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
