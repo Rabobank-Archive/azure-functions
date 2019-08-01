@@ -1,3 +1,5 @@
+using System.Linq;
+
 namespace Functions.Helpers
 {
     public static class OrchestrationIdHelper
@@ -10,14 +12,7 @@ namespace Functions.Helpers
 
         public static string GetSupervisorId(string instanceId)
         {
-            string[] ids = instanceId.Split(':');
-                        
-            if (ids.Length < 3)
-            {
-                return null;
-            }
-            
-            return ids[0];
+            return instanceId.Contains(":") ? instanceId.Split(':').First() : null;
         }
     }
 }
