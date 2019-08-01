@@ -3,6 +3,7 @@ using Microsoft.Azure.WebJobs;
 using CompletenessCheckFunction.Requests;
 using DurableFunctionsAdministration.Client.Response;
 using System;
+using System.Linq;
 
 namespace CompletenessCheckFunction.Activities
 {
@@ -11,11 +12,12 @@ namespace CompletenessCheckFunction.Activities
         [FunctionName(nameof(FilterAlreadyAnalyzedOrchestratorsActivity))]
         public IList<OrchestrationInstance> Run([ActivityTrigger] FilterAlreadyAnalyzedOrchestratorsActivityRequest request)
         {
-            // Just return instances to analyze for now. Will implement filtering later
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
 
-            return request.InstancesToAnalyze;
+            return request.InstancesToAnalyze
+                .Where(i => !request.InstanceIdsAlreadyAnalyzed.Contains(i.InstanceId))
+                .ToList();
         }
     }
 }

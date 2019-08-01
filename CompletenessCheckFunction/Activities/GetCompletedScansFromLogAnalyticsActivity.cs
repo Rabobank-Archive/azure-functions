@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using Microsoft.Azure.WebJobs;
 using LogAnalytics.Client;
+using System.Threading.Tasks;
+using System.Linq;
 
 namespace CompletenessCheckFunction.Activities
 {
@@ -12,14 +14,19 @@ namespace CompletenessCheckFunction.Activities
         {
             _client = client;
         }
-        
+
         [FunctionName(nameof(GetCompletedScansFromLogAnalyticsActivity))]
-        public IList<string> Run([ActivityTrigger] DurableOrchestrationContextBase context)
+        public async Task<List<string>> RunAsync([ActivityTrigger] DurableActivityContextBase context)
         {
-            // For now return an empty list. This means we'll just analyze everything
-            return new List<string>();
+            var queryResponse = await _client
+                .QueryAsync("completeness_log_CL | where TimeGenerated > ago(365d) | project SupervisorOrchestratorId_g")
+                .ConfigureAwait(false);
+
+            return queryResponse == null 
+                ? new List<string>() 
+                : queryResponse.tables[0].rows
+                    .Select(x => x[0].ToString())
+                    .ToList();
         }
     }
 }
-
-
