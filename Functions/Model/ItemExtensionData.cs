@@ -1,11 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
+using static Functions.Helpers.OrchestrationIdHelper;
 
 namespace Functions.Model
 {
     public class ItemsExtensionData : ExtensionDataReports<ItemExtensionData>
     {
-        public IEnumerable<PreventiveLogItem> Flatten(string scope)
+        public IEnumerable<PreventiveLogItem> Flatten(string scope, string instanceId)
         {
             return
                 from report in Reports
@@ -17,6 +18,7 @@ namespace Functions.Model
                     Item = report.Item,
                     Rule = rule.Name,
                     Status = rule.Status,
+                    ScanId = GetSupervisorId(instanceId), 
                     EvaluatedDate = Date
                 };
         }

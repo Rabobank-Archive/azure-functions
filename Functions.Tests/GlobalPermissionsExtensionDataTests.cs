@@ -12,6 +12,7 @@ namespace Functions.Tests
         public void FlattenReport()
         {
             var now = new DateTime(2019, 4, 29, 10, 47, 23);
+            var scanId = "supId:projId:scope";
             var data = new GlobalPermissionsExtensionData
             {
                 Id = "TAS",
@@ -38,10 +39,11 @@ namespace Functions.Tests
                 Item = null,
                 Rule = "NobodyCanDoAnything",
                 Status = true,
+                ScanId = "supId",
                 EvaluatedDate = now
             }.ToExpectedObject();
 
-            var result = data.Flatten().Single();
+            var result = data.Flatten(scanId).Single();
             expected.ShouldEqual(result);
         }
     }

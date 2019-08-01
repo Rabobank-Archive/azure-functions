@@ -22,24 +22,32 @@ namespace Functions.Tests.Orchestrators
             starter
                 .Setup(x => x.GetInput<Response.Project>())
                 .Returns(fixture.Create<Response.Project>());
+            
+            starter
+                .Setup(x => x.InstanceId)
+                .Returns(fixture.Create<string>());
 
             starter
-                .Setup(x => x.CallSubOrchestratorAsync(nameof(GlobalPermissionsOrchestration), It.IsAny<Response.Project>()))
+                .Setup(x => x.CallSubOrchestratorAsync(
+                    nameof(GlobalPermissionsOrchestration), It.IsAny<string>(), It.IsAny<Response.Project>()))
                 .Returns(Task.CompletedTask)
                 .Verifiable();
 
             starter
-                .Setup(x => x.CallSubOrchestratorAsync(nameof(RepositoriesOrchestration), It.IsAny<Response.Project>()))
+                .Setup(x => x.CallSubOrchestratorAsync(
+                    nameof(RepositoriesOrchestration), It.IsAny<string>(),It.IsAny<Response.Project>()))
                 .Returns(Task.CompletedTask)
                 .Verifiable();
 
             starter
-                .Setup(x => x.CallSubOrchestratorAsync(nameof(BuildPipelinesOrchestration), It.IsAny<Response.Project>()))
+                .Setup(x => x.CallSubOrchestratorAsync(
+                    nameof(BuildPipelinesOrchestration),It.IsAny<string>(), It.IsAny<Response.Project>()))
                 .Returns(Task.CompletedTask)
                 .Verifiable();
 
             starter
-                .Setup(x => x.CallSubOrchestratorAsync(nameof(ReleasePipelinesOrchestration), It.IsAny<Response.Project>()))
+                .Setup(x => x.CallSubOrchestratorAsync(
+                    nameof(ReleasePipelinesOrchestration),It.IsAny<string>(), It.IsAny<Response.Project>()))
                 .Returns(Task.CompletedTask)
                 .Verifiable();
 
