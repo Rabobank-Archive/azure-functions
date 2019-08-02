@@ -11,8 +11,8 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="AzDoCompliancy.CustomStatus" Version="0.0.1.201384" />
-    <PackageReference Include="LogAnalytics.Client" Version="0.0.1.183265" />
+    <PackageReference Include="AzDoCompliancy.CustomStatus" Version="0.0.1.218427" />
+    <PackageReference Include="LogAnalytics.Client" Version="0.0.1.218427" />
     <PackageReference Include="Microsoft.ApplicationInsights.SnapshotCollector" Version="1.3.5-pre-1906.403" />
     <PackageReference Include="Microsoft.Azure.Services.AppAuthentication" Version="1.0.3" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage" Version="3.0.6" />

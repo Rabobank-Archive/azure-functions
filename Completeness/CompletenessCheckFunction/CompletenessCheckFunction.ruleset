@@ -1,4 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<RuleSet Name="SonarQube - TAS.SecurePipelineScanner TAS" ToolsVersion="16.0">
-  <Include Path="..\.sonarlint\tas.securepipelinescannercsharp.ruleset" Action="Default" />
-</RuleSet>

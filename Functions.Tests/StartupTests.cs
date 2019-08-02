@@ -14,10 +14,23 @@ namespace Functions.Tests
         public void TestDependencyInjectionResolve()
         {
             var fixture = new Fixture();
-            Environment.SetEnvironmentVariable("TOKEN_SECRET", fixture.Create<string>());
-            Environment.SetEnvironmentVariable("WEBSITE_HOSTNAME", fixture.Create<string>());
+            Environment.SetEnvironmentVariable("tenantId", fixture.Create<string>());
+            Environment.SetEnvironmentVariable("clientId", fixture.Create<string>());
+            Environment.SetEnvironmentVariable("clientSecret", fixture.Create<string>());
+            
+            Environment.SetEnvironmentVariable("logAnalyticsWorkspace", fixture.Create<string>());
+            Environment.SetEnvironmentVariable("logAnalyticsKey", fixture.Create<string>());
+            
             Environment.SetEnvironmentVariable("vstsPat", fixture.Create<string>());
+            Environment.SetEnvironmentVariable("organization", fixture.Create<string>());
 
+            Environment.SetEnvironmentVariable("extensionName", fixture.Create<string>());
+            Environment.SetEnvironmentVariable("WEBSITE_HOSTNAME", fixture.Create<string>());
+            
+            Environment.SetEnvironmentVariable("connectionString", fixture.Create<string>());
+            Environment.SetEnvironmentVariable("TOKEN_SECRET", fixture.Create<string>());
+            
+            
             var startup = new Startup();
 
             var services = new ServiceCollection();
