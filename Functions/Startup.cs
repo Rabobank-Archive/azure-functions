@@ -26,17 +26,20 @@ namespace Functions
 
         private void RegisterServices(IServiceCollection services)
         {
-            var workspace =
-                Environment.GetEnvironmentVariable("logAnalyticsWorkspace", EnvironmentVariableTarget.Process);
-            var key = Environment.GetEnvironmentVariable("logAnalyticsKey", EnvironmentVariableTarget.Process);
-            services.AddSingleton<ILogAnalyticsClient>(new LogAnalyticsClient(workspace, key));
+            var tenantId = GetEnvironmentVariable("tenantId");
+            var clientId = GetEnvironmentVariable("clientId");
+            var clientSecret = GetEnvironmentVariable("clientSecret");
 
-            var vstsPat = Environment.GetEnvironmentVariable("vstsPat", EnvironmentVariableTarget.Process);
-            var organization = Environment.GetEnvironmentVariable("organization", EnvironmentVariableTarget.Process) ?? "somecompany-test";
+            var workspace = GetEnvironmentVariable("logAnalyticsWorkspace");
+            var key = GetEnvironmentVariable("logAnalyticsKey");
+            services.AddSingleton<ILogAnalyticsClient>(new LogAnalyticsClient(workspace, key,
+                new AzureTokenProvider(tenantId, clientId, clientSecret)));
+
+            var vstsPat = GetEnvironmentVariable("vstsPat");
+            var organization = GetEnvironmentVariable("organization");
 
             services.AddSingleton<IVstsRestClient>(new VstsRestClient(organization, vstsPat));
 
-            services.AddSingleton(new HttpClient());
             services.AddSingleton(new AzureServiceTokenProvider().Wrap());
 
             services.AddScoped<IMemoryCache>(_ => new MemoryCache(new MemoryCacheOptions()));
@@ -44,22 +47,29 @@ namespace Functions
             services.AddTransient<IServiceHookScan<BuildScanReport>, BuildScan>();
             services.AddTransient<IServiceEndpointValidator, ServiceEndpointValidator>();
 
-            var extensionName = Environment.GetEnvironmentVariable("extensionName", EnvironmentVariableTarget.Process) ?? "tastest";
-            var functionAppUrl =
-                Environment.GetEnvironmentVariable("WEBSITE_HOSTNAME", EnvironmentVariableTarget.Process) ??
-                throw new ArgumentException("WEBSITE_HOSTNAME");
+            var extensionName = GetEnvironmentVariable("extensionName");
+            var functionAppUrl = GetEnvironmentVariable("WEBSITE_HOSTNAME");
 
             var config = new EnvironmentConfig
             {
                 ExtensionName = extensionName,
                 Organization = organization,
                 FunctionAppHostname = functionAppUrl,
-                StorageAccountConnectionString = Environment.GetEnvironmentVariable("connectionString")
+                StorageAccountConnectionString = GetEnvironmentVariable("connectionString")
             };
 
             services.AddSingleton(config);
             services.AddSingleton<IRulesProvider, RulesProvider>();
-            services.AddSingleton<ITokenizer>(new Tokenizer(Environment.GetEnvironmentVariable("TOKEN_SECRET")));
+            services.AddSingleton<ITokenizer>(new Tokenizer(GetEnvironmentVariable("TOKEN_SECRET")));
+
+            services.AddSingleton(new HttpClient());
+        }
+
+        private static string GetEnvironmentVariable(string variableName)
+        {
+            return Environment.GetEnvironmentVariable(variableName, EnvironmentVariableTarget.Process)
+                   ?? throw new ArgumentNullException(variableName,
+                       $"Please provide a valid value for environment variable '{variableName}'");
         }
     }
 }
