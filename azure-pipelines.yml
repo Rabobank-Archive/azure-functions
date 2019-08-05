@@ -39,6 +39,12 @@ steps:
       publishWebProjects: false
       arguments: '--configuration release --output $(build.artifactstagingdirectory)'
 
+  - task: CopyFiles@2
+    inputs:
+      SourceFolder: '$(build.sourcesdirectory)/Scripts'
+      Contents: '**'
+      TargetFolder: '$(build.artifactstagingdirectory)/Scripts'
+
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact'
     inputs:
