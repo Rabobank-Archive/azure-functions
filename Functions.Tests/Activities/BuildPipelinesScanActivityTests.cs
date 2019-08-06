@@ -26,7 +26,7 @@ namespace Functions.Tests.Activities
 
             var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
             client
-                .Setup(x => x.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.BuildDefinition>>>()))
+                .Setup(x => x.Get(It.IsAny<IEnumerableRequest<Response.BuildDefinition>>()))
                 .Returns(fixture.CreateMany<Response.BuildDefinition>());
 
             // Act
