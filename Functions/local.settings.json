@@ -1,8 +1,8 @@
 {
   "IsEncrypted": false,
   "Values": {
-    "AzureWebJobsStorage": "DefaultEndpointsProtocol=https;AccountName=azdocompliancydevstorage;AccountKey=eoNvch5yNNqz2tUGdZtFxWoPpyDJQ1OMj4gpqDDOlyVPcBsGMLC8/23a9SL5pxayfkSlGxlRmwLy44sxUBDgcw==",
-    "AzureWebJobsDashboard": "DefaultEndpointsProtocol=https;AccountName=azdocompliancydevstorage;AccountKey=eoNvch5yNNqz2tUGdZtFxWoPpyDJQ1OMj4gpqDDOlyVPcBsGMLC8/23a9SL5pxayfkSlGxlRmwLy44sxUBDgcw==",
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "AzureWebJobsDashboard": "UseDevelopmentStorage=true",
     "eventQueueStorageConnectionString": "UseDevelopmentStorage=true",
     "FUNCTIONS_WORKER_RUNTIME": "dotnet"
   }
