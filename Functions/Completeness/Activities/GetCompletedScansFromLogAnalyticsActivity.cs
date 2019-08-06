@@ -25,7 +25,7 @@ namespace Functions.Completeness.Activities
             return queryResponse == null 
                 ? new List<string>() 
                 : queryResponse.tables[0].rows
-                    .Select(x => x[0].ToString())
+                    .Select(x => x[0].ToString().Replace("-",""))
                     .ToList();
         }
     }
