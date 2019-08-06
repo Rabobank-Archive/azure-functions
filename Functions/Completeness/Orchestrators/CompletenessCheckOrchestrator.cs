@@ -23,22 +23,23 @@ namespace Functions.Completeness.Orchestrators
                 new FilterAlreadyAnalyzedOrchestratorsActivityRequest
                 { InstancesToAnalyze = scansToVerify, InstanceIdsAlreadyAnalyzed = alreadyVerifiedScans });
 
-            var allProjectScanOrchestrators =
-                await context.CallActivityAsync<List<DurableOrchestrationStatus>>(
-                    nameof(GetCompletedOrchestratorsWithNameActivity), "ProjectScanOrchestration");
+            if (filteredScansToVerify.Count > 0)
+            {
+                var allProjectScanOrchestrators =
+                    await context.CallActivityAsync<List<DurableOrchestrationStatus>>(
+                        nameof(GetCompletedOrchestratorsWithNameActivity), "ProjectScanOrchestration");
 
-            await Task.WhenAll(filteredScansToVerify.Select(f =>
-                context.CallSubOrchestratorAsync(nameof(SingleAnalysisOrchestrator),
-                    new SingleAnalysisOrchestratorRequest
-                    {
-                        InstanceToAnalyze = f,
-                        AllProjectScanOrchestrators = allProjectScanOrchestrators
-                    })));
+                await Task.WhenAll(filteredScansToVerify.Select(f =>
+                    context.CallSubOrchestratorAsync(nameof(SingleAnalysisOrchestrator),
+                        new SingleAnalysisOrchestratorRequest
+                        {
+                            InstanceToAnalyze = f,
+                            AllProjectScanOrchestrators = allProjectScanOrchestrators
+                        })));
+            }
 
             await Task.WhenAll(scansToVerify.Select(f =>
                 context.CallActivityAsync(nameof(PurgeSingleOrchestratorActivity), f.InstanceId)));
         }
     }
 }
-
-
