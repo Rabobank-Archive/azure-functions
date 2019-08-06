@@ -27,7 +27,7 @@ namespace Functions
 
             log.LogInformation($"Requeue from: {queue}");
 
-            var storage = CloudStorageAccount.Parse(_config.StorageAccountConnectionString);
+            var storage = CloudStorageAccount.Parse(_config.EventQueueStorageConnectionString);
             var client = storage.CreateCloudQueueClient();
 
             await RequeuePoisonMessages(

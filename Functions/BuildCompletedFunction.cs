@@ -35,8 +35,8 @@ namespace Functions
         }
 
         [FunctionName(nameof(BuildCompletedFunction))]
-        public Task RunAsync(
-            [QueueTrigger("buildcompleted", Connection = "connectionString")]string data,
+        public async Task RunAsync(
+            [QueueTrigger("buildcompleted", Connection = "eventQueueStorageConnectionString")]string data,
             ILogger log)
         {
             if (data == null) throw new ArgumentNullException(nameof(data));

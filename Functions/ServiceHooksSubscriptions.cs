@@ -26,7 +26,7 @@ namespace Functions
         public async Task Run([TimerTrigger("0 0 7-19 * * *", RunOnStartup = false)]TimerInfo trigger)
         {
             // This only works because we use the account name and account key in the connection string.
-            var storage = CloudStorageAccount.Parse(_config.StorageAccountConnectionString);
+            var storage = CloudStorageAccount.Parse(_config.EventQueueStorageConnectionString);
             var key = Convert.ToBase64String(storage.Credentials.ExportKey());
 
             await UpdateServiceSubscriptions(storage.Credentials.AccountName, key);

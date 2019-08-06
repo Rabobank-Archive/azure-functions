@@ -37,7 +37,7 @@ namespace Functions
 
         [FunctionName(nameof(ReleaseDeploymentCompletedFunction))]
         public Task RunAsync(
-            [QueueTrigger("releasedeploymentcompleted", Connection = "connectionString")]string data,
+            [QueueTrigger("releasedeploymentcompleted", Connection = "eventQueueStorageConnectionString")]string data,
             ILogger log)
         {
             if (data == null) throw new ArgumentNullException(nameof(data));

@@ -1,5 +1,4 @@
-﻿using Microsoft.Azure.Services.AppAuthentication;
-using Microsoft.Azure.WebJobs;
+﻿using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Hosting;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,7 +10,6 @@ using SecurePipelineScan.VstsService;
 using System;
 using System.Net.Http;
 using LogAnalytics.Client;
-using Unmockable;
 
 [assembly: WebJobsStartup(typeof(Functions.Startup))]
 
@@ -40,8 +38,6 @@ namespace Functions
 
             services.AddSingleton<IVstsRestClient>(new VstsRestClient(organization, vstsPat));
 
-            services.AddSingleton(new AzureServiceTokenProvider().Wrap());
-
             services.AddScoped<IMemoryCache>(_ => new MemoryCache(new MemoryCacheOptions()));
             services.AddTransient<IServiceHookScan<ReleaseDeploymentCompletedReport>, ReleaseDeploymentScan>();
             services.AddTransient<IServiceHookScan<BuildScanReport>, BuildScan>();
@@ -55,7 +51,7 @@ namespace Functions
                 ExtensionName = extensionName,
                 Organization = organization,
                 FunctionAppHostname = functionAppUrl,
-                StorageAccountConnectionString = GetEnvironmentVariable("connectionString")
+                EventQueueStorageConnectionString = GetEnvironmentVariable("eventQueueStorageConnectionString")
             };
 
             services.AddSingleton(config);

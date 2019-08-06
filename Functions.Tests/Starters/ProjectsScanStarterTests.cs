@@ -22,7 +22,7 @@ namespace Functions.Tests.Starters
 
             var projects = ProjectsTestHelper.CreateMultipleProjectsResponse(1);
 
-            clientMock.Setup(x => x.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.Project>>>()))
+            clientMock.Setup(x => x.Get(It.IsAny<IEnumerableRequest<Response.Project>>()))
                 .Returns(projects);
 
             //Act
@@ -30,7 +30,7 @@ namespace Functions.Tests.Starters
             await fun.Run(timerInfoMock, orchestrationClientMock.Object);
 
             //Assert
-            clientMock.Verify(x => x.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.Project>>>()), Times.Exactly(1));
+            clientMock.Verify(x => x.Get(It.IsAny<IEnumerableRequest<Response.Project>>()), Times.Exactly(1));
         }
 
         [Fact]
@@ -43,7 +43,7 @@ namespace Functions.Tests.Starters
 
             var projects = ProjectsTestHelper.CreateMultipleProjectsResponse(2);
 
-            clientMock.Setup(x => x.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.Project>>>()))
+            clientMock.Setup(x => x.Get(It.IsAny<IEnumerableRequest<Response.Project>>()))
                 .Returns(projects);
 
             //Act

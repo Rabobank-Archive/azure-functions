@@ -20,17 +20,17 @@ namespace Functions.Tests
             var fixture = new Fixture();
             var client = new Mock<IVstsRestClient>();
             client
-                .Setup(x => x.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.Project>>>()))
+                .Setup(x => x.Get(It.IsAny<IEnumerableRequest<Response.Project>>()))
                 .Returns(fixture.CreateMany<Response.Project>())
                 .Verifiable();
             client
-                .Setup(x => x.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.Hook>>>()))
+                .Setup(x => x.Get(It.IsAny<IEnumerableRequest<Response.Hook>>()))
                 .Returns(fixture.CreateMany<Response.Hook>())
                 .Verifiable();
 
             // Act
             var function = new ServiceHooksSubscriptions(
-                new EnvironmentConfig { StorageAccountConnectionString = StorageAccountConnectionString },
+                new EnvironmentConfig { EventQueueStorageConnectionString = StorageAccountConnectionString },
                 client.Object);
 
             await function.Run(null);
@@ -71,17 +71,17 @@ namespace Functions.Tests
 
             var client = new Mock<IVstsRestClient>();
             client
-                .Setup(x => x.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.Project>>>()))
+                .Setup(x => x.Get(It.IsAny<IEnumerableRequest<Response.Project>>()))
                 .Returns(fixture.CreateMany<Response.Project>())
                 .Verifiable();
             client
-                .Setup(x => x.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.Hook>>>()))
+                .Setup(x => x.Get(It.IsAny<IEnumerableRequest<Response.Hook>>()))
                 .Returns(fixture.CreateMany<Response.Hook>())
                 .Verifiable();
 
             // Act
             var function = new ServiceHooksSubscriptions(
-                new EnvironmentConfig { StorageAccountConnectionString = StorageAccountConnectionString },
+                new EnvironmentConfig { EventQueueStorageConnectionString = StorageAccountConnectionString },
                 client.Object);
 
             await function.Run(null);
@@ -112,17 +112,17 @@ namespace Functions.Tests
 
             var client = new Mock<IVstsRestClient>();
             client
-                .Setup(x => x.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.Project>>>()))
+                .Setup(x => x.Get(It.IsAny<IEnumerableRequest<Response.Project>>()))
                 .Returns(fixture.CreateMany<Response.Project>())
                 .Verifiable();
             client
-                .Setup(x => x.Get(It.IsAny<IVstsRequest<Response.Multiple<Response.Hook>>>()))
+                .Setup(x => x.Get(It.IsAny<IEnumerableRequest<Response.Hook>>()))
                 .Returns(fixture.CreateMany<Response.Hook>())
                 .Verifiable();
 
             // Act
             var function = new ServiceHooksSubscriptions(
-                new EnvironmentConfig { StorageAccountConnectionString = StorageAccountConnectionString },
+                new EnvironmentConfig { EventQueueStorageConnectionString = StorageAccountConnectionString },
                 client.Object);
 
             await function.Run(null);
