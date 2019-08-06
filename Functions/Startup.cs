@@ -51,7 +51,7 @@ namespace Functions
                 ExtensionName = extensionName,
                 Organization = organization,
                 FunctionAppHostname = functionAppUrl,
-                StorageAccountConnectionString = GetEnvironmentVariable("connectionString")
+                EventQueueStorageConnectionString = GetEnvironmentVariable("eventQueueStorageConnectionString")
             };
 
             services.AddSingleton(config);

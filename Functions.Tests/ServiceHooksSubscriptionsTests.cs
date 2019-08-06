@@ -30,7 +30,7 @@ namespace Functions.Tests
 
             // Act
             var function = new ServiceHooksSubscriptions(
-                new EnvironmentConfig { StorageAccountConnectionString = StorageAccountConnectionString },
+                new EnvironmentConfig { EventQueueStorageConnectionString = StorageAccountConnectionString },
                 client.Object);
 
             await function.Run(null);
@@ -81,7 +81,7 @@ namespace Functions.Tests
 
             // Act
             var function = new ServiceHooksSubscriptions(
-                new EnvironmentConfig { StorageAccountConnectionString = StorageAccountConnectionString },
+                new EnvironmentConfig { EventQueueStorageConnectionString = StorageAccountConnectionString },
                 client.Object);
 
             await function.Run(null);
@@ -122,7 +122,7 @@ namespace Functions.Tests
 
             // Act
             var function = new ServiceHooksSubscriptions(
-                new EnvironmentConfig { StorageAccountConnectionString = StorageAccountConnectionString },
+                new EnvironmentConfig { EventQueueStorageConnectionString = StorageAccountConnectionString },
                 client.Object);
 
             await function.Run(null);

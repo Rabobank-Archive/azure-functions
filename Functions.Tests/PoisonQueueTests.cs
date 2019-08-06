@@ -33,7 +33,7 @@ namespace Functions.Tests
             await poison.AddMessageAsync(new CloudQueueMessage(content));
 
             // Act
-            var function = new PoisonQueueFunction(new EnvironmentConfig { StorageAccountConnectionString = "UseDevelopmentStorage=true" });
+            var function = new PoisonQueueFunction(new EnvironmentConfig { EventQueueStorageConnectionString = "UseDevelopmentStorage=true" });
             await function.Requeue(null, "some-queue", new Mock<ILogger>().Object);
 
             // Assert
@@ -53,7 +53,7 @@ namespace Functions.Tests
         [Fact]
         public async Task SkipIfQueueNameIsEmpty()
         {
-            var func = new PoisonQueueFunction(new EnvironmentConfig { StorageAccountConnectionString = "UseDevelopmentStorage=true" });
+            var func = new PoisonQueueFunction(new EnvironmentConfig { EventQueueStorageConnectionString = "UseDevelopmentStorage=true" });
             await func.Requeue(null, "", new Mock<ILogger>().Object);
         }
     }
