@@ -25,7 +25,6 @@ namespace Functions.Tests.Completeness.Orchestrators
                 .With(d => d.Input, JToken.FromObject(new { }))
                 .With(d => d.Output, JToken.FromObject(new{ }))
                 .With(d => d.CustomStatus, JToken.FromObject(new CustomStatusBase())));
-
         }
         
         [Fact]

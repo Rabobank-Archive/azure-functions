@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Functions.Tests.Completeness.Starters
 {
-    public class CompletenessCheckStarterTests
+    public class OrchestratorCleanUpStarterTests
     {
         [Fact]
         public async Task ShouldStartOrchestrator()
@@ -18,11 +18,11 @@ namespace Functions.Tests.Completeness.Starters
             var timerInfo = new TimerInfo(Substitute.For<TimerSchedule>(), Substitute.For<ScheduleStatus>());
 
             //Act
-            var function = new CompletenessCheckStarter();
+            var function = new OrchestratorCleanUpStarter();
             await function.RunAsync(timerInfo, orchestrationClient);
 
             //Assert
-            await orchestrationClient.Received().StartNewAsync(nameof(CompletenessCheckOrchestrator), Arg.Any<object>());
+            await orchestrationClient.Received().StartNewAsync(nameof(OrchestratorCleanUpOrchestrator), Arg.Any<object>());
         }
     }
 }
