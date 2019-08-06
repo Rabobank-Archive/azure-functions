@@ -40,6 +40,7 @@ namespace Functions.Tests.Starters
               );
 
             result.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
+            result?.Dispose();
         }
 
         [Fact]
@@ -63,7 +64,7 @@ namespace Functions.Tests.Starters
                 .Verifiable();
 
             var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object);
-            await function.Run(request,
+            var result = await function.Run(request,
                 "somecompany",
                 "TAS",
                 RuleScopes.GlobalPermissions,
@@ -72,6 +73,7 @@ namespace Functions.Tests.Starters
 
             mock.Verify(x => x.WaitForCompletionOrCreateCheckStatusResponseAsync(request, It.IsAny<string>(), It.IsAny<TimeSpan>()));
             client.Verify();
+            result?.Dispose();
         }
 
         [Fact]
@@ -103,6 +105,7 @@ namespace Functions.Tests.Starters
 
             result.StatusCode.ShouldBe(HttpStatusCode.NotFound);
             client.Verify();
+            result?.Dispose();
         }
 
         [Fact]

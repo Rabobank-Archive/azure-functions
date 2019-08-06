@@ -35,13 +35,18 @@ namespace Functions
         }
 
         [FunctionName(nameof(BuildCompletedFunction))]
-        public async Task Run(
+        public Task RunAsync(
             [QueueTrigger("buildcompleted", Connection = "connectionString")]string data,
             ILogger log)
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
             if (log == null) throw new ArgumentNullException(nameof(log));
 
+            return RunInternalAsync(data);
+        }
+
+        private async Task RunInternalAsync(string data)
+        {
             var report = await _scan.GetCompletedReportAsync(JObject.Parse(data));
             if (report != null)
             {

@@ -34,6 +34,9 @@ namespace Functions.Completeness.Orchestrators
                         InstanceToAnalyze = f,
                         AllProjectScanOrchestrators = allProjectScanOrchestrators
                     })));
+
+            await Task.WhenAll(scansToVerify.Select(f =>
+                context.CallActivityAsync(nameof(PurgeSingleOrchestratorActivity), f.InstanceId)));
         }
     }
 }

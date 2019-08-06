@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Functions.Completeness.Activities;
 using Functions.Completeness.Requests;
@@ -47,6 +48,9 @@ namespace Functions.Completeness.Orchestrators
                     ScannedProjectCount = projectScanOrchestratorsForThisAnalysis.Count,
                     AnalysisCompleted = context.CurrentUtcDateTime
                 });
+
+           await Task.WhenAll(projectScanOrchestratorsForThisAnalysis.Select(f =>
+                context.CallActivityAsync(nameof(PurgeSingleOrchestratorActivity), f.InstanceId)));
         }
     }
 }
