@@ -4,7 +4,7 @@ param (
     [string]$subscriptionId = "",
     [string]$loganalyticsResourceGroupName = "",
     [string]$loganalytics = "",
-    [string]$loganalytics = $scope = "/subscriptions/$( $subscriptionId )/resourceGroups/$( $loganalyticsResourceGroupName )/providers/Microsoft.OperationalInsights/workspaces/$( $loganalytics )"
+    [string]$scope = "/subscriptions/$( $subscriptionId )/resourceGroups/$( $loganalyticsResourceGroupName )/providers/Microsoft.OperationalInsights/workspaces/$( $loganalytics )"
 )
 
 
