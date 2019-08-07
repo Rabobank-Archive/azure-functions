@@ -20,7 +20,7 @@ if ($sp -eq $null)
 {
     try {
         Write-Host "No Service Principal found for Application with id $( $appReg.ApplicationId ) Create new Service Principal"
-        $sp = New-AzADServicePrincipal -DisplayName $servicePrincipalDisplayName -ApplicationId $appReg.ApplicationId -
+        $sp = New-AzADServicePrincipal -DisplayName $servicePrincipalDisplayName -ApplicationId $appReg.ApplicationId
         Write-Host "Created service principal with id $( $sp.Id )"
     }
     catch
