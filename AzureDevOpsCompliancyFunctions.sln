@@ -12,7 +12,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		azure-pipelines.yml = azure-pipelines.yml
 		Scripts\createAppRegistration.sh = Scripts\createAppRegistration.sh
 		NuGet.Config = NuGet.Config
-		CreateApplication.bat = Scripts\CreateApplication.bat 
+		CreateApplication.bat = Scripts\CreateApplication.bat
+		createSpnAndAssignRoles.ps1 = Scripts\createSpnAndAssignRoles.ps1
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Functions.Tests", "Functions.Tests\Functions.Tests.csproj", "{0D4398D2-2E84-4D5E-8E85-845F3C5C1E99}"
