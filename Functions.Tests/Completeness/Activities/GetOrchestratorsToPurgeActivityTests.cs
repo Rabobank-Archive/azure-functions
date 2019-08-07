@@ -47,7 +47,7 @@ namespace Functions.Tests.Completeness.Activities
             client.GetStatusAsync().Returns(instances);
 
             var func = new GetOrchestratorsToPurgeActivity();
-            var instancesToVerify = await func.Run(client);
+            var instancesToVerify = await func.Run(Substitute.For<DurableActivityContextBase>(), client);
 
             instancesToVerify.Count.ShouldBe(expectedCount);
         }
@@ -75,7 +75,7 @@ namespace Functions.Tests.Completeness.Activities
             client.GetStatusAsync().Returns(instances);
 
             var func = new GetOrchestratorsToPurgeActivity();
-            var instancesToVerify = await func.Run(client);
+            var instancesToVerify = await func.Run(Substitute.For<DurableActivityContextBase>(), client);
 
             instancesToVerify.Count.ShouldBe(expectedCount);
         }
