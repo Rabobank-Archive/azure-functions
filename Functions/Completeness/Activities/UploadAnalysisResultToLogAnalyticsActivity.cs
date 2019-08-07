@@ -34,7 +34,7 @@ namespace Functions.Completeness.Activities
                 SupervisorStarted = request.SupervisorStarted,
                 SupervisorOrchestratorId = request.SupervisorOrchestratorId,
                 TotalProjectCount = request.TotalProjectCount,
-                ScannedProjectCount = request.TotalProjectCount
+                ScannedProjectCount = request.ScannedProjectCount
             };
             await _client.AddCustomLogJsonAsync("completeness_log", new[] { data }, "AnalysisCompleted").ConfigureAwait(false);
 
