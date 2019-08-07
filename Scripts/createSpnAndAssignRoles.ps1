@@ -7,8 +7,6 @@ param (
     [string]$scope = "/subscriptions/$( $subscriptionId )/resourceGroups/$( $loganalyticsResourceGroupName )/providers/Microsoft.OperationalInsights/workspaces/$( $loganalytics )"
 )
 
-
-
 $ErrorActionPreference = "Stop"
 
 Write-Host "Check if there exists an application with $( $aadDisplayName )"
@@ -38,7 +36,7 @@ $role = Get-AzRoleAssignment -RoleDefinitionName Contributor -ServicePrincipalNa
 $NewRole = $null
 
 if ($role -eq $null) {
-    Write-Host "No Roleassignment found. Creating it"
+    Write-Host "No Roleassignment Contributor found for ServicePrincipal $($appReg.ApplicationId). Going to create this"
 
     $Retries = 0;While ($NewRole -eq $null -and $Retries -le 6)
     {
@@ -48,7 +46,8 @@ if ($role -eq $null) {
         $NewRole = Get-AzRoleAssignment -ServicePrincipalName $sp.ApplicationId -ErrorAction SilentlyContinue
         $Retries++;
     }
+    Write-Host "Role Assignment Contributor for ServicePrincipal created for $($appReg.ApplicationId)"
 } else {
-    Write-Host "Role Assignment was found. No new role is created"
+    Write-Host "Role Assignment Contributor for ServicePrincipal $($appReg.ApplicationId) was found. No new role is created"
 }
 
