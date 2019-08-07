@@ -36,7 +36,7 @@ if ($sp -eq $null)
 }
 else
 {
-    Write-Host "No Service Principal created for application with name $( $aadDisplayName ) and ApplicationId $($appReg.ApplicationId). The SPN exists with id $($sp.Id)"
+    Write-Host "Found Service Principal for application with name $( $aadDisplayName ). The SPN exists with id $($sp.Id)"
 }
 
 Write-Host "Check if there is a Roleassignment"
