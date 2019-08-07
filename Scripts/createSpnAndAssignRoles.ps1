@@ -1,11 +1,13 @@
 param (
     [string]$aadDisplayName = "",
-    [string]$servicePrincipalDisplayName = "",
+    [string]$servicePrincipalDisplayName = "CompliancyCompletenessChecker",
     [string]$subscriptionId = "",
     [string]$loganalyticsResourceGroupName = "",
     [string]$loganalytics = "",
-    [string]$scope = "/subscriptions/$( $subscriptionId )/resourceGroups/$( $loganalyticsResourceGroupName )/providers/Microsoft.OperationalInsights/workspaces/$( $loganalytics )"
+    [string]$loganalytics = $scope = "/subscriptions/$( $subscriptionId )/resourceGroups/$( $loganalyticsResourceGroupName )/providers/Microsoft.OperationalInsights/workspaces/$( $loganalytics )"
 )
+
+
 
 $ErrorActionPreference = "Stop"
 
