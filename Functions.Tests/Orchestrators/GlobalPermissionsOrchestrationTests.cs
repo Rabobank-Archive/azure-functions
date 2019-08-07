@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using AzDoCompliancy.CustomStatus;
 using Xunit;
 using Response = SecurePipelineScan.VstsService.Response;
-using static Functions.Helpers.OrchestrationIdHelper;
 
 namespace Functions.Tests.Orchestrators
 {
@@ -38,7 +37,9 @@ namespace Functions.Tests.Orchestrators
                 .Verifiable();
 
             starter
-                .Setup(x => x.CallActivityAsync<GlobalPermissionsExtensionData>(nameof(GlobalPermissionsScanProjectActivity), It.IsAny<Response.Project>()))
+                .Setup(x => x.CallActivityWithRetryAsync<GlobalPermissionsExtensionData>(
+                    nameof(GlobalPermissionsScanProjectActivity), It.IsAny<RetryOptions>(),
+                    It.IsAny<Response.Project>()))
                 .ReturnsAsync(fixture.Create<GlobalPermissionsExtensionData>())
                 .Verifiable();
 

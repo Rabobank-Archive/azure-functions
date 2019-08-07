@@ -36,7 +36,8 @@ namespace Functions.Tests.Orchestrators
                 .Verifiable();
 
             starter
-                .Setup(x => x.CallActivityAsync<ItemsExtensionData>(nameof(BuildPipelinesScanActivity), It.IsAny<Response.Project>()))
+                .Setup(x => x.CallActivityWithRetryAsync<ItemsExtensionData>(nameof(BuildPipelinesScanActivity),
+                    It.IsAny<RetryOptions>(), It.IsAny<Response.Project>()))
                 .ReturnsAsync(fixture.Create<ItemsExtensionData>())
                 .Verifiable();
 
