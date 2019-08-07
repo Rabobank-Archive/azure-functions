@@ -9,8 +9,16 @@ param (
 
 $ErrorActionPreference = "Stop"
 
-Write-Host "Check if there exists an application with $( $aadDisplayName )"
+Write-Host "Check if there exists an application with name $( $aadDisplayName )"
 $appReg = Get-AzADApplication -DisplayName $aadDisplayName
+if ($appReg -eq $null) {
+    Write-Error -Message "No application found with name $( $aadDisplayName ). Stopping script"
+    Break
+}
+else
+{
+    Write-Host "Found application with name $( $aadDisplayName ). Application id is $( $appReg.ApplicationId )"
+}
 
 Write-Host "Check if there is an exisiting service principal for application with name $( $aadDisplayName ) and ApplicationId $($appReg.ApplicationId)" 
 $sp = Get-AzADServicePrincipal -ApplicationId $appReg.ApplicationId
