@@ -3,6 +3,7 @@ using Functions.Activities;
 using Functions.Model;
 using Microsoft.Azure.WebJobs;
 using System.Threading.Tasks;
+using Functions.Helpers;
 using Response = SecurePipelineScan.VstsService.Response;
 
 namespace Functions.Orchestrators
@@ -16,8 +17,8 @@ namespace Functions.Orchestrators
             context.SetCustomStatus(new ScanOrchestrationStatus
                 {Project = project.Name, Scope = RuleScopes.Repositories});
 
-            var data = await context.CallActivityAsync<ItemsExtensionData>(
-                nameof(RepositoriesScanActivity), project);
+            var data = await context.CallActivityWithRetryAsync<ItemsExtensionData>(
+                nameof(RepositoriesScanActivity), RetryHelper.ActivityRetryOptions, project);
 
             await context.CallActivityAsync(nameof(LogAnalyticsUploadActivity),
                 new LogAnalyticsUploadActivityRequest
