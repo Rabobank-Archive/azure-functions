@@ -33,5 +33,22 @@ else
     Write-Host "No Service Principal created for application with name $( $aadDisplayName ) and ApplicationId $($appReg.ApplicationId). The SPN exists with id $($sp.Id)"
 }
 
-# Create role assignement
-#New-AzRoleAssignment -RoleDefinitionName Contributor -ServicePrincipalName $sp.ApplicationId -Scope $scope | Write-Verbose -ErrorAction SilentlyContinue
+Write-Host "Check if there is a Roleassignment"
+$role = Get-AzRoleAssignment -RoleDefinitionName Contributor -ServicePrincipalName $sp.ApplicationId
+$NewRole = $null
+
+if ($role -eq $null) {
+    Write-Host "No Roleassignment found. Creating it"
+
+    $Retries = 0;While ($NewRole -eq $null -and $Retries -le 6)
+    {
+        # Sleep here for a few seconds to allow the service principal application to become active (usually, it will take only a couple of seconds)
+        Sleep 15
+        New-AzRoleAssignment -RoleDefinitionName Contributor -ServicePrincipalName $sp.ApplicationId -Scope $scope | Write-Verbose -ErrorAction SilentlyContinue
+        $NewRole = Get-AzRoleAssignment -ServicePrincipalName $sp.ApplicationId -ErrorAction SilentlyContinue
+        $Retries++;
+    }
+} else {
+    Write-Host "Role Assignment was found. No new role is created"
+}
+
