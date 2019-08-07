@@ -38,7 +38,7 @@ namespace Functions.Tests.Completeness.Activities
             var client = Substitute.For<DurableOrchestrationClientBase>();
             client.GetStatusAsync().Returns(instances);
 
-            var func = new GetCompletedOrchestratorsWithNameActivity();
+            var func = new GetOrchestratorsByNameActivity();
             var instancesToVerify = await func.Run("ProjectScanSupervisor", client);
 
             instancesToVerify.Count.ShouldBe(1);
@@ -47,10 +47,10 @@ namespace Functions.Tests.Completeness.Activities
         
         [Theory]
         [InlineData(OrchestrationRuntimeStatus.Completed, 2)]
-        [InlineData(OrchestrationRuntimeStatus.Failed, 0)]
+        [InlineData(OrchestrationRuntimeStatus.Failed, 2)]
         [InlineData(OrchestrationRuntimeStatus.Pending, 0)]
         [InlineData(OrchestrationRuntimeStatus.Running, 0)]
-        [InlineData(OrchestrationRuntimeStatus.Terminated, 0)]
+        [InlineData(OrchestrationRuntimeStatus.Terminated, 2)]
         [InlineData(OrchestrationRuntimeStatus.ContinuedAsNew, 0)]
         public async Task ShouldReturnOnlyOrchestratorsWithStatus(OrchestrationRuntimeStatus runtimeStatus, int expectedCount)
         {
@@ -68,7 +68,7 @@ namespace Functions.Tests.Completeness.Activities
             var client = Substitute.For<DurableOrchestrationClientBase>();
             client.GetStatusAsync().Returns(instances);
 
-            var func = new GetCompletedOrchestratorsWithNameActivity();
+            var func = new GetOrchestratorsByNameActivity();
             var instancesToVerify = await func.Run("ProjectScanSupervisor", client);
 
             instancesToVerify.Count.ShouldBe(expectedCount);

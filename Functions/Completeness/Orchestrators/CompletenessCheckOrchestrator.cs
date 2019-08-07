@@ -13,7 +13,7 @@ namespace Functions.Completeness.Orchestrators
         public async Task RunAsync([OrchestrationTrigger] DurableOrchestrationContextBase context)
         {
             var scansToVerify = await context.CallActivityAsync<List<DurableOrchestrationStatus>>(
-                nameof(GetCompletedOrchestratorsWithNameActivity), "ProjectScanSupervisor");
+                nameof(GetOrchestratorsByNameActivity), "ProjectScanSupervisor");
 
             var alreadyVerifiedScans = await context.CallActivityAsync<List<string>>(
                 nameof(GetCompletedScansFromLogAnalyticsActivity), null);
@@ -27,7 +27,7 @@ namespace Functions.Completeness.Orchestrators
             {
                 var allProjectScanOrchestrators =
                     await context.CallActivityAsync<List<DurableOrchestrationStatus>>(
-                        nameof(GetCompletedOrchestratorsWithNameActivity), "ProjectScanOrchestration");
+                        nameof(GetOrchestratorsByNameActivity), "ProjectScanOrchestration");
 
                 await Task.WhenAll(filteredScansToVerify.Select(f =>
                     context.CallSubOrchestratorAsync(nameof(SingleAnalysisOrchestrator),

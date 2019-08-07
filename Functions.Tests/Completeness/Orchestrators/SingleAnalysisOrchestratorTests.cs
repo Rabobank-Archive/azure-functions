@@ -74,7 +74,7 @@ namespace Functions.Tests.Completeness.Orchestrators
             await fun.RunAsync(context);
 
             // Assert
-            await context.DidNotReceive().CallActivityAsync<List<DurableOrchestrationStatus>>(nameof(GetCompletedOrchestratorsWithNameActivity), "ProjectScanOrchestration");
+            await context.DidNotReceive().CallActivityAsync<List<DurableOrchestrationStatus>>(nameof(GetOrchestratorsByNameActivity), "ProjectScanOrchestration");
         }
 
         [Theory]
