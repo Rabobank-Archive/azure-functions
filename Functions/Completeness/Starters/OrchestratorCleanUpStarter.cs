@@ -1,14 +1,14 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using Functions.Completeness.Orchestrators;
 using Microsoft.Azure.WebJobs;
 
 namespace Functions.Completeness.Starters
 {
-    public class CompletenessCheckStarter
+    public class OrchestratorCleanUpStarter
     {
-        [FunctionName("CompletenessCheckStarter")]
-        public Task RunAsync([TimerTrigger("0 0 6 * * *", RunOnStartup=false)]
+        [FunctionName("OrchestratorCleanUpStarter")]
+        public Task RunAsync([TimerTrigger("0 0 5 * * *", RunOnStartup=false)]
             TimerInfo timerInfo, [OrchestrationClient] DurableOrchestrationClientBase orchestrationClientBase)
         {
             if (orchestrationClientBase == null)
@@ -19,7 +19,7 @@ namespace Functions.Completeness.Starters
 
         private static async Task RunInternalAsync(DurableOrchestrationClientBase orchestrationClientBase)
         {
-            await orchestrationClientBase.StartNewAsync(nameof(CompletenessCheckOrchestrator), null)
+            await orchestrationClientBase.StartNewAsync(nameof(OrchestratorCleanUpOrchestrator), null)
                 .ConfigureAwait(false);
         }
     }

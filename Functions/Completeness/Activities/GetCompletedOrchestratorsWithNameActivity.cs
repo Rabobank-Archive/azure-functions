@@ -7,7 +7,6 @@ namespace Functions.Completeness.Activities
 {
     public class GetCompletedOrchestratorsWithNameActivity
     {
-        
         [FunctionName(nameof(GetCompletedOrchestratorsWithNameActivity))]
         public async Task<IList<DurableOrchestrationStatus>> Run([ActivityTrigger] string name,
             [OrchestrationClient] DurableOrchestrationClientBase client)

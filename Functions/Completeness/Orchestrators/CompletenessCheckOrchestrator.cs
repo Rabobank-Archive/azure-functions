@@ -37,8 +37,9 @@ namespace Functions.Completeness.Orchestrators
                             AllProjectScanOrchestrators = allProjectScanOrchestrators
                         })));
             }
+
+            await Task.WhenAll(scansToVerify.Select(f =>
+                context.CallActivityAsync(nameof(PurgeSingleOrchestratorActivity), f.InstanceId)));
         }
     }
 }
-
-

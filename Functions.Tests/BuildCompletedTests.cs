@@ -46,7 +46,7 @@ namespace Functions.Tests
             var json = File.ReadAllText(Path.Combine("Assets", "buildcompleted.json"));
             var function =
                 new BuildCompletedFunction(logAnalyticsClient.Object, scan.Object, azDoClient.Object, config);
-            await function.Run(json,
+            await function.RunAsync(json,
                 new Mock<ILogger>().Object);
 
             azDoClient.Verify(x =>
@@ -82,7 +82,7 @@ namespace Functions.Tests
 
             var function = new BuildCompletedFunction(new Mock<ILogAnalyticsClient>().Object, scan.Object,
                 azuredo.Object, new EnvironmentConfig());
-            await function.Run(File.ReadAllText(Path.Combine("Assets", "buildcompleted.json")),
+            await function.RunAsync(File.ReadAllText(Path.Combine("Assets", "buildcompleted.json")),
                 new Mock<ILogger>().Object);
 
             azuredo.Verify();
@@ -117,7 +117,7 @@ namespace Functions.Tests
             // Act
             var fun = new BuildCompletedFunction(new Mock<ILogAnalyticsClient>().Object, client.Object, azdo.Object,
                 new EnvironmentConfig());
-            await fun.Run(
+            await fun.RunAsync(
                 File.ReadAllText(Path.Combine("Assets", "buildcompleted.json")),
                 new Mock<ILogger>().Object
             );
@@ -146,7 +146,7 @@ namespace Functions.Tests
 
             var function = new BuildCompletedFunction(new Mock<ILogAnalyticsClient>().Object, scan.Object,
                 azuredo.Object, new EnvironmentConfig());
-            await function.Run(File.ReadAllText(Path.Combine("Assets", "buildcompleted.json")),
+            await function.RunAsync(File.ReadAllText(Path.Combine("Assets", "buildcompleted.json")),
                 new Mock<ILogger>().Object);
 
             azuredo.Verify();
@@ -186,7 +186,7 @@ namespace Functions.Tests
             //Act
             var function = new BuildCompletedFunction(new Mock<ILogAnalyticsClient>().Object,
                 scan.Object, azuredo.Object, config);
-            await function.Run(File.ReadAllText(Path.Combine("Assets", "buildcompleted.json")),
+            await function.RunAsync(File.ReadAllText(Path.Combine("Assets", "buildcompleted.json")),
                 new Mock<ILogger>().Object);
 
             //Assert

@@ -8,13 +8,16 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{974D9CB3-B265-4904-B5AB-808549B7EC8E}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
-		azure-pipelines.yml = azure-pipelines.yml
-		NuGet.Config = NuGet.Config
 		Scripts\aad-required-permissions-manifest.json = Scripts\aad-required-permissions-manifest.json
+		azure-pipelines.yml = azure-pipelines.yml
 		Scripts\createAppRegistration.sh = Scripts\createAppRegistration.sh
+		NuGet.Config = NuGet.Config
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Functions.Tests", "Functions.Tests\Functions.Tests.csproj", "{0D4398D2-2E84-4D5E-8E85-845F3C5C1E99}"
+	ProjectSection(ProjectDependencies) = postProject
+		{74667D48-0D4F-49AD-9BF5-899198AD4FA2} = {74667D48-0D4F-49AD-9BF5-899198AD4FA2}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

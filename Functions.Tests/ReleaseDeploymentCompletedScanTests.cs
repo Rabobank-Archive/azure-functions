@@ -41,7 +41,7 @@ namespace Functions.Tests
 
             var json = ReleaseDeploymentCompletedJson();
             var fun = new ReleaseDeploymentCompletedFunction(logAnalyticsClient.Object, scan.Object, azDoClient.Object, config);
-            await fun.Run(
+            await fun.RunAsync(
                 json,
                 new Mock<ILogger>().Object
             );
@@ -80,7 +80,7 @@ namespace Functions.Tests
 
             var json = ReleaseDeploymentCompletedJson();
             var fun = new ReleaseDeploymentCompletedFunction(logAnalyticsClient.Object, client.Object, azDoClient.Object, config);
-            await fun.Run(
+            await fun.RunAsync(
                 json,
                 new Mock<ILogger>().Object
             );
@@ -115,7 +115,7 @@ namespace Functions.Tests
 
             // Act
             var fun = new ReleaseDeploymentCompletedFunction(new Mock<ILogAnalyticsClient>().Object, client.Object, azdo.Object, new EnvironmentConfig());
-            await fun.Run(
+            await fun.RunAsync(
                 ReleaseDeploymentCompletedJson(),
                 new Mock<ILogger>().Object
             );

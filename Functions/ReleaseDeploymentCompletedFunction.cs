@@ -36,13 +36,18 @@ namespace Functions
 
 
         [FunctionName(nameof(ReleaseDeploymentCompletedFunction))]
-        public async Task Run(
+        public Task RunAsync(
             [QueueTrigger("releasedeploymentcompleted", Connection = "eventQueueStorageConnectionString")]string data,
             ILogger log)
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
             if (log == null) throw new ArgumentNullException(nameof(log));
 
+            return RunInternalAsync(data);
+        }
+
+        private async Task RunInternalAsync(string data)
+        {
             var report = await _scan.GetCompletedReportAsync(JObject.Parse(data));
             await _client.AddCustomLogJsonAsync("DeploymentStatus", report, "Date");
             await RetryHelper.ExecuteInvalidDocumentVersionPolicy(_config.Organization, () => UpdateExtensionData(report));
