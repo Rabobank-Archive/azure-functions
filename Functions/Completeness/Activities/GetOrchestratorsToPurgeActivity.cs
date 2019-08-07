@@ -11,7 +11,7 @@ namespace Functions.Completeness.Activities
         private const int DaysOld = 14;
 
         [FunctionName(nameof(GetOrchestratorsToPurgeActivity))]
-        public async Task<IList<DurableOrchestrationStatus>> Run([ActivityTrigger]
+        public async Task<IList<DurableOrchestrationStatus>> Run([ActivityTrigger] DurableActivityContextBase context,
             [OrchestrationClient] DurableOrchestrationClientBase client)
         {
             var orchestrators = (await client.GetStatusAsync())
