@@ -1,4 +1,4 @@
-$aadDisplayName = "TAS compliancy completeness checker"
+$aad-display-name =
 $aadIdentifierUri = "http://compliancycheckercompleteness.tas"
 $homepageUrl = "http://localhost:3000/login"
 $aadPassword = ConvertTo-SecureString "8dz1s7hq4GqUrasJFg0H35%bbM4UTcGM%*IJdU!fRb$%IjfJkBKX$%zpYw8lkWA" -AsPlainText -Force
@@ -10,8 +10,8 @@ $scope = "/subscriptions/$( $subscriptionId )/resourceGroups/$( $loganalyticsRes
 
 $ErrorActionPreference = "Stop"
 
-Write-Host "Check if there exists an application with $( $aadDisplayName )"
-$appReg = Get-AzADApplication -DisplayName $aadDisplayName
+Write-Host "Check if there exists an application with $( $aad-display-name )"
+$appReg = Get-AzADApplication -DisplayName $aad-display-name
 #if ($appReg -eq $null)
 #{
 #    try
