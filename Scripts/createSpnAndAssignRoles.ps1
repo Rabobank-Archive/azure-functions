@@ -13,7 +13,6 @@ Write-Host "Check if there exists an application with name $( $aadDisplayName )"
 $appReg = Get-AzADApplication -DisplayName $aadDisplayName
 if ($appReg -eq $null) {
     Write-Error -Message "No application found with name $( $aadDisplayName ). Stopping script"
-    Break
 }
 else
 {
