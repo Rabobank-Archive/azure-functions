@@ -1,4 +1,3 @@
-$aad-display-name =
 $aadIdentifierUri = "http://compliancycheckercompleteness.tas"
 $homepageUrl = "http://localhost:3000/login"
 $aadPassword = ConvertTo-SecureString "8dz1s7hq4GqUrasJFg0H35%bbM4UTcGM%*IJdU!fRb$%IjfJkBKX$%zpYw8lkWA" -AsPlainText -Force
