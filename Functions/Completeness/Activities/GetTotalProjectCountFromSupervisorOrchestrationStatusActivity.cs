@@ -22,5 +22,3 @@ namespace Functions.Completeness.Activities
         }
     }
 }
-
-
