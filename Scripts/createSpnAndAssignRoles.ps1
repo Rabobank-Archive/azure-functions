@@ -39,7 +39,7 @@ else
     Write-Host "Found Service Principal for application with name $( $aadDisplayName ). The SPN exists with id $($sp.Id)"
 }
 
-Write-Host "Check if there is a Roleassignment"
+Write-Host "Check if there is a Roleassignment Contributor for Service Principal with id $( $sp.Id )"
 $role = Get-AzRoleAssignment -RoleDefinitionName Contributor -ServicePrincipalName $sp.ApplicationId
 $NewRole = $null
 
