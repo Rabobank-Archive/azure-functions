@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoFixture;
@@ -5,6 +7,7 @@ using AutoFixture.AutoNSubstitute;
 using AzDoCompliancy.CustomStatus;
 using Functions.Completeness.Activities;
 using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
 using Shouldly;
@@ -15,6 +18,7 @@ namespace Functions.Tests.Completeness.Activities
     public class GetCompletedOrchestratorsWithNameActivityTests
     {
         private readonly Fixture _fixture;
+        private readonly string _finalContinuationToken = System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes("null"));
 
         public GetCompletedOrchestratorsWithNameActivityTests()
         {
@@ -36,7 +40,8 @@ namespace Functions.Tests.Completeness.Activities
             instances[3].Name = "ProjectScanSupervisor";
             
             var client = Substitute.For<DurableOrchestrationClientBase>();
-            client.GetStatusAsync().Returns(instances);
+            client.GetStatusAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>(), Arg.Any<IEnumerable<OrchestrationRuntimeStatus>>(), Arg.Any<int>(), string.Empty)
+                .Returns(new OrchestrationStatusQueryResult { DurableOrchestrationState = instances, ContinuationToken = _finalContinuationToken });
 
             var func = new GetOrchestratorsByNameActivity();
             var instancesToVerify = await func.Run("ProjectScanSupervisor", client);
@@ -66,7 +71,8 @@ namespace Functions.Tests.Completeness.Activities
             instances[6].RuntimeStatus = runtimeStatus;
 
             var client = Substitute.For<DurableOrchestrationClientBase>();
-            client.GetStatusAsync().Returns(instances);
+            client.GetStatusAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>(), Arg.Any<IEnumerable<OrchestrationRuntimeStatus>>(), Arg.Any<int>(), string.Empty)
+                .Returns(new OrchestrationStatusQueryResult { DurableOrchestrationState = instances, ContinuationToken = _finalContinuationToken });
 
             var func = new GetOrchestratorsByNameActivity();
             var instancesToVerify = await func.Run("ProjectScanSupervisor", client);
