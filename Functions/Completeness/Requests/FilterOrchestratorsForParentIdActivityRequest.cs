@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Functions.Completeness.Responses;
+using Functions.Completeness.Model;
 
 namespace Functions.Completeness.Requests
 {

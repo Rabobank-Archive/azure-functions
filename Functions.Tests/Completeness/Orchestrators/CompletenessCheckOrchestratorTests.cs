@@ -7,7 +7,7 @@ using AzDoCompliancy.CustomStatus;
 using Functions.Completeness.Activities;
 using Functions.Completeness.Orchestrators;
 using Functions.Completeness.Requests;
-using Functions.Completeness.Responses;
+using Functions.Completeness.Model;
 using Microsoft.Azure.WebJobs;
 using Newtonsoft.Json.Linq;
 using NSubstitute;

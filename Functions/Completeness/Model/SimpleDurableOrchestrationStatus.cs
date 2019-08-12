@@ -2,7 +2,7 @@
 using Newtonsoft.Json.Linq;
 using System;
 
-namespace Functions.Completeness.Responses
+namespace Functions.Completeness.Model
 {
     public class SimpleDurableOrchestrationStatus
     {

@@ -5,7 +5,7 @@ using AutoFixture.AutoNSubstitute;
 using AzDoCompliancy.CustomStatus;
 using Functions.Completeness.Activities;
 using Functions.Completeness.Requests;
-using Functions.Completeness.Responses;
+using Functions.Completeness.Model;
 using Newtonsoft.Json.Linq;
 using Shouldly;
 using Xunit;

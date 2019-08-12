@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -5,9 +6,9 @@ using AutoFixture;
 using AutoFixture.AutoNSubstitute;
 using AzDoCompliancy.CustomStatus;
 using Functions.Completeness.Activities;
+using Functions.Completeness.Model;
 using Functions.Completeness.Orchestrators;
 using Functions.Completeness.Requests;
-using Functions.Completeness.Responses;
 using Microsoft.Azure.WebJobs;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
@@ -53,8 +54,10 @@ namespace Functions.Tests.Completeness.Orchestrators
                 Arg.Any<SimpleDurableOrchestrationStatus>());
             await context.Received().CallActivityAsync<IList<SimpleDurableOrchestrationStatus>>(
                 nameof(FilterOrchestratorsForParentIdActivity), Arg.Any<FilterOrchestratorsForParentIdActivityRequest>());
+            await context.Received().CallActivityAsync<CompletenessAnalysisResult>
+                (nameof(CreateAnalysisResultActivity), Arg.Any<CreateAnalysisResultActivityRequest>());
             await context.Received().CallActivityAsync(nameof(UploadAnalysisResultToLogAnalyticsActivity),
-                Arg.Any<UploadAnalysisResultToLogAnalyticsActivityRequest>());
+                Arg.Any<CompletenessAnalysisResult>());
         }
 
         [Fact]
@@ -72,8 +75,8 @@ namespace Functions.Tests.Completeness.Orchestrators
             await fun.RunAsync(context);
 
             // Assert
-            await context.DidNotReceive().CallActivityAsync<List<SimpleDurableOrchestrationStatus>>(
-                nameof(UploadAnalysisResultToLogAnalyticsActivityRequest), null);
+            await context.DidNotReceive().CallActivityAsync(nameof(UploadAnalysisResultToLogAnalyticsActivity),
+                Arg.Any<CompletenessAnalysisResult>());
         }
 
         [Theory]

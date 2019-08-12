@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Functions.Completeness.Requests;
-using Functions.Completeness.Responses;
+using Functions.Completeness.Model;
 using Microsoft.Azure.WebJobs;
 
 namespace Functions.Completeness.Activities

@@ -19,7 +19,7 @@ namespace Functions.Tests.Completeness.Activities
             
             // Arrange
             var client = Substitute.For<ILogAnalyticsClient>();
-            var request = fixture.Create<UploadAnalysisResultToLogAnalyticsActivityRequest>();
+            var request = fixture.Create<CompletenessAnalysisResult>();
 
             var fun = new UploadAnalysisResultToLogAnalyticsActivity(client);
             

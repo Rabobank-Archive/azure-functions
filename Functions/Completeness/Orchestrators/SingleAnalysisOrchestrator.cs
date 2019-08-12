@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Functions.Completeness.Activities;
+using Functions.Completeness.Model;
 using Functions.Completeness.Requests;
-using Functions.Completeness.Responses;
 using Microsoft.Azure.WebJobs;
 
 namespace Functions.Completeness.Orchestrators
@@ -31,7 +31,7 @@ namespace Functions.Completeness.Orchestrators
             if (totalProjectCount == null)
                 return;
 
-            var projectScanOrchestratorsForThisAnalysis =
+            var projectScanOrchestratorsForThisAnalysis = 
                 await context.CallActivityAsync<IList<SimpleDurableOrchestrationStatus>>(
                     nameof(FilterOrchestratorsForParentIdActivity),
                     new FilterOrchestratorsForParentIdActivityRequest
@@ -40,20 +40,19 @@ namespace Functions.Completeness.Orchestrators
                         InstancesToFilter = singleAnalysisRequest.AllProjectScanOrchestrators
                     });
 
-            await context.CallActivityAsync(nameof(UploadAnalysisResultToLogAnalyticsActivity),
-                new UploadAnalysisResultToLogAnalyticsActivityRequest
+            var analysisResult = await context.CallActivityAsync<CompletenessAnalysisResult>(
+                nameof(CreateAnalysisResultActivity), 
+                new CreateAnalysisResultActivityRequest
                 {
                     AnalysisCompleted = context.CurrentUtcDateTime,
-                    SupervisorStarted = singleAnalysisRequest.InstanceToAnalyze.CreatedTime,
-                    SupervisorOrchestratorId = singleAnalysisRequest.InstanceToAnalyze.InstanceId,
+                    SupervisorOrchestrator = singleAnalysisRequest.InstanceToAnalyze,
                     TotalProjectCount = (int)totalProjectCount,
-                    ScannedProjectCount = projectScanOrchestratorsForThisAnalysis
-                        .Where(x => x.RuntimeStatus == OrchestrationRuntimeStatus.Completed)
-                        .ToList()
-                        .Count
+                    ProjectScanOrchestrators = projectScanOrchestratorsForThisAnalysis
                 });
 
-           await Task.WhenAll(projectScanOrchestratorsForThisAnalysis.Select(f =>
+            await context.CallActivityAsync(nameof(UploadAnalysisResultToLogAnalyticsActivity), analysisResult);
+            
+            await Task.WhenAll(projectScanOrchestratorsForThisAnalysis.Select(f =>
                 context.CallActivityAsync(nameof(PurgeSingleOrchestratorActivity), f.InstanceId)));
         }
     }

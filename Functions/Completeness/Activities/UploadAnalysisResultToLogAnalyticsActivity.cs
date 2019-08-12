@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Functions.Completeness.Model;
-using Functions.Completeness.Requests;
 using LogAnalytics.Client;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
@@ -18,7 +17,7 @@ namespace Functions.Completeness.Activities
         }
 
         [FunctionName(nameof(UploadAnalysisResultToLogAnalyticsActivity))]
-        public Task RunAsync([ActivityTrigger] UploadAnalysisResultToLogAnalyticsActivityRequest request, ILogger logger)
+        public Task RunAsync([ActivityTrigger] CompletenessAnalysisResult request, ILogger logger)
         {
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
@@ -26,17 +25,9 @@ namespace Functions.Completeness.Activities
             return RunInternalAsync(request, logger);
         }
 
-        private async Task RunInternalAsync(UploadAnalysisResultToLogAnalyticsActivityRequest request, ILogger logger)
+        private async Task RunInternalAsync(CompletenessAnalysisResult request, ILogger logger)
         {
-            var data = new CompletenessAnalysisResult
-            {
-                AnalysisCompleted = request.AnalysisCompleted,
-                SupervisorStarted = request.SupervisorStarted,
-                SupervisorOrchestratorId = request.SupervisorOrchestratorId,
-                TotalProjectCount = request.TotalProjectCount,
-                ScannedProjectCount = request.ScannedProjectCount,
-            };
-            await _client.AddCustomLogJsonAsync("completeness_log", new[] { data }, "AnalysisCompleted").ConfigureAwait(false);
+            await _client.AddCustomLogJsonAsync("completeness_log", new[] { request }, "AnalysisCompleted").ConfigureAwait(false);
 
             logger.LogInformation(
                 $"Analyzed completeness! Supervisor id: '{request.SupervisorOrchestratorId}', started at '{request.SupervisorStarted}'. " +

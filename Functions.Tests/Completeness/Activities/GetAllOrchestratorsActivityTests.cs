@@ -6,7 +6,7 @@ using AutoFixture;
 using AutoFixture.AutoNSubstitute;
 using AzDoCompliancy.CustomStatus;
 using Functions.Completeness.Activities;
-using Functions.Completeness.Responses;
+using Functions.Completeness.Model;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Newtonsoft.Json.Linq;
