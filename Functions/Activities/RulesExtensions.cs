@@ -20,6 +20,7 @@ namespace Functions.Activities
                 Status = await rule.EvaluateAsync(projectId, itemId),
                 Description = rule.Description,
                 Why = rule.Why,
+                IsSox = rule.IsSox,
                 Reconcile = ReconcileFunction.ReconcileFromRule(rule as IReconcile, environmentConfig, projectId, scope, itemId)
             }).ToList());
         }

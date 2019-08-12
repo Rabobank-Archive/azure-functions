@@ -42,6 +42,7 @@ namespace Functions.Activities
                     Name = r.GetType().Name,
                     Description = r.Description,
                     Why = r.Why,
+                    IsSox = r.IsSox,
                     Status = await r.EvaluateAsync(project.Name),
                     Reconcile = ReconcileFunction.ReconcileFromRule(_config, project.Name, r as IProjectReconcile)
                 }).ToList())
