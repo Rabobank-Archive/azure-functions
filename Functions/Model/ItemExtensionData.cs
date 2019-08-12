@@ -17,6 +17,7 @@ namespace Functions.Model
                     Scope = scope,
                     Item = report.Item,
                     Rule = rule.Name,
+                    IsSox = rule.IsSox,
                     Status = rule.Status,
                     ScanId = GetSupervisorId(instanceId), 
                     EvaluatedDate = Date
