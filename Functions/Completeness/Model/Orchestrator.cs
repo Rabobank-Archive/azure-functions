@@ -4,7 +4,7 @@ using System;
 
 namespace Functions.Completeness.Model
 {
-    public class SimpleDurableOrchestrationStatus
+    public class Orchestrator
     {
         public string Name { get; set; }
         public string InstanceId { get; set; }

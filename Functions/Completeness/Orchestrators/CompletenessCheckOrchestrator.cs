@@ -13,30 +13,30 @@ namespace Functions.Completeness.Orchestrators
         [FunctionName(nameof(CompletenessCheckOrchestrator))]
         public async Task RunAsync([OrchestrationTrigger] DurableOrchestrationContextBase context)
         {
-            (var projectScanSupervisors, var projectScanOrchestrators) = 
-                await context.CallActivityAsync<(IList<SimpleDurableOrchestrationStatus>, IList<SimpleDurableOrchestrationStatus>)>
-                    (nameof(GetAllOrchestratorsActivity), null);
+            (var allSupervisors, var allProjectScanners) =
+                await context.CallActivityAsync<(IList<Orchestrator>, IList<Orchestrator>)>(
+                    nameof(GetAllOrchestratorsActivity), null);
 
-            var alreadyVerifiedScans = await context.CallActivityAsync<IList<string>>(
-                nameof(GetCompletedScansFromLogAnalyticsActivity), null);
+            var scannedSupervisors =
+                await context.CallActivityAsync<IList<string>>(nameof(GetScannedSupervisorsActivity), null);
 
-            var filteredScansToVerify = await context.CallActivityAsync<IList<SimpleDurableOrchestrationStatus>>(
-                nameof(FilterAlreadyAnalyzedOrchestratorsActivity),
-                new FilterAlreadyAnalyzedOrchestratorsActivityRequest
-                { InstancesToAnalyze = projectScanSupervisors, InstanceIdsAlreadyAnalyzed = alreadyVerifiedScans });
+            var filteredSupervisors =
+                await context.CallActivityAsync<IList<Orchestrator>>(nameof(FilterSupervisorsActivity),
+                    new FilterSupervisorsRequest
+                    {
+                        AllSupervisors = allSupervisors,
+                        ScannedSupervisors = scannedSupervisors
+                    });
 
-            if (filteredScansToVerify.Count > 0)
-            {
-                await Task.WhenAll(filteredScansToVerify.Select(f =>
-                    context.CallSubOrchestratorAsync(nameof(SingleAnalysisOrchestrator),
-                        new SingleAnalysisOrchestratorRequest
-                        {
-                            InstanceToAnalyze = f,
-                            AllProjectScanOrchestrators = projectScanOrchestrators
-                        })));
-            }
+            await Task.WhenAll(filteredSupervisors.Select(f =>
+                context.CallSubOrchestratorAsync(nameof(SingleCompletenessCheckOrchestrator),
+                    new SingleCompletenessCheckRequest
+                    {
+                        Supervisor = f,
+                        AllProjectScanners = allProjectScanners
+                    })));
 
-            await Task.WhenAll(projectScanSupervisors.Select(f =>
+            await Task.WhenAll(allSupervisors.Select(f =>
                 context.CallActivityAsync(nameof(PurgeSingleOrchestratorActivity), f.InstanceId)));
         }
     }

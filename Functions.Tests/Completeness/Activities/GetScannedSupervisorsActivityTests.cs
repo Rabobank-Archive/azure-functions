@@ -11,10 +11,11 @@ using Xunit;
 
 namespace Functions.Tests.Completeness.Activities
 {
-    public class GetCompletedScansFromLogAnalyticsActivityTests
+    public class GetScannedSupervisorsActivityTests
     {
         private readonly Fixture _fixture;
-        public GetCompletedScansFromLogAnalyticsActivityTests()
+
+        public GetScannedSupervisorsActivityTests()
         {
             _fixture = new Fixture();
             _fixture.Customize(new AutoNSubstituteCustomization());
@@ -24,13 +25,11 @@ namespace Functions.Tests.Completeness.Activities
         public async Task ShouldQueryLogAnalytics()
         {
             // Arrange
-            var response = _fixture.Create<LogAnalyticsQueryResponse>();
-
             var client = Substitute.For<ILogAnalyticsClient>();
-            client.QueryAsync(Arg.Any<string>()).Returns(response);
+            client.QueryAsync(Arg.Any<string>()).Returns(_fixture.Create<LogAnalyticsQueryResponse>());
 
             // Act
-            var fun = new GetCompletedScansFromLogAnalyticsActivity(client);
+            var fun = new GetScannedSupervisorsActivity(client);
             await fun.RunAsync(Substitute.For<DurableActivityContextBase>());
 
             // Assert
@@ -55,7 +54,7 @@ namespace Functions.Tests.Completeness.Activities
             client.QueryAsync(Arg.Any<string>()).Returns(response);
 
             // Act
-            var fun = new GetCompletedScansFromLogAnalyticsActivity(client);
+            var fun = new GetScannedSupervisorsActivity(client);
             var result = await fun.RunAsync(Substitute.For<DurableActivityContextBase>());
 
             // Assert
@@ -70,7 +69,7 @@ namespace Functions.Tests.Completeness.Activities
             client.QueryAsync(Arg.Any<string>()).Returns((LogAnalyticsQueryResponse)null);
 
             // Act
-            var fun = new GetCompletedScansFromLogAnalyticsActivity(client);
+            var fun = new GetScannedSupervisorsActivity(client);
             var result = await fun.RunAsync(Substitute.For<DurableActivityContextBase>());
 
             // Assert

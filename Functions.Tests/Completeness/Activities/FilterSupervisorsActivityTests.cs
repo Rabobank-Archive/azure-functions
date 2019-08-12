@@ -13,15 +13,15 @@ using Xunit;
 
 namespace Functions.Tests.Completeness.Activities
 {
-    public class FilterAlreadyAnalyzedOrchestratorsActivityTests
+    public class FilterSupervisorsActivityTests
     {
         private readonly Fixture _fixture;
 
-        public FilterAlreadyAnalyzedOrchestratorsActivityTests()
+        public FilterSupervisorsActivityTests()
         {
             _fixture = new Fixture();
             _fixture.Customize(new AutoNSubstituteCustomization());
-            _fixture.Customize<SimpleDurableOrchestrationStatus>(s => s
+            _fixture.Customize<Orchestrator>(s => s
                 .With(d => d.CustomStatus, JToken.FromObject(new CustomStatusBase())));
         }
         
@@ -29,7 +29,7 @@ namespace Functions.Tests.Completeness.Activities
         public void ShouldReturnOnlyInstancesThatHaveNotBeenScanned()
         {
             //Arrange
-            var instances = _fixture.CreateMany<SimpleDurableOrchestrationStatus>(10).ToList();
+            var instances = _fixture.CreateMany<Orchestrator>(10).ToList();
             var instanceIds = new List<string>
             {
                 instances[0].InstanceId,
@@ -37,14 +37,14 @@ namespace Functions.Tests.Completeness.Activities
                 instances[6].InstanceId,
                 _fixture.Create<string>()
             };
-            var request = new FilterAlreadyAnalyzedOrchestratorsActivityRequest
+            var request = new FilterSupervisorsRequest
             {
-                InstancesToAnalyze = instances,
-                InstanceIdsAlreadyAnalyzed = instanceIds
+                AllSupervisors = instances,
+                ScannedSupervisors = instanceIds
             };
 
             //Act
-            var fun = new FilterAlreadyAnalyzedOrchestratorsActivity();
+            var fun = new FilterSupervisorsActivity();
             var filteredInstances = fun.Run(request);
 
             //Assert

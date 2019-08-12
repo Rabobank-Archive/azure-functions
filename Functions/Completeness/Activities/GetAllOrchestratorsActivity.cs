@@ -11,8 +11,9 @@ namespace Functions.Completeness.Activities
     public class GetAllOrchestratorsActivity
     {
         [FunctionName(nameof(GetAllOrchestratorsActivity))]
-        public async Task<(IList<SimpleDurableOrchestrationStatus>, IList<SimpleDurableOrchestrationStatus>)> RunAsync(
-            [ActivityTrigger] DurableActivityContextBase context, [OrchestrationClient] DurableOrchestrationClientBase client)
+        public async Task<(IList<Orchestrator>, IList<Orchestrator>)> RunAsync(
+            [ActivityTrigger] DurableActivityContextBase context, 
+            [OrchestrationClient] DurableOrchestrationClientBase client)
         {
             var runtimeStatuses = new List<OrchestrationRuntimeStatus>
             {
@@ -21,15 +22,15 @@ namespace Functions.Completeness.Activities
                 OrchestrationRuntimeStatus.Canceled,
                 OrchestrationRuntimeStatus.Terminated
             };
-
             var allOrchestrators = new List<DurableOrchestrationStatus>();
             var continuationToken = string.Empty;
+
             do
             {
-                var orchestratorsPage = await client.GetStatusAsync(DateTime.Now.AddDays(-2), DateTime.Now, runtimeStatuses, 1000, continuationToken).ConfigureAwait(false);
-
+                var orchestratorsPage = await client.GetStatusAsync(DateTime.Now.AddDays(-2), DateTime.Now, 
+                    runtimeStatuses, 1000, continuationToken)
+                    .ConfigureAwait(false);
                 allOrchestrators.AddRange(orchestratorsPage.DurableOrchestrationState);
-
                 continuationToken = orchestratorsPage.ContinuationToken;
             }
             while (Encoding.UTF8.GetString(Convert.FromBase64String(continuationToken)) != "null");
@@ -37,24 +38,24 @@ namespace Functions.Completeness.Activities
             return (
                 allOrchestrators
                     .Where(x => x.Name == "ProjectScanSupervisor")
-                    .Select(x => ConvertToSimpleDurableOrchestrationStatus(x))
+                    .Select(x => ConvertToOrchestrator(x))
                     .ToList(),
                 allOrchestrators
                     .Where(x => x.Name == "ProjectScanOrchestration")
-                    .Select(x => ConvertToSimpleDurableOrchestrationStatus(x))
+                    .Select(x => ConvertToOrchestrator(x))
                     .ToList()
             );
         }
 
-        private SimpleDurableOrchestrationStatus ConvertToSimpleDurableOrchestrationStatus(DurableOrchestrationStatus orchestrator)
+        private Orchestrator ConvertToOrchestrator(DurableOrchestrationStatus orchestrator)
         {
-            return new SimpleDurableOrchestrationStatus
+            return new Orchestrator
             {
                 Name = orchestrator.Name,
                 InstanceId = orchestrator.InstanceId,
                 CreatedTime = orchestrator.CreatedTime,
                 RuntimeStatus = orchestrator.RuntimeStatus,
-                CustomStatus = orchestrator.CustomStatus
+                CustomStatus = orchestrator?.CustomStatus
             };
         }
     }

@@ -6,7 +6,6 @@ using AutoFixture;
 using AutoFixture.AutoNSubstitute;
 using AzDoCompliancy.CustomStatus;
 using Functions.Completeness.Activities;
-using Functions.Completeness.Model;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Newtonsoft.Json.Linq;
@@ -19,7 +18,7 @@ namespace Functions.Tests.Completeness.Activities
     public class GetAllOrchestratorsActivityTests
     {
         private readonly Fixture _fixture;
-        private readonly string _finalContinuationToken = System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes("null"));
+        private readonly string _finalContinuationToken = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes("null"));
 
         public GetAllOrchestratorsActivityTests()
         {
@@ -57,6 +56,34 @@ namespace Functions.Tests.Completeness.Activities
             supervisors[0].Name.ShouldBe("ProjectScanSupervisor");
             projectScanOrchestrators.Count.ShouldBe(2);
             projectScanOrchestrators[0].Name.ShouldBe("ProjectScanOrchestration");
+        }
+
+        [Fact]
+        public async Task ShouldNotBreakIfNoCustomStatus()
+        {
+            //Arrange
+            _fixture.Customize<DurableOrchestrationStatus>(o => o
+                .With(i => i.Name, "ProjectScanSupervisor")
+                .With(i => i.RuntimeStatus, OrchestrationRuntimeStatus.Completed)
+                .With(d => d.Input, JToken.FromObject(new { }))
+                .With(d => d.Output, JToken.FromObject(new { }))
+                .Without(d => d.CustomStatus));
+
+            var client = Substitute.For<DurableOrchestrationClientBase>();
+            client.GetStatusAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>(), Arg.Any<IEnumerable<OrchestrationRuntimeStatus>>(),
+                    Arg.Any<int>(), string.Empty)
+                .Returns(new OrchestrationStatusQueryResult
+                {
+                    DurableOrchestrationState = _fixture.CreateMany<DurableOrchestrationStatus>(1).ToList(),
+                    ContinuationToken = _finalContinuationToken
+                });
+
+            //Act
+            var func = new GetAllOrchestratorsActivity();
+            (var supervisors, var projectScanOrchestrators) = await func.RunAsync(null, client);
+
+            // Assert
+            supervisors[0].CustomStatus.ShouldBeNull();
         }
     }
 }
