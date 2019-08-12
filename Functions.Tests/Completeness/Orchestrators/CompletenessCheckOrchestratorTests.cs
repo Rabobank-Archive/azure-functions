@@ -7,6 +7,7 @@ using AzDoCompliancy.CustomStatus;
 using Functions.Completeness.Activities;
 using Functions.Completeness.Orchestrators;
 using Functions.Completeness.Requests;
+using Functions.Completeness.Responses;
 using Microsoft.Azure.WebJobs;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
@@ -21,9 +22,7 @@ namespace Functions.Tests.Completeness.Orchestrators
         {
             _fixture = new Fixture();
             _fixture.Customize(new AutoNSubstituteCustomization());
-            _fixture.Customize<DurableOrchestrationStatus>(s => s
-                .With(d => d.Input, JToken.FromObject(new { }))
-                .With(d => d.Output, JToken.FromObject(new{ }))
+            _fixture.Customize<SimpleDurableOrchestrationStatus>(s => s
                 .With(d => d.CustomStatus, JToken.FromObject(new CustomStatusBase())));
         }
         
@@ -32,23 +31,25 @@ namespace Functions.Tests.Completeness.Orchestrators
         {
             //Arrange
             var orchestrationContext = Substitute.For<DurableOrchestrationContextBase>();
-            orchestrationContext.CallActivityAsync<List<DurableOrchestrationStatus>>(nameof(FilterAlreadyAnalyzedOrchestratorsActivity),
-                    Arg.Any<FilterAlreadyAnalyzedOrchestratorsActivityRequest>())
-                .Returns(_fixture.CreateMany<DurableOrchestrationStatus>(1).ToList());
-            orchestrationContext.CallActivityAsync<List<DurableOrchestrationStatus>>(
-                    nameof(GetOrchestratorsByNameActivity), "ProjectScanSupervisor")
-                .Returns(_fixture.CreateMany<DurableOrchestrationStatus>(1).ToList());
+            orchestrationContext.CallActivityAsync<IList<SimpleDurableOrchestrationStatus>>(
+                    nameof(FilterAlreadyAnalyzedOrchestratorsActivity), Arg.Any<FilterAlreadyAnalyzedOrchestratorsActivityRequest>())
+                .Returns(_fixture.CreateMany<SimpleDurableOrchestrationStatus>(1).ToList());
+            orchestrationContext.CallActivityAsync<(IList<SimpleDurableOrchestrationStatus>, IList<SimpleDurableOrchestrationStatus>)>(
+                    nameof(GetAllOrchestratorsActivity), null)
+                .Returns((_fixture.CreateMany<SimpleDurableOrchestrationStatus>(1).ToList(), 
+                    _fixture.CreateMany<SimpleDurableOrchestrationStatus>(1).ToList()));
 
             //Act
             var function = new CompletenessCheckOrchestrator();
             await function.RunAsync(orchestrationContext);
 
             //Assert
-            await orchestrationContext.Received().CallActivityAsync<List<DurableOrchestrationStatus>>(nameof(GetOrchestratorsByNameActivity), "ProjectScanSupervisor");
-            await orchestrationContext.Received().CallActivityAsync<List<string>>(nameof(GetCompletedScansFromLogAnalyticsActivity), null);
-            await orchestrationContext.Received().CallActivityAsync<List<DurableOrchestrationStatus>>(nameof(FilterAlreadyAnalyzedOrchestratorsActivity),
-                Arg.Any<FilterAlreadyAnalyzedOrchestratorsActivityRequest>());
-            await orchestrationContext.Received().CallActivityAsync<List<DurableOrchestrationStatus>>(nameof(GetOrchestratorsByNameActivity), "ProjectScanOrchestration");
+            await orchestrationContext.Received().CallActivityAsync<(IList<SimpleDurableOrchestrationStatus>, 
+                IList<SimpleDurableOrchestrationStatus>)>(nameof(GetAllOrchestratorsActivity), null);
+            await orchestrationContext.Received().CallActivityAsync<IList<string>>(
+                nameof(GetCompletedScansFromLogAnalyticsActivity), null);
+            await orchestrationContext.Received().CallActivityAsync<IList<SimpleDurableOrchestrationStatus>>(
+                nameof(FilterAlreadyAnalyzedOrchestratorsActivity), Arg.Any<FilterAlreadyAnalyzedOrchestratorsActivityRequest>());
         }
 
         [Theory]
@@ -61,12 +62,13 @@ namespace Functions.Tests.Completeness.Orchestrators
         {
             //Arrange
             var orchestrationContext = Substitute.For<DurableOrchestrationContextBase>();
-            orchestrationContext.CallActivityAsync<List<DurableOrchestrationStatus>>(nameof(FilterAlreadyAnalyzedOrchestratorsActivity),
-                Arg.Any<FilterAlreadyAnalyzedOrchestratorsActivityRequest>())
-                .Returns(_fixture.CreateMany<DurableOrchestrationStatus>(count).ToList());
-            orchestrationContext.CallActivityAsync<List<DurableOrchestrationStatus>>(
-                    nameof(GetOrchestratorsByNameActivity), "ProjectScanSupervisor")
-                .Returns(_fixture.CreateMany<DurableOrchestrationStatus>(1).ToList());
+            orchestrationContext.CallActivityAsync<IList<SimpleDurableOrchestrationStatus>>(
+                    nameof(FilterAlreadyAnalyzedOrchestratorsActivity), Arg.Any<FilterAlreadyAnalyzedOrchestratorsActivityRequest>())
+                .Returns(_fixture.CreateMany<SimpleDurableOrchestrationStatus>(count).ToList());
+            orchestrationContext.CallActivityAsync<(IList<SimpleDurableOrchestrationStatus>, IList<SimpleDurableOrchestrationStatus>)>(
+                    nameof(GetAllOrchestratorsActivity), null)
+                .Returns((_fixture.CreateMany<SimpleDurableOrchestrationStatus>(1).ToList(),
+                    _fixture.CreateMany<SimpleDurableOrchestrationStatus>(1).ToList()));
 
             //Act
             var function = new CompletenessCheckOrchestrator();
@@ -87,12 +89,13 @@ namespace Functions.Tests.Completeness.Orchestrators
         {
             //Arrange
             var orchestrationContext = Substitute.For<DurableOrchestrationContextBase>();
-            orchestrationContext.CallActivityAsync<List<DurableOrchestrationStatus>>(nameof(FilterAlreadyAnalyzedOrchestratorsActivity),
-                Arg.Any<FilterAlreadyAnalyzedOrchestratorsActivityRequest>())
-                .Returns(_fixture.CreateMany<DurableOrchestrationStatus>(count).ToList());
-            orchestrationContext.CallActivityAsync<List<DurableOrchestrationStatus>>(
-                    nameof(GetOrchestratorsByNameActivity), "ProjectScanSupervisor")
-                .Returns(_fixture.CreateMany<DurableOrchestrationStatus>(count).ToList());
+            orchestrationContext.CallActivityAsync<IList<SimpleDurableOrchestrationStatus>>(
+                    nameof(FilterAlreadyAnalyzedOrchestratorsActivity), Arg.Any<FilterAlreadyAnalyzedOrchestratorsActivityRequest>())
+                .Returns(_fixture.CreateMany<SimpleDurableOrchestrationStatus>(1).ToList());
+            orchestrationContext.CallActivityAsync<(IList<SimpleDurableOrchestrationStatus>, IList<SimpleDurableOrchestrationStatus>)>(
+                    nameof(GetAllOrchestratorsActivity), null)
+                .Returns((_fixture.CreateMany<SimpleDurableOrchestrationStatus>(count).ToList(),
+                    _fixture.CreateMany<SimpleDurableOrchestrationStatus>(1).ToList()));
 
             //Act
             var function = new CompletenessCheckOrchestrator();

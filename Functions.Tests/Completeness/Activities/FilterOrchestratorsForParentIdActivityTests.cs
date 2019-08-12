@@ -5,7 +5,7 @@ using AutoFixture.AutoNSubstitute;
 using AzDoCompliancy.CustomStatus;
 using Functions.Completeness.Activities;
 using Functions.Completeness.Requests;
-using Microsoft.Azure.WebJobs;
+using Functions.Completeness.Responses;
 using Newtonsoft.Json.Linq;
 using Shouldly;
 using Xunit;
@@ -19,9 +19,7 @@ namespace Functions.Tests.Completeness.Activities
         {
             _fixture = new Fixture();
             _fixture.Customize(new AutoNSubstituteCustomization());
-            _fixture.Customize<DurableOrchestrationStatus>(s => s
-                .With(d => d.Input, JToken.FromObject(new { }))
-                .With(d => d.Output, JToken.FromObject(new { }))
+            _fixture.Customize<SimpleDurableOrchestrationStatus>(s => s
                 .With(d => d.CustomStatus, JToken.FromObject(new CustomStatusBase())));
         }
 
@@ -50,7 +48,7 @@ namespace Functions.Tests.Completeness.Activities
             var request = new FilterOrchestratorsForParentIdActivityRequest
             {
                 ParentId = "1234-5678-90",
-                InstancesToFilter = _fixture.CreateMany<DurableOrchestrationStatus>(10).ToList()
+                InstancesToFilter = _fixture.CreateMany<SimpleDurableOrchestrationStatus>(10).ToList()
             };
             
             //Act
@@ -61,19 +59,16 @@ namespace Functions.Tests.Completeness.Activities
             filteredInstances.Count.ShouldBe(0);
         }
 
-        private List<DurableOrchestrationStatus> CreateInstancesList(string parentId, int countWithParentId, int countWithoutParentId)
+        private List<SimpleDurableOrchestrationStatus> CreateInstancesList(string parentId, 
+            int countWithParentId, int countWithoutParentId)
         {
-            var withParentId = _fixture.Build<DurableOrchestrationStatus>()
+            var withParentId = _fixture.Build<SimpleDurableOrchestrationStatus>()
                 .With(o => o.InstanceId, $"{parentId}:{_fixture.Create<string>()}")
-                .With(d => d.Input, JToken.FromObject(new { }))
-                .With(d => d.Output, JToken.FromObject(new { }))
                 .With(d => d.CustomStatus, JToken.FromObject(new CustomStatusBase()))
                 .CreateMany(countWithParentId);
             
-            var withoutParentId = _fixture.Build<DurableOrchestrationStatus>()
+            var withoutParentId = _fixture.Build<SimpleDurableOrchestrationStatus>()
                 .With(o => o.InstanceId, $"Not{parentId}:{_fixture.Create<string>()}")
-                .With(d => d.Input, JToken.FromObject(new { }))
-                .With(d => d.Output, JToken.FromObject(new { }))
                 .With(d => d.CustomStatus, JToken.FromObject(new CustomStatusBase()))
                 .CreateMany(countWithoutParentId);
             

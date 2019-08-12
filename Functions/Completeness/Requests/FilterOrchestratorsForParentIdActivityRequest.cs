@@ -1,11 +1,11 @@
 using System.Collections.Generic;
-using Microsoft.Azure.WebJobs;
+using Functions.Completeness.Responses;
 
 namespace Functions.Completeness.Requests
 {
     public class FilterOrchestratorsForParentIdActivityRequest
     {
         public string ParentId { get; set; }
-        public IList<DurableOrchestrationStatus> InstancesToFilter { get; set; }
+        public IList<SimpleDurableOrchestrationStatus> InstancesToFilter { get; set; }
     }
 }

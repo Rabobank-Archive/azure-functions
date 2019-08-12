@@ -1,11 +1,11 @@
 using System.Collections.Generic;
-using Microsoft.Azure.WebJobs;
+using Functions.Completeness.Responses;
 
 namespace Functions.Completeness.Requests
 {
     public class SingleAnalysisOrchestratorRequest
     {
-        public DurableOrchestrationStatus InstanceToAnalyze { get; set; }
-        public IList<DurableOrchestrationStatus> AllProjectScanOrchestrators { get; set; }
+        public SimpleDurableOrchestrationStatus InstanceToAnalyze { get; set; }
+        public IList<SimpleDurableOrchestrationStatus> AllProjectScanOrchestrators { get; set; }
     }
 }

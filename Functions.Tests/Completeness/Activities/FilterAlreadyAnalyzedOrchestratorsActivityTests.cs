@@ -5,6 +5,7 @@ using AutoFixture.AutoNSubstitute;
 using AzDoCompliancy.CustomStatus;
 using Functions.Completeness.Activities;
 using Functions.Completeness.Requests;
+using Functions.Completeness.Responses;
 using Microsoft.Azure.WebJobs;
 using Newtonsoft.Json.Linq;
 using Shouldly;
@@ -20,9 +21,7 @@ namespace Functions.Tests.Completeness.Activities
         {
             _fixture = new Fixture();
             _fixture.Customize(new AutoNSubstituteCustomization());
-            _fixture.Customize<DurableOrchestrationStatus>(s => s
-                .With(d => d.Input, JToken.FromObject(new { }))
-                .With(d => d.Output, JToken.FromObject(new { }))
+            _fixture.Customize<SimpleDurableOrchestrationStatus>(s => s
                 .With(d => d.CustomStatus, JToken.FromObject(new CustomStatusBase())));
         }
         
@@ -30,7 +29,7 @@ namespace Functions.Tests.Completeness.Activities
         public void ShouldReturnOnlyInstancesThatHaveNotBeenScanned()
         {
             //Arrange
-            var instances = _fixture.CreateMany<DurableOrchestrationStatus>(10).ToList();
+            var instances = _fixture.CreateMany<SimpleDurableOrchestrationStatus>(10).ToList();
             var instanceIds = new List<string>
             {
                 instances[0].InstanceId,

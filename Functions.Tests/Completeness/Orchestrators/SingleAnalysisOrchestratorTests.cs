@@ -7,6 +7,7 @@ using AzDoCompliancy.CustomStatus;
 using Functions.Completeness.Activities;
 using Functions.Completeness.Orchestrators;
 using Functions.Completeness.Requests;
+using Functions.Completeness.Responses;
 using Microsoft.Azure.WebJobs;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
@@ -21,9 +22,7 @@ namespace Functions.Tests.Completeness.Orchestrators
         {
             _fixture = new Fixture();
             _fixture.Customize(new AutoNSubstituteCustomization());
-            _fixture.Customize<DurableOrchestrationStatus>(s => s
-                .With(d => d.Input, JToken.FromObject(new { }))
-                .With(d => d.Output, JToken.FromObject(new { }))
+            _fixture.Customize<SimpleDurableOrchestrationStatus>(s => s
                 .With(d => d.CustomStatus, JToken.FromObject(new CustomStatusBase())));
         }
 
@@ -33,17 +32,16 @@ namespace Functions.Tests.Completeness.Orchestrators
             // Arrange
             var context = Substitute.For<DurableOrchestrationContextBase>();
 
-            _fixture.Customize<DurableOrchestrationStatus>(s => s
-                .With(d => d.Input, JToken.FromObject(new { }))
-                .With(d => d.Output, JToken.FromObject(new { }))
-                .With(d => d.CustomStatus, JToken.FromObject(JToken.FromObject(new SupervisorOrchestrationStatus { TotalProjectCount = 3 }))));
+            _fixture.Customize<SimpleDurableOrchestrationStatus>(s => s
+                .With(d => d.CustomStatus, JToken.FromObject(JToken.FromObject(
+                    new SupervisorOrchestrationStatus { TotalProjectCount = 3 }))));
 
             context.GetInput<SingleAnalysisOrchestratorRequest>().Returns(_fixture.Create<SingleAnalysisOrchestratorRequest>());
             context.CallActivityAsync<int?>(nameof(GetTotalProjectCountFromSupervisorOrchestrationStatusActivity),
-                Arg.Any<DurableOrchestrationStatus>()).Returns(1);
-            context.CallActivityAsync<List<DurableOrchestrationStatus>>(nameof(FilterOrchestratorsForParentIdActivity),
+                Arg.Any<SimpleDurableOrchestrationStatus>()).Returns(1);
+            context.CallActivityAsync<IList<SimpleDurableOrchestrationStatus>>(nameof(FilterOrchestratorsForParentIdActivity),
                     Arg.Any<FilterOrchestratorsForParentIdActivityRequest>())
-                .Returns(_fixture.CreateMany<DurableOrchestrationStatus>().ToList());
+                .Returns(_fixture.CreateMany<SimpleDurableOrchestrationStatus>().ToList());
 
             // Act
             var fun = new SingleAnalysisOrchestrator();
@@ -52,8 +50,8 @@ namespace Functions.Tests.Completeness.Orchestrators
             // Assert
             await context.Received().CallActivityAsync<int?>(
                 nameof(GetTotalProjectCountFromSupervisorOrchestrationStatusActivity),
-                Arg.Any<DurableOrchestrationStatus>());
-            await context.Received().CallActivityAsync<List<DurableOrchestrationStatus>>(
+                Arg.Any<SimpleDurableOrchestrationStatus>());
+            await context.Received().CallActivityAsync<IList<SimpleDurableOrchestrationStatus>>(
                 nameof(FilterOrchestratorsForParentIdActivity), Arg.Any<FilterOrchestratorsForParentIdActivityRequest>());
             await context.Received().CallActivityAsync(nameof(UploadAnalysisResultToLogAnalyticsActivity),
                 Arg.Any<UploadAnalysisResultToLogAnalyticsActivityRequest>());
@@ -67,14 +65,15 @@ namespace Functions.Tests.Completeness.Orchestrators
             context.GetInput<SingleAnalysisOrchestratorRequest>()
                 .Returns(_fixture.Create<SingleAnalysisOrchestratorRequest>());
             context.CallActivityAsync<int?>(nameof(GetTotalProjectCountFromSupervisorOrchestrationStatusActivity),
-                Arg.Any<DurableOrchestrationStatus>()).Returns((int?)null);
+                Arg.Any<SimpleDurableOrchestrationStatus>()).Returns((int?)null);
 
             // Act
             var fun = new SingleAnalysisOrchestrator();
             await fun.RunAsync(context);
 
             // Assert
-            await context.DidNotReceive().CallActivityAsync<List<DurableOrchestrationStatus>>(nameof(GetOrchestratorsByNameActivity), "ProjectScanOrchestration");
+            await context.DidNotReceive().CallActivityAsync<List<SimpleDurableOrchestrationStatus>>(
+                nameof(UploadAnalysisResultToLogAnalyticsActivityRequest), null);
         }
 
         [Theory]
@@ -88,19 +87,17 @@ namespace Functions.Tests.Completeness.Orchestrators
             //Arrange
             var context = Substitute.For<DurableOrchestrationContextBase>();
 
-            _fixture.Customize<DurableOrchestrationStatus>(s => s
-                .With(d => d.Input, JToken.FromObject(new { }))
-                .With(d => d.Output, JToken.FromObject(new { }))
+            _fixture.Customize<SimpleDurableOrchestrationStatus>(s => s
                 .With(d => d.CustomStatus, JToken.FromObject(JToken.FromObject(new SupervisorOrchestrationStatus { TotalProjectCount = 1 }))));
 
             context.GetInput<SingleAnalysisOrchestratorRequest>()
                 .Returns(_fixture.Create<SingleAnalysisOrchestratorRequest>());
             context.CallActivityAsync<int?>(nameof(GetTotalProjectCountFromSupervisorOrchestrationStatusActivity),
-                    Arg.Any<DurableOrchestrationStatus>())
+                    Arg.Any<SimpleDurableOrchestrationStatus>())
                 .Returns(1);
-            context.CallActivityAsync<List<DurableOrchestrationStatus>>(nameof(FilterOrchestratorsForParentIdActivity),
+            context.CallActivityAsync<IList<SimpleDurableOrchestrationStatus>>(nameof(FilterOrchestratorsForParentIdActivity),
                     Arg.Any<FilterOrchestratorsForParentIdActivityRequest>())
-                .Returns(_fixture.CreateMany<DurableOrchestrationStatus>(count).ToList());
+                .Returns(_fixture.CreateMany<SimpleDurableOrchestrationStatus>(count).ToList());
 
             // Act
             var fun = new SingleAnalysisOrchestrator();

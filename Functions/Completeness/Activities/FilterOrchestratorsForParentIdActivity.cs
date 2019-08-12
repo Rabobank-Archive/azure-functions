@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Functions.Completeness.Requests;
+using Functions.Completeness.Responses;
 using Microsoft.Azure.WebJobs;
 
 namespace Functions.Completeness.Activities
@@ -10,7 +11,7 @@ namespace Functions.Completeness.Activities
         private const int IdPartsToSubstract = 2;
 
         [FunctionName(nameof(FilterOrchestratorsForParentIdActivity))]
-        public IList<DurableOrchestrationStatus> Run([ActivityTrigger] FilterOrchestratorsForParentIdActivityRequest request)
+        public IList<SimpleDurableOrchestrationStatus> Run([ActivityTrigger] FilterOrchestratorsForParentIdActivityRequest request)
         {
             return request.InstancesToFilter.Where(i => GetParentId(i.InstanceId) == request.ParentId).ToList();
         }

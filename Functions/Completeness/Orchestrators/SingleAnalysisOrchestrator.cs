@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Functions.Completeness.Activities;
 using Functions.Completeness.Requests;
+using Functions.Completeness.Responses;
 using Microsoft.Azure.WebJobs;
 
 namespace Functions.Completeness.Orchestrators
@@ -31,7 +32,7 @@ namespace Functions.Completeness.Orchestrators
                 return;
 
             var projectScanOrchestratorsForThisAnalysis =
-                await context.CallActivityAsync<List<DurableOrchestrationStatus>>(
+                await context.CallActivityAsync<IList<SimpleDurableOrchestrationStatus>>(
                     nameof(FilterOrchestratorsForParentIdActivity),
                     new FilterOrchestratorsForParentIdActivityRequest
                     {
@@ -42,11 +43,14 @@ namespace Functions.Completeness.Orchestrators
             await context.CallActivityAsync(nameof(UploadAnalysisResultToLogAnalyticsActivity),
                 new UploadAnalysisResultToLogAnalyticsActivityRequest
                 {
-                    SupervisorOrchestratorId = singleAnalysisRequest.InstanceToAnalyze.InstanceId,
+                    AnalysisCompleted = context.CurrentUtcDateTime,
                     SupervisorStarted = singleAnalysisRequest.InstanceToAnalyze.CreatedTime,
+                    SupervisorOrchestratorId = singleAnalysisRequest.InstanceToAnalyze.InstanceId,
                     TotalProjectCount = (int)totalProjectCount,
-                    ScannedProjectCount = projectScanOrchestratorsForThisAnalysis.Count,
-                    AnalysisCompleted = context.CurrentUtcDateTime
+                    ScannedProjectCount = projectScanOrchestratorsForThisAnalysis
+                        .Where(x => x.RuntimeStatus == OrchestrationRuntimeStatus.Completed)
+                        .ToList()
+                        .Count
                 });
 
            await Task.WhenAll(projectScanOrchestratorsForThisAnalysis.Select(f =>

@@ -1,11 +1,11 @@
 using System.Collections.Generic;
-using Microsoft.Azure.WebJobs;
+using Functions.Completeness.Responses;
 
 namespace Functions.Completeness.Requests
 {
     public class FilterAlreadyAnalyzedOrchestratorsActivityRequest
     {
-        public IList<DurableOrchestrationStatus> InstancesToAnalyze { get; set; }
+        public IList<SimpleDurableOrchestrationStatus> InstancesToAnalyze { get; set; }
         public IList<string> InstanceIdsAlreadyAnalyzed { get; set; }
     }
 }
