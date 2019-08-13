@@ -38,16 +38,16 @@ namespace Functions.Completeness.Activities
             return (
                 allOrchestrators
                     .Where(x => x.Name == "ProjectScanSupervisor")
-                    .Select(x => ConvertToOrchestrator(x))
+                    .Select(ConvertToOrchestrator)
                     .ToList(),
                 allOrchestrators
                     .Where(x => x.Name == "ProjectScanOrchestration")
-                    .Select(x => ConvertToOrchestrator(x))
+                    .Select(ConvertToOrchestrator)
                     .ToList()
             );
         }
 
-        private Orchestrator ConvertToOrchestrator(DurableOrchestrationStatus orchestrator)
+        private static Orchestrator ConvertToOrchestrator(DurableOrchestrationStatus orchestrator)
         {
             return new Orchestrator
             {
@@ -55,7 +55,7 @@ namespace Functions.Completeness.Activities
                 InstanceId = orchestrator.InstanceId,
                 CreatedTime = orchestrator.CreatedTime,
                 RuntimeStatus = orchestrator.RuntimeStatus,
-                CustomStatus = orchestrator?.CustomStatus
+                CustomStatus = orchestrator.CustomStatus
             };
         }
     }

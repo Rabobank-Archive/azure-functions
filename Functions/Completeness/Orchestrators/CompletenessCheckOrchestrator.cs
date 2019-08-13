@@ -13,7 +13,7 @@ namespace Functions.Completeness.Orchestrators
         [FunctionName(nameof(CompletenessCheckOrchestrator))]
         public async Task RunAsync([OrchestrationTrigger] DurableOrchestrationContextBase context)
         {
-            (var allSupervisors, var allProjectScanners) =
+            var (allSupervisors, allProjectScanners) =
                 await context.CallActivityAsync<(IList<Orchestrator>, IList<Orchestrator>)>(
                     nameof(GetAllOrchestratorsActivity), null);
 

@@ -2,10 +2,10 @@
 using Functions.Completeness.Requests;
 using Functions.Completeness.Model;
 using Microsoft.Azure.WebJobs;
-using System;
 using Newtonsoft.Json;
 using AzDoCompliancy.CustomStatus.Converter;
 using AzDoCompliancy.CustomStatus;
+using Functions.Helpers;
 
 namespace Functions.Completeness.Activities
 {
@@ -25,20 +25,11 @@ namespace Functions.Completeness.Activities
                 TotalProjectCount = (request.Supervisor.CustomStatus?
                     .ToObject<CustomStatusBase>(serializer) as SupervisorOrchestrationStatus)?.TotalProjectCount,
                 ScannedProjectCount = request.ProjectScanners
-                    .Where(x => x.RuntimeStatus == OrchestrationRuntimeStatus.Completed)
-                    .ToList()
-                    .Count,
-                FailedProjectIds = String.Join(", ", request.ProjectScanners
+                    .Count(x => x.RuntimeStatus == OrchestrationRuntimeStatus.Completed),
+                FailedProjectIds = string.Join(", ", request.ProjectScanners
                     .Where(x => x.RuntimeStatus != OrchestrationRuntimeStatus.Completed)
-                    .Select(x => GetProjectId(x.InstanceId))
-                    .ToList())
+                    .Select(x => OrchestrationIdHelper.GetProjectId(x.InstanceId)))
             };
-        }
-
-        private static string GetProjectId(string instanceId)
-        {
-            var idParts = instanceId.Split(':');
-            return idParts.Length == 2 ? idParts.Last() : string.Empty;
         }
     }
 }
