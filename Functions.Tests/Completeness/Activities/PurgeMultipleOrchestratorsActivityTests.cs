@@ -23,8 +23,8 @@ namespace Functions.Tests.Completeness.Activities
             await func.RunAsync(context, client);
 
             //Assert
-            await client.Received().PurgeInstanceHistoryAsync(Arg.Any<DateTime>(), 
-                Arg.Any<DateTime>(), Arg.Any<List<OrchestrationStatus>>());
+            await client.ReceivedWithAnyArgs().PurgeInstanceHistoryAsync(new DateTime(),
+               new DateTime(), new List<OrchestrationStatus>());
         }
     }
 }

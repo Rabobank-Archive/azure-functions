@@ -42,10 +42,13 @@ namespace Functions.Tests.Completeness.Activities
             instances[9].Name = "ProjectScanOrchestration";
 
             var client = Substitute.For<DurableOrchestrationClientBase>();
-            client.GetStatusAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>(), Arg.Any<IEnumerable<OrchestrationRuntimeStatus>>(), 
-                    Arg.Any<int>(), string.Empty)
-                .Returns(new OrchestrationStatusQueryResult { DurableOrchestrationState = instances,
-                    ContinuationToken = _finalContinuationToken });
+            client
+                .GetStatusAsync(new DateTime(), new DateTime(), new List<OrchestrationRuntimeStatus>(), 1000, string.Empty)
+                .ReturnsForAnyArgs(new OrchestrationStatusQueryResult
+                {
+                    DurableOrchestrationState = instances,
+                    ContinuationToken = _finalContinuationToken
+                });
 
             //Act
             var func = new GetAllOrchestratorsActivity();
@@ -70,9 +73,9 @@ namespace Functions.Tests.Completeness.Activities
                 .Without(d => d.CustomStatus));
 
             var client = Substitute.For<DurableOrchestrationClientBase>();
-            client.GetStatusAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>(), Arg.Any<IEnumerable<OrchestrationRuntimeStatus>>(),
-                    Arg.Any<int>(), string.Empty)
-                .Returns(new OrchestrationStatusQueryResult
+            client
+                .GetStatusAsync(new DateTime(), new DateTime(), new List<OrchestrationRuntimeStatus>(), 1000, string.Empty)
+                .ReturnsForAnyArgs(new OrchestrationStatusQueryResult
                 {
                     DurableOrchestrationState = _fixture.CreateMany<DurableOrchestrationStatus>(1).ToList(),
                     ContinuationToken = _finalContinuationToken

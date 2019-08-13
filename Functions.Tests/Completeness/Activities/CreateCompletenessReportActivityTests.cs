@@ -41,7 +41,7 @@ namespace Functions.Tests.Completeness.Activities
 
             var request = new CreateCompletenessReportRequest
             {
-                AnalysisCompleted = Arg.Any<DateTime>(),
+                AnalysisCompleted = new DateTime(),
                 Supervisor = _fixture.Create<Orchestrator>(),
                 ProjectScanners = _fixture.CreateMany<Orchestrator>(1).ToList()
             };
@@ -63,7 +63,7 @@ namespace Functions.Tests.Completeness.Activities
 
             var request = new CreateCompletenessReportRequest
             {
-                AnalysisCompleted = Arg.Any<DateTime>(),
+                AnalysisCompleted = new DateTime(),
                 Supervisor = _fixture.Create<Orchestrator>(),
                 ProjectScanners = _fixture.CreateMany<Orchestrator>(1).ToList()
             };
@@ -85,7 +85,7 @@ namespace Functions.Tests.Completeness.Activities
 
             var request = new CreateCompletenessReportRequest
             {
-                AnalysisCompleted = Arg.Any<DateTime>(),
+                AnalysisCompleted = new DateTime(),
                 Supervisor = _fixture.Create<Orchestrator>(),
                 ProjectScanners = _fixture.CreateMany<Orchestrator>(1).ToList()
             };
@@ -111,7 +111,7 @@ namespace Functions.Tests.Completeness.Activities
 
             var request = new CreateCompletenessReportRequest
             {
-                AnalysisCompleted = Arg.Any<DateTime>(),
+                AnalysisCompleted = new DateTime(),
                 Supervisor = _fixture.Create<Orchestrator>(),
                 ProjectScanners = projectScanners
             };
@@ -142,7 +142,7 @@ namespace Functions.Tests.Completeness.Activities
 
             var request = new CreateCompletenessReportRequest
             {
-                AnalysisCompleted = Arg.Any<DateTime>(),
+                AnalysisCompleted = new DateTime(),
                 Supervisor = _fixture.Create<Orchestrator>(),
                 ProjectScanners = projectScanners
             };

@@ -28,7 +28,7 @@ namespace Functions.Tests.Completeness.Activities
             var context = Substitute.For<DurableActivityContextBase>();
             var response = _fixture.Create<LogAnalyticsQueryResponse>();
             var client = Substitute.For<ILogAnalyticsClient>();
-            client.QueryAsync(Arg.Any<string>()).Returns(response);
+            client.QueryAsync("").ReturnsForAnyArgs(response);
 
             // Act
             var fun = new GetScannedSupervisorsActivity(client);
@@ -53,7 +53,7 @@ namespace Functions.Tests.Completeness.Activities
             response.tables[0].rows = instanceIds;
 
             var client = Substitute.For<ILogAnalyticsClient>();
-            client.QueryAsync(Arg.Any<string>()).Returns(response);
+            client.QueryAsync("").ReturnsForAnyArgs(response);
 
             // Act
             var fun = new GetScannedSupervisorsActivity(client);
@@ -69,7 +69,7 @@ namespace Functions.Tests.Completeness.Activities
             // Arrange
             var context = Substitute.For<DurableActivityContextBase>();
             var client = Substitute.For<ILogAnalyticsClient>();
-            client.QueryAsync(Arg.Any<string>()).Returns((LogAnalyticsQueryResponse)null);
+            client.QueryAsync("").ReturnsForAnyArgs((LogAnalyticsQueryResponse)null);
 
             // Act
             var fun = new GetScannedSupervisorsActivity(client);
