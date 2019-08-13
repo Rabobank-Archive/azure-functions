@@ -65,12 +65,13 @@ namespace Functions.Tests.Completeness.Activities
         public async Task ShouldReturnEmptyListWhenLogDoesNotExist()
         {
             // Arrange
+            var context = Substitute.For<DurableActivityContextBase>();
             var client = Substitute.For<ILogAnalyticsClient>();
             client.QueryAsync(Arg.Any<string>()).Returns((LogAnalyticsQueryResponse)null);
 
             // Act
             var fun = new GetScannedSupervisorsActivity(client);
-            var result = await fun.RunAsync(Substitute.For<DurableActivityContextBase>());
+            var result = await fun.RunAsync(context);
 
             // Assert
             result.Count.ShouldBe(0);
