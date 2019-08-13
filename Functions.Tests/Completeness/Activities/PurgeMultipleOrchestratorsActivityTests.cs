@@ -15,11 +15,12 @@ namespace Functions.Tests.Completeness.Activities
         public async Task ShouldSendDeleteCall()
         {
             //Arrange
+            var context = Substitute.For<DurableActivityContextBase>();
             var client = Substitute.For<DurableOrchestrationClientBase>();
 
             //Act
             var func = new PurgeMultipleOrchestratorsActivity();
-            await func.RunAsync(Substitute.For<DurableActivityContextBase>(), client);
+            await func.RunAsync(context, client);
 
             //Assert
             await client.Received().PurgeInstanceHistoryAsync(Arg.Any<DateTime>(), 

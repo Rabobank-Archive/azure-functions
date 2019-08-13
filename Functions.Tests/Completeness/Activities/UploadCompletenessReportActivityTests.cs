@@ -19,10 +19,11 @@ namespace Functions.Tests.Completeness.Activities
             // Arrange
             var client = Substitute.For<ILogAnalyticsClient>();
             var request = fixture.Create<CompletenessReport>();
+            var logger = Substitute.For<ILogger>();
 
             // Act
             var fun = new UploadCompletenessReportActivity(client);
-            await fun.RunAsync(request, Substitute.For<ILogger>());
+            await fun.RunAsync(request, logger);
             
             // Assert
             await client.Received().AddCustomLogJsonAsync("completeness_log", Arg.Any<CompletenessReport[]>(), "AnalysisCompleted");

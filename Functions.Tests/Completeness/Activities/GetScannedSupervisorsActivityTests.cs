@@ -25,12 +25,14 @@ namespace Functions.Tests.Completeness.Activities
         public async Task ShouldQueryLogAnalytics()
         {
             // Arrange
+            var context = Substitute.For<DurableActivityContextBase>();
+            var response = _fixture.Create<LogAnalyticsQueryResponse>();
             var client = Substitute.For<ILogAnalyticsClient>();
-            client.QueryAsync(Arg.Any<string>()).Returns(_fixture.Create<LogAnalyticsQueryResponse>());
+            client.QueryAsync(Arg.Any<string>()).Returns(response);
 
             // Act
             var fun = new GetScannedSupervisorsActivity(client);
-            await fun.RunAsync(Substitute.For<DurableActivityContextBase>());
+            await fun.RunAsync(context);
 
             // Assert
             await client.ReceivedWithAnyArgs().QueryAsync("");
