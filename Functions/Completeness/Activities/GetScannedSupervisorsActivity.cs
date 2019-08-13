@@ -6,16 +6,16 @@ using Microsoft.Azure.WebJobs;
 
 namespace Functions.Completeness.Activities
 {
-    public class GetCompletedScansFromLogAnalyticsActivity
+    public class GetScannedSupervisorsActivity
     {
         private readonly ILogAnalyticsClient _client;
 
-        public GetCompletedScansFromLogAnalyticsActivity(ILogAnalyticsClient client)
+        public GetScannedSupervisorsActivity(ILogAnalyticsClient client)
         {
             _client = client;
         }
 
-        [FunctionName(nameof(GetCompletedScansFromLogAnalyticsActivity))]
+        [FunctionName(nameof(GetScannedSupervisorsActivity))]
         public async Task<List<string>> RunAsync([ActivityTrigger] DurableActivityContextBase context)
         {
             var queryResponse = await _client
