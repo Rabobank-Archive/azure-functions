@@ -8,7 +8,6 @@ using Functions.Completeness.Model;
 using Newtonsoft.Json.Linq;
 using Shouldly;
 using Xunit;
-using NSubstitute;
 using System;
 using Microsoft.Azure.WebJobs;
 

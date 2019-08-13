@@ -13,17 +13,19 @@ namespace Functions.Completeness.Activities
             [OrchestrationClient] DurableOrchestrationClientBase client)
         {
             const int PurgeFromDaysAgo = 365;
-            const int KeepFromDaysAgo = 14;
+            const int KeepFromDaysAgo = 30;
 
             var runtimeStatuses = new List<OrchestrationStatus>
             {
                 OrchestrationStatus.Completed,
                 OrchestrationStatus.Failed,
                 OrchestrationStatus.Canceled,
-                OrchestrationStatus.Terminated
+                OrchestrationStatus.Terminated,
+                OrchestrationStatus.ContinuedAsNew,
+                OrchestrationStatus.Pending
             };
 
-            await client.PurgeInstanceHistoryAsync(DateTime.Now.Date.AddDays(-PurgeFromDaysAgo), 
+            await client.PurgeInstanceHistoryAsync(DateTime.Now.Date.AddDays(-PurgeFromDaysAgo),
                     DateTime.Now.Date.AddDays(-KeepFromDaysAgo), runtimeStatuses)
                 .ConfigureAwait(false);
         }

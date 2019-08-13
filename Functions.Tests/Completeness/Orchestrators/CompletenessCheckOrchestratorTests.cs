@@ -35,7 +35,7 @@ namespace Functions.Tests.Completeness.Orchestrators
                 .CallActivityAsync<IList<Orchestrator>>(nameof(FilterSupervisorsActivity), Arg.Any<FilterSupervisorsRequest>())
                 .Returns(_fixture.CreateMany<Orchestrator>(1).ToList());
             orchestrationContext
-                .CallActivityAsync<(IList<Orchestrator>, IList<Orchestrator>)>(nameof(GetAllOrchestratorsActivity), null)
+                .CallActivityAsync<(IList<Orchestrator>, IList<Orchestrator>)>(nameof(GetOrchestratorsToScanActivity), null)
                 .Returns((_fixture.CreateMany<Orchestrator>(1).ToList(), _fixture.CreateMany<Orchestrator>(1).ToList()));
 
             //Act
@@ -44,7 +44,7 @@ namespace Functions.Tests.Completeness.Orchestrators
 
             //Assert
             await orchestrationContext.Received()
-                .CallActivityAsync<(IList<Orchestrator>, IList<Orchestrator>)>(nameof(GetAllOrchestratorsActivity), null);
+                .CallActivityAsync<(IList<Orchestrator>, IList<Orchestrator>)>(nameof(GetOrchestratorsToScanActivity), null);
             await orchestrationContext.Received()
                 .CallActivityAsync<IList<string>>(nameof(GetScannedSupervisorsActivity), null);
             await orchestrationContext.Received()
@@ -65,7 +65,7 @@ namespace Functions.Tests.Completeness.Orchestrators
                 .CallActivityAsync<IList<Orchestrator>>(nameof(FilterSupervisorsActivity), Arg.Any<FilterSupervisorsRequest>())
                 .Returns(_fixture.CreateMany<Orchestrator>(count).ToList());
             orchestrationContext
-                .CallActivityAsync<(IList<Orchestrator>, IList<Orchestrator>)>(nameof(GetAllOrchestratorsActivity), null)
+                .CallActivityAsync<(IList<Orchestrator>, IList<Orchestrator>)>(nameof(GetOrchestratorsToScanActivity), null)
                 .Returns((_fixture.CreateMany<Orchestrator>(1).ToList(), _fixture.CreateMany<Orchestrator>(1).ToList()));
 
             //Act
@@ -91,7 +91,7 @@ namespace Functions.Tests.Completeness.Orchestrators
                 .CallActivityAsync<IList<Orchestrator>>(nameof(FilterSupervisorsActivity), Arg.Any<FilterSupervisorsRequest>())
                 .Returns(_fixture.CreateMany<Orchestrator>(1).ToList());
             orchestrationContext
-                .CallActivityAsync<(IList<Orchestrator>, IList<Orchestrator>)>(nameof(GetAllOrchestratorsActivity), null)
+                .CallActivityAsync<(IList<Orchestrator>, IList<Orchestrator>)>(nameof(GetOrchestratorsToScanActivity), null)
                 .Returns((_fixture.CreateMany<Orchestrator>(count).ToList(), _fixture.CreateMany<Orchestrator>(1).ToList()));
 
             //Act

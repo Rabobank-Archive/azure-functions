@@ -15,19 +15,19 @@ using Xunit;
 
 namespace Functions.Tests.Completeness.Activities
 {
-    public class GetAllOrchestratorsActivityTests
+    public class GetOrchestratorsToPurgeActivityTests
     {
         private readonly Fixture _fixture;
         private readonly string _finalContinuationToken = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes("null"));
 
-        public GetAllOrchestratorsActivityTests()
+        public GetOrchestratorsToPurgeActivityTests()
         {
             _fixture = new Fixture();
             _fixture.Customize(new AutoNSubstituteCustomization());
         }
 
         [Fact]
-        public async Task ShouldReturnOnlyInstancesWithSpecifiedName()
+        public async Task ShouldReturnNoSupervisorAndProjectScannerOrchestrators()
         {
             //Arrange
             _fixture.Customize<DurableOrchestrationStatus>(o => o
@@ -51,42 +51,44 @@ namespace Functions.Tests.Completeness.Activities
                 });
 
             //Act
-            var func = new GetAllOrchestratorsActivity();
-            (var supervisors, var projectScanOrchestrators) = await func.RunAsync(null, client);
+            var func = new GetOrchestratorsToPurgeActivity();
+            (var runningOrchestratorIds, var subOrchestratorIds) = await func.RunAsync(null, client);
 
             //Assert
-            supervisors.Count.ShouldBe(1);
-            supervisors[0].Name.ShouldBe("ProjectScanSupervisor");
-            projectScanOrchestrators.Count.ShouldBe(2);
-            projectScanOrchestrators[0].Name.ShouldBe("ProjectScanOrchestration");
+            subOrchestratorIds.Count.ShouldBe(7);
         }
 
-        [Fact]
-        public async Task ShouldNotBreakIfNoCustomStatus()
+        [Theory]
+        [InlineData(OrchestrationRuntimeStatus.Running, 10)]
+        [InlineData(OrchestrationRuntimeStatus.Completed, 0)]
+        [InlineData(OrchestrationRuntimeStatus.Failed, 0)]
+        [InlineData(OrchestrationRuntimeStatus.Terminated, 0)]
+        public async Task ShouldReturnOnlyRunningOrchestrators(OrchestrationRuntimeStatus status, int expected)
         {
             //Arrange
             _fixture.Customize<DurableOrchestrationStatus>(o => o
-                .With(i => i.Name, "ProjectScanSupervisor")
-                .With(i => i.RuntimeStatus, OrchestrationRuntimeStatus.Completed)
+                .With(i => i.RuntimeStatus, status)
                 .With(d => d.Input, JToken.FromObject(new { }))
                 .With(d => d.Output, JToken.FromObject(new { }))
-                .Without(d => d.CustomStatus));
+                .With(d => d.CustomStatus, JToken.FromObject(new CustomStatusBase())));
+
+            var instances = _fixture.CreateMany<DurableOrchestrationStatus>(10).ToList();
 
             var client = Substitute.For<DurableOrchestrationClientBase>();
             client
                 .GetStatusAsync(new DateTime(), new DateTime(), new List<OrchestrationRuntimeStatus>(), 1000, string.Empty)
                 .ReturnsForAnyArgs(new OrchestrationStatusQueryResult
                 {
-                    DurableOrchestrationState = _fixture.CreateMany<DurableOrchestrationStatus>(1).ToList(),
+                    DurableOrchestrationState = instances,
                     ContinuationToken = _finalContinuationToken
                 });
 
             //Act
-            var func = new GetAllOrchestratorsActivity();
-            (var supervisors, var projectScanOrchestrators) = await func.RunAsync(null, client);
+            var func = new GetOrchestratorsToPurgeActivity();
+            (var runningOrchestratorIds, var subOrchestratorIds) = await func.RunAsync(null, client);
 
-            // Assert
-            supervisors[0].CustomStatus.ShouldBeNull();
+            //Assert
+            runningOrchestratorIds.Count.ShouldBe(expected);
         }
     }
 }

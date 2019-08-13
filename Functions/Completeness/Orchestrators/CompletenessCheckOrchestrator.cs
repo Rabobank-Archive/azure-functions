@@ -15,9 +15,9 @@ namespace Functions.Completeness.Orchestrators
         {
             var (allSupervisors, allProjectScanners) =
                 await context.CallActivityAsync<(IList<Orchestrator>, IList<Orchestrator>)>(
-                    nameof(GetAllOrchestratorsActivity), null);
+                    nameof(GetOrchestratorsToScanActivity), null);
 
-            var scannedSupervisors =
+            var scannedSupervisorIds =
                 await context.CallActivityAsync<IList<string>>(nameof(GetScannedSupervisorsActivity), null);
 
             var filteredSupervisors =
@@ -25,7 +25,7 @@ namespace Functions.Completeness.Orchestrators
                     new FilterSupervisorsRequest
                     {
                         AllSupervisors = allSupervisors,
-                        ScannedSupervisors = scannedSupervisors
+                        ScannedSupervisors = scannedSupervisorIds
                     });
 
             await Task.WhenAll(filteredSupervisors.Select(f =>
