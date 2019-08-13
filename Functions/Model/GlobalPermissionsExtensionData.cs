@@ -13,6 +13,7 @@ namespace Functions.Model
                 Project = Id,
                 Item = null,
                 Rule = rule.Name,
+                IsSox = rule.IsSox,
                 Status = rule.Status,
                 EvaluatedDate = Date,
                 ScanId = GetSupervisorId(instanceId), 
