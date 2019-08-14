@@ -120,14 +120,7 @@
       "properties": {
         "groupShortName": "Notify Omega",
         "enabled": "[parameters('alertingEnabled')]",
-        "emailReceivers": [
-          {
-            "name": "Email Kees_-EmailAction-",
-            "emailAddress": "kees.verhaar@somecompany.nl",
-            "status": "Enabled",
-            "useCommonAlertSchema": false
-          }
-        ],
+        "emailReceivers": [],
         "smsReceivers": [],
         "webhookReceivers": [],
         "itsmReceivers": [],
@@ -157,14 +150,7 @@
       "properties": {
         "groupShortName": "Notify Omega",
         "enabled": "[parameters('alertingEnabled')]",
-        "emailReceivers": [
-          {
-            "name": "Email Kees_-EmailAction-",
-            "emailAddress": "kees.verhaar@somecompany.nl",
-            "status": "Enabled",
-            "useCommonAlertSchema": false
-          }
-        ],
+        "emailReceivers": [],
         "smsReceivers": [],
         "webhookReceivers": [],
         "itsmReceivers": [],
