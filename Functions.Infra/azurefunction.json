@@ -16,9 +16,11 @@
   "variables": {
     "storageName": "[concat(parameters('appName'),'storage')]",
     "appInsightsName": "[concat(parameters('appName'),'-ai')]",
-    "logicAppName": "[concat(parameters('appName'),'-monitoring-logicapp')]",
+    "logicAppNameAi": "[concat(parameters('appName'),'-monitoring-logicapp-ai')]",
+    "logicAppNameLa": "[concat(parameters('appName'),'-monitoring-logicapp-la')]",
     "location": "[resourceGroup().location]",
-    "actionGroupName": "[concat('Notify Omega Team for ',parameters('appName'))]"
+    "actionGroupNameAi": "[concat('Notify Omega Team for ',parameters('appName'),' AI alerts')]",
+    "actionGroupNameLa": "[concat('Notify Omega Team for ',parameters('appName'), ' LA alerts')]"
   },
   "resources": [
     {
@@ -113,7 +115,7 @@
     {
       "apiVersion": "2018-03-01",
       "type": "Microsoft.Insights/ActionGroups",
-      "name": "[variables('actionGroupName')]",
+      "name": "[variables('actionGroupNameAi')]",
       "location": "Global",
       "properties": {
         "groupShortName": "Notify Omega",
@@ -135,8 +137,8 @@
         "logicAppReceivers": [
           {
             "name": "send to logic app",
-            "resourceId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Logic/workflows/', variables('logicAppName'))]",
-            "callbackUrl": "[listCallbackURL(concat(resourceId('Microsoft.Logic/workflows', variables('logicAppName')), '/triggers/manual'), '2016-06-01').value]",
+            "resourceId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Logic/workflows/', variables('logicAppNameAi'))]",
+            "callbackUrl": "[listCallbackURL(concat(resourceId('Microsoft.Logic/workflows', variables('logicAppNameAi')), '/triggers/manual'), '2016-06-01').value]",
             "useCommonAlertSchema": false
           }
         ],
@@ -144,7 +146,44 @@
         "armRoleReceivers": []
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Logic/workflows', variables('logicAppName'))]"
+        "[resourceId('Microsoft.Logic/workflows', variables('logicAppNameAi'))]"
+      ]
+    },
+    {
+      "apiVersion": "2018-03-01",
+      "type": "Microsoft.Insights/ActionGroups",
+      "name": "[variables('actionGroupNameLa')]",
+      "location": "Global",
+      "properties": {
+        "groupShortName": "Notify Omega",
+        "enabled": "[parameters('alertingEnabled')]",
+        "emailReceivers": [
+          {
+            "name": "Email Kees_-EmailAction-",
+            "emailAddress": "kees.verhaar@somecompany.nl",
+            "status": "Enabled",
+            "useCommonAlertSchema": false
+          }
+        ],
+        "smsReceivers": [],
+        "webhookReceivers": [],
+        "itsmReceivers": [],
+        "azureAppPushReceivers": [],
+        "automationRunbookReceivers": [],
+        "voiceReceivers": [],
+        "logicAppReceivers": [
+          {
+            "name": "send to logic app",
+            "resourceId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Logic/workflows/', variables('logicAppNameLa'))]",
+            "callbackUrl": "[listCallbackURL(concat(resourceId('Microsoft.Logic/workflows', variables('logicAppNameLa')), '/triggers/manual'), '2016-06-01').value]",
+            "useCommonAlertSchema": false
+          }
+        ],
+        "azureFunctionReceivers": [],
+        "armRoleReceivers": []
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Logic/workflows', variables('logicAppNameLa'))]"
       ]
     },
     {
@@ -176,12 +215,12 @@
         },
         "actions": [
           {
-            "actionGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('actionGroupName'))]"
+            "actionGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('actionGroupNameAi'))]"
           }
         ]
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupName'))]",
+        "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupNameAi'))]",
         "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
       ]
     },
@@ -214,12 +253,12 @@
         },
         "actions": [
           {
-            "actionGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('actionGroupName'))]"
+            "actionGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('actionGroupNameAi'))]"
           }
         ]
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupName'))]",
+        "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupNameAi'))]",
         "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
       ]
     },
@@ -254,12 +293,12 @@
         },
         "actions": [
           {
-            "actionGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('actionGroupName'))]"
+            "actionGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('actionGroupNameLa'))]"
           }
         ]
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupName'))]",
+        "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupNameLa'))]",
         "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
       ]
     },
@@ -294,12 +333,12 @@
         },
         "actions": [
           {
-            "actionGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('actionGroupName'))]"
+            "actionGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('actionGroupNameLa'))]"
           }
         ]
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupName'))]",
+        "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupNameLa'))]",
         "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
       ]
     },
@@ -334,12 +373,12 @@
         },
         "actions": [
           {
-            "actionGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('actionGroupName'))]"
+            "actionGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('actionGroupNameLa'))]"
           }
         ]
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupName'))]",
+        "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupNameLa'))]",
         "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
       ]
     },
@@ -374,19 +413,19 @@
         },
         "actions": [
           {
-            "actionGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('actionGroupName'))]"
+            "actionGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('actionGroupNameLa'))]"
           }
         ]
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupName'))]",
+        "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupNameLa'))]",
         "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
       ]
     },
     {
       "type": "Microsoft.Logic/workflows",
       "apiVersion": "2017-07-01",
-      "name": "[variables('logicAppName')]",
+      "name": "[variables('logicAppNameAi')]",
       "location": "[resourceGroup().location]",
       "properties": {
         "state": "Enabled",
@@ -541,6 +580,180 @@
                       ],
                       "author_name": "Resource group: @{triggerBody()?['data']?['context']?['resourceGroupName']}",
                       "title": "'@{triggerBody()?['data']?['context']?['name']}' alert @{triggerBody()?['data']?['status']}"
+                    }
+                  ],
+                  "text": "AzDo Compliancy Functions Alert!"
+                },
+                "headers": {
+                  "Content-Type": "application/json"
+                },
+                "method": "POST",
+                "uri": "[parameters('slackWebhookUrl')]"
+              }
+            }
+          },
+          "outputs": {}
+        },
+        "parameters": {}
+      }
+    },
+    {
+      "type": "Microsoft.Logic/workflows",
+      "apiVersion": "2017-07-01",
+      "name": "[variables('logicAppNameLa')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "state": "Enabled",
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {},
+          "triggers": {
+            "manual": {
+              "type": "Request",
+              "kind": "Http",
+              "inputs": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "properties": {
+                        "AlertRuleName": {
+                          "type": "string"
+                        },
+                        "AlertThresholdOperator": {
+                          "type": "string"
+                        },
+                        "AlertThresholdValue": {
+                          "type": "integer"
+                        },
+                        "AlertType": {
+                          "type": "string"
+                        },
+                        "Description": {
+                          "type": "string"
+                        },
+                        "LinkToSearchResults": {
+                          "type": "string"
+                        },
+                        "ResultCount": {
+                          "type": "integer"
+                        },
+                        "SearchIntervalEndtimeUtc": {
+                          "type": "string"
+                        },
+                        "SearchIntervalInSeconds": {
+                          "type": "integer"
+                        },
+                        "SearchIntervalStartTimeUtc": {
+                          "type": "string"
+                        },
+                        "SearchQuery": {
+                          "type": "string"
+                        },
+                        "SearchResult": {
+                          "properties": {
+                            "dataSources": {
+                              "items": {
+                                "properties": {
+                                  "resourceId": {
+                                    "type": "string"
+                                  },
+                                  "tables": {
+                                    "items": {
+                                      "type": "string"
+                                    },
+                                    "type": "array"
+                                  }
+                                },
+                                "required": [
+                                  "resourceId",
+                                  "tables"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
+                            "tables": {
+                              "items": {
+                                "properties": {
+                                  "columns": {
+                                    "items": {
+                                      "properties": {
+                                        "name": {
+                                          "type": "string"
+                                        },
+                                        "type": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "name",
+                                        "type"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    "type": "array"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "rows": {
+                                    "items": {
+                                      "type": "array"
+                                    },
+                                    "type": "array"
+                                  }
+                                },
+                                "required": [
+                                  "name",
+                                  "columns",
+                                  "rows"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "Severity": {
+                          "type": "string"
+                        },
+                        "SubscriptionId": {
+                          "type": "string"
+                        },
+                        "WorkspaceId": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "schemaId": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "actions": {
+            "HTTP": {
+              "runAfter": {},
+              "type": "Http",
+              "inputs": {
+                "body": {
+                  "attachments": [
+                    {
+                      "actions": [
+                        {
+                          "text": "View in portal",
+                          "type": "button",
+                          "url": "@{triggerBody()?['data']?['LinkToSearchResults']}"
+                        }
+                      ],
+                      "author_name": "@{triggerBody()?['data']?['AlertRuleName']}",
+                      "title": "@{triggerBody()?['data']?['SearchQuery']} @{triggerBody()?['data']?['AlertThresholdOperator']} @{triggerBody()?['data']?['AlertThresholdValue']}"
                     }
                   ],
                   "text": "AzDo Compliancy Functions Alert!"

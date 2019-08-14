@@ -42,8 +42,9 @@
     <None Include="parameters\azdocompliancyqueuedev-params.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="sampledata\azdocompliancyqueue-params.json" />
-    <None Include="sampledata\azdocompliancyqueuedev-params.json" />
+    <None Include="sampledata\sample-azure-monitor-alert-loganalytics.json" />
+    <None Include="sampledata\sample-azure-monitor-alert-appinsights.json" />
+    <None Include="sampledata\sample-slack-message.json" />
   </ItemGroup>
   <Target Name="GetReferenceAssemblyPaths" />
 </Project>
