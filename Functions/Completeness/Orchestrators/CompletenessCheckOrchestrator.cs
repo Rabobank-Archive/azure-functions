@@ -14,14 +14,14 @@ namespace Functions.Completeness.Orchestrators
         public async Task RunAsync([OrchestrationTrigger] DurableOrchestrationContextBase context)
         {
             var (allSupervisors, allProjectScanners) =
-                await context.CallActivityAsync<(IList<Orchestrator>, IList<Orchestrator>)>(
+                await context.CallActivityAsync<(List<Orchestrator>, List<Orchestrator>)>(
                     nameof(GetOrchestratorsToScanActivity), null);
 
             var scannedSupervisorIds =
-                await context.CallActivityAsync<IList<string>>(nameof(GetScannedSupervisorsActivity), null);
+                await context.CallActivityAsync<List<string>>(nameof(GetScannedSupervisorsActivity), null);
 
             var filteredSupervisors =
-                await context.CallActivityAsync<IList<Orchestrator>>(nameof(FilterSupervisorsActivity),
+                await context.CallActivityAsync<List<Orchestrator>>(nameof(FilterSupervisorsActivity),
                     new FilterSupervisorsRequest
                     {
                         AllSupervisors = allSupervisors,
