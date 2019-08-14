@@ -564,32 +564,48 @@
             }
           },
           "actions": {
-            "HTTP": {
-              "runAfter": {},
-              "type": "Http",
-              "inputs": {
-                "body": {
-                  "attachments": [
-                    {
-                      "actions": [
+            "Condition": {
+              "actions": {
+                "HTTP": {
+                  "runAfter": {},
+                  "type": "Http",
+                  "inputs": {
+                    "body": {
+                      "attachments": [
                         {
-                          "text": "View in portal",
-                          "type": "button",
-                          "url": "@{triggerBody()?['data']?['context']?['portalLink']}"
+                          "actions": [
+                            {
+                              "text": "View in portal",
+                              "type": "button",
+                              "url": "@{triggerBody()?['data']?['context']?['portalLink']}"
+                            }
+                          ],
+                          "author_name": "Resource group: @{triggerBody()?['data']?['context']?['resourceGroupName']}",
+                          "title": "'@{triggerBody()?['data']?['context']?['name']}' alert @{triggerBody()?['data']?['status']}"
                         }
                       ],
-                      "author_name": "Resource group: @{triggerBody()?['data']?['context']?['resourceGroupName']}",
-                      "title": "'@{triggerBody()?['data']?['context']?['name']}' alert @{triggerBody()?['data']?['status']}"
-                    }
-                  ],
-                  "text": "AzDo Compliancy Functions Alert!"
-                },
-                "headers": {
-                  "Content-Type": "application/json"
-                },
-                "method": "POST",
-                "uri": "[parameters('slackWebhookUrl')]"
-              }
+                      "text": "AzDo Compliancy Functions Alert!"
+                    },
+                    "headers": {
+                      "Content-Type": "application/json"
+                    },
+                    "method": "POST",
+                    "uri": "[parameters('slackWebhookUrl')]"
+                  }
+                }
+              },
+              "runAfter": {},
+              "expression": {
+                "and": [
+                  {
+                    "equals": [
+                      "@triggerBody()?['data']?['status']",
+                      "Activated"
+                    ]
+                  }
+                ]
+              },
+              "type": "If"
             }
           },
           "outputs": {}
