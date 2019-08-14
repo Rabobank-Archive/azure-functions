@@ -14,8 +14,8 @@ namespace Functions.Completeness.Activities
             [ActivityTrigger] DurableActivityContextBase context,
             [OrchestrationClient] DurableOrchestrationClientBase client)
         {
-            const int FromDaysAgo = 30;
-            const int ToDaysAgo = 2;
+            const int fromDaysAgo = 30;
+            const int toDaysAgo = 2;
             var runtimeStatuses = new List<OrchestrationRuntimeStatus>
             {
                 OrchestrationRuntimeStatus.Completed,
@@ -34,8 +34,8 @@ namespace Functions.Completeness.Activities
 
             do
             {
-                var orchestratorsPage = await client.GetStatusAsync(DateTime.Now.Date.AddDays(-FromDaysAgo), 
-                        DateTime.Now.Date.AddDays(-ToDaysAgo), runtimeStatuses, 1000, continuationToken)
+                var orchestratorsPage = await client.GetStatusAsync(DateTime.Now.Date.AddDays(-fromDaysAgo), 
+                        DateTime.Now.Date.AddDays(-toDaysAgo), runtimeStatuses, 1000, continuationToken)
                     .ConfigureAwait(false);
                 runningOrchestratorIds.AddRange(orchestratorsPage.DurableOrchestrationState
                     .Where(x => x.RuntimeStatus == OrchestrationRuntimeStatus.Running)

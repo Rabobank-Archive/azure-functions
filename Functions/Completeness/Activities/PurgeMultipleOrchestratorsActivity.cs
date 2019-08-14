@@ -12,8 +12,8 @@ namespace Functions.Completeness.Activities
         public async Task RunAsync([ActivityTrigger] DurableActivityContextBase context,
             [OrchestrationClient] DurableOrchestrationClientBase client)
         {
-            const int PurgeFromDaysAgo = 365;
-            const int KeepFromDaysAgo = 30;
+            const int purgeFromDaysAgo = 365;
+            const int keepFromDaysAgo = 30;
 
             var runtimeStatuses = new List<OrchestrationStatus>
             {
@@ -25,8 +25,8 @@ namespace Functions.Completeness.Activities
                 OrchestrationStatus.Pending
             };
 
-            await client.PurgeInstanceHistoryAsync(DateTime.Now.Date.AddDays(-PurgeFromDaysAgo),
-                    DateTime.Now.Date.AddDays(-KeepFromDaysAgo), runtimeStatuses)
+            await client.PurgeInstanceHistoryAsync(DateTime.Now.Date.AddDays(-purgeFromDaysAgo),
+                    DateTime.Now.Date.AddDays(-keepFromDaysAgo), runtimeStatuses)
                 .ConfigureAwait(false);
         }
     }
