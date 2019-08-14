@@ -37,6 +37,7 @@ steps:
     inputs:
       command: publish
       publishWebProjects: false
+      projects: '$(build.sourcesdirectory)/Functions/Functions.csproj'
       arguments: '--configuration release --output $(build.artifactstagingdirectory)'
 
   - task: CopyFiles@2
@@ -44,6 +45,12 @@ steps:
       SourceFolder: '$(build.sourcesdirectory)/Scripts'
       Contents: '**'
       TargetFolder: '$(build.artifactstagingdirectory)/Scripts'
+
+  - task: CopyFiles@2
+    inputs:
+      SourceFolder: '$(build.sourcesdirectory)/Functions.Infra/bin/Release'
+      Contents: '**'
+      TargetFolder: '$(build.artifactstagingdirectory)/Infra'
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact'
