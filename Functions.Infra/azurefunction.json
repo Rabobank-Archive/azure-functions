@@ -1,0 +1,570 @@
+{
+  "parameters": {
+    "appName": {
+      "type": "string",
+      "defaultValue": "vstslogwebhook"
+    },
+    "alertingEnabled": {
+      "type": "bool",
+      "defaultValue": true
+    },
+    "slackWebhookUrl": {
+      "type": "string",
+      "defaultValue": "http://dummy-url"
+    }
+  },
+  "variables": {
+    "storageName": "[concat(parameters('appName'),'storage')]",
+    "appInsightsName": "[concat(parameters('appName'),'-ai')]",
+    "logicAppName": "[concat(parameters('appName'),'-monitoring-logicapp')]",
+    "location": "[resourceGroup().location]",
+    "actionGroupName": "[concat('Notify Omega Team for ',parameters('appName'))]"
+  },
+  "resources": [
+    {
+      "name": "[parameters('appName')]",
+      "type": "Microsoft.Web/sites",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]",
+        "[resourceId('microsoft.insights/components/', variables('appInsightsName'))]"
+      ],
+      "properties": {
+        "siteConfig": {
+          "appSettings": [
+            {
+              "name": "AzureWebJobsDashboard",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageName')), '2015-05-01-preview').key1)]"
+            },
+            {
+              "name": "AzureWebJobsStorage",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageName')), '2015-05-01-preview').key1)]"
+            },
+            {
+              "name": "FUNCTIONS_EXTENSION_VERSION",
+              "value": "~2"
+            },
+            {
+              "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageName')), '2015-05-01-preview').key1)]"
+            },
+            {
+              "name": "WEBSITE_CONTENTSHARE",
+              "value": "[concat(toLower(parameters('appName')), 'a282')]"
+            },
+            {
+              "name": "WEBSITE_NODE_DEFAULT_VERSION",
+              "value": "6.5.0"
+            },
+            {
+              "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+              "value": "[reference(resourceId('microsoft.insights/components/', variables('appInsightsName')), '2015-05-01').InstrumentationKey]"
+            }
+          ]
+        },
+        "name": "[parameters('appName')]",
+        "clientAffinityEnabled": false,
+        "reserved": false
+      },
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "apiVersion": "2016-03-01",
+      "location": "[variables('location')]",
+      "kind": "functionapp"
+    },
+    {
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Storage/storageAccounts",
+      "name": "[variables('storageName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "accountType": "Standard_LRS"
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites/config",
+      "name": "[concat(parameters('appName'), '/web')]",
+      "apiVersion": "2016-08-01",
+      "properties": {
+        "cors": {
+          "allowedOrigins": [
+            "https://tas.gallery.vsassets.io",
+            "https://tas.gallerycdn.vsassets.io"
+          ],
+          "supportCredentials": true
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('appName'))]"
+      ]
+    },
+    {
+      "apiVersion": "2015-05-01",
+      "name": "[variables('appInsightsName')]",
+      "type": "microsoft.insights/components",
+      "location": "[variables('location')]",
+      "tags": {
+        "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', parameters('appName'))]": "Resource"
+      },
+      "properties": {
+        "ApplicationId": "[parameters('appName')]"
+      }
+    },
+    {
+      "apiVersion": "2018-03-01",
+      "type": "Microsoft.Insights/ActionGroups",
+      "name": "[variables('actionGroupName')]",
+      "location": "Global",
+      "properties": {
+        "groupShortName": "Notify Omega",
+        "enabled": "[parameters('alertingEnabled')]",
+        "emailReceivers": [
+          {
+            "name": "Email Kees_-EmailAction-",
+            "emailAddress": "kees.verhaar@somecompany.nl",
+            "status": "Enabled",
+            "useCommonAlertSchema": false
+          }
+        ],
+        "smsReceivers": [],
+        "webhookReceivers": [],
+        "itsmReceivers": [],
+        "azureAppPushReceivers": [],
+        "automationRunbookReceivers": [],
+        "voiceReceivers": [],
+        "logicAppReceivers": [
+          {
+            "name": "send to logic app",
+            "resourceId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Logic/workflows/', variables('logicAppName'))]",
+            "callbackUrl": "[listCallbackURL(concat(resourceId('Microsoft.Logic/workflows', variables('logicAppName')), '/triggers/manual'), '2016-06-01').value]",
+            "useCommonAlertSchema": false
+          }
+        ],
+        "azureFunctionReceivers": [],
+        "armRoleReceivers": []
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Logic/workflows', variables('logicAppName'))]"
+      ]
+    },
+    {
+      "name": "[concat('Failed requests in ', parameters('appName'))]",
+      "type": "Microsoft.Insights/metricAlerts",
+      "location": "global",
+      "apiVersion": "2018-03-01",
+      "properties": {
+        "description": "failed request count > 1",
+        "severity": 3,
+        "enabled": true,
+        "scopes": [
+          "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
+        ],
+        "evaluationFrequency": "Pt1m",
+        "windowSize": "Pt5m",
+        "criteria": {
+          "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+          "allOf": [
+            {
+              "name": "iard name",
+              "metricName": "requests/failed",
+              "dimensions": [],
+              "operator": "GreaterThan",
+              "threshold": 1,
+              "timeAggregation": "Count"
+            }
+          ]
+        },
+        "actions": [
+          {
+            "actionGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('actionGroupName'))]"
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupName'))]",
+        "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
+      ]
+    },
+    {
+      "name": "[concat('Exceptions in ', parameters('appName'))]",
+      "type": "Microsoft.Insights/metricAlerts",
+      "location": "global",
+      "apiVersion": "2018-03-01",
+      "properties": {
+        "description": "Exceptions count > 1",
+        "severity": 3,
+        "enabled": true,
+        "scopes": [
+          "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
+        ],
+        "evaluationFrequency": "Pt1m",
+        "windowSize": "Pt5m",
+        "criteria": {
+          "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+          "allOf": [
+            {
+              "name": "iard name",
+              "metricName": "exceptions/count",
+              "dimensions": [],
+              "operator": "GreaterThan",
+              "threshold": 1,
+              "timeAggregation": "Count"
+            }
+          ]
+        },
+        "actions": [
+          {
+            "actionGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('actionGroupName'))]"
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupName'))]",
+        "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
+      ]
+    },
+    {
+      "name": "[concat('Long queue lenth - buildcompleted in ', parameters('appName'))]",
+      "type": "Microsoft.Insights/metricAlerts",
+      "location": "global",
+      "apiVersion": "2018-03-01",
+      "properties": {
+        "description": "Queue length > 10",
+        "severity": 3,
+        "enabled": true,
+        "scopes": [
+          "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
+        ],
+        "evaluationFrequency": "Pt1m",
+        "windowSize": "Pt5m",
+        "criteria": {
+          "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+          "allOf": [
+            {
+              "dimensions": [],
+              "metricName": "Queue length - buildcompleted",
+              "metricNamespace": "azure.applicationinsights",
+              "monitorTemplateType": 8,
+              "name": "Metric1",
+              "operator": "GreaterThan",
+              "threshold": 10.0,
+              "timeAggregation": "Average"
+            }
+          ]
+        },
+        "actions": [
+          {
+            "actionGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('actionGroupName'))]"
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupName'))]",
+        "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
+      ]
+    },
+    {
+      "name": "[concat('Long queue lenth - buildcompleted-poison in ', parameters('appName'))]",
+      "type": "Microsoft.Insights/metricAlerts",
+      "location": "global",
+      "apiVersion": "2018-03-01",
+      "properties": {
+        "description": "Queue length > 2",
+        "severity": 3,
+        "enabled": true,
+        "scopes": [
+          "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
+        ],
+        "evaluationFrequency": "Pt1m",
+        "windowSize": "Pt5m",
+        "criteria": {
+          "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+          "allOf": [
+            {
+              "dimensions": [],
+              "metricName": "Queue length - buildcompleted-poison",
+              "metricNamespace": "azure.applicationinsights",
+              "monitorTemplateType": 8,
+              "name": "Metric1",
+              "operator": "GreaterThan",
+              "threshold": 2.0,
+              "timeAggregation": "Average"
+            }
+          ]
+        },
+        "actions": [
+          {
+            "actionGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('actionGroupName'))]"
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupName'))]",
+        "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
+      ]
+    },
+    {
+      "name": "[concat('Long queue lenth - releasedeploymentcompleted in ', parameters('appName'))]",
+      "type": "Microsoft.Insights/metricAlerts",
+      "location": "global",
+      "apiVersion": "2018-03-01",
+      "properties": {
+        "description": "Queue length > 10",
+        "severity": 3,
+        "enabled": true,
+        "scopes": [
+          "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
+        ],
+        "evaluationFrequency": "Pt1m",
+        "windowSize": "Pt5m",
+        "criteria": {
+          "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+          "allOf": [
+            {
+              "dimensions": [],
+              "metricName": "Queue length - releasedeploymentcompleted",
+              "metricNamespace": "azure.applicationinsights",
+              "monitorTemplateType": 8,
+              "name": "Metric1",
+              "operator": "GreaterThan",
+              "threshold": 10.0,
+              "timeAggregation": "Average"
+            }
+          ]
+        },
+        "actions": [
+          {
+            "actionGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('actionGroupName'))]"
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupName'))]",
+        "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
+      ]
+    },
+    {
+      "name": "[concat('Long queue lenth - releasedeploymentcompleted-poison in ', parameters('appName'))]",
+      "type": "Microsoft.Insights/metricAlerts",
+      "location": "global",
+      "apiVersion": "2018-03-01",
+      "properties": {
+        "description": "Queue length > 2",
+        "severity": 3,
+        "enabled": true,
+        "scopes": [
+          "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
+        ],
+        "evaluationFrequency": "Pt1m",
+        "windowSize": "Pt5m",
+        "criteria": {
+          "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+          "allOf": [
+            {
+              "dimensions": [],
+              "metricName": "Queue length - releasedeploymentcompleted-poison",
+              "metricNamespace": "azure.applicationinsights",
+              "monitorTemplateType": 8,
+              "name": "Metric1",
+              "operator": "GreaterThan",
+              "threshold": 2.0,
+              "timeAggregation": "Average"
+            }
+          ]
+        },
+        "actions": [
+          {
+            "actionGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('actionGroupName'))]"
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupName'))]",
+        "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Logic/workflows",
+      "apiVersion": "2017-07-01",
+      "name": "[variables('logicAppName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "state": "Enabled",
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {},
+          "triggers": {
+            "manual": {
+              "type": "Request",
+              "kind": "Http",
+              "inputs": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "properties": {
+                        "context": {
+                          "properties": {
+                            "condition": {
+                              "properties": {
+                                "allOf": {
+                                  "items": {
+                                    "properties": {
+                                      "dimensions": {
+                                        "items": {
+                                          "properties": {
+                                            "name": {
+                                              "type": "string"
+                                            },
+                                            "value": {
+                                              "type": "string"
+                                            }
+                                          },
+                                          "required": [
+                                            "name",
+                                            "value"
+                                          ],
+                                          "type": "object"
+                                        },
+                                        "type": "array"
+                                      },
+                                      "metricName": {
+                                        "type": "string"
+                                      },
+                                      "metricNamespace": {
+                                        "type": "string"
+                                      },
+                                      "metricValue": {
+                                        "type": "integer"
+                                      },
+                                      "operator": {
+                                        "type": "string"
+                                      },
+                                      "threshold": {
+                                        "type": "string"
+                                      },
+                                      "timeAggregation": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "metricName",
+                                      "metricNamespace",
+                                      "operator",
+                                      "threshold",
+                                      "timeAggregation",
+                                      "dimensions",
+                                      "metricValue"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "type": "array"
+                                },
+                                "windowSize": {
+                                  "type": "string"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "conditionType": {
+                              "type": "string"
+                            },
+                            "description": {
+                              "type": "string"
+                            },
+                            "id": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "portalLink": {
+                              "type": "string"
+                            },
+                            "resourceGroupName": {
+                              "type": "string"
+                            },
+                            "resourceId": {
+                              "type": "string"
+                            },
+                            "resourceName": {
+                              "type": "string"
+                            },
+                            "resourceType": {
+                              "type": "string"
+                            },
+                            "severity": {
+                              "type": "string"
+                            },
+                            "subscriptionId": {
+                              "type": "string"
+                            },
+                            "timestamp": {
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "properties": {},
+                        "status": {
+                          "type": "string"
+                        },
+                        "version": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "schemaId": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "actions": {
+            "HTTP": {
+              "runAfter": {},
+              "type": "Http",
+              "inputs": {
+                "body": {
+                  "attachments": [
+                    {
+                      "actions": [
+                        {
+                          "text": "View in portal",
+                          "type": "button",
+                          "url": "@{triggerBody()?['data']?['context']?['portalLink']}"
+                        }
+                      ],
+                      "author_name": "Resource group: @{triggerBody()?['data']?['context']?['resourceGroupName']}",
+                      "title": "'@{triggerBody()?['data']?['context']?['name']}' alert @{triggerBody()?['data']?['status']}"
+                    }
+                  ],
+                  "text": "AzDo Compliancy Functions Alert!"
+                },
+                "headers": {
+                  "Content-Type": "application/json"
+                },
+                "method": "POST",
+                "uri": "[parameters('slackWebhookUrl')]"
+              }
+            }
+          },
+          "outputs": {}
+        },
+        "parameters": {}
+      }
+    }
+  ],
+  "outputs": {
+    "appInsightsName": {
+      "type": "string",
+      "value": "[variables('appInsightsName')]"
+    }
+  },
+  "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0"
+}

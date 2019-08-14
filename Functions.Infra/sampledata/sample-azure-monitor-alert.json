@@ -1,0 +1,45 @@
+{
+    "schemaId": "AzureMonitorMetricAlert",
+    "data": {
+        "version": "2.0",
+        "properties": null,
+        "status": "Activated",
+        "context": {
+            "timestamp": "2019-05-23T11:41:11.4147503Z",
+            "id": "/subscriptions/d65193b5-a500-405c-b6f4-767fb5063969/resourceGroups/rg-d02-dev-azdocompliancydev-01/providers/microsoft.insights/metricAlerts/failed%20requests",
+            "name": "failed requests",
+            "description": "",
+            "conditionType": "SingleResourceMultipleMetricCriteria",
+            "severity": "3",
+            "condition": {
+                "windowSize": "PT5M",
+                "allOf": [
+                    {
+                        "metricName": "requests/failed",
+                        "metricNamespace": "ApplicationInsights",
+                        "operator": "GreaterThan",
+                        "threshold": "0",
+                        "timeAggregation": "Count",
+                        "dimensions": [
+                            {
+                                "name": "ResourceId",
+                                "value": "d83a9d07-eca2-4a6c-bfb4-109449a64f31"
+                            },
+                            {
+                                "name": "request/success",
+                                "value": "False"
+                            }
+                        ],
+                        "metricValue": 6.0
+                    }
+                ]
+            },
+            "subscriptionId": "d65193b5-a500-405c-b6f4-767fb5063969",
+            "resourceGroupName": "rg-d02-dev-azdocompliancydev-01",
+            "resourceName": "azdocompliancydev-ai",
+            "resourceType": "microsoft.insights/components",
+            "resourceId": "/subscriptions/d65193b5-a500-405c-b6f4-767fb5063969/resourceGroups/rg-d02-dev-azdocompliancydev-01/providers/microsoft.insights/components/azdocompliancydev-ai",
+            "portalLink": "https://portal.azure.com/#resource/subscriptions/d65193b5-a500-405c-b6f4-767fb5063969/resourceGroups/rg-d02-dev-azdocompliancydev-01/providers/microsoft.insights/components/azdocompliancydev-ai"
+        }
+    }
+}
