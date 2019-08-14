@@ -2,7 +2,6 @@
 using AutoFixture;
 using Functions.Completeness.Activities;
 using Functions.Completeness.Model;
-using Functions.Completeness.Requests;
 using LogAnalytics.Client;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -10,7 +9,7 @@ using Xunit;
 
 namespace Functions.Tests.Completeness.Activities
 {
-    public class UploadAnalysisResultToLogAnalyticsActivityTests
+    public class UploadCompletenessReportActivityTests
     {
         [Fact]
         public async Task ShouldUploadToLogAnalytics()
@@ -19,16 +18,15 @@ namespace Functions.Tests.Completeness.Activities
             
             // Arrange
             var client = Substitute.For<ILogAnalyticsClient>();
-            var request = fixture.Create<UploadAnalysisResultToLogAnalyticsActivityRequest>();
+            var request = fixture.Create<CompletenessReport>();
+            var logger = Substitute.For<ILogger>();
 
-            var fun = new UploadAnalysisResultToLogAnalyticsActivity(client);
-            
             // Act
-            await fun.RunAsync(request, Substitute.For<ILogger>());
+            var fun = new UploadCompletenessReportActivity(client);
+            await fun.RunAsync(request, logger);
             
             // Assert
-            await client.Received().AddCustomLogJsonAsync("completeness_log", Arg.Any<CompletenessAnalysisResult[]>(),
-                "AnalysisCompleted");
+            await client.Received().AddCustomLogJsonAsync("completeness_log", Arg.Any<CompletenessReport[]>(), "AnalysisCompleted");
         }
     }
 }

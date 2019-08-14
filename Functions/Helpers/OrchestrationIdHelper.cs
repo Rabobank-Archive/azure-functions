@@ -14,5 +14,10 @@ namespace Functions.Helpers
         {
             return instanceId.Contains(":") ? instanceId.Split(':').First() : null;
         }
+        
+        public static string GetProjectId(string instanceId)
+        {
+            return instanceId.Contains(":") ? instanceId.Split(':').Last() : null;
+        }
     }
 }

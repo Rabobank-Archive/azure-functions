@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Functions.Completeness.Activities;
 using Functions.Completeness.Requests;
+using Functions.Completeness.Model;
 using Microsoft.Azure.WebJobs;
 
 namespace Functions.Completeness.Orchestrators
@@ -12,33 +13,30 @@ namespace Functions.Completeness.Orchestrators
         [FunctionName(nameof(CompletenessCheckOrchestrator))]
         public async Task RunAsync([OrchestrationTrigger] DurableOrchestrationContextBase context)
         {
-            var scansToVerify = await context.CallActivityAsync<List<DurableOrchestrationStatus>>(
-                nameof(GetOrchestratorsByNameActivity), "ProjectScanSupervisor");
+            var (allSupervisors, allProjectScanners) =
+                await context.CallActivityAsync<(IList<Orchestrator>, IList<Orchestrator>)>(
+                    nameof(GetAllOrchestratorsActivity), null);
 
-            var alreadyVerifiedScans = await context.CallActivityAsync<List<string>>(
-                nameof(GetCompletedScansFromLogAnalyticsActivity), null);
+            var scannedSupervisors =
+                await context.CallActivityAsync<IList<string>>(nameof(GetScannedSupervisorsActivity), null);
 
-            var filteredScansToVerify = await context.CallActivityAsync<List<DurableOrchestrationStatus>>(
-                nameof(FilterAlreadyAnalyzedOrchestratorsActivity),
-                new FilterAlreadyAnalyzedOrchestratorsActivityRequest
-                { InstancesToAnalyze = scansToVerify, InstanceIdsAlreadyAnalyzed = alreadyVerifiedScans });
+            var filteredSupervisors =
+                await context.CallActivityAsync<IList<Orchestrator>>(nameof(FilterSupervisorsActivity),
+                    new FilterSupervisorsRequest
+                    {
+                        AllSupervisors = allSupervisors,
+                        ScannedSupervisors = scannedSupervisors
+                    });
 
-            if (filteredScansToVerify.Count > 0)
-            {
-                var allProjectScanOrchestrators =
-                    await context.CallActivityAsync<List<DurableOrchestrationStatus>>(
-                        nameof(GetOrchestratorsByNameActivity), "ProjectScanOrchestration");
+            await Task.WhenAll(filteredSupervisors.Select(f =>
+                context.CallSubOrchestratorAsync(nameof(SingleCompletenessCheckOrchestrator),
+                    new SingleCompletenessCheckRequest
+                    {
+                        Supervisor = f,
+                        AllProjectScanners = allProjectScanners
+                    })));
 
-                await Task.WhenAll(filteredScansToVerify.Select(f =>
-                    context.CallSubOrchestratorAsync(nameof(SingleAnalysisOrchestrator),
-                        new SingleAnalysisOrchestratorRequest
-                        {
-                            InstanceToAnalyze = f,
-                            AllProjectScanOrchestrators = allProjectScanOrchestrators
-                        })));
-            }
-
-            await Task.WhenAll(scansToVerify.Select(f =>
+            await Task.WhenAll(allSupervisors.Select(f =>
                 context.CallActivityAsync(nameof(PurgeSingleOrchestratorActivity), f.InstanceId)));
         }
     }

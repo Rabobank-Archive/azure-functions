@@ -11,10 +11,11 @@ using Xunit;
 
 namespace Functions.Tests.Completeness.Activities
 {
-    public class GetCompletedScansFromLogAnalyticsActivityTests
+    public class GetScannedSupervisorsActivityTests
     {
         private readonly Fixture _fixture;
-        public GetCompletedScansFromLogAnalyticsActivityTests()
+
+        public GetScannedSupervisorsActivityTests()
         {
             _fixture = new Fixture();
             _fixture.Customize(new AutoNSubstituteCustomization());
@@ -24,14 +25,14 @@ namespace Functions.Tests.Completeness.Activities
         public async Task ShouldQueryLogAnalytics()
         {
             // Arrange
+            var context = Substitute.For<DurableActivityContextBase>();
             var response = _fixture.Create<LogAnalyticsQueryResponse>();
-
             var client = Substitute.For<ILogAnalyticsClient>();
-            client.QueryAsync(Arg.Any<string>()).Returns(response);
+            client.QueryAsync("").ReturnsForAnyArgs(response);
 
             // Act
-            var fun = new GetCompletedScansFromLogAnalyticsActivity(client);
-            await fun.RunAsync(Substitute.For<DurableActivityContextBase>());
+            var fun = new GetScannedSupervisorsActivity(client);
+            await fun.RunAsync(context);
 
             // Assert
             await client.ReceivedWithAnyArgs().QueryAsync("");
@@ -52,10 +53,10 @@ namespace Functions.Tests.Completeness.Activities
             response.tables[0].rows = instanceIds;
 
             var client = Substitute.For<ILogAnalyticsClient>();
-            client.QueryAsync(Arg.Any<string>()).Returns(response);
+            client.QueryAsync("").ReturnsForAnyArgs(response);
 
             // Act
-            var fun = new GetCompletedScansFromLogAnalyticsActivity(client);
+            var fun = new GetScannedSupervisorsActivity(client);
             var result = await fun.RunAsync(Substitute.For<DurableActivityContextBase>());
 
             // Assert
@@ -66,12 +67,13 @@ namespace Functions.Tests.Completeness.Activities
         public async Task ShouldReturnEmptyListWhenLogDoesNotExist()
         {
             // Arrange
+            var context = Substitute.For<DurableActivityContextBase>();
             var client = Substitute.For<ILogAnalyticsClient>();
-            client.QueryAsync(Arg.Any<string>()).Returns((LogAnalyticsQueryResponse)null);
+            client.QueryAsync("").ReturnsForAnyArgs((LogAnalyticsQueryResponse)null);
 
             // Act
-            var fun = new GetCompletedScansFromLogAnalyticsActivity(client);
-            var result = await fun.RunAsync(Substitute.For<DurableActivityContextBase>());
+            var fun = new GetScannedSupervisorsActivity(client);
+            var result = await fun.RunAsync(context);
 
             // Assert
             result.Count.ShouldBe(0);
