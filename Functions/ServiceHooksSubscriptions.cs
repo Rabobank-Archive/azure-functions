@@ -1,11 +1,11 @@
 using Microsoft.Azure.WebJobs;
-using Microsoft.WindowsAzure.Storage;
 using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Requests;
 using SecurePipelineScan.VstsService.Response;
-using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.WindowsAzure.Storage.Queue;
+using Unmockable;
 using Project = SecurePipelineScan.VstsService.Requests.Project;
 using Task = System.Threading.Tasks.Task;
 
@@ -14,43 +14,39 @@ namespace Functions
     public class ServiceHooksSubscriptions
     {
         private readonly EnvironmentConfig _config;
-        private readonly IVstsRestClient _client;
+        private readonly IVstsRestClient _vstsRestClient;
 
         private static readonly string[] QueueNames = new[] {"buildcompleted", "releasedeploymentcompleted"};
+        private IUnmockable<CloudQueueClient> _cloudQueueClient;
 
-        public ServiceHooksSubscriptions(EnvironmentConfig config, IVstsRestClient client)
+        public ServiceHooksSubscriptions(EnvironmentConfig config, IVstsRestClient vstsRestClient, IUnmockable<CloudQueueClient> cloudQueueClient)
         {
             _config = config;
-            _client = client;
+            _vstsRestClient = vstsRestClient;
+            _cloudQueueClient = cloudQueueClient;
         }
 
         [FunctionName(nameof(ServiceHooksSubscriptions))]
         public async Task Run([TimerTrigger("0 0 7-19 * * *", RunOnStartup = false)]TimerInfo trigger)
         {
-            // This only works because we use the account name and account key in the connection string.
-            var storage = CloudStorageAccount.Parse(_config.EventQueueStorageConnectionString);
-            var key = Convert.ToBase64String(storage.Credentials.ExportKey());
+            await CreateQueuesIfNotExist();
 
-            await CreateQueuesIfNotExist(storage);
-
-            await UpdateServiceSubscriptions(storage.Credentials.AccountName, key);
+            await UpdateServiceSubscriptions(_config.EventQueueStorageAccountName, _config.EventQueueStorageAccountKey);
         }
 
-        private async Task CreateQueuesIfNotExist(CloudStorageAccount storage)
+        private async Task CreateQueuesIfNotExist()
         {
-            var queueClient = storage.CreateCloudQueueClient();
-
             foreach (var queueName in QueueNames)
             {
-                var queue = queueClient.GetQueueReference(queueName);
+                var queue = _cloudQueueClient.Execute(c => c.GetQueueReference(queueName));
                 await queue.CreateIfNotExistsAsync();
             }
         }
 
         private async Task UpdateServiceSubscriptions(string accountName, string accountKey)
         {
-            var hooks = _client.Get(Hooks.Subscriptions()).ToList();
-            foreach (var project in _client.Get(Project.Projects()))
+            var hooks = _vstsRestClient.Get(Hooks.Subscriptions()).ToList();
+            foreach (var project in _vstsRestClient.Get(Project.Projects()))
             {
                 foreach (var queueName in QueueNames)
                 {
@@ -68,7 +64,7 @@ namespace Functions
                                 h.ConsumerInputs.AccountName == hook.ConsumerInputs.AccountName &&
                                 h.PublisherInputs.ProjectId == hook.PublisherInputs.ProjectId))
             {
-                await _client.PostAsync(request, hook);
+                await _vstsRestClient.PostAsync(request, hook);
             }
         }
     }

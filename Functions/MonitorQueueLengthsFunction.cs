@@ -2,34 +2,30 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
-using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Queue;
+using Unmockable;
 
 namespace Functions
 {
     public class MonitorQueueLengthsFunction
     {
-        private readonly EnvironmentConfig _config;
+        private readonly IUnmockable<CloudQueueClient> _cloudQueueClient;
 
-        public MonitorQueueLengthsFunction(EnvironmentConfig config)
+        public MonitorQueueLengthsFunction(IUnmockable<CloudQueueClient> cloudQueueClient)
         {
-            _config = config;
+            _cloudQueueClient = cloudQueueClient;
         }
 
         [FunctionName("MonitorQueueLengthsFunction")]
         public async Task Run([TimerTrigger("0 */5 * * * *")]TimerInfo myTimer, ILogger log)
         {
-            // connect to Azure Storage
-            var account = CloudStorageAccount.Parse(_config.EventQueueStorageConnectionString);
-            var queueClient = account.CreateCloudQueueClient();
-
             // List the queues for this storage account 
             QueueContinuationToken token = null;
             var cloudQueueList = new List<CloudQueue>();
 
             do
             {
-                var segment = await queueClient.ListQueuesSegmentedAsync(token);
+                var segment = await _cloudQueueClient.Execute(c => c.ListQueuesSegmentedAsync(token));
                 token = segment.ContinuationToken;
                 cloudQueueList.AddRange(segment.Results);
             }

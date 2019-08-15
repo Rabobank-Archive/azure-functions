@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.WindowsAzure.Storage;
 using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Requests;
 using Functions.Orchestrators;
@@ -27,12 +26,9 @@ namespace Functions.Starters
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequestMessage req,
             [OrchestrationClient] DurableOrchestrationClientBase starter)
         {
-            // This only works because we use the account name and account key in the connection string.
-            var storage = CloudStorageAccount.Parse(_config.EventQueueStorageConnectionString);
-
             var subscriptionsToDelete = _client
                 .Get(Hooks.Subscriptions())
-                .Where(h => storage.QueueEndpoint.Host.StartsWith(h.ConsumerInputs.AccountName))
+                .Where(h => _config.EventQueueStorageAccountName == h.ConsumerInputs.AccountName)
                 .ToList();
 
             await starter.StartNewAsync(nameof(DeleteServiceHooksSubscriptionsOrchestrator), subscriptionsToDelete);

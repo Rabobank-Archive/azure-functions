@@ -3,21 +3,21 @@ using System.Net;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
-using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Queue;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Unmockable;
 
 namespace Functions
 {
     public class PoisonQueueFunction
     {
-        private readonly EnvironmentConfig _config;
+        private readonly IUnmockable<CloudQueueClient> _cloudQueueClient;
 
-        public PoisonQueueFunction(EnvironmentConfig config)
+        public PoisonQueueFunction(IUnmockable<CloudQueueClient> cloudQueueClient)
         {
-            _config = config;
+            _cloudQueueClient = cloudQueueClient;
         }
 
         [FunctionName(nameof(PoisonQueueFunction))]
@@ -30,12 +30,9 @@ namespace Functions
 
             log.LogInformation($"Requeue from: {queue}");
 
-            var storage = CloudStorageAccount.Parse(_config.EventQueueStorageConnectionString);
-            var client = storage.CreateCloudQueueClient();
-
             var requeuedPoisonMessages = await RequeuePoisonMessages(
-                client.GetQueueReference(queue),
-                client.GetQueueReference($"{queue}-poison"),
+                _cloudQueueClient.Execute(c => c.GetQueueReference(queue)),
+                _cloudQueueClient.Execute(c => c.GetQueueReference($"{queue}-poison")),
                 log);
 
             return new HttpResponseMessage(HttpStatusCode.OK)

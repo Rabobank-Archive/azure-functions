@@ -27,10 +27,9 @@ namespace Functions.Tests
             Environment.SetEnvironmentVariable("extensionName", fixture.Create<string>());
             Environment.SetEnvironmentVariable("WEBSITE_HOSTNAME", fixture.Create<string>());
             
-            Environment.SetEnvironmentVariable("eventQueueStorageConnectionString", fixture.Create<string>());
+            Environment.SetEnvironmentVariable("eventQueueStorageConnectionString", "UseDevelopmentStorage=true");
             Environment.SetEnvironmentVariable("TOKEN_SECRET", fixture.Create<string>());
-            
-            
+
             var startup = new Startup();
 
             var services = new ServiceCollection();

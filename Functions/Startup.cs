@@ -10,6 +10,8 @@ using SecurePipelineScan.VstsService;
 using System;
 using System.Net.Http;
 using LogAnalytics.Client;
+using Microsoft.WindowsAzure.Storage;
+using Unmockable;
 
 [assembly: WebJobsStartup(typeof(Functions.Startup))]
 
@@ -46,12 +48,18 @@ namespace Functions
             var extensionName = GetEnvironmentVariable("extensionName");
             var functionAppUrl = GetEnvironmentVariable("WEBSITE_HOSTNAME");
 
+            // This only works because we use the account name and account key in the connection string.
+            var storage = CloudStorageAccount.Parse(GetEnvironmentVariable("eventQueueStorageConnectionString"));
+
+            services.AddSingleton(storage.CreateCloudQueueClient().Wrap());
+            
             var config = new EnvironmentConfig
             {
                 ExtensionName = extensionName,
                 Organization = organization,
                 FunctionAppHostname = functionAppUrl,
-                EventQueueStorageConnectionString = GetEnvironmentVariable("eventQueueStorageConnectionString")
+                EventQueueStorageAccountName = storage.Credentials.AccountName,
+                EventQueueStorageAccountKey = Convert.ToBase64String(storage.Credentials.ExportKey())
             };
 
             services.AddSingleton(config);

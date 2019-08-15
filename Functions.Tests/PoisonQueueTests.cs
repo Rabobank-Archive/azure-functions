@@ -5,6 +5,7 @@ using Moq;
 using Shouldly;
 using System;
 using System.Threading.Tasks;
+using Unmockable;
 using Xunit;
 
 namespace Functions.Tests
@@ -33,7 +34,7 @@ namespace Functions.Tests
             await poison.AddMessageAsync(new CloudQueueMessage(content));
 
             // Act
-            var function = new PoisonQueueFunction(new EnvironmentConfig { EventQueueStorageConnectionString = "UseDevelopmentStorage=true" });
+            var function = new PoisonQueueFunction(client.Wrap());
             await function.Requeue(null, "some-queue", new Mock<ILogger>().Object);
 
             // Assert
@@ -53,7 +54,7 @@ namespace Functions.Tests
         [Fact]
         public async Task SkipIfQueueNameIsEmpty()
         {
-            var func = new PoisonQueueFunction(new EnvironmentConfig { EventQueueStorageConnectionString = "UseDevelopmentStorage=true" });
+            var func = new PoisonQueueFunction(null);
             await func.Requeue(null, "", new Mock<ILogger>().Object);
         }
     }
