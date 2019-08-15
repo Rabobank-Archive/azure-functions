@@ -17,7 +17,7 @@ namespace Functions
         private readonly IVstsRestClient _vstsRestClient;
 
         private static readonly string[] QueueNames = new[] {"buildcompleted", "releasedeploymentcompleted"};
-        private IUnmockable<CloudQueueClient> _cloudQueueClient;
+        private readonly IUnmockable<CloudQueueClient> _cloudQueueClient;
 
         public ServiceHooksSubscriptions(EnvironmentConfig config, IVstsRestClient vstsRestClient, IUnmockable<CloudQueueClient> cloudQueueClient)
         {

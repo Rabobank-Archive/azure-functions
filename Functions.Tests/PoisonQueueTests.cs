@@ -35,7 +35,8 @@ namespace Functions.Tests
 
             // Act
             var function = new PoisonQueueFunction(client.Wrap());
-            await function.Requeue(null, "some-queue", new Mock<ILogger>().Object);
+            var response = await function.Requeue(null, "some-queue", new Mock<ILogger>().Object);
+            response.Dispose();
 
             // Assert
             poison
@@ -55,7 +56,8 @@ namespace Functions.Tests
         public async Task SkipIfQueueNameIsEmpty()
         {
             var func = new PoisonQueueFunction(null);
-            await func.Requeue(null, "", new Mock<ILogger>().Object);
+            var response = await func.Requeue(null, "", new Mock<ILogger>().Object);
+            response.Dispose();
         }
     }
 }
