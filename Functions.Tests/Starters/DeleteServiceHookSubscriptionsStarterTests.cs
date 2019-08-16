@@ -14,7 +14,7 @@ namespace Functions.Tests.Starters
 {
     public class DeleteServiceHookSubscriptionsStarterTests
     {
-        private Fixture _fixture;
+        private readonly Fixture _fixture;
         private const string AccountName = "azdocompliancyqueue";
         private const string AccountKey = "ZHVtbXlrZXk=";
 
