@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Task = System.Threading.Tasks.Task;
 using Functions.Activities;
+using Functions.Helpers;
 
 namespace Functions.Orchestrators
 {
@@ -15,7 +16,8 @@ namespace Functions.Orchestrators
             var subscriptionsToDelete = context.GetInput<List<Hook>>();
 
             await Task.WhenAll(subscriptionsToDelete.Select(s =>
-                context.CallActivityAsync(nameof(DeleteServiceHookSubscriptionActivity), s)));
+                context.CallActivityWithRetryAsync(nameof(DeleteServiceHookSubscriptionActivity),
+                    RetryHelper.ActivityRetryOptions, s)));
         }
     }
 }

@@ -38,7 +38,8 @@ namespace Functions.Tests.Orchestrators
 
             //Assert
             orchestrationClientMock.Verify(
-                x => x.CallActivityAsync(nameof(DeleteServiceHookSubscriptionActivity), It.IsAny<Response.Hook>()),
+                x => x.CallActivityWithRetryAsync(nameof(DeleteServiceHookSubscriptionActivity),
+                    It.IsAny<RetryOptions>(), It.IsAny<Response.Hook>()),
                 Times.Exactly(count));
         }
     }
