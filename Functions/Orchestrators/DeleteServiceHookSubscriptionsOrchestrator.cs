@@ -7,9 +7,9 @@ using Functions.Activities;
 
 namespace Functions.Orchestrators
 {
-    public class DeleteServiceHooksSubscriptionsOrchestrator
+    public class DeleteServiceHookSubscriptionsOrchestrator
     {
-        [FunctionName(nameof(DeleteServiceHooksSubscriptionsOrchestrator))]
+        [FunctionName(nameof(DeleteServiceHookSubscriptionsOrchestrator))]
         public async Task Run([OrchestrationTrigger] DurableOrchestrationContextBase context)
         {
             var subscriptionsToDelete = context.GetInput<List<Hook>>();

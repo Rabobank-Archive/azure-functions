@@ -16,9 +16,9 @@ namespace Functions.Activities
         }
 
         [FunctionName(nameof(DeleteServiceHookSubscriptionActivity))]
-        public async Task Run([ActivityTrigger] DurableActivityContextBase inputs)
+        public async Task Run([ActivityTrigger] DurableActivityContextBase context)
         {
-            var hook = inputs.GetInput<Response.Hook>();
+            var hook = context.GetInput<Response.Hook>();
             await _azuredo.DeleteAsync(Hooks.Subscription(hook.Id));
         }
     }

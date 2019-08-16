@@ -40,7 +40,7 @@ namespace Functions.Tests.Starters
                 .Returns(hooks);
 
             //Act
-            var fun = new DeleteServiceHooksSubscriptionsStarter(config, clientMock.Object);
+            var fun = new DeleteServiceHookSubscriptionsStarter(config, clientMock.Object);
             await fun.Run(new HttpRequestMessage(), orchestrationClientMock.Object);
 
             //Assert
@@ -72,12 +72,12 @@ namespace Functions.Tests.Starters
                 .Returns(hooks);
 
             //Act
-            var fun = new DeleteServiceHooksSubscriptionsStarter(config, clientMock.Object);
+            var fun = new DeleteServiceHookSubscriptionsStarter(config, clientMock.Object);
             await fun.Run(new HttpRequestMessage(), orchestrationClientMock.Object);
 
             //Assert
             orchestrationClientMock.Verify(
-                x => x.StartNewAsync(nameof(DeleteServiceHooksSubscriptionsOrchestrator), It.Is<List<Response.Hook>>(r => r.Count == 4)),
+                x => x.StartNewAsync(nameof(DeleteServiceHookSubscriptionsOrchestrator), It.Is<List<Response.Hook>>(r => r.Count == 4)),
                 Times.Once());
         }
     }

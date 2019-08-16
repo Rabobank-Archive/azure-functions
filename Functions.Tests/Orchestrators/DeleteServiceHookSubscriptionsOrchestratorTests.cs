@@ -33,7 +33,7 @@ namespace Functions.Tests.Orchestrators
                 x => x.GetInput<List<Response.Hook>>()).Returns(hooks);
 
             //Act
-            var fun = new DeleteServiceHooksSubscriptionsOrchestrator();
+            var fun = new DeleteServiceHookSubscriptionsOrchestrator();
             await fun.Run(orchestrationClientMock.Object);
 
             //Assert

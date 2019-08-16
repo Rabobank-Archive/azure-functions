@@ -10,18 +10,18 @@ using Functions.Orchestrators;
 
 namespace Functions.Starters
 {
-    public class DeleteServiceHooksSubscriptionsStarter
+    public class DeleteServiceHookSubscriptionsStarter
     {
         private readonly EnvironmentConfig _config;
         private readonly IVstsRestClient _client;
 
-        public DeleteServiceHooksSubscriptionsStarter(EnvironmentConfig config, IVstsRestClient client)
+        public DeleteServiceHookSubscriptionsStarter(EnvironmentConfig config, IVstsRestClient client)
         {
             _config = config;
             _client = client;
         }
         
-        [FunctionName(nameof(DeleteServiceHooksSubscriptionsStarter))]
+        [FunctionName(nameof(DeleteServiceHookSubscriptionsStarter))]
         public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequestMessage req,
             [OrchestrationClient] DurableOrchestrationClientBase starter)
@@ -31,7 +31,7 @@ namespace Functions.Starters
                 .Where(h => _config.EventQueueStorageAccountName == h.ConsumerInputs.AccountName)
                 .ToList();
 
-            await starter.StartNewAsync(nameof(DeleteServiceHooksSubscriptionsOrchestrator), subscriptionsToDelete);
+            await starter.StartNewAsync(nameof(DeleteServiceHookSubscriptionsOrchestrator), subscriptionsToDelete);
 
             return new OkResult();
         }

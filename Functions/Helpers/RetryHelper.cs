@@ -44,7 +44,8 @@ namespace Functions.Helpers
                         socketException && // Handle timeout (happens if we got delayed by rate limits)
                     socketException.Message.Contains(
                         "A connection attempt failed because the connected party did not properly respond after a period of time")
-                );
+                )
+                || (exception.InnerException is TaskCanceledException); // Happens when calls time out
         }
     }
 }
