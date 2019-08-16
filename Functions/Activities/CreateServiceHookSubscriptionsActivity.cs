@@ -41,7 +41,7 @@ namespace Functions.Activities
                                 h.ConsumerInputs.AccountName == hook.ConsumerInputs.AccountName &&
                                 h.PublisherInputs.ProjectId == hook.PublisherInputs.ProjectId))
             {
-                await _vstsRestClient.PostAsync(request, hook);
+                await _vstsRestClient.PostAsync(request, hook).ConfigureAwait(false);
             }
         }
     }
