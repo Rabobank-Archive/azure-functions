@@ -15,9 +15,11 @@ namespace Functions
     {
         private readonly EnvironmentConfig _config;
         private readonly IVstsRestClient _vstsRestClient;
+        private readonly IUnmockable<CloudQueueClient> _cloudQueueClient;
 
-        private static readonly string[] QueueNames = new[] {"buildcompleted", "releasedeploymentcompleted"};
-        private IUnmockable<CloudQueueClient> _cloudQueueClient;
+        private const string BuildCompletedQueueName = "buildcompleted";
+        private const string ReleaseDeploymentCompletedQueueName = "releasedeploymentcompleted";
+        
 
         public ServiceHooksSubscriptions(EnvironmentConfig config, IVstsRestClient vstsRestClient, IUnmockable<CloudQueueClient> cloudQueueClient)
         {
@@ -36,11 +38,10 @@ namespace Functions
 
         private async Task CreateQueuesIfNotExist()
         {
-            foreach (var queueName in QueueNames)
-            {
-                var queue = _cloudQueueClient.Execute(c => c.GetQueueReference(queueName));
-                await queue.CreateIfNotExistsAsync();
-            }
+            var queue = _cloudQueueClient.Execute(c => c.GetQueueReference(BuildCompletedQueueName));
+            await queue.CreateIfNotExistsAsync();
+            queue = _cloudQueueClient.Execute(c => c.GetQueueReference(ReleaseDeploymentCompletedQueueName));
+            await queue.CreateIfNotExistsAsync();
         }
 
         private async Task UpdateServiceSubscriptions(string accountName, string accountKey)
@@ -48,13 +49,15 @@ namespace Functions
             var hooks = _vstsRestClient.Get(Hooks.Subscriptions()).ToList();
             foreach (var project in _vstsRestClient.Get(Project.Projects()))
             {
-                foreach (var queueName in QueueNames)
-                {
-                    await AddHookIfNotSubscribed(
-                        Hooks.AddHookSubscription(),
-                        Hooks.Add.BuildCompleted(accountName, accountKey, queueName, project.Id),
-                        hooks);
-                }
+                await AddHookIfNotSubscribed(
+                    Hooks.AddHookSubscription(),
+                    Hooks.Add.BuildCompleted(accountName, accountKey, BuildCompletedQueueName, project.Id),
+                    hooks);
+                
+                await AddHookIfNotSubscribed(
+                    Hooks.AddHookSubscription(),
+                    Hooks.Add.ReleaseDeploymentCompleted(accountName, accountKey, ReleaseDeploymentCompletedQueueName, project.Id),
+                    hooks);
             }
         }
 

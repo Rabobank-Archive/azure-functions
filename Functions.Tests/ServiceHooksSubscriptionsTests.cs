@@ -50,6 +50,7 @@ namespace Functions.Tests
                 .Verify(x => x.PostAsync(
                     It.IsAny<IVstsRequest<Hooks.Add.Body, Response.Hook>>(),
                     It.Is<Hooks.Add.Body>(b =>
+                        b.EventType == "build.complete" &&
                         b.ConsumerInputs.QueueName == "buildcompleted" &&
                         b.ConsumerInputs.AccountName == AccountName &&
                         b.ConsumerInputs.AccountKey == "aG9pCg==")));
@@ -58,6 +59,7 @@ namespace Functions.Tests
                 .Verify(x => x.PostAsync(
                     It.IsAny<IVstsRequest<Hooks.Add.Body, Response.Hook>>(),
                     It.Is<Hooks.Add.Body>(b =>
+                        b.EventType == "ms.vss-release.deployment-completed-event" &&
                         b.ConsumerInputs.QueueName == "releasedeploymentcompleted" &&
                         b.ConsumerInputs.AccountName == AccountName &&
                         b.ConsumerInputs.AccountKey == "aG9pCg==")));
