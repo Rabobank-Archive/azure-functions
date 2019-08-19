@@ -35,17 +35,13 @@ namespace Functions.Helpers
         private static bool IsRetryableActivity(Exception exception)
         {
             return
-                (exception.InnerException is FlurlHttpException
-                     flurlHttpException && // Handle rate limits (happens if we got blocked by rate limits)
-                 (flurlHttpException.Message.Contains("Call failed with status code 429") ||
-                 flurlHttpException.Call.HttpStatus == (HttpStatusCode) 429))
-                || (
-                    exception.InnerException is SocketException
-                        socketException && // Handle timeout (happens if we got delayed by rate limits)
-                    socketException.Message.Contains(
-                        "A connection attempt failed because the connected party did not properly respond after a period of time")
-                )
-                || (exception.InnerException is TaskCanceledException); // Happens when calls time out
+                // Handle rate limits (happens if we got blocked by rate limits)
+                exception.InnerException.Message.Contains("Call failed with status code 429")
+                // Handle timeout (happens if we got delayed by rate limits)
+                || (exception.InnerException is SocketException socketException && socketException.Message.Contains(
+                    "A connection attempt failed because the connected party did not properly respond after a period of time"))
+                // Happens when calls time out
+                || (exception.InnerException is TaskCanceledException); 
         }
     }
 }
