@@ -10,6 +10,7 @@ namespace Functions.Starters
     public class DeleteServiceHookSubscriptionsStarter
     {
         [FunctionName(nameof(DeleteServiceHookSubscriptionsStarter))]
+        [Disable]
         public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequestMessage req,
             [OrchestrationClient] DurableOrchestrationClientBase starter)
