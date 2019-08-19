@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Azure.WebJobs;
 using Response = SecurePipelineScan.VstsService.Response;
 using System.Threading.Tasks;
@@ -22,10 +21,13 @@ namespace Functions.Orchestrators
 
             await context.CallActivityAsync(nameof(CreateStorageQueuesActivity), null);
 
-            await Task.WhenAll(projects.Select(p =>
-                context.CallActivityWithRetryAsync(nameof(CreateServiceHookSubscriptionsActivity),
+            foreach (var p in projects)
+            {
+                await context.CallActivityWithRetryAsync(nameof(CreateServiceHookSubscriptionsActivity),
                     RetryHelper.ActivityRetryOptions,
-                    new CreateServiceHookSubscriptionsActivityRequest {Project = p, ExistingHooks = existingHooks})));
+                    new CreateServiceHookSubscriptionsActivityRequest {Project = p, ExistingHooks = existingHooks});
+            }
+                
         }
     }
 }
