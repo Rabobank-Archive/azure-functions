@@ -29,7 +29,7 @@ namespace Functions.Activities
                         StorageQueueNames.BuildCompletedQueueName, request.Project.Id), request.ExistingHooks);
                 
                 await AddHookIfNotSubscribed(
-                    Hooks.AddHookSubscription(),
+                    Hooks.AddReleaseManagementSubscription(),
                     Hooks.Add.ReleaseDeploymentCompleted(_config.EventQueueStorageAccountName,
                         _config.EventQueueStorageAccountKey, StorageQueueNames.ReleaseDeploymentCompletedQueueName,
                         request.Project.Id), request.ExistingHooks);
