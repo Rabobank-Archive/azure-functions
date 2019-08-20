@@ -18,7 +18,8 @@ namespace Functions.Activities
         private readonly EnvironmentConfig _config;
         private readonly IVstsRestClient _azuredo;
 
-        public BuildPipelinesScanActivity(EnvironmentConfig config, IVstsRestClient azuredo, IRulesProvider rulesProvider)
+        public BuildPipelinesScanActivity(EnvironmentConfig config, IVstsRestClient azuredo,
+            IRulesProvider rulesProvider)
         {
             _config = config;
             _azuredo = azuredo;
@@ -26,36 +27,18 @@ namespace Functions.Activities
         }
 
         [FunctionName(nameof(BuildPipelinesScanActivity))]
-        public async Task<ItemsExtensionData> Run(
-            [ActivityTrigger] Project project)
-        {
-            return new ItemsExtensionData
-            {
-                Id = project.Name,
-                Date = DateTime.UtcNow,
-                RescanUrl = ProjectScanHttpStarter.RescanUrl(_config, project.Name, RuleScopes.BuildPipelines),
-                HasReconcilePermissionUrl = ReconcileFunction.HasReconcilePermissionUrl(_config, project.Id),
-                Reports = await CreateReports(project)
-            };
-        }
-
-        private async Task<IList<ItemExtensionData>> CreateReports(Project project)
+        public async Task<ItemExtensionData> Run(
+            [ActivityTrigger] BuildDefinition definition)
         {
             var rules = _rulesProvider.BuildRules(_azuredo).ToList();
-            var items = _azuredo.Get(Requests.Builds.BuildDefinitions(project.Id));
 
-            var evaluationResults = new List<ItemExtensionData>();
-
-            // Do this in a loop (instead of in a Select) to avoid parallelism which messes up our sockets
-            foreach (var pipeline in items)
+            var evaluationResult = new ItemExtensionData
             {
-                evaluationResults.Add(new ItemExtensionData
-                {
-                    Item = pipeline.Name,
-                    Rules = await rules.Evaluate(_config, project.Id, RuleScopes.BuildPipelines, pipeline.Id)
-                });
-            }
-            return evaluationResults;
+                Item = definition.Name,
+                Rules = await rules.Evaluate(_config, definition.Project.Id, RuleScopes.BuildPipelines, definition.Id)
+            };
+
+            return evaluationResult;
         }
     }
 }

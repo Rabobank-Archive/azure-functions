@@ -14,7 +14,7 @@ namespace Functions.Tests.Activities
     public class BuildPipelinesScanActivityTests
     {
         [Fact]
-        public async Task EvaluatesRulesAndReturnsReport()
+        public async Task RunShouldReturnItemExtensionData()
         {
             // Arrange
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
@@ -25,9 +25,8 @@ namespace Functions.Tests.Activities
                 .Verifiable();
 
             var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
-            client
-                .Setup(x => x.Get(It.IsAny<IEnumerableRequest<Response.BuildDefinition>>()))
-                .Returns(fixture.CreateMany<Response.BuildDefinition>());
+
+            Response.BuildDefinition definition = fixture.Create<Response.BuildDefinition>();
 
             // Act
             var activity = new BuildPipelinesScanActivity(
@@ -35,11 +34,10 @@ namespace Functions.Tests.Activities
                 client.Object,
                 provider.Object);
 
-            var result = await activity.Run(fixture.Create<Response.Project>());
+            var result = await activity.Run(definition);
 
             // Assert
-            result.RescanUrl.ShouldNotBeNull();
-            result.Reports.ShouldNotBeEmpty();
+            result.ShouldNotBeNull();
 
             client.VerifyAll();
         }
