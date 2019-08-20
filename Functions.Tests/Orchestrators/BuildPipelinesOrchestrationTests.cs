@@ -2,17 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AutoFixture;
+using AzDoCompliancy.CustomStatus;
 using Functions.Activities;
 using Functions.Model;
 using Functions.Orchestrators;
 using Microsoft.Azure.WebJobs;
 using Moq;
-using System.Threading.Tasks;
-using AzDoCompliancy.CustomStatus;
-using Functions.Helpers;
-using NSubstitute;
+using SecurePipelineScan.VstsService.Response;
 using Xunit;
-using Response = SecurePipelineScan.VstsService.Response;
+using Task = System.Threading.Tasks.Task;
 
 namespace Functions.Tests.Orchestrators
 {
@@ -28,8 +26,8 @@ namespace Functions.Tests.Orchestrators
 
             var starter = mocks.Create<DurableOrchestrationContextBase>();
             starter
-                .Setup(x => x.GetInput<Response.Project>())
-                .Returns(fixture.Create<Response.Project>());
+                .Setup(x => x.GetInput<Project>())
+                .Returns(fixture.Create<Project>());
             
             starter
                 .Setup(x => x.InstanceId)
@@ -41,15 +39,15 @@ namespace Functions.Tests.Orchestrators
 
             starter.Setup(x => x.CallActivityWithRetryAsync<ItemExtensionData>(nameof(BuildPipelinesScanActivity),
                     It.IsAny<RetryOptions>(), 
-                    It.IsAny<Response.BuildDefinition>()))
+                    It.IsAny<BuildDefinition>()))
                 .ReturnsAsync(fixture.Create<ItemExtensionData>())
                 .Verifiable();
             
             starter
-                .Setup(x => x.CallActivityWithRetryAsync<List<Response.BuildDefinition>>(nameof(BuildDefinitionsActivity),
+                .Setup(x => x.CallActivityWithRetryAsync<List<BuildDefinition>>(nameof(BuildDefinitionsActivity),
                     It.IsAny<RetryOptions>(),
-                    It.IsAny<Response.Project>()))
-                .ReturnsAsync(fixture.CreateMany<Response.BuildDefinition>().ToList())
+                    It.IsAny<Project>()))
+                .ReturnsAsync(fixture.CreateMany<BuildDefinition>().ToList())
                 .Verifiable();
 
             
