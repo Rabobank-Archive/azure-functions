@@ -279,12 +279,12 @@
         },
         "actions": [
           {
-            "actionGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('actionGroupNameLa'))]"
+            "actionGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('actionGroupNameAi'))]"
           }
         ]
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupNameLa'))]",
+        "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupNameAi'))]",
         "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
       ]
     },
@@ -319,12 +319,12 @@
         },
         "actions": [
           {
-            "actionGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('actionGroupNameLa'))]"
+            "actionGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('actionGroupNameAi'))]"
           }
         ]
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupNameLa'))]",
+        "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupNameAi'))]",
         "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
       ]
     },
@@ -359,12 +359,12 @@
         },
         "actions": [
           {
-            "actionGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('actionGroupNameLa'))]"
+            "actionGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('actionGroupNameAi'))]"
           }
         ]
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupNameLa'))]",
+        "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupNameAi'))]",
         "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
       ]
     },
@@ -399,12 +399,12 @@
         },
         "actions": [
           {
-            "actionGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('actionGroupNameLa'))]"
+            "actionGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('actionGroupNameAi'))]"
           }
         ]
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupNameLa'))]",
+        "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupNameAi'))]",
         "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
       ]
     },
