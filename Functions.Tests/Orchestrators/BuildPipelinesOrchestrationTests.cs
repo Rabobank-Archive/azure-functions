@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using AutoFixture;
 using Functions.Activities;
@@ -7,6 +9,8 @@ using Microsoft.Azure.WebJobs;
 using Moq;
 using System.Threading.Tasks;
 using AzDoCompliancy.CustomStatus;
+using Functions.Helpers;
+using NSubstitute;
 using Xunit;
 using Response = SecurePipelineScan.VstsService.Response;
 
@@ -35,12 +39,23 @@ namespace Functions.Tests.Orchestrators
                 .Setup(x => x.SetCustomStatus(It.Is<ScanOrchestrationStatus>(s => s.Scope == RuleScopes.BuildPipelines)))
                 .Verifiable();
 
+            starter.Setup(x => x.CallActivityWithRetryAsync<ItemExtensionData>(nameof(BuildPipelinesScanActivity),
+                    It.IsAny<RetryOptions>(), 
+                    It.IsAny<Response.BuildDefinition>()))
+                .ReturnsAsync(fixture.Create<ItemExtensionData>())
+                .Verifiable();
+            
             starter
-                .Setup(x => x.CallActivityWithRetryAsync<ItemsExtensionData>(nameof(BuildPipelinesScanActivity),
-                    It.IsAny<RetryOptions>(), It.IsAny<Response.Project>()))
-                .ReturnsAsync(fixture.Create<ItemsExtensionData>())
+                .Setup(x => x.CallActivityWithRetryAsync<List<Response.BuildDefinition>>(nameof(BuildDefinitionsActivity),
+                    It.IsAny<RetryOptions>(),
+                    It.IsAny<Response.Project>()))
+                .ReturnsAsync(fixture.CreateMany<Response.BuildDefinition>().ToList())
                 .Verifiable();
 
+            
+            starter
+                .Setup(x => x.CurrentUtcDateTime).Returns(new DateTime());
+                
             starter
                 .Setup(x => x.CallActivityAsync(nameof(ExtensionDataUploadActivity),
                     It.Is<(ItemsExtensionData data, string scope)>(t => t.scope == RuleScopes.BuildPipelines)))
@@ -52,9 +67,12 @@ namespace Functions.Tests.Orchestrators
                     l.PreventiveLogItems.All(p => p.Scope == RuleScopes.BuildPipelines))))
                 .Returns(Task.CompletedTask);
 
-            //Act
-            await BuildPipelinesOrchestration.Run(starter.Object);
+            var environmentConfig = fixture.Create<EnvironmentConfig>();
 
+            //Act
+            var function = new BuildPipelinesOrchestration(environmentConfig);
+            await function.Run(starter.Object);
+            
             //Assert           
             mocks.VerifyAll();
         }
