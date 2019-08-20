@@ -26,7 +26,7 @@ namespace Functions.Tests.Activities
 
             var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
 
-            Response.BuildDefinition definition = fixture.Create<Response.BuildDefinition>();
+            var definition = fixture.Create<Response.BuildDefinition>();
 
             // Act
             var activity = new BuildPipelinesScanActivity(
