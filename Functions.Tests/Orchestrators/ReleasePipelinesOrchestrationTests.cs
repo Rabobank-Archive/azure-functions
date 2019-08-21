@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using AutoFixture;
 using Functions.Activities;
@@ -8,7 +9,8 @@ using Moq;
 using System.Threading.Tasks;
 using AzDoCompliancy.CustomStatus;
 using Xunit;
-using Response = SecurePipelineScan.VstsService.Response;
+using SecurePipelineScan.VstsService.Response;
+using Task = System.Threading.Tasks.Task;
 
 namespace Functions.Tests.Orchestrators
 {
@@ -24,8 +26,8 @@ namespace Functions.Tests.Orchestrators
 
             var starter = mocks.Create<DurableOrchestrationContextBase>();
             starter
-                .Setup(x => x.GetInput<Response.Project>())
-                .Returns(fixture.Create<Response.Project>());
+                .Setup(x => x.GetInput<Project>())
+                .Returns(fixture.Create<Project>());
             
             starter
                 .Setup(x => x.InstanceId)
@@ -37,8 +39,15 @@ namespace Functions.Tests.Orchestrators
 
             starter
                 .Setup(x => x.CallActivityWithRetryAsync<ItemsExtensionData>(nameof(ReleasePipelinesScanActivity),
-                    It.IsAny<RetryOptions>(), It.IsAny<Response.Project>()))
+                    It.IsAny<RetryOptions>(), It.IsAny<Project>()))
                 .ReturnsAsync(fixture.Create<ItemsExtensionData>())
+                .Verifiable();
+            
+            starter
+                .Setup(x => x.CallActivityWithRetryAsync<List<ReleaseDefinition>>(nameof(BuildDefinitionsActivity),
+                    It.IsAny<RetryOptions>(),
+                    It.IsAny<Project>()))
+                .ReturnsAsync(fixture.CreateMany<ReleaseDefinition>().ToList())
                 .Verifiable();
 
             starter
@@ -51,9 +60,12 @@ namespace Functions.Tests.Orchestrators
                     It.Is<LogAnalyticsUploadActivityRequest>(l =>
                     l.PreventiveLogItems.All(p => p.Scope == RuleScopes.ReleasePipelines))))
                 .Returns(Task.CompletedTask);
+            
+            var environmentConfig = fixture.Create<EnvironmentConfig>();
 
             //Act
-            await ReleasePipelinesOrchestration.Run(starter.Object);
+            var function = new ReleasePipelinesOrchestration(environmentConfig);
+            await function.Run(starter.Object);
 
             //Assert           
             mocks.VerifyAll();
