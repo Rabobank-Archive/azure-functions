@@ -1,16 +1,15 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AutoFixture;
+using AzDoCompliancy.CustomStatus;
 using Functions.Activities;
 using Functions.Model;
 using Functions.Orchestrators;
 using Microsoft.Azure.WebJobs;
 using Moq;
-using System.Threading.Tasks;
-using AzDoCompliancy.CustomStatus;
-using Functions.Tests.Activities;
-using Xunit;
 using SecurePipelineScan.VstsService.Response;
+using Xunit;
 using Task = System.Threading.Tasks.Task;
 
 namespace Functions.Tests.Orchestrators
@@ -39,9 +38,10 @@ namespace Functions.Tests.Orchestrators
                 .Verifiable();
 
             starter
-                .Setup(x => x.CallActivityWithRetryAsync<ItemsExtensionData>(nameof(ReleasePipelinesScanActivity),
-                    It.IsAny<RetryOptions>(), It.IsAny<Project>()))
-                .ReturnsAsync(fixture.Create<ItemsExtensionData>())
+                .Setup(x => x.CallActivityWithRetryAsync<ItemExtensionData>(nameof(ReleasePipelinesScanActivity),
+                    It.IsAny<RetryOptions>(), 
+                    It.IsAny<ReleaseDefinition>()))
+                .ReturnsAsync(fixture.Create<ItemExtensionData>())
                 .Verifiable();
             
             starter
@@ -50,6 +50,9 @@ namespace Functions.Tests.Orchestrators
                     It.IsAny<Project>()))
                 .ReturnsAsync(fixture.CreateMany<ReleaseDefinition>().ToList())
                 .Verifiable();
+            
+            starter
+                .Setup(x => x.CurrentUtcDateTime).Returns(new DateTime());
 
             starter
                 .Setup(x => x.CallActivityAsync(nameof(ExtensionDataUploadActivity),

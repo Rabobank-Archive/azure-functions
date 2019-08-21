@@ -1,14 +1,10 @@
+using System.Linq;
+using System.Threading.Tasks;
 using Functions.Model;
-using Functions.Starters;
 using Microsoft.Azure.WebJobs;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Response;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Requests = SecurePipelineScan.VstsService.Requests;
 
 namespace Functions.Activities
 {
@@ -18,7 +14,8 @@ namespace Functions.Activities
         private readonly EnvironmentConfig _config;
         private readonly IVstsRestClient _azuredo;
 
-        public ReleasePipelinesScanActivity(EnvironmentConfig config, IVstsRestClient azuredo, IRulesProvider rulesProvider)
+        public ReleasePipelinesScanActivity(EnvironmentConfig config, IVstsRestClient azuredo,
+            IRulesProvider rulesProvider)
         {
             _config = config;
             _azuredo = azuredo;
@@ -26,36 +23,19 @@ namespace Functions.Activities
         }
 
         [FunctionName(nameof(ReleasePipelinesScanActivity))]
-        public async Task<ItemsExtensionData> Run(
-            [ActivityTrigger] Project project)
-        {
-            return new ItemsExtensionData
-            {
-                Id = project.Name,
-                Date = DateTime.UtcNow,
-                RescanUrl = ProjectScanHttpStarter.RescanUrl(_config, project.Name, RuleScopes.ReleasePipelines),
-                HasReconcilePermissionUrl = ReconcileFunction.HasReconcilePermissionUrl(_config, project.Id),
-                Reports = await CreateReports(project)
-            };
-        }
-
-        private async Task<IList<ItemExtensionData>> CreateReports(Project project)
+        public async Task<ItemExtensionData> Run(
+            [ActivityTrigger] ReleaseDefinition definition)
         {
             var rules = _rulesProvider.ReleaseRules(_azuredo).ToList();
-            var items = _azuredo.Get(Requests.ReleaseManagement.Definitions(project.Id));
 
-            // Do this in a loop (instead of in a Select) to avoid parallelism which messes up our sockets
-            var evaluationResults = new List<ItemExtensionData>();
-            foreach (var pipeline in items)
+            var evaluationResult = new ItemExtensionData
             {
-                evaluationResults.Add(new ItemExtensionData
-                {
-                    Item = pipeline.Name,
-                    Rules = await rules.Evaluate(_config, project.Id, RuleScopes.ReleasePipelines, pipeline.Id)
-                });
-            }
+                Item = definition.Name,
+                Rules = await rules.Evaluate(_config, definition.ProjectReference.Id, RuleScopes.ReleasePipelines,
+                    definition.Id)
+            };
 
-            return evaluationResults;
+            return evaluationResult;
         }
     }
 }

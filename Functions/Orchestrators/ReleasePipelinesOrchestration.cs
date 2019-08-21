@@ -1,8 +1,10 @@
 using System.Collections.Generic;
+using System.Linq;
 using AzDoCompliancy.CustomStatus;
 using Functions.Activities;
 using Functions.Helpers;
 using Functions.Model;
+using Functions.Starters;
 using Microsoft.Azure.WebJobs;
 using SecurePipelineScan.VstsService.Response;
 using Task = System.Threading.Tasks.Task;
@@ -30,8 +32,16 @@ namespace Functions.Orchestrators
                     RetryHelper.ActivityRetryOptions,
                     project);
 
-            var data = await context.CallActivityWithRetryAsync<ItemsExtensionData>(
-                nameof(ReleasePipelinesScanActivity), RetryHelper.ActivityRetryOptions, project);
+            var data = new ItemsExtensionData()
+            {
+                Id = project.Name,
+                Date = context.CurrentUtcDateTime,
+                RescanUrl = ProjectScanHttpStarter.RescanUrl(_config, project.Name, RuleScopes.ReleasePipelines),
+                HasReconcilePermissionUrl = ReconcileFunction.HasReconcilePermissionUrl(_config, project.Id),
+                Reports = await Task.WhenAll(releaseDefinitions.Select(b =>
+                    context.CallActivityWithRetryAsync<ItemExtensionData>(nameof(ReleasePipelinesScanActivity),
+                        RetryHelper.ActivityRetryOptions, b)))
+            };
 
             await context.CallActivityAsync(nameof(LogAnalyticsUploadActivity),
                 new LogAnalyticsUploadActivityRequest

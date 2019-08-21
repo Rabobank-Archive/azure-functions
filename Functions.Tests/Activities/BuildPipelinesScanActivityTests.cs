@@ -14,7 +14,7 @@ namespace Functions.Tests.Activities
     public class BuildPipelinesScanActivityTests
     {
         [Fact]
-        public async Task RunShouldReturnItemExtensionData()
+        public async Task RunShouldReturnItemExtensionDataForBuildDefinition()
         {
             // Arrange
             var fixture = new Fixture().Customize(new AutoMoqCustomization());

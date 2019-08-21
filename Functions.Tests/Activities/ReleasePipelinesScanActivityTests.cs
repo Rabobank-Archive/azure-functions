@@ -4,10 +4,10 @@ using Functions.Activities;
 using Moq;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
+using SecurePipelineScan.VstsService.Response;
 using Shouldly;
-using System.Threading.Tasks;
 using Xunit;
-using Response = SecurePipelineScan.VstsService.Response;
+using Task = System.Threading.Tasks.Task;
 
 namespace Functions.Tests.Activities
 {
@@ -25,9 +25,8 @@ namespace Functions.Tests.Activities
                 .Verifiable();
 
             var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
-            client
-                .Setup(x => x.Get(It.IsAny<IEnumerableRequest<Response.ReleaseDefinition>>()))
-                .Returns(fixture.CreateMany<Response.ReleaseDefinition>());
+            
+            var definition = fixture.Create<ReleaseDefinition>();
 
             // Act
             var activity = new ReleasePipelinesScanActivity(
@@ -35,11 +34,10 @@ namespace Functions.Tests.Activities
                 client.Object,
                 provider.Object);
 
-            var result = await activity.Run(fixture.Create<Response.Project>());
+            var result = await activity.Run(definition);
 
             // Assert
-            result.RescanUrl.ShouldNotBeNull();
-            result.Reports.ShouldNotBeEmpty();
+            result.ShouldNotBeNull();
 
             client.VerifyAll();
         }

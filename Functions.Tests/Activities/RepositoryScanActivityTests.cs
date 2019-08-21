@@ -25,9 +25,6 @@ namespace Functions.Tests.Activities
                 .Verifiable();
 
             var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
-            client
-                .Setup(x => x.Get(It.IsAny<IEnumerableRequest<Response.ReleaseDefinition>>()))
-                .Returns(fixture.CreateMany<Response.ReleaseDefinition>());
 
             var repository = fixture.Create<Response.Repository>();
 
