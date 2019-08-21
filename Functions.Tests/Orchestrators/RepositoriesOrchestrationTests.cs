@@ -1,14 +1,16 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using AutoFixture;
+using AzDoCompliancy.CustomStatus;
 using Functions.Activities;
 using Functions.Model;
 using Functions.Orchestrators;
 using Microsoft.Azure.WebJobs;
 using Moq;
-using System.Threading.Tasks;
-using AzDoCompliancy.CustomStatus;
+using SecurePipelineScan.VstsService.Response;
 using Xunit;
-using Response = SecurePipelineScan.VstsService.Response;
+using Task = System.Threading.Tasks.Task;
 
 namespace Functions.Tests.Orchestrators
 {
@@ -24,8 +26,8 @@ namespace Functions.Tests.Orchestrators
 
             var starter = mocks.Create<DurableOrchestrationContextBase>();
             starter
-                .Setup(x => x.GetInput<Response.Project>())
-                .Returns(fixture.Create<Response.Project>());
+                .Setup(x => x.GetInput<Project>())
+                .Returns(fixture.Create<Project>());
             
             starter
                 .Setup(x => x.InstanceId)
@@ -36,11 +38,22 @@ namespace Functions.Tests.Orchestrators
                 .Verifiable();
 
             starter
-                .Setup(x => x.CallActivityWithRetryAsync<ItemsExtensionData>(nameof(RepositoriesScanActivity),
-                    It.IsAny<RetryOptions>(), It.IsAny<Response.Project>()))
-                .ReturnsAsync(fixture.Create<ItemsExtensionData>())
+                .Setup(x => x.CallActivityWithRetryAsync<ItemExtensionData>(nameof(RepositoriesScanActivity),
+                    It.IsAny<RetryOptions>(), 
+                    It.IsAny<Repository>()))
+                .ReturnsAsync(fixture.Create<ItemExtensionData>())
                 .Verifiable();
-
+            
+            starter
+                .Setup(x => x.CallActivityWithRetryAsync<List<Repository>>(nameof(RepositoriesForProjectActivity),
+                    It.IsAny<RetryOptions>(),
+                    It.IsAny<Project>()))
+                .ReturnsAsync(fixture.CreateMany<Repository>().ToList())
+                .Verifiable();
+            
+            starter
+                .Setup(x => x.CurrentUtcDateTime).Returns(new DateTime());
+            
             starter
                 .Setup(x => x.CallActivityAsync(nameof(ExtensionDataUploadActivity),
                     It.Is<(ItemsExtensionData data, string scope)>(t => t.scope == RuleScopes.Repositories)))
@@ -51,9 +64,13 @@ namespace Functions.Tests.Orchestrators
                     It.Is<LogAnalyticsUploadActivityRequest>(l =>
                         l.PreventiveLogItems.All(p => p.Scope == RuleScopes.Repositories))))
                 .Returns(Task.CompletedTask);
+            
+            var environmentConfig = fixture.Create<EnvironmentConfig>();
 
             //Act
-            await RepositoriesOrchestration.Run(starter.Object);
+            
+            var function = new RepositoriesOrchestration(environmentConfig);
+            await function.Run(starter.Object);
 
             //Assert           
             mocks.VerifyAll();
