@@ -14,7 +14,7 @@ namespace Functions.Tests.Activities
     public class RepositoryScanActivityTests
     {
         [Fact]
-        public async Task EvaluatesRulesAndReturnsReport()
+        public async Task RunShouldReturnItemExtensionDataForRepository()
         {
             // Arrange
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
@@ -29,17 +29,18 @@ namespace Functions.Tests.Activities
                 .Setup(x => x.Get(It.IsAny<IEnumerableRequest<Response.ReleaseDefinition>>()))
                 .Returns(fixture.CreateMany<Response.ReleaseDefinition>());
 
+            var repository = fixture.Create<Response.Repository>();
+
             // Act
-            var activity = new ReleasePipelinesScanActivity(
+            var activity = new RepositoriesScanActivity(
                 fixture.Create<EnvironmentConfig>(),
                 client.Object,
                 provider.Object);
 
-            var result = await activity.Run(fixture.Create<Response.Project>());
+            var result = await activity.Run(repository);
 
             // Assert
-            result.RescanUrl.ShouldNotBeNull();
-            result.Reports.ShouldNotBeEmpty();
+            result.ShouldNotBeNull();
 
             client.VerifyAll();
         }
