@@ -8,6 +8,7 @@ using Microsoft.Azure.WebJobs;
 using Moq;
 using System.Threading.Tasks;
 using AzDoCompliancy.CustomStatus;
+using Functions.Tests.Activities;
 using Xunit;
 using SecurePipelineScan.VstsService.Response;
 using Task = System.Threading.Tasks.Task;
@@ -44,7 +45,7 @@ namespace Functions.Tests.Orchestrators
                 .Verifiable();
             
             starter
-                .Setup(x => x.CallActivityWithRetryAsync<List<ReleaseDefinition>>(nameof(BuildDefinitionsActivity),
+                .Setup(x => x.CallActivityWithRetryAsync<List<ReleaseDefinition>>(nameof(ReleaseDefinitionsForProjectActivity),
                     It.IsAny<RetryOptions>(),
                     It.IsAny<Project>()))
                 .ReturnsAsync(fixture.CreateMany<ReleaseDefinition>().ToList())
