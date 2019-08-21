@@ -1,14 +1,10 @@
-﻿using Functions.Model;
-using Functions.Starters;
+﻿using System.Linq;
+using System.Threading.Tasks;
+using Functions.Model;
 using Microsoft.Azure.WebJobs;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Response;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Requests = SecurePipelineScan.VstsService.Requests;
 
 namespace Functions.Activities
 {
@@ -26,34 +22,18 @@ namespace Functions.Activities
         }
 
         [FunctionName(nameof(RepositoriesScanActivity))]
-        public async Task<ItemsExtensionData> Run([ActivityTrigger] Project project)
-        {
-            return new ItemsExtensionData
-            {
-                Id = project.Name,
-                Date = DateTime.UtcNow,
-                RescanUrl = ProjectScanHttpStarter.RescanUrl(_config, project.Name, RuleScopes.Repositories),
-                HasReconcilePermissionUrl = ReconcileFunction.HasReconcilePermissionUrl(_config, project.Id),
-                Reports = await CreateReports(project)
-            };
-        }
-
-        private async Task<IList<ItemExtensionData>> CreateReports(Project project)
+        public async Task<ItemExtensionData> Run
+            ([ActivityTrigger] Repository repository)
         {
             var rules = _rulesProvider.RepositoryRules(_azuredo).ToList();
-            var items = _azuredo.Get(Requests.Repository.Repositories(project.Name));
 
-            var evaluationResults = new List<ItemExtensionData>();
-            foreach (var repository in items)
+            var evaluationResult = new ItemExtensionData
             {
-                evaluationResults.Add(new ItemExtensionData
-                {
-                    Item = repository.Name,
-                    Rules = await rules.Evaluate(_config, project.Id, RuleScopes.Repositories, repository.Id)
-                });
-            }
+                Item = repository.Name,
+                Rules = await rules.Evaluate(_config, repository.Project.Id, RuleScopes.Repositories, repository.Id)
+            };
 
-            return evaluationResults;
+            return evaluationResult;
         }
     }
 }
