@@ -25,8 +25,7 @@ namespace Functions.Tests.Activities
                 .Verifiable();
 
             var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
-            
-            var definition = fixture.Create<ReleaseDefinition>();
+            var request = fixture.Create<ReleasePipelinesScanActivityRequest>();
 
             // Act
             var activity = new ReleasePipelinesScanActivity(
@@ -34,7 +33,7 @@ namespace Functions.Tests.Activities
                 client.Object,
                 provider.Object);
 
-            var result = await activity.Run(definition);
+            var result = await activity.Run(request);
 
             // Assert
             result.ShouldNotBeNull();

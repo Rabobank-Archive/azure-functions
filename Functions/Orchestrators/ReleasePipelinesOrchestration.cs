@@ -40,7 +40,11 @@ namespace Functions.Orchestrators
                 HasReconcilePermissionUrl = ReconcileFunction.HasReconcilePermissionUrl(_config, project.Id),
                 Reports = await Task.WhenAll(releaseDefinitions.Select(b =>
                     context.CallActivityWithRetryAsync<ItemExtensionData>(nameof(ReleasePipelinesScanActivity),
-                        RetryHelper.ActivityRetryOptions, b)))
+                        RetryHelper.ActivityRetryOptions, new ReleasePipelinesScanActivityRequest
+                        {
+                            Project = project,
+                            ReleaseDefinition = b,
+                        })))
             };
 
             await context.CallActivityAsync(nameof(LogAnalyticsUploadActivity),

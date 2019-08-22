@@ -24,15 +24,15 @@ namespace Functions.Activities
 
         [FunctionName(nameof(ReleasePipelinesScanActivity))]
         public async Task<ItemExtensionData> Run(
-            [ActivityTrigger] ReleaseDefinition definition)
+            [ActivityTrigger] ReleasePipelinesScanActivityRequest request)
         {
             var rules = _rulesProvider.ReleaseRules(_azuredo).ToList();
 
             var evaluationResult = new ItemExtensionData
             {
-                Item = definition.Name,
-                Rules = await rules.Evaluate(_config, definition.ProjectReference.Id, RuleScopes.ReleasePipelines,
-                    definition.Id)
+                Item = request.ReleaseDefinition.Name,
+                Rules = await rules.Evaluate(_config, request.Project.Id, RuleScopes.ReleasePipelines,
+                    request.ReleaseDefinition.Id)
             };
 
             return evaluationResult;
