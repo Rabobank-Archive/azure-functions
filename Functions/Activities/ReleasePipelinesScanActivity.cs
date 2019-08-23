@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Functions.Model;
@@ -26,6 +27,11 @@ namespace Functions.Activities
         public async Task<ItemExtensionData> Run(
             [ActivityTrigger] ReleasePipelinesScanActivityRequest request)
         {
+            
+            if (request == null) throw new ArgumentNullException(nameof(request));
+            if (request.Project == null) throw new ArgumentNullException(nameof(request.Project));
+            if (request.ReleaseDefinition == null) throw new ArgumentNullException(nameof(request.ReleaseDefinition));
+
             var rules = _rulesProvider.ReleaseRules(_azuredo).ToList();
 
             var evaluationResult = new ItemExtensionData
