@@ -32,6 +32,15 @@ namespace Functions.Orchestrators
                 await context.CallActivityWithRetryAsync<List<BuildDefinition>>(nameof(BuildDefinitionsActivity),
                     RetryHelper.ActivityRetryOptions,
                     project);
+            
+            //Not using select so we can run the activities each at a time
+            var reports = new List<ItemExtensionData>();
+            foreach (var buildDefinition in buildDefinitions)
+            {
+                var itemExtensionData = await context.CallActivityWithRetryAsync<ItemExtensionData>(nameof(BuildPipelinesScanActivity),
+                    RetryHelper.ActivityRetryOptions, buildDefinition);
+                reports.Add(itemExtensionData);
+            }
 
             var data = new ItemsExtensionData
             {
@@ -39,9 +48,7 @@ namespace Functions.Orchestrators
                 Date = context.CurrentUtcDateTime,
                 RescanUrl = ProjectScanHttpStarter.RescanUrl(_config, project.Name, RuleScopes.BuildPipelines),
                 HasReconcilePermissionUrl = ReconcileFunction.HasReconcilePermissionUrl(_config, project.Id),
-                Reports = await Task.WhenAll(buildDefinitions.Select(b =>
-                    context.CallActivityWithRetryAsync<ItemExtensionData>(nameof(BuildPipelinesScanActivity),
-                        RetryHelper.ActivityRetryOptions, b)))
+                Reports = reports
             };
 
             await context.CallActivityAsync(nameof(LogAnalyticsUploadActivity),
