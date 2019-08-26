@@ -8,20 +8,12 @@ using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Response;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 using Task = System.Threading.Tasks.Task;
 
 namespace Functions.Tests.Activities
 {
     public class ReleasePipelinesScanActivityTests
     {
-        private readonly ITestOutputHelper _testOutputHelper;
-
-        public ReleasePipelinesScanActivityTests(ITestOutputHelper testOutputHelper)
-        {
-            _testOutputHelper = testOutputHelper;
-        }
-
         [Fact]
         public async Task EvaluatesRulesAndReturnsReport()
         {
