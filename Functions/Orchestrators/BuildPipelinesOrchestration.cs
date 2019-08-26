@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using AzDoCompliancy.CustomStatus;
 using Functions.Activities;
 using Functions.Helpers;
