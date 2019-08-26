@@ -36,12 +36,17 @@ namespace Functions.Helpers
         {
             return
                 // Handle rate limits (happens if we got blocked by rate limits)
-                exception.InnerException.Message.Contains("Call failed with status code 429")
-                // Handle timeout (happens if we got delayed by rate limits)
-                || (exception.InnerException is SocketException socketException && socketException.Message.Contains(
-                    "A connection attempt failed because the connected party did not properly respond after a period of time"))
-                // Happens when calls time out
-                || (exception.InnerException is TaskCanceledException); 
+                exception.InnerException != null
+                && (exception.InnerException.Message.Contains("Call failed with status code 429")
+                    // Handle timeout (happens if we got delayed by rate limits)
+                    || exception.InnerException is SocketException socketException
+                        && (socketException.Message.Contains(
+                                "A connection attempt failed because the connected party did not properly respond after a period of time")
+                            || socketException.Message.Contains(
+                                "An existing connection was forcibly closed by the remote host")
+                        )
+                    // Happens when calls time out
+                    || (exception.InnerException is TaskCanceledException));
         }
     }
 }
