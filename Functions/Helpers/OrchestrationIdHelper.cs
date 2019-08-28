@@ -17,7 +17,7 @@ namespace Functions.Helpers
         
         public static string GetProjectId(string instanceId)
         {
-            return instanceId.Contains(":") ? instanceId.Split(':').Last() : null;
+            return instanceId.Contains(":") ? instanceId.Split(':')[1] : null;
         }
     }
 }

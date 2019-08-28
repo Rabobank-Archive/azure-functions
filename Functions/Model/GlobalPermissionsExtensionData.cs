@@ -11,6 +11,7 @@ namespace Functions.Model
             return Reports.Select(rule => new PreventiveLogItem
             {
                 Project = Id,
+                ProjectId = GetProjectId(instanceId),
                 Item = null,
                 Rule = rule.Name,
                 IsSox = rule.IsSox,

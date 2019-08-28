@@ -42,6 +42,7 @@ namespace Functions.Tests
             var expected = new PreventiveLogItem
             {
                 Project = "TAS",
+                ProjectId = "projId",
                 Scope = RuleScopes.Repositories,
                 Item = "SOx-Compliant-Demo",
                 Rule = "NobodyCanDoAnything",

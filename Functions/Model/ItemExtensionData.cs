@@ -14,6 +14,7 @@ namespace Functions.Model
                 select new PreventiveLogItem
                 {
                     Project = Id,
+                    ProjectId = GetProjectId(instanceId),
                     Scope = scope,
                     Item = report.Item,
                     Rule = rule.Name,
