@@ -8,6 +8,10 @@
     <_IsFunctionsSdkBuild Condition="$(_FunctionsTaskFramework) != ''">true</_IsFunctionsSdkBuild>
     <_FunctionsExtensionsDir>$(TargetDir)</_FunctionsExtensionsDir>
     <_FunctionsExtensionsDir Condition="$(_IsFunctionsSdkBuild) == 'true'">$(_FunctionsExtensionsDir)bin</_FunctionsExtensionsDir>
+    <CodeAnalysisRuleSet>Functions.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <CodeAnalysisRuleSet>Functions.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   
   <ItemGroup>

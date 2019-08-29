@@ -18,7 +18,7 @@ namespace Functions.Starters
         }
 
         [FunctionName(nameof(ProjectsScanStarter))]
-        public async Task Run(
+        public async Task RunAsync(
             [TimerTrigger("0 17 3 * * *", RunOnStartup=false)]
             TimerInfo timerInfo,
             [OrchestrationClient] DurableOrchestrationClientBase orchestrationClientBase)

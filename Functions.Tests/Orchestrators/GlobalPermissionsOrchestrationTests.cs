@@ -63,7 +63,7 @@ namespace Functions.Tests.Orchestrators
                 .Returns(Task.CompletedTask);
 
             //Act
-            await GlobalPermissionsOrchestration.Run(starter.Object);
+            await GlobalPermissionsOrchestration.RunAsync(starter.Object);
 
             //Assert           
             mocks.VerifyAll();

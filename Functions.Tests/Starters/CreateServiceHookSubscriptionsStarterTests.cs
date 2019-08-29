@@ -17,7 +17,7 @@ namespace Functions.Tests.Starters
 
             //Act
             var fun = new CreateServiceHookSubscriptionsStarter();
-            await fun.Run(null, orchestrationClientMock.Object);
+            await fun.RunAsync(null, orchestrationClientMock.Object);
 
             //Assert
             orchestrationClientMock.Verify(

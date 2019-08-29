@@ -16,12 +16,12 @@ namespace Functions.Activities
         }
 
         [FunctionName(nameof(CreateStorageQueuesActivity))]
-        public async Task Run([ActivityTrigger] DurableActivityContextBase context)
+        public async Task RunAsync([ActivityTrigger] DurableActivityContextBase context)
         {
             var queue = _cloudQueueClient.Execute(c => c.GetQueueReference(StorageQueueNames.BuildCompletedQueueName));
-            await queue.CreateIfNotExistsAsync();
+            await queue.CreateIfNotExistsAsync().ConfigureAwait(false);
             queue = _cloudQueueClient.Execute(c => c.GetQueueReference(StorageQueueNames.ReleaseDeploymentCompletedQueueName));
-            await queue.CreateIfNotExistsAsync();
+            await queue.CreateIfNotExistsAsync().ConfigureAwait(false);
         }
     }
 }

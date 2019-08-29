@@ -32,7 +32,7 @@ namespace Functions.Tests.Starters
 
             var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
             var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object);
-            var result = await function.Run(request,
+            var result = await function.RunAsync(request,
                 "somecompany",
                 "TAS",
                 RuleScopes.GlobalPermissions,
@@ -64,7 +64,7 @@ namespace Functions.Tests.Starters
                 .Verifiable();
 
             var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object);
-            var result = await function.Run(request,
+            var result = await function.RunAsync(request,
                 "somecompany",
                 "TAS",
                 RuleScopes.GlobalPermissions,
@@ -96,7 +96,7 @@ namespace Functions.Tests.Starters
                 .Verifiable();
 
             var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object);
-            var result = await function.Run(request,
+            var result = await function.RunAsync(request,
                 "somecompany",
                 "TAS",
                 RuleScopes.GlobalPermissions,
@@ -131,7 +131,7 @@ namespace Functions.Tests.Starters
                 .Verifiable();
 
             var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object);
-            await function.Run(request,
+            await function.RunAsync(request,
                 "somecompany",
                 "TAS",
                 RuleScopes.GlobalPermissions,
@@ -164,7 +164,7 @@ namespace Functions.Tests.Starters
                 .Verifiable();
 
             var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object);
-            await function.Run(request,
+            await function.RunAsync(request,
                 "somecompany",
                 "TAS",
                 RuleScopes.Repositories,
@@ -196,7 +196,7 @@ namespace Functions.Tests.Starters
 
             var mock = new Mock<DurableOrchestrationClientBase>();
             var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object);
-            await function.Run(request,
+            await function.RunAsync(request,
                 "somecompany",
                 "TAS",
                 RuleScopes.BuildPipelines,
@@ -228,7 +228,7 @@ namespace Functions.Tests.Starters
 
             var mock = new Mock<DurableOrchestrationClientBase>();
             var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object);
-            await function.Run(request,
+            await function.RunAsync(request,
                 "somecompany",
                 "TAS",
                 RuleScopes.ReleasePipelines,

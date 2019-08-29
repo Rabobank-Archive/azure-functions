@@ -21,21 +21,23 @@ namespace Functions.Activities
         }
 
         [FunctionName(nameof(CreateServiceHookSubscriptionsActivity))]
-        public async Task Run([ActivityTrigger] CreateServiceHookSubscriptionsActivityRequest request)
+        public async Task RunAsync([ActivityTrigger] CreateServiceHookSubscriptionsActivityRequest request)
         {
-                await AddHookIfNotSubscribed(
+                await AddHookIfNotSubscribedAsync(
                     Hooks.AddHookSubscription(),
                     Hooks.Add.BuildCompleted(_config.EventQueueStorageAccountName, _config.EventQueueStorageAccountKey,
-                        StorageQueueNames.BuildCompletedQueueName, request.Project.Id), request.ExistingHooks);
+                        StorageQueueNames.BuildCompletedQueueName, request.Project.Id), request.ExistingHooks)
+                    .ConfigureAwait(false);
                 
-                await AddHookIfNotSubscribed(
+                await AddHookIfNotSubscribedAsync(
                     Hooks.AddReleaseManagementSubscription(),
                     Hooks.Add.ReleaseDeploymentCompleted(_config.EventQueueStorageAccountName,
                         _config.EventQueueStorageAccountKey, StorageQueueNames.ReleaseDeploymentCompletedQueueName,
-                        request.Project.Id), request.ExistingHooks);
+                        request.Project.Id), request.ExistingHooks)
+                    .ConfigureAwait(false);
         }
 
-        private async Task AddHookIfNotSubscribed(IVstsRequest<Hooks.Add.Body, Hook> request, Hooks.Add.Body hook, IEnumerable<Hook> hooks)
+        private async Task AddHookIfNotSubscribedAsync(IVstsRequest<Hooks.Add.Body, Hook> request, Hooks.Add.Body hook, IEnumerable<Hook> hooks)
         {
             if (!hooks.Any(h => h.EventType == hook.EventType &&
                                 h.ConsumerInputs.AccountName == hook.ConsumerInputs.AccountName &&

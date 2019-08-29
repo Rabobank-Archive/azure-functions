@@ -18,7 +18,7 @@ namespace Functions.Orchestrators
         }
         
         [FunctionName(nameof(DeleteServiceHookSubscriptionsOrchestrator))]
-        public async Task Run([OrchestrationTrigger] DurableOrchestrationContextBase context)
+        public async Task RunAsync([OrchestrationTrigger] DurableOrchestrationContextBase context)
         {
             var allHookSubscriptions =
                 await context.CallActivityWithRetryAsync<IList<Response.Hook>>(nameof(GetHooksActivity), RetryHelper.ActivityRetryOptions, null);

@@ -10,7 +10,7 @@ namespace Functions.Orchestrators
 
     {
         [FunctionName(nameof(ProjectScanOrchestration))]
-        public async Task Run([OrchestrationTrigger] DurableOrchestrationContextBase context)
+        public async Task RunAsync([OrchestrationTrigger] DurableOrchestrationContextBase context)
         {
             var project = context.GetInput<Project>();
             

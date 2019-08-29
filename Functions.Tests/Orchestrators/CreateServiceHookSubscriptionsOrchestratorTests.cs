@@ -38,7 +38,7 @@ namespace Functions.Tests.Orchestrators
 
             //Act
             var fun = new CreateServiceHookSubscriptionsOrchestrator();
-            await fun.Run(orchestrationClientMock.Object);
+            await fun.RunAsync(orchestrationClientMock.Object);
 
             //Assert
             orchestrationClientMock.Verify();

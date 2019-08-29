@@ -19,10 +19,11 @@ namespace Functions.Activities
         }
 
         [FunctionName(nameof(ExtensionDataGlobalPermissionsUploadActivity))]
-        public async Task Run([ActivityTrigger] DurableActivityContext inputs)
+        public async Task RunAsync([ActivityTrigger] DurableActivityContext inputs)
         {
             var (data, scope) = inputs.GetInput<(GlobalPermissionsExtensionData, string)>();
-            await _azuredo.PutAsync(ExtensionManagement.ExtensionData<ExtensionDataReports>("tas", _config.ExtensionName, scope), data);
+            await _azuredo.PutAsync(ExtensionManagement.ExtensionData<ExtensionDataReports>("tas", _config.ExtensionName, scope), data)
+                .ConfigureAwait(false);
         }
     }
 }

@@ -28,7 +28,7 @@ namespace Functions.Tests.Activities
             
             // Act
             var fun = new CreateStorageQueuesActivity(cloudQueueClient);
-            await fun.Run(context.Object);
+            await fun.RunAsync(context.Object);
 
             // Assert
             buildCompletedQueue.Verify(c => c.CreateIfNotExistsAsync(), Times.Once);

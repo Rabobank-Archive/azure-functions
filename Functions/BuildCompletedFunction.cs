@@ -51,11 +51,11 @@ namespace Functions
             if (report != null)
             {
                 await _client.AddCustomLogJsonAsync(nameof(BuildCompletedFunction), report, "Date");
-                await RetryHelper.ExecuteInvalidDocumentVersionPolicy(_config.Organization, () => UpdateExtensionData(report));
+                await RetryHelper.ExecuteInvalidDocumentVersionPolicyAsync(_config.Organization, () => UpdateExtensionDataAsync(report));
             }
         }
 
-        private async Task UpdateExtensionData(BuildScanReport report)
+        private async Task UpdateExtensionDataAsync(BuildScanReport report)
         {
             var reports = await _azuredo.GetAsync(
                               Requests.ExtensionManagement.ExtensionData<ExtensionDataReports<BuildScanReport>>(

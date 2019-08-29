@@ -11,7 +11,7 @@ namespace Functions.Orchestrators
     public static class GlobalPermissionsOrchestration
     {
         [FunctionName(nameof(GlobalPermissionsOrchestration))]
-        public static async Task Run([OrchestrationTrigger]DurableOrchestrationContextBase context)
+        public static async Task RunAsync([OrchestrationTrigger]DurableOrchestrationContextBase context)
         {
             var project = context.GetInput<Response.Project>();
             context.SetCustomStatus(new ScanOrchestrationStatus { Project = project.Name, Scope = RuleScopes.GlobalPermissions });

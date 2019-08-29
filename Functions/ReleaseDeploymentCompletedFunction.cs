@@ -50,10 +50,10 @@ namespace Functions
         {
             var report = await _scan.GetCompletedReportAsync(JObject.Parse(data));
             await _client.AddCustomLogJsonAsync("DeploymentStatus", report, "Date");
-            await RetryHelper.ExecuteInvalidDocumentVersionPolicy(_config.Organization, () => UpdateExtensionData(report));
+            await RetryHelper.ExecuteInvalidDocumentVersionPolicyAsync(_config.Organization, () => UpdateExtensionDataAsync(report));
         }
 
-        private async Task UpdateExtensionData(ReleaseDeploymentCompletedReport report)
+        private async Task UpdateExtensionDataAsync(ReleaseDeploymentCompletedReport report)
         {
             var reports = await _azuredo.GetAsync(
                                      Requests.ExtensionManagement

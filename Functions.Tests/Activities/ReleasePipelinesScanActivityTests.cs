@@ -34,7 +34,7 @@ namespace Functions.Tests.Activities
                 client.Object,
                 provider.Object);
 
-            var result = await activity.Run(request);
+            var result = await activity.RunAsync(request);
 
             // Assert
             result.ShouldNotBeNull();
@@ -61,7 +61,7 @@ namespace Functions.Tests.Activities
                 client.Object,
                 provider.Object);
 
-            var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () => await activity.Run(null));
+            var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () => await activity.RunAsync(null));
             exception.Message.ShouldContainWithoutWhitespace("Value cannot be null. Parameter name: request");
         }
         
@@ -89,7 +89,7 @@ namespace Functions.Tests.Activities
                 client.Object,
                 provider.Object);
 
-            var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () => await activity.Run(request));
+            var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () => await activity.RunAsync(request));
             exception.Message.ShouldContainWithoutWhitespace("Value cannot be null. Parameter name: Project");
         }
 
@@ -117,7 +117,7 @@ namespace Functions.Tests.Activities
                 client.Object,
                 provider.Object);
 
-            var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () => await activity.Run(request));
+            var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () => await activity.RunAsync(request));
             exception.Message.ShouldContainWithoutWhitespace("Value cannot be null. Parameter name: ReleaseDefinition");
         }
     }

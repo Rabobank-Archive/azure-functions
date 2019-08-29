@@ -27,7 +27,7 @@ namespace Functions.Tests.Orchestrators
 
             //Act
             var fun = new ProjectScanSupervisor();
-            await fun.Run(orchestrationClientMock.Object);
+            await fun.RunAsync(orchestrationClientMock.Object);
 
             //Assert
             orchestrationClientMock.Verify(
@@ -49,7 +49,7 @@ namespace Functions.Tests.Orchestrators
 
             //Act
             var fun = new ProjectScanSupervisor();
-            await fun.Run(orchestrationClientMock.Object);
+            await fun.RunAsync(orchestrationClientMock.Object);
 
             //Assert
             orchestrationClientMock.Verify(
@@ -67,7 +67,7 @@ namespace Functions.Tests.Orchestrators
 
             //Act
             var fun = new ProjectScanSupervisor();
-            await fun.Run(orchestrationClientMock.Object);
+            await fun.RunAsync(orchestrationClientMock.Object);
 
             //Assert
             orchestrationClientMock.Verify(
@@ -87,7 +87,7 @@ namespace Functions.Tests.Orchestrators
 
             //Act
             var fun = new ProjectScanSupervisor();
-            await fun.Run(orchestrationClientMock.Object);
+            await fun.RunAsync(orchestrationClientMock.Object);
 
             //Assert
             orchestrationClientMock.Verify(

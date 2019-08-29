@@ -22,7 +22,7 @@ namespace Functions.Activities
         }
 
         [FunctionName(nameof(RepositoriesScanActivity))]
-        public async Task<ItemExtensionData> Run
+        public async Task<ItemExtensionData> RunAsync
             ([ActivityTrigger] Repository repository)
         {
             var rules = _rulesProvider.RepositoryRules(_azuredo).ToList();
@@ -30,7 +30,8 @@ namespace Functions.Activities
             var evaluationResult = new ItemExtensionData
             {
                 Item = repository.Name,
-                Rules = await rules.Evaluate(_config, repository.Project.Id, RuleScopes.Repositories, repository.Id)
+                Rules = await rules.EvaluateAsync(_config, repository.Project.Id, RuleScopes.Repositories, repository.Id)
+                    .ConfigureAwait(false)
             };
 
             return evaluationResult;

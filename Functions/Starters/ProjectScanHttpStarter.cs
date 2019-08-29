@@ -16,6 +16,7 @@ namespace Functions.Starters
     {
         private readonly ITokenizer _tokenizer;
         private readonly IVstsRestClient _azuredo;
+        private const int TimeOut = 180;
 
         private static readonly IDictionary<string, string> Scopes = new Dictionary<string, string>
         {
@@ -32,7 +33,7 @@ namespace Functions.Starters
         }
 
         [FunctionName(nameof(ProjectScanHttpStarter))]
-        public async Task<HttpResponseMessage> Run(
+        public async Task<HttpResponseMessage> RunAsync(
             [HttpTrigger(AuthorizationLevel.Anonymous, Route = "scan/{organization}/{project}/{scope}")]
             HttpRequestMessage request,
             string organization,
@@ -53,7 +54,7 @@ namespace Functions.Starters
             }
 
             var instanceId = await starter.StartNewAsync(Orchestration(scope), projectObject);
-            return await starter.WaitForCompletionOrCreateCheckStatusResponseAsync(request, instanceId, TimeSpan.FromSeconds(180));
+            return await starter.WaitForCompletionOrCreateCheckStatusResponseAsync(request, instanceId, TimeSpan.FromSeconds(TimeOut));
         }
 
         private static string Orchestration(string scope) =>

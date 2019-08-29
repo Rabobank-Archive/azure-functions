@@ -20,7 +20,7 @@ namespace Functions.Orchestrators
         }
         
         [FunctionName(nameof(ReleasePipelinesOrchestration))]
-        public async Task Run([OrchestrationTrigger] DurableOrchestrationContextBase context)
+        public async Task RunAsync([OrchestrationTrigger] DurableOrchestrationContextBase context)
         {
             var project = context.GetInput<Project>();
             context.SetCustomStatus(new ScanOrchestrationStatus
@@ -44,7 +44,7 @@ namespace Functions.Orchestrators
                 reports.Add(itemExtensionData);
             }
 
-            var data = new ItemsExtensionData()
+            var data = new ItemsExtensionData
             {
                 Id = project.Name,
                 Date = context.CurrentUtcDateTime,
