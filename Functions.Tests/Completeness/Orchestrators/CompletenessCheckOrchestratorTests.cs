@@ -88,11 +88,11 @@ namespace Functions.Tests.Completeness.Orchestrators
             //Arrange
             var orchestrationContext = Substitute.For<DurableOrchestrationContextBase>();
             orchestrationContext
-                .CallActivityAsync<List<Orchestrator>>(nameof(FilterSupervisorsActivity), Arg.Any<FilterSupervisorsRequest>())
-                .Returns(_fixture.CreateMany<Orchestrator>(1).ToList());
-            orchestrationContext
                 .CallActivityAsync<(List<Orchestrator>, List<Orchestrator>)>(nameof(GetOrchestratorsToScanActivity), null)
-                .Returns((_fixture.CreateMany<Orchestrator>(count).ToList(), _fixture.CreateMany<Orchestrator>(1).ToList()));
+                .Returns((_fixture.CreateMany<Orchestrator>(1).ToList(), _fixture.CreateMany<Orchestrator>(1).ToList()));
+            orchestrationContext
+                .CallActivityAsync<List<Orchestrator>>(nameof(FilterSupervisorsActivity), Arg.Any<FilterSupervisorsRequest>())
+                .Returns(_fixture.CreateMany<Orchestrator>(count).ToList());
 
             //Act
             var function = new CompletenessCheckOrchestrator();

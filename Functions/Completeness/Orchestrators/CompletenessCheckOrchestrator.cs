@@ -36,7 +36,7 @@ namespace Functions.Completeness.Orchestrators
                         AllProjectScanners = allProjectScanners
                     })));
 
-            await Task.WhenAll(allSupervisors.Select(f =>
+            await Task.WhenAll(filteredSupervisors.Select(f =>
                 context.CallActivityAsync(nameof(PurgeSingleOrchestratorActivity), f.InstanceId)));
         }
     }
