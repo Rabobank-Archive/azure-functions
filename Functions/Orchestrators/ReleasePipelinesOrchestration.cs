@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using AzDoCompliancy.CustomStatus;
 using Functions.Activities;
 using Functions.Helpers;
@@ -28,21 +29,7 @@ namespace Functions.Orchestrators
 
             var releaseDefinitions =
                 await context.CallActivityWithRetryAsync<List<ReleaseDefinition>>(nameof(ReleaseDefinitionsForProjectActivity),
-                    RetryHelper.ActivityRetryOptions,
-                    project);
-            
-            //Not using select so we can run the activities each at a time
-            var reports = new List<ItemExtensionData>();
-            foreach (var releaseDefinition in releaseDefinitions)
-            {
-                var itemExtensionData = await context.CallActivityWithRetryAsync<ItemExtensionData>(nameof(ReleasePipelinesScanActivity),
-                    RetryHelper.ActivityRetryOptions, new ReleasePipelinesScanActivityRequest
-                    {
-                        Project = project,
-                        ReleaseDefinition = releaseDefinition,
-                    });
-                reports.Add(itemExtensionData);
-            }
+                    RetryHelper.ActivityRetryOptions, project);
 
             var data = new ItemsExtensionData
             {
@@ -50,7 +37,13 @@ namespace Functions.Orchestrators
                 Date = context.CurrentUtcDateTime,
                 RescanUrl = ProjectScanHttpStarter.RescanUrl(_config, project.Name, RuleScopes.ReleasePipelines),
                 HasReconcilePermissionUrl = ReconcileFunction.HasReconcilePermissionUrl(_config, project.Id),
-                Reports = reports
+                Reports = await Task.WhenAll(releaseDefinitions.Select(b =>
+                    context.CallActivityWithRetryAsync<ItemExtensionData>(nameof(ReleasePipelinesScanActivity),
+                        RetryHelper.ActivityRetryOptions, new ReleasePipelinesScanActivityRequest
+                        {
+                            Project = project,
+                            ReleaseDefinition = b,
+                        })))
             };
 
             await context.CallActivityAsync(nameof(LogAnalyticsUploadActivity),
