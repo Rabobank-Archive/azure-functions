@@ -18,10 +18,14 @@ namespace Functions.Completeness.Activities
             const int fromDaysAgo = 30;
             var runtimeStatuses = new List<OrchestrationRuntimeStatus>
             {
-                OrchestrationRuntimeStatus.Completed,
-                OrchestrationRuntimeStatus.Failed,
                 OrchestrationRuntimeStatus.Canceled,
-                OrchestrationRuntimeStatus.Terminated
+                OrchestrationRuntimeStatus.Completed,
+                OrchestrationRuntimeStatus.ContinuedAsNew,
+                OrchestrationRuntimeStatus.Failed,
+                OrchestrationRuntimeStatus.Pending,
+                OrchestrationRuntimeStatus.Running,
+                OrchestrationRuntimeStatus.Terminated,
+                OrchestrationRuntimeStatus.Unknown
             };
 
             var supervisors = new List<Orchestrator>();

@@ -14,11 +14,12 @@ namespace Functions.Activities
         }
 
         [FunctionName(nameof(LogAnalyticsUploadActivity))]
-        public async Task Run([ActivityTrigger] LogAnalyticsUploadActivityRequest request)
+        public async Task RunAsync([ActivityTrigger] LogAnalyticsUploadActivityRequest request)
         {
             foreach (var item in request.PreventiveLogItems)
             {
-                await _analytics.AddCustomLogJsonAsync("preventive_analysis_log", item, "evaluatedDate");
+                await _analytics.AddCustomLogJsonAsync("preventive_analysis_log", item, "evaluatedDate")
+                    .ConfigureAwait(false);
             }
         }
     }

@@ -21,7 +21,7 @@ namespace Functions
         }
 
         [FunctionName(nameof(PoisonQueueFunction))]
-        public async Task<HttpResponseMessage> Requeue(
+        public async Task<HttpResponseMessage> RequeueAsync(
             [HttpTrigger(AuthorizationLevel.Anonymous, Route = "poison/requeue/{queue}")]HttpRequestMessage request,
             string queue,
             ILogger log)
@@ -30,7 +30,7 @@ namespace Functions
 
             log.LogInformation($"Requeue from: {queue}");
 
-            var requeuedPoisonMessages = await RequeuePoisonMessages(
+            var requeuedPoisonMessages = await RequeuePoisonMessagesAsync(
                 _cloudQueueClient.Execute(c => c.GetQueueReference(queue)),
                 _cloudQueueClient.Execute(c => c.GetQueueReference($"{queue}-poison")),
                 log);
@@ -42,7 +42,7 @@ namespace Functions
             };
         }
 
-        private async Task<IList<string>> RequeuePoisonMessages(CloudQueue queue, CloudQueue poison, ILogger log)
+        private static async Task<IList<string>> RequeuePoisonMessagesAsync(CloudQueue queue, CloudQueue poison, ILogger log)
         {
             var requeuedMessageIds = new List<string>();
             

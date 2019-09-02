@@ -49,7 +49,7 @@ namespace Functions.Tests
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
 
             var function = new ReconcileFunction(client.Object, ruleProvider.Object, tokenizer.Object);
-            (await function.Reconcile(request,
+            (await function.ReconcileAsync(request,
                 "somecompany",
                 "TAS",
                 RuleScopes.GlobalPermissions,
@@ -90,7 +90,7 @@ namespace Functions.Tests
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
 
             var function = new ReconcileFunction(client.Object, ruleProvider.Object, tokenizer.Object);
-            (await function.Reconcile(request,
+            (await function.ReconcileAsync(request,
                 "somecompany",
                 "TAS",
                 RuleScopes.Repositories,
@@ -126,7 +126,7 @@ namespace Functions.Tests
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
 
             var function = new ReconcileFunction(client.Object, ruleProvider.Object, tokenizer.Object);
-            var result = (await function.Reconcile(request,
+            var result = (await function.ReconcileAsync(request,
                 "somecompany",
                 "TAS",
                 RuleScopes.GlobalPermissions,
@@ -160,7 +160,7 @@ namespace Functions.Tests
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
 
             var function = new ReconcileFunction(client.Object, new Mock<IRulesProvider>().Object, tokenizer.Object);
-            var result = (await function.Reconcile(request,
+            var result = (await function.ReconcileAsync(request,
                 "somecompany",
                 "TAS",
                 "non-existing-scope",
@@ -177,7 +177,7 @@ namespace Functions.Tests
             request.Headers.Authorization = null;
 
             var function = new ReconcileFunction(null, ruleProvider.Object, new Mock<ITokenizer>().Object);
-            (await function.Reconcile(request,
+            (await function.ReconcileAsync(request,
                 "somecompany",
                 "TAS",
                 RuleScopes.GlobalPermissions,
@@ -196,7 +196,7 @@ namespace Functions.Tests
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
 
             var function = new ReconcileFunction(null, new Mock<IRulesProvider>().Object, tokenizer.Object);
-            (await function.Reconcile(request,
+            (await function.ReconcileAsync(request,
                 "somecompany",
                 "TAS",
                 RuleScopes.GlobalPermissions,
@@ -226,7 +226,7 @@ namespace Functions.Tests
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
 
             var function = new ReconcileFunction(client.Object, new Mock<IRulesProvider>().Object, tokenizer.Object);
-            (await function.Reconcile(request,
+            (await function.ReconcileAsync(request,
                 "somecompany",
                 "TAS",
                 RuleScopes.GlobalPermissions,
@@ -244,7 +244,7 @@ namespace Functions.Tests
 
             var function = new ReconcileFunction(null, new Mock<IRulesProvider>().Object, new Mock<ITokenizer>().Object);
             (await function
-                .HasPermission(request, "somecompany", "TAS"))
+                .HasPermissionAsync(request, "somecompany", "TAS"))
                 .ShouldBeOfType<UnauthorizedResult>();
         }
 
@@ -261,7 +261,7 @@ namespace Functions.Tests
 
             var function = new ReconcileFunction(null, new Mock<IRulesProvider>().Object, tokenizer.Object);
             (await function
-                .HasPermission(request, "somecompany", "TAS"))
+                .HasPermissionAsync(request, "somecompany", "TAS"))
                 .ShouldBeOfType<UnauthorizedResult>();
         }
 
@@ -289,7 +289,7 @@ namespace Functions.Tests
 
             var function = new ReconcileFunction(client.Object, new Mock<IRulesProvider>().Object, tokenizer.Object);
             (await function
-                .HasPermission(request, "somecompany", "TAS"))
+                .HasPermissionAsync(request, "somecompany", "TAS"))
                 .ShouldBeOfType<OkObjectResult>()
                 .Value
                 .ShouldBe(false);
@@ -319,7 +319,7 @@ namespace Functions.Tests
 
             var function = new ReconcileFunction(client.Object, new Mock<IRulesProvider>().Object, tokenizer.Object);
             (await function
-                .HasPermission(request, "somecompany", "TAS"))
+                .HasPermissionAsync(request, "somecompany", "TAS"))
                 .ShouldBeOfType<OkObjectResult>()
                 .Value
                 .ShouldBe(true);

@@ -22,7 +22,8 @@ namespace Functions.Tests.Completeness.Activities
             _fixture = new Fixture();
             _fixture.Customize(new AutoNSubstituteCustomization());
             _fixture.Customize<Orchestrator>(s => s
-                .With(d => d.CustomStatus, JToken.FromObject(new CustomStatusBase())));
+                .With(d => d.CustomStatus, JToken.FromObject(new CustomStatusBase()))
+                .With(d => d.RuntimeStatus, OrchestrationRuntimeStatus.Completed));
         }
         
         [Fact]

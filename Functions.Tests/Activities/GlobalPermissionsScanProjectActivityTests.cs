@@ -36,7 +36,7 @@ namespace Functions.Tests.Activities
                 fixture.Create<EnvironmentConfig>(),
                 ruleSets.Object);
 
-            await fun.RunAsActivity(
+            await fun.RunAsActivityAsync(
                 fixture.Create<Response.Project>());
 
             //Assert
@@ -69,7 +69,7 @@ namespace Functions.Tests.Activities
                 clientMock.Object,
                 config,
                 rulesProvider.Object);
-            var result = await fun.RunAsActivity(
+            var result = await fun.RunAsActivityAsync(
                 dummyproj);
 
             var ruleName = rule.Object.GetType().Name;

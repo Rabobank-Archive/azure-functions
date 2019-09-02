@@ -69,7 +69,7 @@ namespace Functions.Tests.Orchestrators
 
             //Act
             var function = new ReleasePipelinesOrchestration(environmentConfig);
-            await function.Run(starter.Object);
+            await function.RunAsync(starter.Object);
 
             //Assert           
             mocks.VerifyAll();

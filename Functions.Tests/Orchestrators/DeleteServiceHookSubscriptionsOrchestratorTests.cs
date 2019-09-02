@@ -38,7 +38,7 @@ namespace Functions.Tests.Orchestrators
 
             //Act
             var fun = new DeleteServiceHookSubscriptionsOrchestrator(config);
-            await fun.Run(orchestrationContextMock.Object);
+            await fun.RunAsync(orchestrationContextMock.Object);
 
             //Assert
             orchestrationContextMock.Verify(
@@ -73,7 +73,7 @@ namespace Functions.Tests.Orchestrators
 
             //Act
             var fun = new DeleteServiceHookSubscriptionsOrchestrator(config);
-            await fun.Run(orchestrationContextMock.Object);
+            await fun.RunAsync(orchestrationContextMock.Object);
 
             //Assert
             orchestrationContextMock.Verify(

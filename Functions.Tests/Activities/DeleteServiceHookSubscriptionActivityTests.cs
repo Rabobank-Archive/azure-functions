@@ -29,7 +29,7 @@ namespace Functions.Tests.Activities
             
             // Act
             var fun = new DeleteServiceHookSubscriptionActivity(client.Object);
-            await fun.Run(context.Object);
+            await fun.RunAsync(context.Object);
             
             // Assert
             client.Verify(c => c.DeleteAsync(It.IsAny<IVstsRequest<Hook>>()), Times.Once);

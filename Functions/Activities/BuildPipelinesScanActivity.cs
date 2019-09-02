@@ -23,7 +23,7 @@ namespace Functions.Activities
         }
 
         [FunctionName(nameof(BuildPipelinesScanActivity))]
-        public async Task<ItemExtensionData> Run(
+        public async Task<ItemExtensionData> RunAsync(
             [ActivityTrigger] BuildDefinition definition)
         {
             var rules = _rulesProvider.BuildRules(_azuredo).ToList();
@@ -31,7 +31,8 @@ namespace Functions.Activities
             var evaluationResult = new ItemExtensionData
             {
                 Item = definition.Name,
-                Rules = await rules.Evaluate(_config, definition.Project.Id, RuleScopes.BuildPipelines, definition.Id)
+                Rules = await rules.EvaluateAsync(_config, definition.Project.Id, RuleScopes.BuildPipelines, definition.Id)
+                    .ConfigureAwait(false)
             };
 
             return evaluationResult;

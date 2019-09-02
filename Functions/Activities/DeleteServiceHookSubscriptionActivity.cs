@@ -16,10 +16,11 @@ namespace Functions.Activities
         }
 
         [FunctionName(nameof(DeleteServiceHookSubscriptionActivity))]
-        public async Task Run([ActivityTrigger] DurableActivityContextBase context)
+        public async Task RunAsync([ActivityTrigger] DurableActivityContextBase context)
         {
             var hook = context.GetInput<Response.Hook>();
-            await _azuredo.DeleteAsync(Hooks.Subscription(hook.Id));
+            await _azuredo.DeleteAsync(Hooks.Subscription(hook.Id))
+                .ConfigureAwait(false);
         }
     }
 }

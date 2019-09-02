@@ -26,7 +26,7 @@ namespace Functions.Activities
         }
 
         [FunctionName(nameof(GlobalPermissionsScanProjectActivity))]
-        public async Task<GlobalPermissionsExtensionData> RunAsActivity([ActivityTrigger] Response.Project project)
+        public async Task<GlobalPermissionsExtensionData> RunAsActivityAsync([ActivityTrigger] Response.Project project)
         {
             var now = DateTime.UtcNow;
             var rules = _rulesProvider.GlobalPermissions(_azuredo);
@@ -43,9 +43,9 @@ namespace Functions.Activities
                     Description = r.Description,
                     Why = r.Why,
                     IsSox = r.IsSox,
-                    Status = await r.EvaluateAsync(project.Name),
+                    Status = await r.EvaluateAsync(project.Name).ConfigureAwait(false),
                     Reconcile = ReconcileFunction.ReconcileFromRule(_config, project.Name, r as IProjectReconcile)
-                }).ToList())
+                }).ToList()).ConfigureAwait(false)
             };
 
             return data;

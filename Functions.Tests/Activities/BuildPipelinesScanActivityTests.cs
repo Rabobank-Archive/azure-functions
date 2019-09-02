@@ -34,7 +34,7 @@ namespace Functions.Tests.Activities
                 client.Object,
                 provider.Object);
 
-            var result = await activity.Run(definition);
+            var result = await activity.RunAsync(definition);
 
             // Assert
             result.ShouldNotBeNull();

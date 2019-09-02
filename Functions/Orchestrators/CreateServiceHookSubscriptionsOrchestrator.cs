@@ -11,7 +11,7 @@ namespace Functions.Orchestrators
 
     {
         [FunctionName(nameof(CreateServiceHookSubscriptionsOrchestrator))]
-        public async Task Run([OrchestrationTrigger] DurableOrchestrationContextBase context)
+        public async Task RunAsync([OrchestrationTrigger] DurableOrchestrationContextBase context)
         {
             var projects =
                 await context.CallActivityWithRetryAsync<IList<Response.Project>>(nameof(GetProjectsActivity),

@@ -24,20 +24,24 @@ namespace Functions.Activities
         }
 
         [FunctionName(nameof(ReleasePipelinesScanActivity))]
-        public async Task<ItemExtensionData> Run(
+        public async Task<ItemExtensionData> RunAsync(
             [ActivityTrigger] ReleasePipelinesScanActivityRequest request)
         {
-            if (request == null) throw new ArgumentNullException(nameof(request));
-            if (request.Project == null) throw new ArgumentNullException(nameof(request.Project));
-            if (request.ReleaseDefinition == null) throw new ArgumentNullException(nameof(request.ReleaseDefinition));
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+            if (request.Project == null)
+                throw new ArgumentNullException(nameof(request.Project));
+            if (request.ReleaseDefinition == null)
+                throw new ArgumentNullException(nameof(request.ReleaseDefinition));
 
             var rules = _rulesProvider.ReleaseRules(_azuredo).ToList();
 
             var evaluationResult = new ItemExtensionData
             {
                 Item = request.ReleaseDefinition.Name,
-                Rules = await rules.Evaluate(_config, request.Project.Id, RuleScopes.ReleasePipelines,
-                    request.ReleaseDefinition.Id)
+                Rules = await rules.EvaluateAsync(_config, request.Project.Id, RuleScopes.ReleasePipelines,
+                        request.ReleaseDefinition.Id)
+                    .ConfigureAwait(false)
             };
 
             return evaluationResult;

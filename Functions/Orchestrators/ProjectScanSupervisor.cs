@@ -11,7 +11,7 @@ namespace Functions.Orchestrators
     public class ProjectScanSupervisor
     {
         [FunctionName(nameof(ProjectScanSupervisor))]
-        public async Task Run([OrchestrationTrigger] DurableOrchestrationContextBase context)
+        public async Task RunAsync([OrchestrationTrigger] DurableOrchestrationContextBase context)
         {
             var projects = context.GetInput<List<Project>>();
             context.SetCustomStatus(new SupervisorOrchestrationStatus { TotalProjectCount = projects.Count });

@@ -28,7 +28,7 @@ namespace Functions.Tests.Activities
                 new EnvironmentConfig { EventQueueStorageAccountName = AccountName, EventQueueStorageAccountKey = AccountKey },
                 vstsRestClient.Object);
 
-            await function.Run(fixture.Create<CreateServiceHookSubscriptionsActivityRequest>());
+            await function.RunAsync(fixture.Create<CreateServiceHookSubscriptionsActivityRequest>());
 
             // Assert
             vstsRestClient
@@ -79,7 +79,7 @@ namespace Functions.Tests.Activities
                 new EnvironmentConfig { EventQueueStorageAccountName = AccountName, EventQueueStorageAccountKey = AccountKey },
                 client.Object);
 
-            await function.Run(request);
+            await function.RunAsync(request);
 
             // Assert
             client.Verify();
@@ -118,7 +118,7 @@ namespace Functions.Tests.Activities
                 new EnvironmentConfig { EventQueueStorageAccountName = AccountName, EventQueueStorageAccountKey = AccountKey },
                 client.Object);
 
-            await function.Run(request);
+            await function.RunAsync(request);
 
             // Assert
             client.Verify();

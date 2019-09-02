@@ -53,7 +53,7 @@ namespace Functions.Tests.Orchestrators
 
             //Act
             var fun = new ProjectScanOrchestration();
-            await fun.Run(starter.Object);
+            await fun.RunAsync(starter.Object);
 
             //Assert           
             mocks.VerifyAll();

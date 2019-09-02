@@ -26,7 +26,7 @@ namespace Functions
         }
 
         [FunctionName(nameof(ReconcileFunction))]
-        public async Task<IActionResult> Reconcile([HttpTrigger(AuthorizationLevel.Anonymous, Route = "reconcile/{organization}/{project}/{scope}/{ruleName}/{item?}")]HttpRequestMessage request,
+        public async Task<IActionResult> ReconcileAsync([HttpTrigger(AuthorizationLevel.Anonymous, Route = "reconcile/{organization}/{project}/{scope}/{ruleName}/{item?}")]HttpRequestMessage request,
             string organization,
             string project,
             string scope,
@@ -34,7 +34,7 @@ namespace Functions
             string item = null)
         {
             var id = _tokenizer.IdentifierFromClaim(request);
-            if (id == null || !(await HasPermissionToReconcile(project, id)))
+            if (id == null || !(await HasPermissionToReconcileAsync(project, id)))
             {
                 return new UnauthorizedResult();
             }
@@ -42,19 +42,19 @@ namespace Functions
             switch (scope)
             {
                 case RuleScopes.GlobalPermissions:
-                    return await ReconcileGlobalPermissions(project, ruleName);
+                    return await ReconcileGlobalPermissionsAsync(project, ruleName);
                 case RuleScopes.Repositories:
-                    return await ReconcileItem(project, ruleName, item, _ruleProvider.RepositoryRules(_client));
+                    return await ReconcileItemAsync(project, ruleName, item, _ruleProvider.RepositoryRules(_client));
                 case RuleScopes.BuildPipelines:
-                    return await ReconcileItem(project, ruleName, item, _ruleProvider.BuildRules(_client));
+                    return await ReconcileItemAsync(project, ruleName, item, _ruleProvider.BuildRules(_client));
                 case RuleScopes.ReleasePipelines:
-                    return await ReconcileItem(project, ruleName, item, _ruleProvider.ReleaseRules(_client));
+                    return await ReconcileItemAsync(project, ruleName, item, _ruleProvider.ReleaseRules(_client));
                 default:
                     return new NotFoundObjectResult(scope);
             }
         }
 
-        private async Task<IActionResult> ReconcileGlobalPermissions(string project, string ruleName)
+        private async Task<IActionResult> ReconcileGlobalPermissionsAsync(string project, string ruleName)
         {
             var rule = _ruleProvider
                 .GlobalPermissions(_client)
@@ -70,7 +70,7 @@ namespace Functions
             return new OkResult();
         }
 
-        private static async Task<IActionResult> ReconcileItem(string project, string ruleName, string item, IEnumerable<IRule> rules)
+        private static async Task<IActionResult> ReconcileItemAsync(string project, string ruleName, string item, IEnumerable<IRule> rules)
         {
             var rule = rules
                 .OfType<IReconcile>()
@@ -86,7 +86,7 @@ namespace Functions
         }
 
         [FunctionName("HasPermissionToReconcileFunction")]
-        public async Task<IActionResult> HasPermission([HttpTrigger(AuthorizationLevel.Anonymous,
+        public async Task<IActionResult> HasPermissionAsync([HttpTrigger(AuthorizationLevel.Anonymous,
             Route = "reconcile/{organization}/{project}/haspermissions")]HttpRequestMessage request,
             string organization,
             string project)
@@ -97,10 +97,10 @@ namespace Functions
                 return new UnauthorizedResult();
             }
 
-            return new OkObjectResult(await HasPermissionToReconcile(project, id));
+            return new OkObjectResult(await HasPermissionToReconcileAsync(project, id));
         }
 
-        private async Task<bool> HasPermissionToReconcile(string project, string id)
+        private async Task<bool> HasPermissionToReconcileAsync(string project, string id)
         {
             var permissions = await _client.GetAsync(Requests.Permissions.PermissionsGroupProjectId(project, id));
             return permissions.Security.Permissions.Any(x =>
