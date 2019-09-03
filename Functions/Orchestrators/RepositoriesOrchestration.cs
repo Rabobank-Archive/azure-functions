@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using AzDoCompliancy.CustomStatus;
 using Functions.Activities;
 using Functions.Helpers;
@@ -30,23 +31,16 @@ namespace Functions.Orchestrators
                 await context.CallActivityWithRetryAsync<List<Repository>>(
                     nameof(RepositoriesForProjectActivity), RetryHelper.ActivityRetryOptions, project);
 
-            //Not using select so we can run the activities each at a time
-            var reports = new List<ItemExtensionData>();
-            foreach (var repository in repositories)
-            {
-                var itemExtensionData = await context.CallActivityWithRetryAsync<ItemExtensionData>(nameof(RepositoriesScanActivity),
-                    RetryHelper.ActivityRetryOptions, repository);
-                reports.Add(itemExtensionData);
-            }
-
             var data = new ItemsExtensionData
                 {
                     Id = project.Name,
                     Date = context.CurrentUtcDateTime,
                     RescanUrl = ProjectScanHttpStarter.RescanUrl(_config, project.Name, RuleScopes.Repositories),
                     HasReconcilePermissionUrl = ReconcileFunction.HasReconcilePermissionUrl(_config, project.Id),
-                    Reports = reports
-                };
+                    Reports = await Task.WhenAll(repositories.Select(r =>
+                        context.CallActivityWithRetryAsync<ItemExtensionData>(nameof(RepositoriesScanActivity),
+                            RetryHelper.ActivityRetryOptions, r)))
+            };
             
 
             await context.CallActivityAsync(nameof(LogAnalyticsUploadActivity),

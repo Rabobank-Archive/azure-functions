@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using AzDoCompliancy.CustomStatus;
 using Functions.Activities;
 using Functions.Helpers;
@@ -29,17 +30,7 @@ namespace Functions.Orchestrators
 
             var buildDefinitions =
                 await context.CallActivityWithRetryAsync<List<BuildDefinition>>(nameof(BuildDefinitionsActivity),
-                    RetryHelper.ActivityRetryOptions,
-                    project);
-            
-            //Not using select so we can run the activities each at a time
-            var reports = new List<ItemExtensionData>();
-            foreach (var buildDefinition in buildDefinitions)
-            {
-                var itemExtensionData = await context.CallActivityWithRetryAsync<ItemExtensionData>(nameof(BuildPipelinesScanActivity),
-                    RetryHelper.ActivityRetryOptions, buildDefinition);
-                reports.Add(itemExtensionData);
-            }
+                    RetryHelper.ActivityRetryOptions, project);
 
             var data = new ItemsExtensionData
             {
@@ -47,7 +38,9 @@ namespace Functions.Orchestrators
                 Date = context.CurrentUtcDateTime,
                 RescanUrl = ProjectScanHttpStarter.RescanUrl(_config, project.Name, RuleScopes.BuildPipelines),
                 HasReconcilePermissionUrl = ReconcileFunction.HasReconcilePermissionUrl(_config, project.Id),
-                Reports = reports
+                Reports = await Task.WhenAll(buildDefinitions.Select(b =>
+                    context.CallActivityWithRetryAsync<ItemExtensionData>(nameof(BuildPipelinesScanActivity),
+                        RetryHelper.ActivityRetryOptions, b)))
             };
 
             await context.CallActivityAsync(nameof(LogAnalyticsUploadActivity),
