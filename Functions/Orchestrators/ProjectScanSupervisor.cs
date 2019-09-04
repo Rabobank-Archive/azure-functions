@@ -27,7 +27,7 @@ namespace Functions.Orchestrators
         private async static Task StartProjectScanOrchestratorWithTimerAsync(
             DurableOrchestrationContextBase context, Project project, int index)
         {
-            await context.CreateTimer(DateTime.Now.AddSeconds(index * TimerInterval), CancellationToken.None);
+            await context.CreateTimer(context.CurrentUtcDateTime.AddSeconds(index * TimerInterval), CancellationToken.None);
             await context.CallSubOrchestratorAsync(nameof(ProjectScanOrchestration),
                 OrchestrationIdHelper.CreateProjectScanOrchestrationId(context.InstanceId, project.Id), project);
         }
