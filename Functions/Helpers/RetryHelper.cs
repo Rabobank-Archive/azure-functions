@@ -23,7 +23,7 @@ namespace Functions.Helpers
             AsyncRetryPolicy invalidDocumentVersionPolicy = Policy
                 .Handle<FlurlHttpException>(ex =>
                     ex.Call.HttpStatus == HttpStatusCode.BadRequest && ex.Call.Request.IsExtMgtRequest(organization))
-                .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(5));
+                .WaitAndRetryAsync(6, retryAttempt => TimeSpan.FromSeconds(new Random().Next(5, 20)));
 
             return invalidDocumentVersionPolicy.ExecuteAsync(action);
         }
