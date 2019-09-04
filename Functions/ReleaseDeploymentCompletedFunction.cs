@@ -40,8 +40,10 @@ namespace Functions
             [QueueTrigger("releasedeploymentcompleted", Connection = "eventQueueStorageConnectionString")]string data,
             ILogger log)
         {
-            if (data == null) throw new ArgumentNullException(nameof(data));
-            if (log == null) throw new ArgumentNullException(nameof(log));
+            if (data == null)
+                throw new ArgumentNullException(nameof(data));
+            if (log == null)
+                throw new ArgumentNullException(nameof(log));
 
             return RunInternalAsync(data);
         }
@@ -55,19 +57,14 @@ namespace Functions
 
         private async Task UpdateExtensionDataAsync(ReleaseDeploymentCompletedReport report)
         {
-            var reports = await _azuredo.GetAsync(
-                                     Requests.ExtensionManagement
-                                         .ExtensionData<ExtensionDataReports<ReleaseDeploymentCompletedReport>>(
-                                             "tas",
-                                             _config.ExtensionName,
-
-                                             "Releases",
-                                             report.Project)) ??
-                                 new ExtensionDataReports<ReleaseDeploymentCompletedReport>
-                                 {
-                                     Id = report.Project,
-                                     Reports = new List<ReleaseDeploymentCompletedReport>()
-                                 };
+            var reports = 
+                await _azuredo.GetAsync(Requests.ExtensionManagement.ExtensionData<ExtensionDataReports<ReleaseDeploymentCompletedReport>>(
+                    "tas", _config.ExtensionName, "Releases", report.Project)) ??
+                new ExtensionDataReports<ReleaseDeploymentCompletedReport>
+                {
+                    Id = report.Project,
+                    Reports = new List<ReleaseDeploymentCompletedReport>()
+                };
 
             reports.Reports = reports
                 .Reports
@@ -76,10 +73,8 @@ namespace Functions
                 .Take(50)
                 .ToList();
 
-            await _azuredo.PutAsync(
-                Requests.ExtensionManagement.ExtensionData<ExtensionDataReports<ReleaseDeploymentCompletedReport>>(
-                    "tas", _config.ExtensionName,
-                    "Releases", report.Project), reports);
+            await _azuredo.PutAsync(Requests.ExtensionManagement.ExtensionData<ExtensionDataReports<ReleaseDeploymentCompletedReport>>(
+                "tas", _config.ExtensionName, "Releases", report.Project), reports);
         }
     }
 }

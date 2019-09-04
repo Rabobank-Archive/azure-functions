@@ -39,8 +39,10 @@ namespace Functions
             [QueueTrigger("buildcompleted", Connection = "eventQueueStorageConnectionString")]string data,
             ILogger log)
         {
-            if (data == null) throw new ArgumentNullException(nameof(data));
-            if (log == null) throw new ArgumentNullException(nameof(log));
+            if (data == null)
+                throw new ArgumentNullException(nameof(data));
+            if (log == null)
+                throw new ArgumentNullException(nameof(log));
 
             return RunInternalAsync(data);
         }
@@ -57,14 +59,14 @@ namespace Functions
 
         private async Task UpdateExtensionDataAsync(BuildScanReport report)
         {
-            var reports = await _azuredo.GetAsync(
-                              Requests.ExtensionManagement.ExtensionData<ExtensionDataReports<BuildScanReport>>(
-                                  "tas",
-                                  _config.ExtensionName,
-                                  "BuildReports",
-                                  report.Project)) ??
-                          new ExtensionDataReports<BuildScanReport>
-                          { Id = report.Project, Reports = new List<BuildScanReport>() };
+            var reports = 
+                await _azuredo.GetAsync(Requests.ExtensionManagement.ExtensionData<ExtensionDataReports<BuildScanReport>>(
+                    "tas", _config.ExtensionName, "BuildReports", report.Project)) ??
+                new ExtensionDataReports<BuildScanReport>
+                {
+                    Id = report.Project,
+                    Reports = new List<BuildScanReport>()
+                };
 
             reports.Reports = reports
                 .Reports
@@ -73,10 +75,8 @@ namespace Functions
                 .Take(50)
                 .ToList();
 
-            await _azuredo.PutAsync(
-                Requests.ExtensionManagement.ExtensionData<ExtensionDataReports<BuildScanReport>>(
-                    "tas", _config.ExtensionName,
-                    "BuildReports", report.Project), reports);
+            await _azuredo.PutAsync(Requests.ExtensionManagement.ExtensionData<ExtensionDataReports<BuildScanReport>>(
+                "tas", _config.ExtensionName, "BuildReports", report.Project), reports);
         }
     }
 }
