@@ -2,7 +2,6 @@
 using Microsoft.Azure.WebJobs.Hosting;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
-using SecurePipelineScan.Rules;
 using SecurePipelineScan.Rules.Events;
 using SecurePipelineScan.Rules.Reports;
 using SecurePipelineScan.Rules.Security;
@@ -43,7 +42,6 @@ namespace Functions
             services.AddScoped<IMemoryCache>(_ => new MemoryCache(new MemoryCacheOptions()));
             services.AddTransient<IServiceHookScan<ReleaseDeploymentCompletedReport>, ReleaseDeploymentScan>();
             services.AddTransient<IServiceHookScan<BuildScanReport>, BuildScan>();
-            services.AddTransient<IServiceEndpointValidator, ServiceEndpointValidator>();
 
             var extensionName = GetEnvironmentVariable("extensionName");
             var functionAppUrl = GetEnvironmentVariable("WEBSITE_HOSTNAME");
