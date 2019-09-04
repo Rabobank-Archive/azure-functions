@@ -5,23 +5,31 @@ using System.Collections.Generic;
 using System.Linq;
 using Functions.Helpers;
 using Task = System.Threading.Tasks.Task;
+using System.Threading;
+using System;
 
 namespace Functions.Orchestrators
 {
     public class ProjectScanSupervisor
     {
+        private const int TimerInterval = 20; 
+
         [FunctionName(nameof(ProjectScanSupervisor))]
         public async Task RunAsync([OrchestrationTrigger] DurableOrchestrationContextBase context)
         {
             var projects = context.GetInput<List<Project>>();
             context.SetCustomStatus(new SupervisorOrchestrationStatus { TotalProjectCount = projects.Count });
 
-            //No multithreading with linq, so we won't hit rate limits
-            foreach (var project in projects)
-            {
-                await context.CallSubOrchestratorAsync(nameof(ProjectScanOrchestration),
-                    OrchestrationIdHelper.CreateProjectScanOrchestrationId(context.InstanceId, project.Id), project);
-            }
+            await Task.WhenAll(projects.Select(async (p, i) => 
+                await StartProjectScanOrchestratorWithTimerAsync(context, p, i)));
+        }
+
+        private async static Task StartProjectScanOrchestratorWithTimerAsync(
+            DurableOrchestrationContextBase context, Project project, int index)
+        {
+            await context.CreateTimer(context.CurrentUtcDateTime.AddSeconds(index * TimerInterval), CancellationToken.None);
+            await context.CallSubOrchestratorAsync(nameof(ProjectScanOrchestration),
+                OrchestrationIdHelper.CreateProjectScanOrchestrationId(context.InstanceId, project.Id), project);
         }
     }
 }

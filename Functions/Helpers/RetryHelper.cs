@@ -13,7 +13,7 @@ namespace Functions.Helpers
     public static class RetryHelper
     {
         private const int FirstRetryInterval = 1 * 60; // First retry happens after 1 minute
-        private const int MaxNumberOfAttempts = 6; // Maximum of 6 attempts
+        private const int MaxNumberOfAttempts = 10; // Maximum of 6 attempts
         private const double BackoffCoefficient = 1.5; // Back-off timer is multiplied by this number for each retry
         private const int MaxRetryInterval = 25 * 60; // Maximum time to wait
         private const int RetryTimeout = 5 * 60; // Time to wait before a single retry times out
@@ -23,7 +23,7 @@ namespace Functions.Helpers
             AsyncRetryPolicy invalidDocumentVersionPolicy = Policy
                 .Handle<FlurlHttpException>(ex =>
                     ex.Call.HttpStatus == HttpStatusCode.BadRequest && ex.Call.Request.IsExtMgtRequest(organization))
-                .WaitAndRetryAsync(6, retryAttempt => TimeSpan.FromSeconds(new Random().Next(5, 20)));
+                .WaitAndRetryAsync(MaxNumberOfAttempts, retryAttempt => TimeSpan.FromSeconds(new Random().Next(5, 20)));
 
             return invalidDocumentVersionPolicy.ExecuteAsync(action);
         }
