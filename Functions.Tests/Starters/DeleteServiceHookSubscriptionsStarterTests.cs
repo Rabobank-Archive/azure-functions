@@ -18,7 +18,7 @@ namespace Functions.Tests.Starters
 
             //Act
             var fun = new DeleteServiceHookSubscriptionsStarter();
-            await fun.RunAsync(new HttpRequestMessage(), orchestrationClientMock.Object);
+            await fun.RunAsync(orchestrationClientMock.Object);
 
             //Assert
             orchestrationClientMock.Verify(

@@ -10,13 +10,11 @@ namespace Functions.Starters
     public class DeleteServiceHookSubscriptionsStarter
     {
         [FunctionName(nameof(DeleteServiceHookSubscriptionsStarter))]
-        public async Task<IActionResult> RunAsync(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequestMessage req,
+        [NoAutomaticTrigger]
+        public async Task RunAsync(
             [OrchestrationClient] DurableOrchestrationClientBase starter)
         {
-            var result = await starter.StartNewAsync(nameof(DeleteServiceHookSubscriptionsOrchestrator), null);
-
-            return new OkObjectResult(result);
+            await starter.StartNewAsync(nameof(DeleteServiceHookSubscriptionsOrchestrator), null);
         }
     }
 }
