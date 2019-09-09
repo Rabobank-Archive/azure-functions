@@ -20,18 +20,10 @@ namespace Functions.Orchestrators
         [FunctionName(nameof(DeleteServiceHookSubscriptionsOrchestrator))]
         public async Task RunAsync([OrchestrationTrigger] DurableOrchestrationContextBase context)
         {
-            var allHookSubscriptions =
-                await context.CallActivityWithRetryAsync<IList<Response.Hook>>(nameof(GetHooksActivity), RetryHelper.ActivityRetryOptions, null);
-
-            var subscriptionsToDelete = allHookSubscriptions
+            var hooks = await context.CallActivityWithRetryAsync<IList<Response.Hook>>(nameof(GetHooksActivity), RetryHelper.ActivityRetryOptions, null);
+            await Task.WhenAll(hooks
                 .Where(h => _config.EventQueueStorageAccountName == h.ConsumerInputs.AccountName)
-                .ToList();
-            
-            foreach (var hook in subscriptionsToDelete)
-            {
-                await context.CallActivityWithRetryAsync(nameof(DeleteServiceHookSubscriptionActivity),
-                    RetryHelper.ActivityRetryOptions, hook);
-            }
+                .Select(async hook => await context.CallActivityWithRetryAsync(nameof(DeleteServiceHookSubscriptionActivity), RetryHelper.ActivityRetryOptions, hook)));
         }
     }
 }
