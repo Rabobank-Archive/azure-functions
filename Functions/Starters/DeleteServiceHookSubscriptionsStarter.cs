@@ -9,12 +9,19 @@ namespace Functions.Starters
 {
     public class DeleteServiceHookSubscriptionsStarter
     {
+        private readonly EnvironmentConfig _config;
+
+        public DeleteServiceHookSubscriptionsStarter(EnvironmentConfig config)
+        {
+            _config = config;
+        }
+        
         [FunctionName(nameof(DeleteServiceHookSubscriptionsStarter))]
         [NoAutomaticTrigger]
         public async Task RunAsync(
             [OrchestrationClient] DurableOrchestrationClientBase starter)
         {
-            await starter.StartNewAsync(nameof(DeleteServiceHookSubscriptionsOrchestrator), null);
+            await starter.StartNewAsync(nameof(DeleteServiceHookSubscriptionsOrchestrator), _config.EventQueueStorageAccountName);
         }
     }
 }

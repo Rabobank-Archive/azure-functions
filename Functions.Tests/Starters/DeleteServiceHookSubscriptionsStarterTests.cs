@@ -1,4 +1,5 @@
 using System.Net.Http;
+using AutoFixture;
 using Functions.Orchestrators;
 using Functions.Starters;
 using Microsoft.Azure.WebJobs;
@@ -14,15 +15,18 @@ namespace Functions.Tests.Starters
         public async Task RunShouldCallOrchestratorExactlyOnce()
         {
             //Arrange       
-            var orchestrationClientMock = new Mock<DurableOrchestrationClientBase>();
+            var fixture = new Fixture();
+            var config = fixture.Create<EnvironmentConfig>();
+            var client = new Mock<DurableOrchestrationClientBase>();
 
             //Act
-            var fun = new DeleteServiceHookSubscriptionsStarter();
-            await fun.RunAsync(orchestrationClientMock.Object);
+            var fun = new DeleteServiceHookSubscriptionsStarter(config);
+            await fun.RunAsync(client.Object);
 
             //Assert
-            orchestrationClientMock.Verify(
-                x => x.StartNewAsync(nameof(DeleteServiceHookSubscriptionsOrchestrator), null),
+            client.Verify(x => x.StartNewAsync(
+                    nameof(DeleteServiceHookSubscriptionsOrchestrator), 
+                    config.EventQueueStorageAccountName),
                 Times.Once());
         }
     }

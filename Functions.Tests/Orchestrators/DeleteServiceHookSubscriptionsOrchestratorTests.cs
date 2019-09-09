@@ -14,8 +14,6 @@ namespace Functions.Tests.Orchestrators
     public class DeleteServiceHookSubscriptionsOrchestratorTests
     {
         private readonly Fixture _fixture;
-        private const string AccountName = "azdocompliancyqueue";
-        private const string AccountKey = "ZHVtbXlrZXk=";
 
         public DeleteServiceHookSubscriptionsOrchestratorTests()
         {
@@ -26,22 +24,18 @@ namespace Functions.Tests.Orchestrators
         public async Task RunShouldCallGetHooksExactlyOnce()
         {
             //Arrange
-            var orchestrationContextMock = new Mock<DurableOrchestrationContextBase>();
-            orchestrationContextMock.Setup(x =>
+            var context = new Mock<DurableOrchestrationContextBase>();
+            context.Setup(x =>
                     x.CallActivityWithRetryAsync<IList<Response.Hook>>(nameof(GetHooksActivity),
                         It.IsAny<RetryOptions>(), null))
                 .Returns(Task.FromResult(_fixture.CreateMany<Response.Hook>().ToList() as IList<Response.Hook>));
-            var config = new EnvironmentConfig
-            {
-                EventQueueStorageAccountName = AccountName, EventQueueStorageAccountKey = AccountKey
-            };
 
             //Act
-            var fun = new DeleteServiceHookSubscriptionsOrchestrator(config);
-            await fun.RunAsync(orchestrationContextMock.Object);
+            var fun = new DeleteServiceHookSubscriptionsOrchestrator();
+            await fun.RunAsync(context.Object);
 
             //Assert
-            orchestrationContextMock.Verify(
+            context.Verify(
                 x => x.CallActivityWithRetryAsync<IList<Response.Hook>>(nameof(GetHooksActivity),
                     It.IsAny<RetryOptions>(), null), Times.Once);
         }
@@ -49,34 +43,34 @@ namespace Functions.Tests.Orchestrators
         [Fact]
         public async Task RunShouldCallActivityExactlyOnceForCompliancyHooks()
         {
-            //Arrange       
-            var orchestrationContextMock = new Mock<DurableOrchestrationContextBase>();
-            var config = new EnvironmentConfig
-            {
-                EventQueueStorageAccountName = AccountName, EventQueueStorageAccountKey = AccountKey
-            };
-
+            //Arrange
+            var accountName = _fixture.Create<string>();
+            var context = new Mock<DurableOrchestrationContextBase>();
+            context
+                .Setup(x => x.GetInput<string>())
+                .Returns(accountName);
+            
             var hooks = new List<Response.Hook>
             {
-                new Response.Hook {ConsumerInputs = new Response.ConsumerInputs {AccountName = "azdocompliancyqueue"}},
-                new Response.Hook {ConsumerInputs = new Response.ConsumerInputs {AccountName = "azdocompliancyqueue"}},
-                new Response.Hook {ConsumerInputs = new Response.ConsumerInputs {AccountName = "azdocompliancyqueue"}},
-                new Response.Hook {ConsumerInputs = new Response.ConsumerInputs {AccountName = "azdocompliancyqueue"}},
-                new Response.Hook {ConsumerInputs = new Response.ConsumerInputs {AccountName = "dummy"}},
-                new Response.Hook {ConsumerInputs = new Response.ConsumerInputs {AccountName = "someother"}},
+                new Response.Hook {ConsumerInputs = new Response.ConsumerInputs { AccountName = accountName }},
+                new Response.Hook {ConsumerInputs = new Response.ConsumerInputs { AccountName = accountName }},
+                new Response.Hook {ConsumerInputs = new Response.ConsumerInputs { AccountName = accountName }},
+                new Response.Hook {ConsumerInputs = new Response.ConsumerInputs { AccountName = accountName }},
+                new Response.Hook {ConsumerInputs = new Response.ConsumerInputs { AccountName = "dummy" }},
+                new Response.Hook {ConsumerInputs = new Response.ConsumerInputs { AccountName = "someother" }},
             };
 
-            orchestrationContextMock.Setup(x =>
+            context.Setup(x =>
                     x.CallActivityWithRetryAsync<IList<Response.Hook>>(nameof(GetHooksActivity),
                         It.IsAny<RetryOptions>(), null))
                 .Returns(Task.FromResult((IList<Response.Hook>)hooks));
 
             //Act
-            var fun = new DeleteServiceHookSubscriptionsOrchestrator(config);
-            await fun.RunAsync(orchestrationContextMock.Object);
+            var fun = new DeleteServiceHookSubscriptionsOrchestrator();
+            await fun.RunAsync(context.Object);
 
             //Assert
-            orchestrationContextMock.Verify(
+            context.Verify(
                 x => x.CallActivityWithRetryAsync(nameof(DeleteServiceHookSubscriptionActivity), It.IsAny<RetryOptions>(), It.IsAny<Response.Hook>()),
                 Times.Exactly(4));
         }

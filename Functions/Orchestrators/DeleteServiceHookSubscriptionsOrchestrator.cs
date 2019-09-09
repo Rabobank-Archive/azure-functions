@@ -10,19 +10,14 @@ namespace Functions.Orchestrators
 {
     public class DeleteServiceHookSubscriptionsOrchestrator
     {
-        private readonly EnvironmentConfig _config;
-
-        public DeleteServiceHookSubscriptionsOrchestrator(EnvironmentConfig config)
-        {
-            _config = config;
-        }
-        
         [FunctionName(nameof(DeleteServiceHookSubscriptionsOrchestrator))]
         public async Task RunAsync([OrchestrationTrigger] DurableOrchestrationContextBase context)
         {
             var hooks = await context.CallActivityWithRetryAsync<IList<Response.Hook>>(nameof(GetHooksActivity), RetryHelper.ActivityRetryOptions, null);
+            var accountName = context.GetInput<string>();
+            
             await Task.WhenAll(hooks
-                .Where(h => _config.EventQueueStorageAccountName == h.ConsumerInputs.AccountName)
+                .Where(h => accountName == h.ConsumerInputs.AccountName)
                 .Select(async hook => await context.CallActivityWithRetryAsync(nameof(DeleteServiceHookSubscriptionActivity), RetryHelper.ActivityRetryOptions, hook)));
         }
     }
