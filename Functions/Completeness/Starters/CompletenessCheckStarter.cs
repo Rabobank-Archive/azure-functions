@@ -8,7 +8,7 @@ namespace Functions.Completeness.Starters
     public class CompletenessCheckStarter
     {
         [FunctionName("CompletenessCheckStarter")]
-        public Task RunAsync([TimerTrigger("0 0 6 * * *", RunOnStartup=false)]
+        public Task RunAsync([TimerTrigger("0 0 8 * * *", RunOnStartup=false)]
             TimerInfo timerInfo, [OrchestrationClient] DurableOrchestrationClientBase orchestrationClientBase)
         {
             if (orchestrationClientBase == null)
