@@ -1,8 +1,5 @@
-using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
 using Functions.Orchestrators;
 
 namespace Functions.Starters
@@ -18,7 +15,7 @@ namespace Functions.Starters
         
         [FunctionName(nameof(DeleteServiceHookSubscriptionsStarter))]
         [NoAutomaticTrigger]
-        public async Task RunAsync(
+        public async Task RunAsync(string input,
             [OrchestrationClient] DurableOrchestrationClientBase starter)
         {
             await starter.StartNewAsync(nameof(DeleteServiceHookSubscriptionsOrchestrator), _config.EventQueueStorageAccountName);

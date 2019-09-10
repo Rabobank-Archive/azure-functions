@@ -21,7 +21,7 @@ namespace Functions.Tests.Starters
 
             //Act
             var fun = new DeleteServiceHookSubscriptionsStarter(config);
-            await fun.RunAsync(client.Object);
+            await fun.RunAsync("", client.Object);
 
             //Assert
             client.Verify(x => x.StartNewAsync(
