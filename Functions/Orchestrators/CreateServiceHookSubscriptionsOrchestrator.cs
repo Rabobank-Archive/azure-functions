@@ -5,12 +5,14 @@ using Response = SecurePipelineScan.VstsService.Response;
 using System.Threading.Tasks;
 using Functions.Activities;
 using Functions.Helpers;
+using System.Threading;
 
 namespace Functions.Orchestrators
 {
     public class CreateServiceHookSubscriptionsOrchestrator
-
     {
+        private const int TimerInterval = 2;
+
         [FunctionName(nameof(CreateServiceHookSubscriptionsOrchestrator))]
         public async Task RunAsync([OrchestrationTrigger] DurableOrchestrationContextBase context)
         {
@@ -24,11 +26,17 @@ namespace Functions.Orchestrators
                 null);
 
             await context.CallActivityAsync(nameof(CreateStorageQueuesActivity), null);
-            await Task.WhenAll(projects.Select(async p => 
-                await context.CallActivityWithRetryAsync(
-                    nameof(CreateServiceHookSubscriptionsActivity),
-                    RetryHelper.ActivityRetryOptions,
-                    new CreateServiceHookSubscriptionsActivityRequest {Project = p, ExistingHooks = hooks})));
+            await Task.WhenAll(projects.Select(async(p, i) => await StartCreateHooksActivityWithTimerAsync(context, p, i, hooks)));
+        }
+
+        private async static Task StartCreateHooksActivityWithTimerAsync(
+            DurableOrchestrationContextBase context, Response.Project project, int index, IList<Response.Hook> hooks)
+        {
+            await context.CreateTimer(context.CurrentUtcDateTime.AddSeconds(index * TimerInterval), CancellationToken.None);
+            await context.CallActivityWithRetryAsync(
+                nameof(CreateServiceHookSubscriptionsActivity),
+                RetryHelper.ActivityRetryOptions,
+                new CreateServiceHookSubscriptionsActivityRequest { Project = project, ExistingHooks = hooks });
         }
     }
 }
