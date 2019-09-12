@@ -9,7 +9,6 @@ namespace Functions.Starters
 {
     public class ProjectsScanStarter
     {
-
         private readonly IVstsRestClient _azuredo;
 
         public ProjectsScanStarter(IVstsRestClient azuredo)
