@@ -50,7 +50,8 @@ namespace Functions
             var storage = CloudStorageAccount.Parse(GetEnvironmentVariable("eventQueueStorageConnectionString"));
 
             services.AddSingleton(storage.CreateCloudQueueClient().Wrap());
-            
+            services.AddSingleton(storage.CreateCloudTableClient().Wrap());
+
             var config = new EnvironmentConfig
             {
                 ExtensionName = extensionName,

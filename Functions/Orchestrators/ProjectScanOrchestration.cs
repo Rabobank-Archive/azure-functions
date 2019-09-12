@@ -1,6 +1,8 @@
+using Functions.Activities;
 using Functions.Helpers;
 using Functions.Model;
 using Microsoft.Azure.WebJobs;
+using Microsoft.WindowsAzure.Storage.Table;
 using SecurePipelineScan.VstsService.Response;
 using Task = System.Threading.Tasks.Task;
 
@@ -13,7 +15,10 @@ namespace Functions.Orchestrators
         public async Task RunAsync([OrchestrationTrigger] DurableOrchestrationContextBase context)
         {
             var project = context.GetInput<Project>();
-            
+
+            await context.CallActivityWithRetryAsync<CloudTable>(nameof(GetDataFromTableStorageActivity),
+                        RetryHelper.ActivityRetryOptions, project);
+
             await context.CallSubOrchestratorAsync(nameof(GlobalPermissionsOrchestration),
                 OrchestrationIdHelper.CreateProjectScanScopeOrchestrationId(context.InstanceId,
                     RuleScopes.GlobalPermissions), project);
