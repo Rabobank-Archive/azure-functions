@@ -64,12 +64,13 @@ namespace Functions.Tests.Completeness.Orchestrators
         [InlineData(8)]
         [InlineData(10)]
         [InlineData(12)]
-        public async Task ShouldStartDeleteActivityForEachOrchestrator(int count)
+        public async Task ShouldStartDeleteActivityForEachCompletedOrchestrator(int count)
         {
             //Arrange
             var context = Substitute.For<DurableOrchestrationContextBase>();
 
             _fixture.Customize<Orchestrator>(s => s
+                .With(d => d.RuntimeStatus, OrchestrationRuntimeStatus.Completed)
                 .With(d => d.CustomStatus, JToken.FromObject(JToken.FromObject(
                     new SupervisorOrchestrationStatus { TotalProjectCount = 1 }))));
 
