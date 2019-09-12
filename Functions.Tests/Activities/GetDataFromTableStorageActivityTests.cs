@@ -4,8 +4,6 @@ using System.Threading.Tasks;
 using Xunit;
 using Shouldly;
 using Functions.Model;
-using Microsoft.Azure.WebJobs;
-using Moq;
 using Functions.Activities;
 using Unmockable;
 using AutoFixture;
@@ -17,7 +15,7 @@ namespace Functions.Tests
     public class GetDataFromTableStorageActivityTests
     {
         [Fact]
-        public async Task GetDataFromLocalTableStorageAsync()
+        public async Task GetDataFromLocalTableStorage()
         {
             // Arrange 
             // Use Azure Storage Emulator on Windows or azurite to use local development server
@@ -40,14 +38,22 @@ namespace Functions.Tests
         }
 
         [Fact]
-        public async Task GetDataFromAzureTableStorageAsync()
+        public async Task RunActivity()
         {
             // Arrange 
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
             var project = fixture.Create<Response.Project>();
+            project.Id = "111";
+
             var storage = CloudStorageAccount.Parse("UseDevelopmentStorage=true");
             var client = storage.CreateCloudTableClient();
-            var cloudTableClient = new Intercept<CloudTableClient>(); //CLoudTableClient.Execute returns...
+            var table = client.GetTableReference("ciDummyTable");
+            await CreateDummyTable(table).ConfigureAwait(false);
+
+            var cloudTableClient = new Intercept<CloudTableClient>();
+            cloudTableClient.Setup(c => c.GetTableReference("deploymentMethodTable"))
+                .Returns(table);
+
             var config = new EnvironmentConfig()
             {
                 Organization = "somecompany-test"

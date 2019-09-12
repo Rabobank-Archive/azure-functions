@@ -1,7 +1,10 @@
 using AutoFixture;
+using Functions.Activities;
 using Functions.Orchestrators;
 using Microsoft.Azure.WebJobs;
+using Microsoft.WindowsAzure.Storage.Table;
 using Moq;
+using System;
 using System.Threading.Tasks;
 using Xunit;
 using Response = SecurePipelineScan.VstsService.Response;
@@ -22,10 +25,16 @@ namespace Functions.Tests.Orchestrators
             starter
                 .Setup(x => x.GetInput<Response.Project>())
                 .Returns(fixture.Create<Response.Project>());
-            
+
             starter
                 .Setup(x => x.InstanceId)
                 .Returns(fixture.Create<string>());
+
+            starter
+                .Setup(x => x.CallActivityWithRetryAsync<CloudTable>(
+                    nameof(GetDataFromTableStorageActivity), It.IsAny<RetryOptions>(), It.IsAny<Response.Project>()))
+                .ReturnsAsync(new CloudTable(new Uri("http://bla.com")))
+                .Verifiable();
 
             starter
                 .Setup(x => x.CallSubOrchestratorAsync(
@@ -35,19 +44,19 @@ namespace Functions.Tests.Orchestrators
 
             starter
                 .Setup(x => x.CallSubOrchestratorAsync(
-                    nameof(RepositoriesOrchestration), It.IsAny<string>(),It.IsAny<Response.Project>()))
+                    nameof(RepositoriesOrchestration), It.IsAny<string>(), It.IsAny<Response.Project>()))
                 .Returns(Task.CompletedTask)
                 .Verifiable();
 
             starter
                 .Setup(x => x.CallSubOrchestratorAsync(
-                    nameof(BuildPipelinesOrchestration),It.IsAny<string>(), It.IsAny<Response.Project>()))
+                    nameof(BuildPipelinesOrchestration), It.IsAny<string>(), It.IsAny<Response.Project>()))
                 .Returns(Task.CompletedTask)
                 .Verifiable();
 
             starter
                 .Setup(x => x.CallSubOrchestratorAsync(
-                    nameof(ReleasePipelinesOrchestration),It.IsAny<string>(), It.IsAny<Response.Project>()))
+                    nameof(ReleasePipelinesOrchestration), It.IsAny<string>(), It.IsAny<Response.Project>()))
                 .Returns(Task.CompletedTask)
                 .Verifiable();
 

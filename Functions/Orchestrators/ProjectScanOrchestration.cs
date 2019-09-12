@@ -9,15 +9,14 @@ using Task = System.Threading.Tasks.Task;
 namespace Functions.Orchestrators
 {
     public class ProjectScanOrchestration
-
     {
         [FunctionName(nameof(ProjectScanOrchestration))]
         public async Task RunAsync([OrchestrationTrigger] DurableOrchestrationContextBase context)
         {
             var project = context.GetInput<Project>();
 
-            await context.CallActivityWithRetryAsync<CloudTable>(nameof(GetDataFromTableStorageActivity),
-                        RetryHelper.ActivityRetryOptions, project);
+            var table = await context.CallActivityWithRetryAsync<CloudTable>(nameof(GetDataFromTableStorageActivity),
+                RetryHelper.ActivityRetryOptions, project);
 
             await context.CallSubOrchestratorAsync(nameof(GlobalPermissionsOrchestration),
                 OrchestrationIdHelper.CreateProjectScanScopeOrchestrationId(context.InstanceId,
