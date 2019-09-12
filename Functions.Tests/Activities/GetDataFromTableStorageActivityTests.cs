@@ -9,6 +9,7 @@ using Unmockable;
 using AutoFixture;
 using AutoFixture.AutoMoq;
 using Response = SecurePipelineScan.VstsService.Response;
+using System.Linq;
 
 namespace Functions.Tests
 {
@@ -34,7 +35,7 @@ namespace Functions.Tests
             var result = await table.ExecuteQuerySegmentedAsync(query, null);
 
             //Assert
-            result.Results.Count.ShouldBe(2);
+            result.Results.Count.ShouldBe(3);
         }
 
         [Fact]
@@ -64,7 +65,9 @@ namespace Functions.Tests
             var result = await fun.RunAsync(project);
 
             //Assert
-            result.Results.Count.ShouldBe(2);
+            result.Project.Id.ShouldBe("111");
+            result.ProductionItems.Count.ShouldBe(2);
+            result.ProductionItems[1].CiIdentifiers.Count.ShouldBe(2);
         }
 
         private async Task CreateDummyTable(CloudTable table)
@@ -89,6 +92,13 @@ namespace Functions.Tests
             DeploymentMethodEntity ci3 = new DeploymentMethodEntity("3", "111")
             {
                 CiIdentifier = "CI-1003",
+                Organisation = "somecompany-test",
+                PipelineId = "22",
+                StageId = "3"
+            };
+            DeploymentMethodEntity ci4 = new DeploymentMethodEntity("4", "111")
+            {
+                CiIdentifier = "CI-1003",
                 Organisation = "somecompany-dublin",
                 PipelineId = "33",
                 StageId = "3"
@@ -97,6 +107,7 @@ namespace Functions.Tests
             await table.ExecuteAsync(TableOperation.Insert(ci1));
             await table.ExecuteAsync(TableOperation.Insert(ci2));
             await table.ExecuteAsync(TableOperation.Insert(ci3));
+            await table.ExecuteAsync(TableOperation.Insert(ci4));
         }
     }
 }

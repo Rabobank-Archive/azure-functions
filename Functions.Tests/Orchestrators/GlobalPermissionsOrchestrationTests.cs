@@ -25,8 +25,8 @@ namespace Functions.Tests.Orchestrators
 
             var starter = mocks.Create<DurableOrchestrationContextBase>();
             starter
-                .Setup(x => x.GetInput<Response.Project>())
-                .Returns(fixture.Create<Response.Project>());
+                .Setup(x => x.GetInput<ItemOrchestratorRequest>())
+                .Returns(fixture.Create<ItemOrchestratorRequest>());
 
             starter
                 .Setup(x => x.InstanceId)

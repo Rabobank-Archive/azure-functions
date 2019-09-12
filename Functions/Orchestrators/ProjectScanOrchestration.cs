@@ -15,12 +15,12 @@ namespace Functions.Orchestrators
         {
             var project = context.GetInput<Project>();
 
-            var table = await context.CallActivityWithRetryAsync<CloudTable>(nameof(GetDataFromTableStorageActivity),
-                RetryHelper.ActivityRetryOptions, project);
+            var releaseOrchestratorRequest = await context.CallActivityWithRetryAsync<ItemOrchestratorRequest>(
+                nameof(GetDataFromTableStorageActivity), RetryHelper.ActivityRetryOptions, project);
 
             await context.CallSubOrchestratorAsync(nameof(GlobalPermissionsOrchestration),
                 OrchestrationIdHelper.CreateProjectScanScopeOrchestrationId(context.InstanceId,
-                    RuleScopes.GlobalPermissions), project);
+                    RuleScopes.GlobalPermissions), releaseOrchestratorRequest);
             
             await context.CallSubOrchestratorAsync(nameof(RepositoriesOrchestration),
                 OrchestrationIdHelper.CreateProjectScanScopeOrchestrationId(context.InstanceId,

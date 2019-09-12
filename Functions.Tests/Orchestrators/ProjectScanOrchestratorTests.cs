@@ -1,5 +1,6 @@
 using AutoFixture;
 using Functions.Activities;
+using Functions.Model;
 using Functions.Orchestrators;
 using Microsoft.Azure.WebJobs;
 using Microsoft.WindowsAzure.Storage.Table;
@@ -13,7 +14,6 @@ namespace Functions.Tests.Orchestrators
 {
     public class ProjectScanOrchestratorTests
     {
-
         [Fact]
         public async Task ShouldCallActivityAsyncForProject()
         {
@@ -31,14 +31,14 @@ namespace Functions.Tests.Orchestrators
                 .Returns(fixture.Create<string>());
 
             starter
-                .Setup(x => x.CallActivityWithRetryAsync<CloudTable>(
+                .Setup(x => x.CallActivityWithRetryAsync<ItemOrchestratorRequest>(
                     nameof(GetDataFromTableStorageActivity), It.IsAny<RetryOptions>(), It.IsAny<Response.Project>()))
-                .ReturnsAsync(new CloudTable(new Uri("http://bla.com")))
+                .ReturnsAsync(fixture.Create<ItemOrchestratorRequest>())
                 .Verifiable();
 
             starter
                 .Setup(x => x.CallSubOrchestratorAsync(
-                    nameof(GlobalPermissionsOrchestration), It.IsAny<string>(), It.IsAny<Response.Project>()))
+                    nameof(GlobalPermissionsOrchestration), It.IsAny<string>(), It.IsAny<ItemOrchestratorRequest>()))
                 .Returns(Task.CompletedTask)
                 .Verifiable();
 

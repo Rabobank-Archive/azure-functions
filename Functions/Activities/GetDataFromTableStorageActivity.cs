@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Functions.Model;
 using Microsoft.Azure.WebJobs;
@@ -20,7 +22,7 @@ namespace Functions.Activities
         }
 
         [FunctionName(nameof(GetDataFromTableStorageActivity))]
-        public Task<TableQuerySegment<DeploymentMethodEntity>> RunAsync([ActivityTrigger] Project project)
+        public Task<ItemOrchestratorRequest> RunAsync([ActivityTrigger] Project project)
         {
             if (project == null)
                 throw new ArgumentNullException(nameof(project));
@@ -28,14 +30,27 @@ namespace Functions.Activities
             return RunInternalAsync(project);
         }
 
-        private async Task<TableQuerySegment<DeploymentMethodEntity>> RunInternalAsync(Project project)
+        private async Task<ItemOrchestratorRequest> RunInternalAsync(Project project)
         {
             var query = new TableQuery<DeploymentMethodEntity>().Where(TableQuery.CombineFilters(
                 TableQuery.GenerateFilterCondition("Organisation", QueryComparisons.Equal, _config.Organization),
                 TableOperators.And,
                 TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, project.Id)));
             var table = _cloudTableClient.Execute(c => c.GetTableReference("deploymentMethodTable"));
-            return await table.ExecuteQuerySegmentedAsync(query, null).ConfigureAwait(false);
+            var data = await table.ExecuteQuerySegmentedAsync(query, null).ConfigureAwait(false);
+
+            return new ItemOrchestratorRequest
+            {
+                Project = project,
+                ProductionItems = data.Results
+                    .GroupBy(d => d.PipelineId)
+                    .Select(g => new ProductionItem
+                    {
+                        ItemId = g.Key,
+                        CiIdentifiers = g.Select(x => x.CiIdentifier).ToList()
+                    })
+                    .ToList()
+            };
         }
     }
 }
