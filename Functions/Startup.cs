@@ -49,6 +49,10 @@ namespace Functions
             // This only works because we use the account name and account key in the connection string.
             var storage = CloudStorageAccount.Parse(GetEnvironmentVariable("eventQueueStorageConnectionString"));
 
+            var tableClient = storage.CreateCloudTableClient();
+            services.AddSingleton(tableClient);
+
+
             services.AddSingleton(storage.CreateCloudQueueClient().Wrap());
             
             var config = new EnvironmentConfig
