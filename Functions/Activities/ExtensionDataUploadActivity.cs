@@ -22,7 +22,8 @@ namespace Functions.Activities
         public async Task RunAsync([ActivityTrigger] DurableActivityContext inputs)
         {
             var (data, scope) = inputs.GetInput<(ItemsExtensionData, string)>();
-            await _azuredo.PutAsync(ExtensionManagement.ExtensionData<ExtensionDataReports>("tas", _config.ExtensionName, scope), data)
+            await _azuredo.PutAsync(ExtensionManagement.ExtensionData<ExtensionDataReports>(
+                "tas", _config.ExtensionName, scope), data)
                 .ConfigureAwait(false);
         }
     }

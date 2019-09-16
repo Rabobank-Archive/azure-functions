@@ -5,7 +5,6 @@ using Functions.Model;
 using Microsoft.Azure.WebJobs;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
-using SecurePipelineScan.VstsService.Response;
 
 namespace Functions.Activities
 {
@@ -33,18 +32,20 @@ namespace Functions.Activities
                 throw new ArgumentNullException(nameof(request.Project));
             if (request.ReleaseDefinition == null)
                 throw new ArgumentNullException(nameof(request.ReleaseDefinition));
+            if (request.CiIdentifiers == null)
+                throw new ArgumentNullException(nameof(request.CiIdentifiers));
 
             var rules = _rulesProvider.ReleaseRules(_azuredo).ToList();
 
-            var evaluationResult = new ItemExtensionData
+            return new ItemExtensionData
             {
                 Item = request.ReleaseDefinition.Name,
+                ItemId = request.ReleaseDefinition.Id,
                 Rules = await rules.EvaluateAsync(_config, request.Project.Id, RuleScopes.ReleasePipelines,
                         request.ReleaseDefinition.Id)
-                    .ConfigureAwait(false)
+                    .ConfigureAwait(false),
+                CiIdentifiers = String.Join(",", request.CiIdentifiers)
             };
-
-            return evaluationResult;
         }
     }
 }

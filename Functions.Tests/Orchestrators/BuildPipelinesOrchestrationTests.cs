@@ -16,7 +16,6 @@ namespace Functions.Tests.Orchestrators
 {
     public class BuildPipelinesOrchestrationTests
     {
-
         [Fact]
         public async Task ShouldCallActivityAsyncForProject()
         {
@@ -26,37 +25,38 @@ namespace Functions.Tests.Orchestrators
 
             var starter = mocks.Create<DurableOrchestrationContextBase>();
             starter
-                .Setup(x => x.GetInput<Project>())
-                .Returns(fixture.Create<Project>());
-            
+                .Setup(x => x.GetInput<ItemOrchestratorRequest>())
+                .Returns(fixture.Create<ItemOrchestratorRequest>());
+
             starter
                 .Setup(x => x.InstanceId)
                 .Returns(fixture.Create<string>());
 
             starter
-                .Setup(x => x.SetCustomStatus(It.Is<ScanOrchestrationStatus>(s => s.Scope == RuleScopes.BuildPipelines)))
+                .Setup(x => x.SetCustomStatus(It.Is<ScanOrchestrationStatus>(s => 
+                    s.Scope == RuleScopes.BuildPipelines)))
                 .Verifiable();
 
-            starter.Setup(x => x.CallActivityWithRetryAsync<ItemExtensionData>(nameof(BuildPipelinesScanActivity),
-                    It.IsAny<RetryOptions>(), 
-                    It.IsAny<BuildDefinition>()))
+            starter.Setup(x => x.CallActivityWithRetryAsync<ItemExtensionData>(
+                nameof(BuildPipelinesScanActivity), It.IsAny<RetryOptions>(), 
+                    It.IsAny<BuildPipelinesScanActivityRequest>()))
                 .ReturnsAsync(fixture.Create<ItemExtensionData>())
                 .Verifiable();
             
             starter
-                .Setup(x => x.CallActivityWithRetryAsync<List<BuildDefinition>>(nameof(BuildDefinitionsActivity),
-                    It.IsAny<RetryOptions>(),
+                .Setup(x => x.CallActivityWithRetryAsync<List<BuildDefinition>>(
+                    nameof(BuildDefinitionsActivity), It.IsAny<RetryOptions>(),
                     It.IsAny<Project>()))
                 .ReturnsAsync(fixture.CreateMany<BuildDefinition>().ToList())
                 .Verifiable();
-
             
             starter
                 .Setup(x => x.CurrentUtcDateTime).Returns(new DateTime());
                 
             starter
                 .Setup(x => x.CallActivityAsync(nameof(ExtensionDataUploadActivity),
-                    It.Is<(ItemsExtensionData data, string scope)>(t => t.scope == RuleScopes.BuildPipelines)))
+                    It.Is<(ItemsExtensionData data, string scope)>(t => 
+                    t.scope == RuleScopes.BuildPipelines)))
                 .Returns(Task.CompletedTask);
 
             starter

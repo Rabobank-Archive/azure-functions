@@ -2,7 +2,7 @@
 using Microsoft.Azure.WebJobs;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
-using SecurePipelineScan.VstsService.Response;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -24,18 +24,28 @@ namespace Functions.Activities
 
         [FunctionName(nameof(BuildPipelinesScanActivity))]
         public async Task<ItemExtensionData> RunAsync(
-            [ActivityTrigger] BuildDefinition definition)
+            [ActivityTrigger] BuildPipelinesScanActivityRequest request)
         {
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+            if (request.Project == null)
+                throw new ArgumentNullException(nameof(request.Project));
+            if (request.BuildDefinition == null)
+                throw new ArgumentNullException(nameof(request.BuildDefinition));
+            if (request.CiIdentifiers == null)
+                throw new ArgumentNullException(nameof(request.CiIdentifiers));
+
             var rules = _rulesProvider.BuildRules(_azuredo).ToList();
 
-            var evaluationResult = new ItemExtensionData
+            return new ItemExtensionData
             {
-                Item = definition.Name,
-                Rules = await rules.EvaluateAsync(_config, definition.Project.Id, RuleScopes.BuildPipelines, definition.Id)
-                    .ConfigureAwait(false)
+                Item = request.BuildDefinition.Name,
+                ItemId = request.BuildDefinition.Id,
+                Rules = await rules.EvaluateAsync(_config, request.Project.Id, RuleScopes.BuildPipelines,
+                    request.BuildDefinition.Id)
+                        .ConfigureAwait(false),
+                CiIdentifiers = String.Join(",", request.CiIdentifiers)
             };
-
-            return evaluationResult;
         }
     }
 }

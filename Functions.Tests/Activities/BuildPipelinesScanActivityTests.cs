@@ -26,7 +26,7 @@ namespace Functions.Tests.Activities
 
             var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
 
-            var definition = fixture.Create<Response.BuildDefinition>();
+            var request = fixture.Create<BuildPipelinesScanActivityRequest>();
 
             // Act
             var activity = new BuildPipelinesScanActivity(
@@ -34,7 +34,7 @@ namespace Functions.Tests.Activities
                 client.Object,
                 provider.Object);
 
-            var result = await activity.RunAsync(definition);
+            var result = await activity.RunAsync(request);
 
             // Assert
             result.ShouldNotBeNull();

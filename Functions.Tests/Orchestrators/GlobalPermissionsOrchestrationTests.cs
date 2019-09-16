@@ -8,13 +8,12 @@ using Moq;
 using System.Threading.Tasks;
 using AzDoCompliancy.CustomStatus;
 using Xunit;
-using Response = SecurePipelineScan.VstsService.Response;
+using System;
 
 namespace Functions.Tests.Orchestrators
 {
     public class GlobalPermissionsOrchestrationTests
     {
-
         [Fact]
         public async Task ShouldCallActivityAsyncForProject()
         {
@@ -33,37 +32,35 @@ namespace Functions.Tests.Orchestrators
                 .Returns(instanceId);
 
             starter
-                .Setup(x => x.SetCustomStatus(It.Is<ScanOrchestrationStatus>(s => s.Scope == RuleScopes.GlobalPermissions)))
+                .Setup(x => x.SetCustomStatus(It.Is<ScanOrchestrationStatus>(s => 
+                    s.Scope == RuleScopes.GlobalPermissions)))
                 .Verifiable();
 
             starter
-                .Setup(x => x.CallActivityWithRetryAsync<GlobalPermissionsExtensionData>(
-                    nameof(GlobalPermissionsScanProjectActivity), It.IsAny<RetryOptions>(),
-                    It.IsAny<Response.Project>()))
-                .ReturnsAsync(fixture.Create<GlobalPermissionsExtensionData>())
+                .Setup(x => x.CurrentUtcDateTime).Returns(new DateTime());
+
+            starter
+                .Setup(x => x.CallActivityWithRetryAsync<ItemExtensionData>(
+                    nameof(GlobalPermissionsScanActivity), It.IsAny<RetryOptions>(),
+                    It.IsAny<ItemOrchestratorRequest>()))
+                .ReturnsAsync(fixture.Create<ItemExtensionData>())
                 .Verifiable();
 
             starter
-                .Setup(x => x.CallActivityAsync(nameof(ExtensionDataGlobalPermissionsUploadActivity),
-                    It.Is<(GlobalPermissionsExtensionData data, string scope)>(d =>
-                        d.scope == RuleScopes.GlobalPermissions)))
+                .Setup(x => x.CallActivityAsync(nameof(ExtensionDataUploadActivity),
+                    It.Is<(ItemsExtensionData data, string scope)>(d =>
+                    d.scope == RuleScopes.GlobalPermissions)))
                 .Returns(Task.CompletedTask);
 
             starter
-                .Setup(x => x.CallActivityAsync(
-                    nameof(LogAnalyticsUploadActivity), 
-                    It.Is<LogAnalyticsUploadActivityRequest>(
-                        l =>
-                            l.PreventiveLogItems.All(
-                                p =>
-                                    p.Scope == RuleScopes.GlobalPermissions && p.ScanId == "supervisorId")
-                            )
-                    )
-                )
+                .Setup(x => x.CallActivityAsync(nameof(LogAnalyticsUploadActivity), 
+                    It.Is<LogAnalyticsUploadActivityRequest>(l => l.PreventiveLogItems.All(p => 
+                    p.Scope == RuleScopes.GlobalPermissions && p.ScanId == "supervisorId"))))
                 .Returns(Task.CompletedTask);
 
             //Act
-            await GlobalPermissionsOrchestration.RunAsync(starter.Object);
+            var function = new GlobalPermissionsOrchestration(fixture.Create<EnvironmentConfig>());
+            await function.RunAsync(starter.Object);
 
             //Assert           
             mocks.VerifyAll();

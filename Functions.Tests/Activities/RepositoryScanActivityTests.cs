@@ -26,7 +26,7 @@ namespace Functions.Tests.Activities
 
             var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
 
-            var repository = fixture.Create<Response.Repository>();
+            var request = fixture.Create<RepositoriesScanActivityRequest>();
 
             // Act
             var activity = new RepositoriesScanActivity(
@@ -34,7 +34,7 @@ namespace Functions.Tests.Activities
                 client.Object,
                 provider.Object);
 
-            var result = await activity.RunAsync(repository);
+            var result = await activity.RunAsync(request);
 
             // Assert
             result.ShouldNotBeNull();

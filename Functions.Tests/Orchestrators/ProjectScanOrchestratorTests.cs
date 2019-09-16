@@ -3,9 +3,7 @@ using Functions.Activities;
 using Functions.Model;
 using Functions.Orchestrators;
 using Microsoft.Azure.WebJobs;
-using Microsoft.WindowsAzure.Storage.Table;
 using Moq;
-using System;
 using System.Threading.Tasks;
 using Xunit;
 using Response = SecurePipelineScan.VstsService.Response;
@@ -43,20 +41,20 @@ namespace Functions.Tests.Orchestrators
                 .Verifiable();
 
             starter
+                .Setup(x => x.CallSubOrchestratorAsync<(ItemOrchestratorRequest, ItemOrchestratorRequest)>(
+                    nameof(ReleasePipelinesOrchestration), It.IsAny<string>(), It.IsAny<ItemOrchestratorRequest>()))
+                .ReturnsAsync((fixture.Create<ItemOrchestratorRequest>(), fixture.Create<ItemOrchestratorRequest>()))
+                .Verifiable();
+
+            starter
                 .Setup(x => x.CallSubOrchestratorAsync(
-                    nameof(RepositoriesOrchestration), It.IsAny<string>(), It.IsAny<Response.Project>()))
+                    nameof(RepositoriesOrchestration), It.IsAny<string>(), It.IsAny<ItemOrchestratorRequest>()))
                 .Returns(Task.CompletedTask)
                 .Verifiable();
 
             starter
                 .Setup(x => x.CallSubOrchestratorAsync(
-                    nameof(BuildPipelinesOrchestration), It.IsAny<string>(), It.IsAny<Response.Project>()))
-                .Returns(Task.CompletedTask)
-                .Verifiable();
-
-            starter
-                .Setup(x => x.CallSubOrchestratorAsync(
-                    nameof(ReleasePipelinesOrchestration), It.IsAny<string>(), It.IsAny<Response.Project>()))
+                    nameof(BuildPipelinesOrchestration), It.IsAny<string>(), It.IsAny<ItemOrchestratorRequest>()))
                 .Returns(Task.CompletedTask)
                 .Verifiable();
 

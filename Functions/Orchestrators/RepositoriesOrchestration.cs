@@ -21,31 +21,43 @@ namespace Functions.Orchestrators
         }
         
         [FunctionName(nameof(RepositoriesOrchestration))]
-        public async Task RunAsync([OrchestrationTrigger]DurableOrchestrationContextBase context)
+        public async Task RunAsync([OrchestrationTrigger] DurableOrchestrationContextBase context)
         {
-            var project = context.GetInput<Project>();
-            context.SetCustomStatus(new ScanOrchestrationStatus
-                {Project = project.Name, Scope = RuleScopes.Repositories});
+            var request = context.GetInput<ItemOrchestratorRequest>();
 
-            var repositories =
-                await context.CallActivityWithRetryAsync<List<Repository>>(
-                    nameof(RepositoriesForProjectActivity), RetryHelper.ActivityRetryOptions, project);
+            context.SetCustomStatus(new ScanOrchestrationStatus
+            {
+                Project = request.Project.Name,
+                Scope = RuleScopes.Repositories
+            });
+
+            var repositories = await context.CallActivityWithRetryAsync<List<Repository>>(
+                nameof(RepositoriesForProjectActivity), RetryHelper.ActivityRetryOptions, request.Project);
 
             var data = new ItemsExtensionData
-                {
-                    Id = project.Name,
-                    Date = context.CurrentUtcDateTime,
-                    RescanUrl = ProjectScanHttpStarter.RescanUrl(_config, project.Name, RuleScopes.Repositories),
-                    HasReconcilePermissionUrl = ReconcileFunction.HasReconcilePermissionUrl(_config, project.Id),
-                    Reports = await Task.WhenAll(repositories.Select(r =>
-                        context.CallActivityWithRetryAsync<ItemExtensionData>(nameof(RepositoriesScanActivity),
-                            RetryHelper.ActivityRetryOptions, r)))
+            {
+                Id = request.Project.Name,
+                Date = context.CurrentUtcDateTime,
+                RescanUrl = ProjectScanHttpStarter.RescanUrl(_config, request.Project.Name, RuleScopes.Repositories),
+                HasReconcilePermissionUrl = ReconcileFunction.HasReconcilePermissionUrl(_config, request.Project.Id),
+                Reports = await Task.WhenAll(repositories.Select(r =>
+                    context.CallActivityWithRetryAsync<ItemExtensionData>(nameof(RepositoriesScanActivity),
+                        RetryHelper.ActivityRetryOptions, new RepositoriesScanActivityRequest
+                        {
+                            Project = request.Project,
+                            Repository = r,
+                            CiIdentifiers = request.ProductionItems
+                                .Where(p => p.ItemId == r.Id)
+                                .SelectMany(p => p.CiIdentifiers)
+                                .ToList()
+                        })))
             };
             
-
             await context.CallActivityAsync(nameof(LogAnalyticsUploadActivity),
                 new LogAnalyticsUploadActivityRequest
-                    {PreventiveLogItems = data.Flatten(RuleScopes.Repositories, context.InstanceId)});
+                {
+                    PreventiveLogItems = data.Flatten(RuleScopes.Repositories, context.InstanceId)
+                });
 
             await context.CallActivityAsync(nameof(ExtensionDataUploadActivity),
                 (repositories: data, RuleScopes.Repositories));

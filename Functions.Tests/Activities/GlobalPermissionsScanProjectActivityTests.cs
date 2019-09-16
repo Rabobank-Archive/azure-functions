@@ -1,6 +1,7 @@
 using AutoFixture;
 using AutoFixture.AutoMoq;
 using Functions.Activities;
+using Functions.Model;
 using Moq;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
@@ -31,13 +32,13 @@ namespace Functions.Tests.Activities
                 .Returns(new[] { rule.Object, rule.Object });
 
             //Act
-            var fun = new GlobalPermissionsScanProjectActivity(
+            var fun = new GlobalPermissionsScanActivity(
                 fixture.Create<IVstsRestClient>(),
                 fixture.Create<EnvironmentConfig>(),
                 ruleSets.Object);
 
-            await fun.RunAsActivityAsync(
-                fixture.Create<Response.Project>());
+            await fun.RunAsync(
+                fixture.Create<ItemOrchestratorRequest>());
 
             //Assert
             rule.Verify(x => x.EvaluateAsync(It.IsAny<string>()), Times.AtLeastOnce());
@@ -50,7 +51,7 @@ namespace Functions.Tests.Activities
             //Arrange
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
             var config = fixture.Create<EnvironmentConfig>();
-            var dummyproj = fixture.Create<Response.Project>();
+            var dummyreq = fixture.Create<ItemOrchestratorRequest>();
             var clientMock = new Mock<IVstsRestClient>();
 
             var rule = new Mock<IProjectRule>();
@@ -65,21 +66,20 @@ namespace Functions.Tests.Activities
                 .Returns(new[] { rule.Object });
 
             //Act
-            var fun = new GlobalPermissionsScanProjectActivity(
+            var fun = new GlobalPermissionsScanActivity(
                 clientMock.Object,
                 config,
                 rulesProvider.Object);
-            var result = await fun.RunAsActivityAsync(
-                dummyproj);
+            var result = await fun.RunAsync(
+                dummyreq);
 
             var ruleName = rule.Object.GetType().Name;
 
             // Assert
-            result.Reports.ShouldContain(r => r.Reconcile != null &&
-                                              r.Reconcile.Url ==
-                                              $"https://{config.FunctionAppHostname}/api/reconcile/{config.Organization}/{dummyproj.Name}/globalpermissions/{ruleName}" &&
-                                              r.Reconcile.Impact.Any());
-            result.RescanUrl.ShouldNotBeNull();
+            result.Rules.ShouldContain(r => r.Reconcile != null);
+            result.Rules.ShouldContain(r => r.Reconcile.Impact.Any());
+            result.Rules.ShouldContain(r => r.Reconcile.Url == $"https://{config.FunctionAppHostname}" +
+                $"/api/reconcile/{config.Organization}/{dummyreq.Project.Name}/globalpermissions/{ruleName}");
         }
     }
 }
