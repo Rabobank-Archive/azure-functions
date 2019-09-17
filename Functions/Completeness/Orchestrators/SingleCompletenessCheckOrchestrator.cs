@@ -38,8 +38,9 @@ namespace Functions.Completeness.Orchestrators
 
             await context.CallActivityAsync(nameof(UploadCompletenessReportActivity), completenessReport);
             
-            await Task.WhenAll(filteredProjectScanners.Select(f =>
-                context.CallActivityAsync(nameof(PurgeSingleOrchestratorActivity), f.InstanceId)));
+            await Task.WhenAll(filteredProjectScanners
+                .Where(f => f.RuntimeStatus == OrchestrationRuntimeStatus.Completed)
+                .Select(f => context.CallActivityAsync(nameof(PurgeSingleOrchestratorActivity), f.InstanceId)));
         }
     }
 }

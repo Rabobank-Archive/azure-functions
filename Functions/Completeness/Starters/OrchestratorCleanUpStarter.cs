@@ -8,8 +8,9 @@ namespace Functions.Completeness.Starters
     public class OrchestratorCleanUpStarter
     {
         [FunctionName("OrchestratorCleanUpStarter")]
-        public Task RunAsync([TimerTrigger("0 0 7 * * *", RunOnStartup=false)]
-            TimerInfo timerInfo, [OrchestrationClient] DurableOrchestrationClientBase orchestrationClientBase)
+        public Task RunAsync(
+            [TimerTrigger("0 0 2 * * *", RunOnStartup=false)] TimerInfo timerInfo, 
+            [OrchestrationClient] DurableOrchestrationClientBase orchestrationClientBase)
         {
             if (orchestrationClientBase == null)
                 throw new ArgumentNullException(nameof(orchestrationClientBase));

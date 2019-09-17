@@ -18,8 +18,7 @@ namespace Functions.Starters
 
         [FunctionName(nameof(ProjectsScanStarter))]
         public async Task RunAsync(
-            [TimerTrigger("0 0 1 * * *", RunOnStartup=false)]
-            TimerInfo timerInfo,
+            [TimerTrigger("0 0 20 * * *", RunOnStartup=false)] TimerInfo timerInfo,
             [OrchestrationClient] DurableOrchestrationClientBase orchestrationClientBase)
         {
             var projects = _azuredo.Get(Project.Projects()).ToList();

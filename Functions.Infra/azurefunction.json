@@ -248,166 +248,167 @@
         "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
       ]
     },
-    {
-      "name": "[concat('Long queue lenth - buildcompleted in ', parameters('appName'))]",
-      "type": "Microsoft.Insights/metricAlerts",
-      "location": "global",
-      "apiVersion": "2018-03-01",
-      "properties": {
-        "description": "Queue length > 10",
-        "severity": 3,
-        "enabled": true,
-        "scopes": [
-          "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
-        ],
-        "evaluationFrequency": "Pt1m",
-        "windowSize": "Pt5m",
-        "criteria": {
-          "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
-          "allOf": [
-            {
-              "dimensions": [],
-              "metricName": "Queue length - buildcompleted",
-              "metricNamespace": "azure.applicationinsights",
-              "monitorTemplateType": 8,
-              "name": "Metric1",
-              "operator": "GreaterThan",
-              "threshold": 10.0,
-              "timeAggregation": "Average"
-            }
-          ]
-        },
-        "actions": [
-          {
-            "actionGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('actionGroupNameAi'))]"
-          }
-        ]
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupNameAi'))]",
-        "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
-      ]
-    },
-    {
-      "name": "[concat('Long queue lenth - buildcompleted-poison in ', parameters('appName'))]",
-      "type": "Microsoft.Insights/metricAlerts",
-      "location": "global",
-      "apiVersion": "2018-03-01",
-      "properties": {
-        "description": "Queue length > 2",
-        "severity": 3,
-        "enabled": true,
-        "scopes": [
-          "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
-        ],
-        "evaluationFrequency": "Pt1m",
-        "windowSize": "Pt5m",
-        "criteria": {
-          "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
-          "allOf": [
-            {
-              "dimensions": [],
-              "metricName": "Queue length - buildcompleted-poison",
-              "metricNamespace": "azure.applicationinsights",
-              "monitorTemplateType": 8,
-              "name": "Metric1",
-              "operator": "GreaterThan",
-              "threshold": 2.0,
-              "timeAggregation": "Average"
-            }
-          ]
-        },
-        "actions": [
-          {
-            "actionGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('actionGroupNameAi'))]"
-          }
-        ]
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupNameAi'))]",
-        "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
-      ]
-    },
-    {
-      "name": "[concat('Long queue lenth - releasedeploymentcompleted in ', parameters('appName'))]",
-      "type": "Microsoft.Insights/metricAlerts",
-      "location": "global",
-      "apiVersion": "2018-03-01",
-      "properties": {
-        "description": "Queue length > 10",
-        "severity": 3,
-        "enabled": true,
-        "scopes": [
-          "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
-        ],
-        "evaluationFrequency": "Pt1m",
-        "windowSize": "Pt5m",
-        "criteria": {
-          "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
-          "allOf": [
-            {
-              "dimensions": [],
-              "metricName": "Queue length - releasedeploymentcompleted",
-              "metricNamespace": "azure.applicationinsights",
-              "monitorTemplateType": 8,
-              "name": "Metric1",
-              "operator": "GreaterThan",
-              "threshold": 10.0,
-              "timeAggregation": "Average"
-            }
-          ]
-        },
-        "actions": [
-          {
-            "actionGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('actionGroupNameAi'))]"
-          }
-        ]
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupNameAi'))]",
-        "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
-      ]
-    },
-    {
-      "name": "[concat('Long queue lenth - releasedeploymentcompleted-poison in ', parameters('appName'))]",
-      "type": "Microsoft.Insights/metricAlerts",
-      "location": "global",
-      "apiVersion": "2018-03-01",
-      "properties": {
-        "description": "Queue length > 2",
-        "severity": 3,
-        "enabled": true,
-        "scopes": [
-          "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
-        ],
-        "evaluationFrequency": "Pt1m",
-        "windowSize": "Pt5m",
-        "criteria": {
-          "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
-          "allOf": [
-            {
-              "dimensions": [],
-              "metricName": "Queue length - releasedeploymentcompleted-poison",
-              "metricNamespace": "azure.applicationinsights",
-              "monitorTemplateType": 8,
-              "name": "Metric1",
-              "operator": "GreaterThan",
-              "threshold": 2.0,
-              "timeAggregation": "Average"
-            }
-          ]
-        },
-        "actions": [
-          {
-            "actionGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('actionGroupNameAi'))]"
-          }
-        ]
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupNameAi'))]",
-        "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
-      ]
-    },
+//    
+//    {
+//      "name": "[concat('Long queue lenth - buildcompleted in ', parameters('appName'))]",
+//      "type": "Microsoft.Insights/metricAlerts",
+//      "location": "global",
+//      "apiVersion": "2018-03-01",
+//      "properties": {
+//        "description": "Queue length > 10",
+//        "severity": 3,
+//        "enabled": true,
+//        "scopes": [
+//          "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
+//        ],
+//        "evaluationFrequency": "Pt1m",
+//        "windowSize": "Pt5m",
+//        "criteria": {
+//          "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+//          "allOf": [
+//            {
+//              "dimensions": [],
+//              "metricName": "Queue length - buildcompleted",
+//              "metricNamespace": "azure.applicationinsights",
+//              "monitorTemplateType": 8,
+//              "name": "Metric1",
+//              "operator": "GreaterThan",
+//              "threshold": 10.0,
+//              "timeAggregation": "Average"
+//            }
+//          ]
+//        },
+//        "actions": [
+//          {
+//            "actionGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('actionGroupNameAi'))]"
+//          }
+//        ]
+//      },
+//      "dependsOn": [
+//        "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupNameAi'))]",
+//        "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
+//      ]
+//    },
+//    {
+//      "name": "[concat('Long queue lenth - buildcompleted-poison in ', parameters('appName'))]",
+//      "type": "Microsoft.Insights/metricAlerts",
+//      "location": "global",
+//      "apiVersion": "2018-03-01",
+//      "properties": {
+//        "description": "Queue length > 2",
+//        "severity": 3,
+//        "enabled": true,
+//        "scopes": [
+//          "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
+//        ],
+//        "evaluationFrequency": "Pt1m",
+//        "windowSize": "Pt5m",
+//        "criteria": {
+//          "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+//          "allOf": [
+//            {
+//              "dimensions": [],
+//              "metricName": "Queue length - buildcompleted-poison",
+//              "metricNamespace": "azure.applicationinsights",
+//              "monitorTemplateType": 8,
+//              "name": "Metric1",
+//              "operator": "GreaterThan",
+//              "threshold": 2.0,
+//              "timeAggregation": "Average"
+//            }
+//          ]
+//        },
+//        "actions": [
+//          {
+//            "actionGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('actionGroupNameAi'))]"
+//          }
+//        ]
+//      },
+//      "dependsOn": [
+//        "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupNameAi'))]",
+//        "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
+//      ]
+//    },
+//    {
+//      "name": "[concat('Long queue lenth - releasedeploymentcompleted in ', parameters('appName'))]",
+//      "type": "Microsoft.Insights/metricAlerts",
+//      "location": "global",
+//      "apiVersion": "2018-03-01",
+//      "properties": {
+//        "description": "Queue length > 10",
+//        "severity": 3,
+//        "enabled": true,
+//        "scopes": [
+//          "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
+//        ],
+//        "evaluationFrequency": "Pt1m",
+//        "windowSize": "Pt5m",
+//        "criteria": {
+//          "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+//          "allOf": [
+//            {
+//              "dimensions": [],
+//              "metricName": "Queue length - releasedeploymentcompleted",
+//              "metricNamespace": "azure.applicationinsights",
+//              "monitorTemplateType": 8,
+//              "name": "Metric1",
+//              "operator": "GreaterThan",
+//              "threshold": 10.0,
+//              "timeAggregation": "Average"
+//            }
+//          ]
+//        },
+//        "actions": [
+//          {
+//            "actionGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('actionGroupNameAi'))]"
+//          }
+//        ]
+//      },
+//      "dependsOn": [
+//        "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupNameAi'))]",
+//        "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
+//      ]
+//    },
+//    {
+//      "name": "[concat('Long queue lenth - releasedeploymentcompleted-poison in ', parameters('appName'))]",
+//      "type": "Microsoft.Insights/metricAlerts",
+//      "location": "global",
+//      "apiVersion": "2018-03-01",
+//      "properties": {
+//        "description": "Queue length > 2",
+//        "severity": 3,
+//        "enabled": true,
+//        "scopes": [
+//          "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
+//        ],
+//        "evaluationFrequency": "Pt1m",
+//        "windowSize": "Pt5m",
+//        "criteria": {
+//          "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+//          "allOf": [
+//            {
+//              "dimensions": [],
+//              "metricName": "Queue length - releasedeploymentcompleted-poison",
+//              "metricNamespace": "azure.applicationinsights",
+//              "monitorTemplateType": 8,
+//              "name": "Metric1",
+//              "operator": "GreaterThan",
+//              "threshold": 2.0,
+//              "timeAggregation": "Average"
+//            }
+//          ]
+//        },
+//        "actions": [
+//          {
+//            "actionGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('actionGroupNameAi'))]"
+//          }
+//        ]
+//      },
+//      "dependsOn": [
+//        "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupNameAi'))]",
+//        "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
+//      ]
+//    },
     {
       "type": "Microsoft.Logic/workflows",
       "apiVersion": "2017-07-01",
