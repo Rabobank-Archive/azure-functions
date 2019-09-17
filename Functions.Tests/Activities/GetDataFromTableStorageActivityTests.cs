@@ -43,6 +43,32 @@ namespace Functions.Tests
         }
 
         [Fact]
+        public async Task ShouldReturnProductionItemsForBigTable()
+        {
+            // Arrange 
+            var storage = CloudStorageAccount.Parse("UseDevelopmentStorage=true");
+            var client = storage.CreateCloudTableClient();
+            var table = client.GetTableReference("deploymentMethodTable");
+
+            var fixture = new Fixture();
+            var project = fixture.Create<Response.Project>();
+            var organization = fixture.Create<string>();
+            var numberOfRows = 1500;
+
+            await CreateDummyTable(table, organization, project.Id, numberOfRows)
+                .ConfigureAwait(false);
+
+            // Act
+            var fun = new GetDataFromTableStorageActivity(client.Wrap(),
+                new EnvironmentConfig { Organization = organization });
+            var result = await fun.RunAsync(project);
+
+            //Assert
+            result.Project.Id.ShouldBe(project.Id);
+            result.ProductionItems.Count.ShouldBe(numberOfRows);
+        }
+
+        [Fact]
         public async Task ShouldNotReturnProductionItemsForOtherProject()
         {
             // Arrange 

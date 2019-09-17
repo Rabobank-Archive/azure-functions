@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Functions.Model;
@@ -36,12 +37,22 @@ namespace Functions.Activities
                 TableOperators.And,
                 TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, project.Id)));
             var table = _cloudTableClient.Execute(c => c.GetTableReference("deploymentMethodTable"));
-            var data = await table.ExecuteQuerySegmentedAsync(query, null).ConfigureAwait(false);
+
+            var deploymentMethodEntities = new List<DeploymentMethodEntity>();
+            TableContinuationToken continuationToken = null;
+            do
+            {
+                var page = await table.ExecuteQuerySegmentedAsync(query, continuationToken)
+                    .ConfigureAwait(false);
+                continuationToken = page.ContinuationToken;
+                deploymentMethodEntities.AddRange(page.Results);
+            }
+            while (continuationToken != null);
 
             return new ItemOrchestratorRequest
             {
                 Project = project,
-                ProductionItems = data.Results
+                ProductionItems = deploymentMethodEntities
                     .GroupBy(d => d.PipelineId)
                     .Select(g => new ProductionItem
                     {
