@@ -1,6 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
+using AutoFixture;
 using Functions.Activities;
 using Functions.Model;
 using Microsoft.WindowsAzure.Storage;
@@ -16,17 +16,18 @@ namespace Functions.Tests.Activities
         public async Task RunShouldReturnListOfConfigurationItems()
         {
             //Arrange
-            var account = CloudStorageAccount.DevelopmentStorageAccount;
+            var account = CloudStorageAccount.Parse("UseDevelopmentStorage=true"); 
 
             var client = account.CreateCloudTableClient();
             var table = client.GetTableReference("ConfigurationItem");
             
-            await table.CreateIfNotExistsAsync();
+            await table.CreateIfNotExistsAsync().ConfigureAwait(false);
             
             await table.ExecuteAsync(TableOperation.Insert(new ConfigurationItem
             {
                 RowKey = Guid.NewGuid().ToString(),
-            }));
+                PartitionKey = new Fixture().Create<string>()
+            })).ConfigureAwait(false);
             
             //Act
             var target = new GetConfigurationItemsFromTableStorageActivity(client);
