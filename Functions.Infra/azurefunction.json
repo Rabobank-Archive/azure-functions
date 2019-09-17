@@ -248,6 +248,7 @@
         "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
       ]
     },
+//    
 //    {
 //      "name": "[concat('Long queue lenth - buildcompleted in ', parameters('appName'))]",
 //      "type": "Microsoft.Insights/metricAlerts",
