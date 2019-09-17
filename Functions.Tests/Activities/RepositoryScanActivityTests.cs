@@ -7,7 +7,6 @@ using SecurePipelineScan.VstsService;
 using Shouldly;
 using System.Threading.Tasks;
 using Xunit;
-using Response = SecurePipelineScan.VstsService.Response;
 
 namespace Functions.Tests.Activities
 {

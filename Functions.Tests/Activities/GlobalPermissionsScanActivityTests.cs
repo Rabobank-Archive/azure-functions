@@ -9,11 +9,10 @@ using Shouldly;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
-using Response = SecurePipelineScan.VstsService.Response;
 
 namespace Functions.Tests.Activities
 {
-    public class GlobalPermissionsScanProjectActivityTests
+    public class GlobalPermissionsScanActivityTests
     {
         [Fact]
         public async Task RunShouldCallIProjectRuleEvaluate()

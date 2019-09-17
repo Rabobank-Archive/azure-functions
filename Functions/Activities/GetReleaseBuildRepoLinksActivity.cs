@@ -43,11 +43,17 @@ namespace Functions.Activities
             {
                 ReleasePipelineId = releasePipelineId,
                 BuildPipelineIds = releasePipeline.Artifacts
-                    .Where(a => a.DefinitionReference.Project.Id == project.Id)
+                    .Where(a => a.DefinitionReference != null && a.DefinitionReference.Project != null 
+                        && a.DefinitionReference.Project.Id == project.Id)
+                    .Where(a => a.DefinitionReference.Definition != null && a.DefinitionReference.Definition.Id != "" 
+                        && a.DefinitionReference.Definition.Id != null)
                     .Select(a => a.DefinitionReference.Definition.Id)
                     .ToList(),
                 RepositoryIds = releasePipeline.Artifacts
-                    .Where(a => a.DefinitionReference.Project.Id == project.Id)
+                    .Where(a => a.DefinitionReference != null && a.DefinitionReference.Project != null
+                        && a.DefinitionReference.Project.Id == project.Id)
+                    .Where(a => a.DefinitionReference.Repository != null && a.DefinitionReference.Repository.Id != ""
+                        && a.DefinitionReference.Repository.Id != null)
                     .Select(a => a.DefinitionReference.Repository.Id)
                     .ToList()
             };

@@ -98,32 +98,22 @@ namespace Functions.Tests.Orchestrators
         }
 
         [Fact]
-        public void ShouldCreateCorrectItemOrchestratorRequests()
+        public void ShouldCreateRequestsWithCiIdentifiersOfMultipleReleasePipelines()
         {
             //Arrange
-            var fixture = new Fixture();
-
-            var environmentConfig = fixture.Create<EnvironmentConfig>();
-
             var releaseBuildRepoLinks = new List<ReleaseBuildsReposLink>
             {
                 new ReleaseBuildsReposLink
                 {
                     ReleasePipelineId = "rel1",
                     BuildPipelineIds = new List<string> { "b1", "b2" },
-                    RepositoryIds = new List<string> { "rep3", "rep4" }
+                    RepositoryIds = new List<string> { "rep1" }
                 },
                 new ReleaseBuildsReposLink
                 {
                     ReleasePipelineId = "rel2",
-                    BuildPipelineIds = new List<string> { "b2", "b3", "b4" },
-                    RepositoryIds = new List<string> { "rep1", "rep4" }
-                },
-                new ReleaseBuildsReposLink
-                {
-                    ReleasePipelineId = "rel3",
-                    BuildPipelineIds = null,
-                    RepositoryIds = null
+                    BuildPipelineIds = new List<string> { "b1", "b2" },
+                    RepositoryIds = new List<string> { "rep1" }
                 }
             };
             var request = new ItemOrchestratorRequest
@@ -132,27 +122,97 @@ namespace Functions.Tests.Orchestrators
                 ProductionItems = new List<ProductionItem>
                 {
                     new ProductionItem { ItemId = "rel1", CiIdentifiers = new List<string>() { "c1", "c2" } },
-                    new ProductionItem { ItemId = "rel2", CiIdentifiers = new List<string>() { "c2", "c3" } },
-                    new ProductionItem { ItemId = "rel4", CiIdentifiers = new List<string>() { "c4" } }
+                    new ProductionItem { ItemId = "rel2", CiIdentifiers = new List<string>() { "c3", "c4" } },
                 }
             };
 
             //Act
-            var function = new ReleasePipelinesOrchestration(environmentConfig);
+            var function = new ReleasePipelinesOrchestration(
+                new Fixture().Create<EnvironmentConfig>());
             var (buildRequest, repoRequest) = 
                 function.CreateItemOrchestratorRequests(releaseBuildRepoLinks, request);
 
             //Assert
-            buildRequest.ProductionItems.Count.ShouldBe(4);
-            buildRequest.ProductionItems
-                .Where(b => b.ItemId == "b2")
-                .SelectMany(b => b.CiIdentifiers)
-                .ShouldBe(new List<string>() { "c1", "c2", "c3" });
-            repoRequest.ProductionItems.Count.ShouldBe(3);
-            repoRequest.ProductionItems
-                .Where(b => b.ItemId == "rep1")
-                .SelectMany(b => b.CiIdentifiers)
-                .ShouldBe(new List<string>() { "c2", "c3" });
+            buildRequest.ProductionItems.Count.ShouldBe(2);
+            buildRequest.ProductionItems[0].CiIdentifiers.Count.ShouldBe(4);
+            repoRequest.ProductionItems.Count.ShouldBe(1);
+            repoRequest.ProductionItems[0].CiIdentifiers.Count.ShouldBe(4);
+        }
+
+        [Fact]
+        public void ShouldCreateRequestsWithoutCiIdentifiersOfOtherReleasePipelines()
+        {
+            //Arrange
+            var releaseBuildRepoLinks = new List<ReleaseBuildsReposLink>
+            {
+                new ReleaseBuildsReposLink
+                {
+                    ReleasePipelineId = "rel1",
+                    BuildPipelineIds = new List<string> { "b1" },
+                    RepositoryIds = new List<string> { "rep1" }
+                }
+            };
+            var request = new ItemOrchestratorRequest
+            {
+                Project = new Project(),
+                ProductionItems = new List<ProductionItem>
+                {
+                    new ProductionItem { ItemId = "otherRelease", CiIdentifiers = new List<string>() { "c1" } },
+                    new ProductionItem { ItemId = "rel1", CiIdentifiers = new List<string>() { "c2" } },
+                }
+            };
+
+            //Act
+            var function = new ReleasePipelinesOrchestration(
+                new Fixture().Create<EnvironmentConfig>());
+            var (buildRequest, repoRequest) =
+                function.CreateItemOrchestratorRequests(releaseBuildRepoLinks, request);
+
+            //Assert
+            buildRequest.ProductionItems[0].CiIdentifiers.ShouldContain("c2");
+            buildRequest.ProductionItems[0].CiIdentifiers.ShouldNotContain("c1");
+            repoRequest.ProductionItems[0].CiIdentifiers.ShouldContain("c2");
+            repoRequest.ProductionItems[0].CiIdentifiers.ShouldNotContain("c1");
+        }
+
+        [Fact]
+        public void ShouldCreateRequestsWithoutDoubleCiIdentifiers()
+        {
+            //Arrange
+            var releaseBuildRepoLinks = new List<ReleaseBuildsReposLink>
+            {
+                new ReleaseBuildsReposLink
+                {
+                    ReleasePipelineId = "rel1",
+                    BuildPipelineIds = new List<string> { "b1" },
+                    RepositoryIds = new List<string> { "rep1" }
+                },
+                new ReleaseBuildsReposLink
+                {
+                    ReleasePipelineId = "rel2",
+                    BuildPipelineIds = new List<string> { "b1" },
+                    RepositoryIds = new List<string> { "rep1" }
+                }
+            };
+            var request = new ItemOrchestratorRequest
+            {
+                Project = new Project(),
+                ProductionItems = new List<ProductionItem>
+                    {
+                        new ProductionItem { ItemId = "rel1", CiIdentifiers = new List<string>() { "c1", "c2" } },
+                        new ProductionItem { ItemId = "rel2", CiIdentifiers = new List<string>() { "c1", "c2" } },
+                    }
+            };
+
+            //Act
+            var function = new ReleasePipelinesOrchestration(
+                new Fixture().Create<EnvironmentConfig>());
+            var(buildRequest, repoRequest) = 
+                    function.CreateItemOrchestratorRequests(releaseBuildRepoLinks, request);
+
+            //Assert
+            buildRequest.ProductionItems[0].CiIdentifiers.Count.ShouldBe(2);
+            repoRequest.ProductionItems[0].CiIdentifiers.Count.ShouldBe(2);
         }
     }
 }
