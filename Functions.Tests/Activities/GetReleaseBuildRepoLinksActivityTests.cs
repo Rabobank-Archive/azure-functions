@@ -7,7 +7,7 @@ using Response = SecurePipelineScan.VstsService.Response;
 using SecurePipelineScan.VstsService;
 using Moq;
 
-namespace Functions.Tests
+namespace Functions.Tests.Activities
 {
     public class GetReleaseBuildRepoLinksActivityTests
     {
