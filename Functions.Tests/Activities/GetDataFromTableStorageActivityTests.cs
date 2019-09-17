@@ -22,7 +22,7 @@ namespace Functions.Tests.Activities
             //   b) docker run --rm -p 10001:10001 arafato/azurite
             var storage = CloudStorageAccount.Parse("UseDevelopmentStorage=true");
             var client = storage.CreateCloudTableClient();
-            var table = client.GetTableReference("deploymentMethodTable");
+            var table = client.GetTableReference("DeploymentMethod");
 
             var fixture = new Fixture();
             var project = fixture.Create<Response.Project>();
@@ -42,87 +42,88 @@ namespace Functions.Tests.Activities
             result.ProductionItems.Count.ShouldBe(numberOfRows);
         }
 
-        //[Fact]
-        //public async Task ShouldReturnProductionItemsForBigTable()
-        //{
-        //    // Arrange 
-        //    var storage = CloudStorageAccount.Parse("UseDevelopmentStorage=true");
-        //    var client = storage.CreateCloudTableClient();
-        //    var table = client.GetTableReference("deploymentMethodTable");
-
-        //    var fixture = new Fixture();
-        //    var project = fixture.Create<Response.Project>();
-        //    var organization = fixture.Create<string>();
-        //    var numberOfRows = 1500;
-
-        //    await CreateDummyTable(table, organization, project.Id, numberOfRows)
-        //        .ConfigureAwait(false);
-
-        //    // Act
-        //    var fun = new GetDataFromTableStorageActivity(client.Wrap(),
-        //        new EnvironmentConfig { Organization = organization });
-        //    var result = await fun.RunAsync(project);
-
-        //    //Assert
-        //    result.Project.Id.ShouldBe(project.Id);
-        //    result.ProductionItems.Count.ShouldBe(numberOfRows);
-        //}
-
-        //[Fact]
-        //public async Task ShouldNotReturnProductionItemsForOtherProject()
-        //{
-        //    // Arrange 
-        //    var storage = CloudStorageAccount.Parse("UseDevelopmentStorage=true");
-        //    var client = storage.CreateCloudTableClient();
-        //    var table = client.GetTableReference("deploymentMethodTable");
-
-        //    var fixture = new Fixture();
-        //    var project = fixture.Create<Response.Project>();
-        //    var organization = fixture.Create<string>();
-        //    var numberOfRows = fixture.Create<int>();
-
-        //    await CreateDummyTable(table, organization, "otherProjectId", numberOfRows)
-        //        .ConfigureAwait(false);
-
-        //    // Act
-        //    var fun = new GetDataFromTableStorageActivity(client.Wrap(),
-        //        new EnvironmentConfig { Organization = organization });
-        //    var result = await fun.RunAsync(project);
-
-        //    //Assert
-        //    result.Project.Id.ShouldBe(project.Id);
-        //    result.ProductionItems.Count.ShouldBe(0);
-        //}
-
-        //[Fact]
-        //public async Task ShouldNotReturnProductionItemsForOtherOrganization()
-        //{
-        //    // Arrange 
-        //    var storage = CloudStorageAccount.Parse("UseDevelopmentStorage=true");
-        //    var client = storage.CreateCloudTableClient();
-        //    var table = client.GetTableReference("deploymentMethodTable");
-
-        //    var fixture = new Fixture();
-        //    var project = fixture.Create<Response.Project>();
-        //    var organization = fixture.Create<string>();
-        //    var numberOfRows = fixture.Create<int>();
-
-        //    await CreateDummyTable(table, "otherOrganization", project.Id, numberOfRows)
-        //        .ConfigureAwait(false);
-
-        //    // Act
-        //    var fun = new GetDataFromTableStorageActivity(client.Wrap(),
-        //        new EnvironmentConfig { Organization = organization });
-        //    var result = await fun.RunAsync(project);
-
-        //    //Assert
-        //    result.Project.Id.ShouldBe(project.Id);
-        //    result.ProductionItems.Count.ShouldBe(0);
-        //}
-
-        private async Task CreateDummyTable(CloudTable table, string organization, string projectId, int count)
+        [Fact]
+        public async Task ShouldReturnProductionItemsForBigTable()
         {
-            //await table.DeleteIfExistsAsync().ConfigureAwait(false);
+            // Arrange 
+            var storage = CloudStorageAccount.Parse("UseDevelopmentStorage=true");
+            var client = storage.CreateCloudTableClient();
+            var table = client.GetTableReference("DeploymentMethod");
+
+            var fixture = new Fixture();
+            var project = fixture.Create<Response.Project>();
+            var organization = fixture.Create<string>();
+            var numberOfRows = 1500;
+
+            await CreateDummyTable(table, organization, project.Id, numberOfRows)
+                .ConfigureAwait(false);
+
+            // Act
+            var fun = new GetDataFromTableStorageActivity(client.Wrap(),
+                new EnvironmentConfig { Organization = organization });
+            var result = await fun.RunAsync(project);
+
+            //Assert
+            result.Project.Id.ShouldBe(project.Id);
+            result.ProductionItems.Count.ShouldBe(numberOfRows);
+        }
+
+        [Fact]
+        public async Task ShouldNotReturnProductionItemsForOtherProject()
+        {
+            // Arrange 
+            var storage = CloudStorageAccount.Parse("UseDevelopmentStorage=true");
+            var client = storage.CreateCloudTableClient();
+            var table = client.GetTableReference("DeploymentMethod");
+
+            var fixture = new Fixture();
+            var project = fixture.Create<Response.Project>();
+            var organization = fixture.Create<string>();
+            var numberOfRows = fixture.Create<int>();
+
+            await CreateDummyTable(table, organization, "otherProjectId", numberOfRows)
+                .ConfigureAwait(false);
+
+            // Act
+            var fun = new GetDataFromTableStorageActivity(client.Wrap(),
+                new EnvironmentConfig { Organization = organization });
+            var result = await fun.RunAsync(project);
+
+            //Assert
+            result.Project.Id.ShouldBe(project.Id);
+            result.ProductionItems.Count.ShouldBe(0);
+        }
+
+        [Fact]
+        public async Task ShouldNotReturnProductionItemsForOtherOrganization()
+        {
+            // Arrange 
+            var storage = CloudStorageAccount.Parse("UseDevelopmentStorage=true");
+            var client = storage.CreateCloudTableClient();
+            var table = client.GetTableReference("DeploymentMethod");
+
+            var fixture = new Fixture();
+            var project = fixture.Create<Response.Project>();
+            var organization = fixture.Create<string>();
+            var numberOfRows = fixture.Create<int>();
+
+            await CreateDummyTable(table, "otherOrganization", project.Id, numberOfRows)
+                .ConfigureAwait(false);
+
+            // Act
+            var fun = new GetDataFromTableStorageActivity(client.Wrap(),
+                new EnvironmentConfig { Organization = organization });
+            var result = await fun.RunAsync(project);
+
+            //Assert
+            result.Project.Id.ShouldBe(project.Id);
+            result.ProductionItems.Count.ShouldBe(0);
+        }
+
+        private static async Task CreateDummyTable(CloudTable table, string organization, 
+            string projectId, int count)
+        {
+            await table.DeleteIfExistsAsync().ConfigureAwait(false);
             await table.CreateIfNotExistsAsync().ConfigureAwait(false);
 
             var fixture = new Fixture();
@@ -132,7 +133,8 @@ namespace Functions.Tests.Activities
 
             foreach (var ci in fixture.CreateMany<DeploymentMethodEntity>(count))
             {
-                await table.ExecuteAsync(TableOperation.Insert(ci));
+                await table.ExecuteAsync(TableOperation.Insert(ci))
+                    .ConfigureAwait(false);
             }
         }
     }
