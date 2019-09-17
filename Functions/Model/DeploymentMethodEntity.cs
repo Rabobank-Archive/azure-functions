@@ -13,7 +13,7 @@ namespace Functions.Model
         public DeploymentMethodEntity() { }
 
         public string CiIdentifier { get; set; }
-        public string Organisation { get; set; }
+        public string Organization { get; set; }
         public string PipelineId { get; set; }
         public string StageId { get; set; }
     }

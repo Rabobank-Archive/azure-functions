@@ -7,16 +7,14 @@ using Functions.Model;
 using Functions.Activities;
 using Unmockable;
 using AutoFixture;
-using AutoFixture.AutoMoq;
 using Response = SecurePipelineScan.VstsService.Response;
-using System.Linq;
 
 namespace Functions.Tests
 {
     public class GetDataFromTableStorageActivityTests
     {
         [Fact]
-        public async Task GetDataFromLocalTableStorage()
+        public async Task ShouldReturnProductionItemsForProjectWithinOrganization()
         {
             // Arrange 
             // Use Azure Storage Emulator on Windows or azurite to use local development server
@@ -24,90 +22,92 @@ namespace Functions.Tests
             //   b) docker run --rm -p 10001:10001 arafato/azurite
             var storage = CloudStorageAccount.Parse("UseDevelopmentStorage=true");
             var client = storage.CreateCloudTableClient();
-            var table = client.GetTableReference("ciDummyTable");
-            await CreateDummyTable(table).ConfigureAwait(false);
+            var table = client.GetTableReference("deploymentMethodTable");
 
-            //Act
-            var query = new TableQuery<DeploymentMethodEntity>().Where(TableQuery.CombineFilters(
-                TableQuery.GenerateFilterCondition("Organisation", QueryComparisons.Equal, "somecompany-test"), 
-                TableOperators.And,
-                TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, "111")));
-            var result = await table.ExecuteQuerySegmentedAsync(query, null);
-
-            //Assert
-            result.Results.Count.ShouldBe(3);
-        }
-
-        [Fact]
-        public async Task RunActivity()
-        {
-            // Arrange 
-            var fixture = new Fixture().Customize(new AutoMoqCustomization());
+            var fixture = new Fixture();
             var project = fixture.Create<Response.Project>();
-            project.Id = "111";
+            var organization = fixture.Create<string>();
+            var numberOfRows = fixture.Create<int>();
 
-            var storage = CloudStorageAccount.Parse("UseDevelopmentStorage=true");
-            var client = storage.CreateCloudTableClient();
-            var table = client.GetTableReference("ciDummyTable");
-            await CreateDummyTable(table).ConfigureAwait(false);
-
-            var cloudTableClient = new Intercept<CloudTableClient>();
-            cloudTableClient.Setup(c => c.GetTableReference("deploymentMethodTable"))
-                .Returns(table);
-
-            var config = new EnvironmentConfig()
-            {
-                Organization = "somecompany-test"
-            };
+            await CreateDummyTable(table, organization, project.Id, numberOfRows)
+                .ConfigureAwait(false);
 
             // Act
-            var fun = new GetDataFromTableStorageActivity(cloudTableClient, config);
+            var fun = new GetDataFromTableStorageActivity(client.Wrap(), 
+                new EnvironmentConfig { Organization = organization });
             var result = await fun.RunAsync(project);
 
             //Assert
-            result.Project.Id.ShouldBe("111");
-            result.ProductionItems.Count.ShouldBe(2);
-            result.ProductionItems[1].CiIdentifiers.Count.ShouldBe(2);
+            result.Project.Id.ShouldBe(project.Id);
+            result.ProductionItems.Count.ShouldBe(numberOfRows);
         }
 
-        private async Task CreateDummyTable(CloudTable table)
+        [Fact]
+        public async Task ShouldNotReturnProductionItemsForOtherProject()
+        {
+            // Arrange 
+            var storage = CloudStorageAccount.Parse("UseDevelopmentStorage=true");
+            var client = storage.CreateCloudTableClient();
+            var table = client.GetTableReference("deploymentMethodTable");
+
+            var fixture = new Fixture();
+            var project = fixture.Create<Response.Project>();
+            var organization = fixture.Create<string>();
+            var numberOfRows = fixture.Create<int>();
+
+            await CreateDummyTable(table, organization, "otherProjectId", numberOfRows)
+                .ConfigureAwait(false);
+
+            // Act
+            var fun = new GetDataFromTableStorageActivity(client.Wrap(),
+                new EnvironmentConfig { Organization = organization });
+            var result = await fun.RunAsync(project);
+
+            //Assert
+            result.Project.Id.ShouldBe(project.Id);
+            result.ProductionItems.Count.ShouldBe(0);
+        }
+
+        [Fact]
+        public async Task ShouldNotReturnProductionItemsForOtherOrganization()
+        {
+            // Arrange 
+            var storage = CloudStorageAccount.Parse("UseDevelopmentStorage=true");
+            var client = storage.CreateCloudTableClient();
+            var table = client.GetTableReference("deploymentMethodTable");
+
+            var fixture = new Fixture();
+            var project = fixture.Create<Response.Project>();
+            var organization = fixture.Create<string>();
+            var numberOfRows = fixture.Create<int>();
+
+            await CreateDummyTable(table, "otherOrganization", project.Id, numberOfRows)
+                .ConfigureAwait(false);
+
+            // Act
+            var fun = new GetDataFromTableStorageActivity(client.Wrap(),
+                new EnvironmentConfig { Organization = organization });
+            var result = await fun.RunAsync(project);
+
+            //Assert
+            result.Project.Id.ShouldBe(project.Id);
+            result.ProductionItems.Count.ShouldBe(0);
+        }
+
+        private async Task CreateDummyTable(CloudTable table, string organization, string projectId, int count)
         {
             await table.DeleteIfExistsAsync().ConfigureAwait(false);
             await table.CreateIfNotExistsAsync().ConfigureAwait(false);
 
-            DeploymentMethodEntity ci1 = new DeploymentMethodEntity("1", "111")
-            {
-                CiIdentifier = "CI-1001",
-                Organisation = "somecompany-test",
-                PipelineId = "11",
-                StageId = "1"
-            };
-            DeploymentMethodEntity ci2 = new DeploymentMethodEntity("2", "111")
-            {
-                CiIdentifier = "CI-1002",
-                Organisation = "somecompany-test",
-                PipelineId = "22",
-                StageId = "2"
-            };
-            DeploymentMethodEntity ci3 = new DeploymentMethodEntity("3", "111")
-            {
-                CiIdentifier = "CI-1003",
-                Organisation = "somecompany-test",
-                PipelineId = "22",
-                StageId = "3"
-            };
-            DeploymentMethodEntity ci4 = new DeploymentMethodEntity("4", "111")
-            {
-                CiIdentifier = "CI-1003",
-                Organisation = "somecompany-dublin",
-                PipelineId = "33",
-                StageId = "3"
-            };
+            var fixture = new Fixture();
+            fixture.Customize<DeploymentMethodEntity>(ctx => ctx
+                .With(x => x.Organization, organization)
+                .With(x => x.PartitionKey, projectId));
 
-            await table.ExecuteAsync(TableOperation.Insert(ci1));
-            await table.ExecuteAsync(TableOperation.Insert(ci2));
-            await table.ExecuteAsync(TableOperation.Insert(ci3));
-            await table.ExecuteAsync(TableOperation.Insert(ci4));
+            foreach (var ci in fixture.CreateMany<DeploymentMethodEntity>(count))
+            {
+                await table.ExecuteAsync(TableOperation.Insert(ci));
+            }
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Functions.Model;
@@ -33,7 +32,7 @@ namespace Functions.Activities
         private async Task<ItemOrchestratorRequest> RunInternalAsync(Project project)
         {
             var query = new TableQuery<DeploymentMethodEntity>().Where(TableQuery.CombineFilters(
-                TableQuery.GenerateFilterCondition("Organisation", QueryComparisons.Equal, _config.Organization),
+                TableQuery.GenerateFilterCondition("Organization", QueryComparisons.Equal, _config.Organization),
                 TableOperators.And,
                 TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, project.Id)));
             var table = _cloudTableClient.Execute(c => c.GetTableReference("deploymentMethodTable"));
