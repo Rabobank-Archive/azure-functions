@@ -11,6 +11,7 @@ namespace Functions.Tests.Activities
 {
     public class GetConfigurationItemsFromTableStorageActivityTests
     {
+        //When running on OSX you need a running azurite to make this test working
         [Fact]
         public async Task RunShouldReturnListOfConfigurationItems()
         {
