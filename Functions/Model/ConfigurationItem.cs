@@ -6,10 +6,10 @@ namespace Functions.Model
     {
         public string CiIdentifier { get; set; }
         public string DepartmentInfo { get; set; }
-        public string Level1 { get; set; }
-        public string Level2 { get; set; }
-        public string Level3 { get; set; }
-        public string Level4 { get; set; }
-        public string Level5 { get; set; }
+        public string Niveau1 { get; set; }
+        public string Niveau2 { get; set; }
+        public string Niveau3 { get; set; }
+        public string Niveau4 { get; set; }
+        public string Niveau5 { get; set; }
     }
 }
