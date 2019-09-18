@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using Functions.Model;
 using Xunit;
 using Response = SecurePipelineScan.VstsService.Response;
+using System.Collections.Generic;
 
 namespace Functions.Tests.Starters
 {
@@ -32,12 +33,8 @@ namespace Functions.Tests.Starters
 
             var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
             var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object);
-            var result = await function.RunAsync(request,
-                "somecompany",
-                "TAS",
-                RuleScopes.GlobalPermissions,
-                new Mock<DurableOrchestrationClientBase>().Object
-              );
+            var result = await function.RunAsync(request, "somecompany", "TAS", RuleScopes.GlobalPermissions,
+                new Mock<DurableOrchestrationClientBase>().Object);
 
             result.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
             result?.Dispose();
@@ -64,14 +61,11 @@ namespace Functions.Tests.Starters
                 .Verifiable();
 
             var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object);
-            var result = await function.RunAsync(request,
-                "somecompany",
-                "TAS",
-                RuleScopes.GlobalPermissions,
-                mock.Object
-            );
+            var result = await function.RunAsync(request, "somecompany", "TAS", RuleScopes.GlobalPermissions,
+                mock.Object);
 
-            mock.Verify(x => x.WaitForCompletionOrCreateCheckStatusResponseAsync(request, It.IsAny<string>(), It.IsAny<TimeSpan>()));
+            mock.Verify(x => x.WaitForCompletionOrCreateCheckStatusResponseAsync(request, It.IsAny<string>(), 
+                It.IsAny<TimeSpan>()));
             client.Verify();
             result?.Dispose();
         }
@@ -96,12 +90,8 @@ namespace Functions.Tests.Starters
                 .Verifiable();
 
             var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object);
-            var result = await function.RunAsync(request,
-                "somecompany",
-                "TAS",
-                RuleScopes.GlobalPermissions,
-                mock.Object
-            );
+            var result = await function.RunAsync(request, "somecompany", "TAS", RuleScopes.GlobalPermissions,
+                mock.Object);
 
             result.StatusCode.ShouldBe(HttpStatusCode.NotFound);
             client.Verify();
@@ -131,14 +121,10 @@ namespace Functions.Tests.Starters
                 .Verifiable();
 
             var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object);
-            await function.RunAsync(request,
-                "somecompany",
-                "TAS",
-                RuleScopes.GlobalPermissions,
-                mock.Object
-            );
+            await function.RunAsync(request, "somecompany", "TAS", RuleScopes.GlobalPermissions, mock.Object);
 
-            mock.Verify(x => x.StartNewAsync(nameof(GlobalPermissionsOrchestration), project));
+            mock.Verify(x => x.StartNewAsync(nameof(GlobalPermissionsOrchestration), 
+                It.IsAny<ItemOrchestratorRequest>()));
         }
 
         [Fact]
@@ -164,14 +150,10 @@ namespace Functions.Tests.Starters
                 .Verifiable();
 
             var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object);
-            await function.RunAsync(request,
-                "somecompany",
-                "TAS",
-                RuleScopes.Repositories,
-                mock.Object
-            );
+            await function.RunAsync(request, "somecompany", "TAS", RuleScopes.Repositories, mock.Object);
 
-            mock.Verify(x => x.StartNewAsync(nameof(RepositoriesOrchestration), project));
+            mock.Verify(x => x.StartNewAsync(nameof(RepositoriesOrchestration), 
+                It.IsAny<ItemOrchestratorRequest>()));
         }
 
         [Fact]
@@ -195,15 +177,12 @@ namespace Functions.Tests.Starters
                 .Verifiable();
 
             var mock = new Mock<DurableOrchestrationClientBase>();
-            var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object);
-            await function.RunAsync(request,
-                "somecompany",
-                "TAS",
-                RuleScopes.BuildPipelines,
-                mock.Object
-            );
 
-            mock.Verify(x => x.StartNewAsync(nameof(BuildPipelinesOrchestration), project));
+            var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object);
+            await function.RunAsync(request, "somecompany", "TAS", RuleScopes.BuildPipelines, mock.Object);
+
+            mock.Verify(x => x.StartNewAsync(nameof(BuildPipelinesOrchestration),
+                It.IsAny<ItemOrchestratorRequest>()));
         }
 
         [Fact]
@@ -228,14 +207,10 @@ namespace Functions.Tests.Starters
 
             var mock = new Mock<DurableOrchestrationClientBase>();
             var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object);
-            await function.RunAsync(request,
-                "somecompany",
-                "TAS",
-                RuleScopes.ReleasePipelines,
-                mock.Object
-            );
+            await function.RunAsync(request, "somecompany", "TAS", RuleScopes.ReleasePipelines, mock.Object);
 
-            mock.Verify(x => x.StartNewAsync(nameof(ReleasePipelinesOrchestration), project));
+            mock.Verify(x => x.StartNewAsync(nameof(ReleasePipelinesOrchestration),
+                It.IsAny<ItemOrchestratorRequest>()));
         }
 
         private static ClaimsPrincipal PrincipalWithClaims() =>
