@@ -307,7 +307,7 @@
           "allOf": [
             {
               "dimensions": [],
-              "metricName": "Queue length - buildcompleted-poison",
+              "metricName": "Queue length - buildcompletedpoison",
               "metricNamespace": "azure.applicationinsights",
               "monitorTemplateType": 8,
               "name": "Metric1",
@@ -387,7 +387,7 @@
           "allOf": [
             {
               "dimensions": [],
-              "metricName": "Queue length - releasedeploymentcompleted-poison",
+              "metricName": "Queue length - releasedeploymentcompletedpoison",
               "metricNamespace": "azure.applicationinsights",
               "monitorTemplateType": 8,
               "name": "Metric1",
