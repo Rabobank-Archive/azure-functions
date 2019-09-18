@@ -45,7 +45,8 @@ namespace Functions.Starters
 
             var orchestratorRequest = new ItemOrchestratorRequest
             {
-                Project = await _azuredo.GetAsync(Project.ProjectByName(project))
+                Project = await _azuredo.GetAsync(Project.ProjectByName(project)),
+                ProductionItems = new List<ProductionItem>()
             };
 
             if (orchestratorRequest.Project == null)
