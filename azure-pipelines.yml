@@ -19,7 +19,7 @@ steps:
     inputs:
       arguments: '--configuration release'
 
-  - script: docker run --name azurite -d -p 10001:10001 -p 10002:10002 -p 10003:10003 arafato/azurite
+  - script: docker run --name azurite -d -p 10001:10001 -p 10002:10002 -p 10003:10003 mriezebosch/azurite:2.7.1
     displayName: docker run azurite
       
   - task: DotNetCoreCLI@2

@@ -22,11 +22,12 @@ namespace Functions.Tests.Activities
             var table = client.GetTableReference("ConfigurationItem");
             
             await table.CreateIfNotExistsAsync().ConfigureAwait(false);
-            
+
+            var fixture = new Fixture();
             await table.ExecuteAsync(TableOperation.Insert(new ConfigurationItem
             {
                 RowKey = Guid.NewGuid().ToString(),
-                PartitionKey = new Fixture().Create<string>()
+                PartitionKey = fixture.Create<string>()
             })).ConfigureAwait(false);
             
             //Act
