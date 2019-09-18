@@ -35,10 +35,7 @@ namespace Functions.Starters
         [FunctionName(nameof(ProjectScanHttpStarter))]
         public async Task<HttpResponseMessage> RunAsync(
             [HttpTrigger(AuthorizationLevel.Anonymous, Route = "scan/{organization}/{project}/{scope}")]
-            HttpRequestMessage request,
-            string organization,
-            string project,
-            string scope,
+            HttpRequestMessage request, string organization, string project, string scope,
             [OrchestrationClient] DurableOrchestrationClientBase starter)
         {
             if (_tokenizer.IdentifierFromClaim(request) == null)
@@ -46,21 +43,24 @@ namespace Functions.Starters
                 return new HttpResponseMessage(HttpStatusCode.Unauthorized);
             }
 
-            var projectObject = await _azuredo.GetAsync(Project.ProjectByName(project));
-
-            if (projectObject == null)
+            var orchestratorRequest = new ItemOrchestratorRequest
             {
-                return new HttpResponseMessage(HttpStatusCode.NotFound);
-            }
+                Project = await _azuredo.GetAsync(Project.ProjectByName(project))
+            };
 
-            var instanceId = await starter.StartNewAsync(Orchestration(scope), projectObject);
-            return await starter.WaitForCompletionOrCreateCheckStatusResponseAsync(request, instanceId, TimeSpan.FromSeconds(TimeOut));
+            if (orchestratorRequest.Project == null)
+                return new HttpResponseMessage(HttpStatusCode.NotFound);
+
+            var instanceId = await starter.StartNewAsync(Orchestration(scope), orchestratorRequest);
+            return await starter.WaitForCompletionOrCreateCheckStatusResponseAsync(request, instanceId, 
+                TimeSpan.FromSeconds(TimeOut));
         }
 
         private static string Orchestration(string scope) =>
             Scopes.TryGetValue(scope, out var value) ? value : throw new ArgumentException(nameof(scope));
 
         public static string RescanUrl(EnvironmentConfig environmentConfig, string project, string scope) =>
-            $"https://{environmentConfig.FunctionAppHostname}/api/scan/{environmentConfig.Organization}/{project}/{scope}";
+            $"https://{environmentConfig.FunctionAppHostname}/api/scan/{environmentConfig.Organization}/" +
+                $"{project}/{scope}";
     }
 }
