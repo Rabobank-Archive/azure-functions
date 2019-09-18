@@ -35,7 +35,7 @@ namespace Functions.Activities
             var query = new TableQuery<DeploymentMethodEntity>().Where(TableQuery.CombineFilters(
                 TableQuery.GenerateFilterCondition("Organization", QueryComparisons.Equal, _config.Organization),
                 TableOperators.And,
-                TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, project.Id)));
+                TableQuery.GenerateFilterCondition("ProjectId", QueryComparisons.Equal, project.Id)));
             var table = _cloudTableClient.Execute(c => c.GetTableReference("DeploymentMethod"));
 
             var deploymentMethodEntities = new List<DeploymentMethodEntity>();

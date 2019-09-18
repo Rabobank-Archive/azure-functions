@@ -129,7 +129,7 @@ namespace Functions.Tests.Activities
             var fixture = new Fixture();
             fixture.Customize<DeploymentMethodEntity>(ctx => ctx
                 .With(x => x.Organization, organization)
-                .With(x => x.PartitionKey, projectId));
+                .With(x => x.ProjectId, projectId));
 
             foreach (var ci in fixture.CreateMany<DeploymentMethodEntity>(count))
             {
