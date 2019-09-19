@@ -5,6 +5,7 @@ namespace Functions.Model
     public class ConfigurationItem : TableEntity
     {
         public string CiIdentifier { get; set; }
+        public string CiName { get; set; }
         public string DepartmentInfo { get; set; }
         public string Niveau1 { get; set; }
         public string Niveau2 { get; set; }
