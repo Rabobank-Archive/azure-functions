@@ -1,6 +1,6 @@
 pool:
-  name: Rabo-Build-Azure-Linux-Preview
-
+  name: Rabo-Build-Azure-Windows-Preview
+  
 steps:
   - task: DotNetCoreInstaller@0
     displayName: 'Use .NET Core sdk 2.2.203'
@@ -18,19 +18,19 @@ steps:
     displayName: Build
     inputs:
       arguments: '--configuration release'
-
-  - script: docker run --name azurite -d -p 10001:10001 -p 10002:10002 -p 10003:10003 mriezebosch/azurite:2.7.1
-    displayName: docker run azurite
+      
+  - task: CmdLine@2
+    inputs:
+      script: |
+        sqllocaldb create MSSQLLocalDB
+        sqllocaldb start MSSQLLocalDB
+        "C:\Program Files (x86)\Microsoft SDKs\Azure\Storage Emulator\AzureStorageEmulator.exe" start
       
   - task: DotNetCoreCLI@2
     displayName: Test
     inputs:
       command: test
       arguments: '--configuration release /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[xunit*]*"'
-
-  - script: docker rm -f azurite
-    displayName: docker rm azurite
-    condition: always()
 
   - task: DotNetCoreCLI@2
     displayName: Publish
