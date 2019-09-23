@@ -60,7 +60,7 @@ steps:
 
   - script: |
       dotnet tool install dotnet-reportgenerator-globaltool --tool-path tools --ignore-failed-sources 
-      tools/reportgenerator -reports:"*/coverage.opencover.xml" -reporttypes:"HtmlInline_AzurePipelines;cobertura" -targetDir:reports
+      \tools\reportgenerator -reports:"*\coverage.opencover.xml" -reporttypes:"HtmlInline_AzurePipelines;cobertura" -targetDir:reports
     displayName: Generate code coverage reports
     condition: succeededOrFailed()
 
