@@ -18,8 +18,9 @@ steps:
     displayName: Build
     inputs:
       arguments: '--configuration release'
-      
-  - task: Create local MSSQLLocalDB and run AzureStorageEmulator (for Testing)
+
+  - task: CmdLine@2
+    displayName: Create local MSSQLLocalDB and run AzureStorageEmulator (for Testing)
     inputs:
       script: |
         sqllocaldb create MSSQLLocalDB
