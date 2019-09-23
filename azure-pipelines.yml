@@ -64,7 +64,9 @@ steps:
       dir
       cd tools
       dir
-      ../tools/reportgenerator -reports:"*\coverage.opencover.xml" -reporttypes:"HtmlInline_AzurePipelines;cobertura" -targetDir:reports
+      reportgenerator -reports:"OpenCover.xml" -reporttypes:"HtmlInline_AzurePipelines;cobertura" -targetDir:reports
+      cd $(Build.SourcesDirectory)/reports
+      dir
     displayName: Generate code coverage reports
     condition: succeededOrFailed()
 
