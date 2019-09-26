@@ -12,7 +12,7 @@ namespace Functions.Orchestrators
 {
     public class ProjectScanSupervisor
     {
-        private const int TimerInterval = 20; 
+        private const int TimerInterval = 25; 
 
         [FunctionName(nameof(ProjectScanSupervisor))]
         public async Task RunAsync([OrchestrationTrigger] DurableOrchestrationContextBase context)

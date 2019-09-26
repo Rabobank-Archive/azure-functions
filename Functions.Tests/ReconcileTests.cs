@@ -64,7 +64,7 @@ namespace Functions.Tests
             var fixture = new Fixture();
             ManageProjectPropertiesPermission(fixture);
 
-            var rule = new Mock<IRule>(MockBehavior.Strict);
+            var rule = new Mock<IRepositoryRule>(MockBehavior.Strict);
             rule
                 .As<IReconcile>()
                 .Setup(x => x.ReconcileAsync("TAS", "repository-id"))

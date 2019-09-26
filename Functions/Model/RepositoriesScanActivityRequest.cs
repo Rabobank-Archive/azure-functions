@@ -8,5 +8,6 @@ namespace Functions.Activities
         public Project Project { get; set; }
         public Repository Repository { get; set; }
         public IList<string> CiIdentifiers { get; set; }
+        public IEnumerable<MinimumNumberOfReviewersPolicy> Policies { get; set; }
     }
 }

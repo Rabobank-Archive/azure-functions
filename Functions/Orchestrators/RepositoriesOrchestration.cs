@@ -31,8 +31,9 @@ namespace Functions.Orchestrators
                 Scope = RuleScopes.Repositories
             });
 
-            var repositories = await context.CallActivityWithRetryAsync<List<Repository>>(
-                nameof(RepositoriesForProjectActivity), RetryHelper.ActivityRetryOptions, request.Project);
+            var (repositories, policies) = await context.CallActivityWithRetryAsync<(IEnumerable<Repository>, 
+                IEnumerable<MinimumNumberOfReviewersPolicy>)>(nameof(GetRepositoriesAndPoliciesActivity), 
+                RetryHelper.ActivityRetryOptions, request.Project);
 
             var data = new ItemsExtensionData
             {
@@ -49,7 +50,8 @@ namespace Functions.Orchestrators
                             CiIdentifiers = request.ProductionItems
                                 .Where(p => p.ItemId == r.Id)
                                 .SelectMany(p => p.CiIdentifiers)
-                                .ToList()
+                                .ToList(),
+                            Policies = policies
                         })))
             };
             

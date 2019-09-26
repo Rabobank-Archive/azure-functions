@@ -45,10 +45,12 @@ namespace Functions.Tests.Orchestrators
                 .Verifiable();
             
             starter
-                .Setup(x => x.CallActivityWithRetryAsync<List<Repository>>(
-                    nameof(RepositoriesForProjectActivity), It.IsAny<RetryOptions>(),
+                .Setup(x => x.CallActivityWithRetryAsync<(IEnumerable<Repository>, 
+                    IEnumerable<MinimumNumberOfReviewersPolicy>)>(
+                    nameof(GetRepositoriesAndPoliciesActivity), It.IsAny<RetryOptions>(),
                     It.IsAny<Project>()))
-                .ReturnsAsync(fixture.CreateMany<Repository>().ToList())
+                .ReturnsAsync((fixture.CreateMany<Repository>(),
+                    fixture.CreateMany<MinimumNumberOfReviewersPolicy>()))
                 .Verifiable();
             
             starter

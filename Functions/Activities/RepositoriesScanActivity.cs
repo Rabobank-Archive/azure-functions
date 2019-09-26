@@ -5,7 +5,6 @@ using Functions.Model;
 using Microsoft.Azure.WebJobs;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
-using SecurePipelineScan.VstsService.Response;
 
 namespace Functions.Activities
 {
@@ -29,12 +28,6 @@ namespace Functions.Activities
         {
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
-            if (request.Project == null)
-                throw new ArgumentNullException(nameof(request.Project));
-            if (request.Repository == null)
-                throw new ArgumentNullException(nameof(request.Repository));
-            if (request.CiIdentifiers == null)
-                throw new ArgumentNullException(nameof(request.CiIdentifiers));
 
             var rules = _rulesProvider.RepositoryRules(_azuredo).ToList();
 
@@ -42,9 +35,20 @@ namespace Functions.Activities
             {
                 Item = request.Repository.Name,
                 ItemId = request.Repository.Id,
-                Rules = await rules.EvaluateAsync(_config, request.Project.Id, RuleScopes.Repositories, 
-                    request.Repository.Id)
-                        .ConfigureAwait(false),
+                Rules = await Task.WhenAll(rules.Select(async rule => 
+                    new EvaluatedRule
+                    {
+                        Name = rule.GetType().Name,
+                        Description = rule.Description,
+                        Why = rule.Why,
+                        IsSox = rule.IsSox,
+                        Status = await rule.EvaluateAsync(request.Project.Id, request.Repository.Id, request.Policies)
+                            .ConfigureAwait(false),
+                        Reconcile = ReconcileFunction.ReconcileFromRule(rule as IReconcile, _config, 
+                            request.Project.Id, RuleScopes.Repositories, request.Repository.Id)
+                    })
+                    .ToList())
+                    .ConfigureAwait(false),
                 CiIdentifiers = String.Join(",", request.CiIdentifiers)
             };
         }

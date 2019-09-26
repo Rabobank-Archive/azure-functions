@@ -20,7 +20,7 @@ namespace Functions.Tests.Activities
             var provider = new Mock<IRulesProvider>();
             provider
                 .Setup(x => x.RepositoryRules(It.IsAny<IVstsRestClient>()))
-                .Returns(fixture.CreateMany<IRule>())
+                .Returns(fixture.CreateMany<IRepositoryRule>())
                 .Verifiable();
 
             var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
