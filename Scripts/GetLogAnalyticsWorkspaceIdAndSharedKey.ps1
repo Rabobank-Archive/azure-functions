@@ -1,25 +1,25 @@
-    [CmdletBinding()]
-    param (
-        $LogAnalyticsName,
-        $LogAnalyticsResourceGroupName
-    )
+[CmdletBinding()]
+param (
+    $LogAnalyticsName,
+    $LogAnalyticsResourceGroupName
+)
 
-    $ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Stop"
 
-    Write-Host "Trying to get log analytics workspace id"
+Write-Host "Trying to get log analytics workspace id"
 
-    $oms = Get-AzureRmOperationalInsightsWorkspace -Name $LogAnalyticsName -ResourceGroupName $LogAnalyticsResourceGroupName
-    $logAnalyticsWorkspaceID = $oms.CustomerId
+$oms = Get-AzureRmOperationalInsightsWorkspace -Name $LogAnalyticsName -ResourceGroupName $LogAnalyticsResourceGroupName
+$logAnalyticsWorkspaceID = $oms.CustomerId
 
-    Write-Host "Workspace id is: $($logAnalyticsWorkspaceID)"
+Write-Host "Workspace id is: $($logAnalyticsWorkspaceID)"
 
-    Write-Host "Get Log Analytics Shared key for workspace $( $logAnalyticsWorkspaceID )"
+Write-Host "Get Log Analytics Shared key for workspace $( $logAnalyticsWorkspaceID )"
 
-    $oiws=Get-AzureRmOperationalInsightsWorkspaceSharedKeys -ResourceGroupName $lLogAnalyticsResourceGroupName -Name $LogAnalyticsName
+$oiws=Get-AzureRmOperationalInsightsWorkspaceSharedKeys -ResourceGroupName $lLogAnalyticsResourceGroupName -Name $LogAnalyticsName
 
-    $foundLogAnalyticsKey=$oiws.PrimarySharedKey
+$foundLogAnalyticsKey=$oiws.PrimarySharedKey
 
-    Write-Host "Setting workspaceId $($logAnalyticsWorkspaceID) to variable logAnalyticsWorkspace"
-    Write-Host "##vso[task.setvariable variable=logAnalyticsWorkspace]$logAnalyticsWorkspaceID"
-    Write-Host "Settings sharedkey to variable logAnalyticsKey"
-    Write-Host "##vso[task.setvariable variable=logAnalyticsKey]$foundLogAnalyticsKey"
+Write-Host "Setting workspaceId $($logAnalyticsWorkspaceID) to variable logAnalyticsWorkspace"
+Write-Host "##vso[task.setvariable variable=logAnalyticsWorkspace]$logAnalyticsWorkspaceID"
+Write-Host "Settings sharedkey to variable logAnalyticsKey"
+Write-Host "##vso[task.setvariable variable=logAnalyticsKey]$foundLogAnalyticsKey"
