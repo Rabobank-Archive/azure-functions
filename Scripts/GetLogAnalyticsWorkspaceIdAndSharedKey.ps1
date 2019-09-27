@@ -15,7 +15,7 @@ Write-Host "Workspace id is: $($logAnalyticsWorkspaceID)"
 
 Write-Host "Get Log Analytics Shared key for workspace $( $logAnalyticsWorkspaceID )"
 
-$oiws=Get-AzureRmOperationalInsightsWorkspaceSharedKeys -ResourceGroupName $lLogAnalyticsResourceGroupName -Name $LogAnalyticsName
+$oiws=Get-AzureRmOperationalInsightsWorkspaceSharedKeys -ResourceGroupName $LogAnalyticsResourceGroupName -Name $LogAnalyticsName
 
 $foundLogAnalyticsKey=$oiws.PrimarySharedKey
 
