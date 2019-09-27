@@ -1,8 +1,14 @@
+[CmdletBinding()]
+param (
+    $LogAnalyticsName,
+    $LogAnalyticsResourceGroupName
+)
+
 $ErrorActionPreference = "Stop"
 
 Write-Verbose "Trying to get workspace id" -verbose
 
-$oms = Get-AzureRmOperationalInsightsWorkspace -Name $($loganalytics) -ResourceGroupName $($loganalytics.ResourceGroupName)
+$oms = Get-AzureRmOperationalInsightsWorkspace -Name $LogAnalyticsName -ResourceGroupName $LogAnalyticsResourceGroupName
 $logAnalyticsWorkspaceID = $oms.CustomerId
 
 Write-Host "Workspace id: $($logAnalyticsWorkspaceID)"
