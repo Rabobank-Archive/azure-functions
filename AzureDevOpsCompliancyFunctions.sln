@@ -23,7 +23,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{AB70
 		Scripts\CreateApplication.bat = Scripts\CreateApplication.bat
 		Scripts\createSpnAndAssignRoles.ps1 = Scripts\createSpnAndAssignRoles.ps1
 		Scripts\GetLogAnalyticsWorkspaceIdAndSharedKey.ps1 = Scripts\GetLogAnalyticsWorkspaceIdAndSharedKey.ps1
-		Scripts\GetLogAnalyticsSharedKey.ps1 = Scripts\GetLogAnalyticsSharedKey.ps1
 	EndProjectSection
 EndProject
 Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "Functions.Infra", "Functions.Infra\Functions.Infra.deployproj", "{DA49B0A0-C638-4997-9991-6E0D8D06680E}"
