@@ -22,7 +22,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{AB70
 		Scripts\aad-required-permissions-manifest.json = Scripts\aad-required-permissions-manifest.json
 		Scripts\CreateApplication.bat = Scripts\CreateApplication.bat
 		Scripts\createSpnAndAssignRoles.ps1 = Scripts\createSpnAndAssignRoles.ps1
-		Scripts\GetLogAnalyticsWorkspaceID.ps1 = Scripts\GetLogAnalyticsWorkspaceID.ps1
+		Scripts\GetLogAnalyticsWorkspaceIdAndSharedKey.ps1 = Scripts\GetLogAnalyticsWorkspaceIdAndSharedKey.ps1
 		Scripts\GetLogAnalyticsSharedKey.ps1 = Scripts\GetLogAnalyticsSharedKey.ps1
 	EndProjectSection
 EndProject
