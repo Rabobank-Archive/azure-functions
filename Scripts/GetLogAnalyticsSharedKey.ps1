@@ -1,8 +1,8 @@
 $ErrorActionPreference = "Stop"
 
-Write-Verbose "Get logAnalytics key for $(loganalytics)" -verbose
+Write-Verbose "Get logAnalytics key for $( $loganalytics )" -verbose
 
-$oiws=Get-AzureRmOperationalInsightsWorkspaceSharedKeys -ResourceGroupName $(loganalytics.ResourceGroupName) -Name $(loganalytics)
+$oiws=Get-AzureRmOperationalInsightsWorkspaceSharedKeys -ResourceGroupName $loganalytics.ResourceGroupName -Name $loganalytics
 
 $foundLogAnalyticsKey=$oiws.PrimarySharedKey
 
