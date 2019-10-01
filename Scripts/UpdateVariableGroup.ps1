@@ -7,8 +7,7 @@ param (
     $logAnalyticsKey,
     $vstsPat,
     $logAnalyticsWorkspace,
-    $groupName,
-    [hashtable] $variables
+    $groupName
 )
 
 $pair = "$($userName):$($vstsPat)"
