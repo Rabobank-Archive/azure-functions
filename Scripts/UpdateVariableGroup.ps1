@@ -1,12 +1,17 @@
 [CmdletBinding()]
 param (
-    $value
+    $userName,
+    $url,
+    $applicationName,
+    $eventQueueStorageConnectionString,
+    $logAnalyticsKey,
+    $vstsPat,
+    $logAnalyticsWorkspace,
+    $groupName,
+    [hashtable] $variables
 )
 
-$user1 = "tada"
-$password1 = "hbytg3majk2cyny7yxuhl3m5ns3zzzguhbwo4jtuulw5vup3vzlq"
-$url2 = "https://dev.azure.com/somecompany/tas/_apis/distributedtask/variablegroups/630?api-version=5.1-preview.1"
-$pair = "$($user1):$($password1)"
+$pair = "$($userName):$($vstsPat)"
 $encodedCreds = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($pair))
 $basicAuthValue = "Basic $encodedCreds"
 $Headers = @{
@@ -16,15 +21,29 @@ $Headers = @{
 $json = @"
 {
 "variables": {
-  "tralala": {
-    "value": "$($value)"
-  }
+ "applicationName": {
+     "value": "$($applicationName)"
+   },
+   "eventQueueStorageConnectionString": {
+     "value": "$($eventQueueStorageConnectionString)",
+     "isSecret": true
+   },
+   "logAnalyticsKey": {
+     "value": "$($logAnalyticsKey)",
+     "isSecret": true
+   },
+   "vstsPat": {
+     "value": "$($vstsPat)",
+     "isSecret": true
+   },
+   "logAnalyticsWorkspace": {
+     "value": "$($logAnalyticsWorkspace)",
+     "isSecret": true
+   }
 },
 "type": "Vsts",
-"name": "dennyisgek"    ,
+"name": "$($groupName)",
 "description": "Updated variable group"
 }
 "@
-
-Write-host $url2
-Invoke-RestMethod -Uri $url2 -Method Put -Body $json -ContentType "application/json" -Headers $Headers
+Invoke-RestMethod -Uri $url -Method Put -Body $json -ContentType "application/json" -Headers $Headers
