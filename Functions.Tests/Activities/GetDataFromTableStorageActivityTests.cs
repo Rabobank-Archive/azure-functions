@@ -14,12 +14,59 @@ namespace Functions.Tests.Activities
     public class GetDataFromTableStorageActivityTests
     {
         [Fact]
-        public async Task ShouldReturnProductionItemsForProjectWithinOrganization()
+        public async Task ShouldReturnEmptyListIfTableDoesNotExist()
         {
             // Arrange 
             // Use Azure Storage Emulator on Windows or azurite to use local development server
             //   a) npm i -g azurite@2
             //   b) docker run --rm -p 10001:10001 arafato/azurite
+            var storage = CloudStorageAccount.Parse("UseDevelopmentStorage=true");
+            var client = storage.CreateCloudTableClient();
+            var table = client.GetTableReference("DeploymentMethod");
+            await table.DeleteIfExistsAsync().ConfigureAwait(false);
+
+            var fixture = new Fixture();
+            var project = fixture.Create<Response.Project>();
+            var organization = fixture.Create<string>();
+
+            // Act
+            var fun = new GetDataFromTableStorageActivity(client.Wrap(),
+                new EnvironmentConfig { Organization = organization });
+            var result = await fun.RunAsync(project);
+
+            //Assert
+            result.Project.Id.ShouldBe(project.Id);
+            result.ProductionItems.Count.ShouldBe(0);
+        }
+
+        [Fact]
+        public async Task ShouldReturnEmptyListIfTableColumnDoesNotExist()
+        {
+            // Arrange 
+            var storage = CloudStorageAccount.Parse("UseDevelopmentStorage=true");
+            var client = storage.CreateCloudTableClient();
+            var table = client.GetTableReference("DeploymentMethod");
+            await table.DeleteIfExistsAsync().ConfigureAwait(false);
+            await table.CreateIfNotExistsAsync().ConfigureAwait(false);
+
+            var fixture = new Fixture();
+            var project = fixture.Create<Response.Project>();
+            var organization = fixture.Create<string>();
+
+            // Act
+            var fun = new GetDataFromTableStorageActivity(client.Wrap(),
+                new EnvironmentConfig { Organization = organization });
+            var result = await fun.RunAsync(project);
+
+            //Assert
+            result.Project.Id.ShouldBe(project.Id);
+            result.ProductionItems.Count.ShouldBe(0);
+        }
+
+        [Fact]
+        public async Task ShouldReturnProductionItemsForProjectWithinOrganization()
+        {
+            // Arrange 
             var storage = CloudStorageAccount.Parse("UseDevelopmentStorage=true");
             var client = storage.CreateCloudTableClient();
             var table = client.GetTableReference("DeploymentMethod");

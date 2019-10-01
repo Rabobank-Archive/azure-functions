@@ -38,6 +38,15 @@ namespace Functions.Activities
                 TableQuery.GenerateFilterCondition("ProjectId", QueryComparisons.Equal, project.Id)));
             var table = _cloudTableClient.Execute(c => c.GetTableReference("DeploymentMethod"));
 
+            if (!await table.ExistsAsync().ConfigureAwait(false))
+            {
+                return new ItemOrchestratorRequest
+                {
+                    Project = project,
+                    ProductionItems = new List<ProductionItem>()
+                };
+            }
+
             var deploymentMethodEntities = new List<DeploymentMethodEntity>();
             TableContinuationToken continuationToken = null;
             do
