@@ -8,6 +8,7 @@ using Functions.Model;
 using Functions.Orchestrators;
 using Microsoft.Azure.WebJobs;
 using Moq;
+using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService.Response;
 using Xunit;
 using Task = System.Threading.Tasks.Task;

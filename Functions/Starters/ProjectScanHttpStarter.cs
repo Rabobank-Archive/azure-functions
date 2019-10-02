@@ -9,6 +9,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Functions.Model;
+using SecurePipelineScan.Rules.Security;
 
 namespace Functions.Starters
 {

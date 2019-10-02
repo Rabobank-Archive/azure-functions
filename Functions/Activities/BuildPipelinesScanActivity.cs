@@ -32,8 +32,7 @@ namespace Functions.Activities
                 throw new ArgumentNullException(nameof(request.Project));
             if (request.BuildDefinition == null)
                 throw new ArgumentNullException(nameof(request.BuildDefinition));
-            if (request.CiIdentifiers == null)
-                throw new ArgumentNullException(nameof(request.CiIdentifiers));
+
 
             var rules = _rulesProvider.BuildRules(_azuredo).ToList();
 
@@ -41,10 +40,21 @@ namespace Functions.Activities
             {
                 Item = request.BuildDefinition.Name,
                 ItemId = request.BuildDefinition.Id,
-                Rules = await rules.EvaluateAsync(_config, request.Project.Id, RuleScopes.BuildPipelines,
-                    request.BuildDefinition.Id)
-                        .ConfigureAwait(false),
-                CiIdentifiers = String.Join(",", request.CiIdentifiers)
+                Rules = await Task.WhenAll(rules.Select(async rule =>
+                    new EvaluatedRule
+                    {
+                        Name = rule.GetType().Name,
+                        Description = rule.Description,
+                        Why = rule.Why,
+                        IsSox = rule.IsSox,
+                        Status = await rule.EvaluateAsync(request.Project.Id, request.BuildDefinition)
+                            .ConfigureAwait(false),
+                        Reconcile = ReconcileFunction.ReconcileFromRule(rule as IReconcile, _config,
+                            request.Project.Id, RuleScopes.BuildPipelines, request.BuildDefinition.Id)
+                    })
+                    .ToList())
+                    .ConfigureAwait(false),
+                CiIdentifiers = string.Join(",", request.CiIdentifiers)
             };
         }
     }

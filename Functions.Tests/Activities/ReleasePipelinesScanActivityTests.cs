@@ -22,7 +22,7 @@ namespace Functions.Tests.Activities
             var provider = new Mock<IRulesProvider>();
             provider
                 .Setup(x => x.ReleaseRules(It.IsAny<IVstsRestClient>()))
-                .Returns(fixture.CreateMany<IRule>())
+                .Returns(fixture.CreateMany<IReleasePipelineRule>())
                 .Verifiable();
 
             var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
@@ -50,7 +50,7 @@ namespace Functions.Tests.Activities
             var provider = new Mock<IRulesProvider>();
             provider
                 .Setup(x => x.ReleaseRules(It.IsAny<IVstsRestClient>()))
-                .Returns(fixture.CreateMany<IRule>())
+                .Returns(fixture.CreateMany<IReleasePipelineRule>())
                 .Verifiable();
 
             var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
@@ -73,7 +73,7 @@ namespace Functions.Tests.Activities
             var provider = new Mock<IRulesProvider>();
             provider
                 .Setup(x => x.ReleaseRules(It.IsAny<IVstsRestClient>()))
-                .Returns(fixture.CreateMany<IRule>())
+                .Returns(fixture.CreateMany<IReleasePipelineRule>())
                 .Verifiable();
 
             var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
@@ -101,7 +101,7 @@ namespace Functions.Tests.Activities
             var provider = new Mock<IRulesProvider>();
             provider
                 .Setup(x => x.ReleaseRules(It.IsAny<IVstsRestClient>()))
-                .Returns(fixture.CreateMany<IRule>())
+                .Returns(fixture.CreateMany<IReleasePipelineRule>())
                 .Verifiable();
 
             var client = new Mock<IVstsRestClient>(MockBehavior.Strict);

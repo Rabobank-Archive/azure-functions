@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using AzDoCompliancy.CustomStatus;
 using Xunit;
 using System;
+using SecurePipelineScan.Rules.Security;
 
 namespace Functions.Tests.Orchestrators
 {

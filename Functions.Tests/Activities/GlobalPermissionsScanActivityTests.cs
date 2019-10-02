@@ -78,7 +78,7 @@ namespace Functions.Tests.Activities
             result.Rules.ShouldContain(r => r.Reconcile != null);
             result.Rules.ShouldContain(r => r.Reconcile.Impact.Any());
             result.Rules.ShouldContain(r => r.Reconcile.Url == $"https://{config.FunctionAppHostname}" +
-                $"/api/reconcile/{config.Organization}/{dummyreq.Project.Name}/globalpermissions/{ruleName}");
+                $"/api/reconcile/{config.Organization}/{dummyreq.Project.Id}/globalpermissions/{ruleName}");
         }
     }
 }

@@ -2,6 +2,7 @@ using Functions.Activities;
 using Functions.Helpers;
 using Functions.Model;
 using Microsoft.Azure.WebJobs;
+using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService.Response;
 using Task = System.Threading.Tasks.Task;
 

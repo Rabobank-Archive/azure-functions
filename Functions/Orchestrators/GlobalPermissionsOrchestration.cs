@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Functions.Helpers;
 using Functions.Starters;
 using System.Collections.Generic;
+using SecurePipelineScan.Rules.Security;
 
 namespace Functions.Orchestrators
 {

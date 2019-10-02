@@ -44,14 +44,14 @@ namespace Functions.Activities
                         Description = r.Description,
                         Why = r.Why,
                         IsSox = r.IsSox,
-                        Status = await r.EvaluateAsync(request.Project.Name)
+                        Status = await r.EvaluateAsync(request.Project.Id)
                             .ConfigureAwait(false),
                         Reconcile = ReconcileFunction.ReconcileFromRule(
-                            _config, request.Project.Name, r as IProjectReconcile)
+                            _config, request.Project.Id, r as IProjectReconcile)
                     })
                     .ToList())
                     .ConfigureAwait(false),
-                CiIdentifiers = String.Join(",", request.ProductionItems
+                CiIdentifiers = string.Join(",", request.ProductionItems
                     .SelectMany(p => p.CiIdentifiers)
                     .Distinct())
             };

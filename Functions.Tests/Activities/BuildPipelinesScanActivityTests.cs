@@ -19,8 +19,8 @@ namespace Functions.Tests.Activities
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
             var provider = new Mock<IRulesProvider>();
             provider
-                .Setup(x => x.ReleaseRules(It.IsAny<IVstsRestClient>()))
-                .Returns(fixture.CreateMany<IRule>())
+                .Setup(x => x.BuildRules(It.IsAny<IVstsRestClient>()))
+                .Returns(fixture.CreateMany<IBuildPipelineRule>())
                 .Verifiable();
 
             var client = new Mock<IVstsRestClient>(MockBehavior.Strict);

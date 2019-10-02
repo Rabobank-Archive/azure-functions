@@ -1,5 +1,6 @@
 using ExpectedObjects;
 using Functions.Model;
+using SecurePipelineScan.Rules.Security;
 using System;
 using System.Linq;
 using Xunit;

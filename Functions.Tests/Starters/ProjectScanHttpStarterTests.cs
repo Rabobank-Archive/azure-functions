@@ -15,6 +15,7 @@ using Functions.Model;
 using Xunit;
 using Response = SecurePipelineScan.VstsService.Response;
 using System.Collections.Generic;
+using SecurePipelineScan.Rules.Security;
 
 namespace Functions.Tests.Starters
 {

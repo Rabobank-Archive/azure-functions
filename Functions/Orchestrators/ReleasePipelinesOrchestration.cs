@@ -7,6 +7,7 @@ using Functions.Helpers;
 using Functions.Model;
 using Functions.Starters;
 using Microsoft.Azure.WebJobs;
+using SecurePipelineScan.Rules.Security;
 using Response = SecurePipelineScan.VstsService.Response;
 
 namespace Functions.Orchestrators

@@ -28,6 +28,10 @@ namespace Functions.Activities
         {
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
+            if (request.Project == null)
+                throw new ArgumentNullException(nameof(request.Project));
+            if (request.Policies == null)
+                throw new ArgumentNullException(nameof(request.Policies));
 
             var rules = _rulesProvider.RepositoryRules(_azuredo).ToList();
 
@@ -49,7 +53,7 @@ namespace Functions.Activities
                     })
                     .ToList())
                     .ConfigureAwait(false),
-                CiIdentifiers = String.Join(",", request.CiIdentifiers)
+                CiIdentifiers = string.Join(",", request.CiIdentifiers)
             };
         }
     }
