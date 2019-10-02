@@ -2,6 +2,7 @@
 using Microsoft.Azure.WebJobs;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
+using SecurePipelineScan.VstsService.Requests;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -33,8 +34,11 @@ namespace Functions.Activities
             if (request.BuildDefinition == null)
                 throw new ArgumentNullException(nameof(request.BuildDefinition));
 
-
             var rules = _rulesProvider.BuildRules(_azuredo).ToList();
+
+            var fullBuildDefinition = await _azuredo.GetAsync(Builds.BuildDefinition(
+                    request.Project.Id, request.BuildDefinition.Id))
+                .ConfigureAwait(false);
 
             return new ItemExtensionData
             {
@@ -47,7 +51,7 @@ namespace Functions.Activities
                         Description = rule.Description,
                         Why = rule.Why,
                         IsSox = rule.IsSox,
-                        Status = await rule.EvaluateAsync(request.Project.Id, request.BuildDefinition)
+                        Status = await rule.EvaluateAsync(request.Project.Id, fullBuildDefinition)
                             .ConfigureAwait(false),
                         Reconcile = ReconcileFunction.ReconcileFromRule(rule as IReconcile, _config,
                             request.Project.Id, RuleScopes.BuildPipelines, request.BuildDefinition.Id)

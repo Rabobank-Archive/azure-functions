@@ -32,7 +32,7 @@ namespace Functions.Tests.Activities
             
             //Act
             var target = new GetConfigurationItemsFromTableStorageActivity(client);
-            var configItems = await target.Run(null);
+            var configItems = await target.RunAsync(null);
 
             //Assert
             Assert.NotEmpty(configItems);

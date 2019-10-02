@@ -5,6 +5,7 @@ using Functions.Model;
 using Microsoft.Azure.WebJobs;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
+using SecurePipelineScan.VstsService.Requests;
 
 namespace Functions.Activities
 {
@@ -35,6 +36,10 @@ namespace Functions.Activities
 
             var rules = _rulesProvider.ReleaseRules(_azuredo).ToList();
 
+            var fullReleaseDefinition = await _azuredo.GetAsync(ReleaseManagement.Definition(
+                    request.Project.Id, request.ReleaseDefinition.Id))
+                .ConfigureAwait(false);
+
             return new ItemExtensionData
             {
                 Item = request.ReleaseDefinition.Name,
@@ -46,7 +51,7 @@ namespace Functions.Activities
                         Description = rule.Description,
                         Why = rule.Why,
                         IsSox = rule.IsSox,
-                        Status = await rule.EvaluateAsync(request.Project.Id, request.ReleaseDefinition)
+                        Status = await rule.EvaluateAsync(request.Project.Id, fullReleaseDefinition)
                             .ConfigureAwait(false),
                         Reconcile = ReconcileFunction.ReconcileFromRule(rule as IReconcile, _config,
                             request.Project.Id, RuleScopes.ReleasePipelines, request.ReleaseDefinition.Id)

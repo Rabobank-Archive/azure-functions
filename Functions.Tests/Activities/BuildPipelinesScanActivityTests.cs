@@ -4,6 +4,8 @@ using Functions.Activities;
 using Moq;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
+using SecurePipelineScan.VstsService.Requests;
+using Response = SecurePipelineScan.VstsService.Response;
 using Shouldly;
 using System.Threading.Tasks;
 using Xunit;
@@ -24,6 +26,9 @@ namespace Functions.Tests.Activities
                 .Verifiable();
 
             var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
+            client
+                .Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Response.BuildDefinition>>()))
+                .ReturnsAsync(fixture.Create<Response.BuildDefinition>());
 
             var request = fixture.Create<BuildPipelinesScanActivityRequest>();
 

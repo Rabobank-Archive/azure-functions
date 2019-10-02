@@ -26,6 +26,9 @@ namespace Functions.Tests.Activities
                 .Verifiable();
 
             var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
+            client
+                .Setup(x => x.GetAsync(It.IsAny<IVstsRequest<ReleaseDefinition>>()))
+                .ReturnsAsync(fixture.Create<ReleaseDefinition>());
             var request = fixture.Create<ReleasePipelinesScanActivityRequest>();
 
             // Act

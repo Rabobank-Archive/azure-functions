@@ -17,7 +17,7 @@ namespace Functions.Activities
         }
 
         [FunctionName(nameof(GetConfigurationItemsFromTableStorageActivity))]
-        public async Task<List<ConfigurationItem>> Run([ActivityTrigger] DurableActivityContextBase context)
+        public async Task<List<ConfigurationItem>> RunAsync([ActivityTrigger] DurableActivityContextBase context)
         {
             var table = _tableClient.GetTableReference("ConfigurationItem");
             var query = new TableQuery<ConfigurationItem>();
@@ -27,7 +27,8 @@ namespace Functions.Activities
 
             do
             {
-                var page = await table.ExecuteQuerySegmentedAsync(query, continuationToken);
+                var page = await table.ExecuteQuerySegmentedAsync(query, continuationToken)
+                    .ConfigureAwait(false);
                 continuationToken = page.ContinuationToken;
                 configItems.AddRange(page.Results);
             } while (continuationToken != null);
