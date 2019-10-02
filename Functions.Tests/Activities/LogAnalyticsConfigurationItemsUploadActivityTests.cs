@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using AutoFixture;
 using Functions.Activities;
 using Functions.Model;
@@ -11,7 +12,7 @@ namespace Functions.Tests.Activities
     public class LogAnalyticsConfigurationItemsUploadActivityTests
     {
         [Fact]
-        public async void RunAsyncShouldCallAddCustomLogJsonAsyncForEveryConfigurationItem()
+        public async Task RunAsyncShouldCallAddCustomLogJsonAsyncForEveryConfigurationItem()
         {
             //Arrange
             var fixture = new Fixture();

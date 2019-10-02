@@ -1,4 +1,6 @@
-﻿namespace Functions.Model
+﻿using System;
+
+namespace Functions.Model
 {
     public class EvaluatedRule
     {
@@ -12,7 +14,7 @@
 
     public class Reconcile
     {
-        public string Url { get; set; }
+        public Uri Url { get; set; }
         public string[] Impact { get; set; }
     }
 }

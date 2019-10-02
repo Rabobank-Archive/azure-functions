@@ -37,7 +37,8 @@ namespace Functions
                 await queue.FetchAttributesAsync();
                 var length = queue.ApproximateMessageCount;
 
-                if (length != null) log.LogMetric($"Queue length - {queue.Name}", (double) length);
+                if (length != null)
+                    log.LogMetric($"Queue length - {queue.Name}", (double) length);
             }
         }
     }

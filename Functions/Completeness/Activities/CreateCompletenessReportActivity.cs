@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using AzDoCompliancy.CustomStatus.Converter;
 using AzDoCompliancy.CustomStatus;
 using Functions.Helpers;
+using System;
 
 namespace Functions.Completeness.Activities
 {
@@ -14,6 +15,9 @@ namespace Functions.Completeness.Activities
         [FunctionName(nameof(CreateCompletenessReportActivity))]
         public CompletenessReport Run([ActivityTrigger] CreateCompletenessReportRequest request)
         {
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+
             var serializer = new JsonSerializer();
             serializer.Converters.Add(new CustomStatusConverter());
 

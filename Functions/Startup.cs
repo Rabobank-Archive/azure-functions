@@ -20,6 +20,9 @@ namespace Functions
     {
         public void Configure(IWebJobsBuilder builder)
         {
+            if (builder == null)
+                throw new ArgumentNullException(nameof(builder));
+
             RegisterServices(builder.Services);
         }
 

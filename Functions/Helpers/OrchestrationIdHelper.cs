@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 
 namespace Functions.Helpers
@@ -12,11 +13,17 @@ namespace Functions.Helpers
 
         public static string GetSupervisorId(string instanceId)
         {
+            if (instanceId == null)
+                throw new ArgumentNullException(nameof(instanceId));
+
             return instanceId.Contains(":") ? instanceId.Split(':').First() : null;
         }
         
         public static string GetProjectId(string instanceId)
         {
+            if (instanceId == null)
+                throw new ArgumentNullException(nameof(instanceId));
+
             return instanceId.Contains(":") ? instanceId.Split(':')[1] : null;
         }
     }

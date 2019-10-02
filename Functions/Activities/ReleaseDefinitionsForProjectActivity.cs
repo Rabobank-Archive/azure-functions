@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Azure.WebJobs;
@@ -18,8 +19,11 @@ namespace Functions.Activities
         }
 
         [FunctionName(nameof(ReleaseDefinitionsForProjectActivity))]
-        public List<ReleaseDefinition> Run([ActivityTrigger] Project project)
+        public IList<ReleaseDefinition> Run([ActivityTrigger] Project project)
         {
+            if (project == null)
+                throw new ArgumentNullException(nameof(project));
+
             var items = _azuredo.Get(ReleaseManagement.Definitions(project.Id));
 
             return items.ToList();

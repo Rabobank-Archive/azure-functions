@@ -39,6 +39,9 @@ namespace Functions.Starters
             HttpRequestMessage request, string organization, string project, string scope,
             [OrchestrationClient] DurableOrchestrationClientBase starter)
         {
+            if (starter == null)
+                throw new ArgumentNullException(nameof(starter));
+
             if (_tokenizer.IdentifierFromClaim(request) == null)
             {
                 return new HttpResponseMessage(HttpStatusCode.Unauthorized);
@@ -61,8 +64,13 @@ namespace Functions.Starters
         private static string Orchestration(string scope) =>
             Scopes.TryGetValue(scope, out var value) ? value : throw new ArgumentException(nameof(scope));
 
-        public static string RescanUrl(EnvironmentConfig environmentConfig, string project, string scope) =>
-            $"https://{environmentConfig.FunctionAppHostname}/api/scan/{environmentConfig.Organization}/" +
-                $"{project}/{scope}";
+        public static Uri RescanUrl(EnvironmentConfig environmentConfig, string project, string scope)
+        {
+            if (environmentConfig == null)
+                throw new ArgumentNullException(nameof(environmentConfig));
+
+            return new Uri($"https://{environmentConfig.FunctionAppHostname}/api/scan/{environmentConfig.Organization}/" +
+                $"{project}/{scope}");
+        }
     }
 }

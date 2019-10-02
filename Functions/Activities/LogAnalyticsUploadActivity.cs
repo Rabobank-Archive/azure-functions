@@ -1,5 +1,6 @@
 ﻿using LogAnalytics.Client;
 using Microsoft.Azure.WebJobs;
+using System;
 using System.Threading.Tasks;
 
 namespace Functions.Activities
@@ -16,6 +17,9 @@ namespace Functions.Activities
         [FunctionName(nameof(LogAnalyticsUploadActivity))]
         public async Task RunAsync([ActivityTrigger] LogAnalyticsUploadActivityRequest request)
         {
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+
             foreach (var item in request.PreventiveLogItems)
             {
                 await _analytics.AddCustomLogJsonAsync("preventive_analysis_log", item, "evaluatedDate")

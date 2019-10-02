@@ -3,6 +3,7 @@ using LogAnalytics.Client;
 using Microsoft.Azure.WebJobs;
 using System.Threading.Tasks;
 using Functions.Model;
+using System;
 
 namespace Functions.Activities
 {
@@ -18,6 +19,9 @@ namespace Functions.Activities
         [FunctionName(nameof(LogAnalyticsConfigurationItemsUploadActivity))]
         public async Task RunAsync([ActivityTrigger] IEnumerable<ConfigurationItem> request)
         {
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+
             foreach (var configurationItem in request)
             {
                 await _analyticsClient

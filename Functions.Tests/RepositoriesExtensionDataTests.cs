@@ -30,7 +30,7 @@ namespace Functions.Tests
                                 Description =  "Nobody can do anything",
                                 Reconcile = new Reconcile
                                 {
-                                    Url =  "https://azuredevops.somewhere.azure.com"
+                                    Url =  new Uri("https://azuredevops.somewhere.azure.com")
                                 },
                                 Name = "NobodyCanDoAnything",
                                 Status =  true

@@ -26,7 +26,8 @@ namespace Functions
             string queue,
             ILogger log)
         {
-            if (string.IsNullOrEmpty(queue)) return new HttpResponseMessage(HttpStatusCode.BadRequest);
+            if (string.IsNullOrEmpty(queue))
+                return new HttpResponseMessage(HttpStatusCode.BadRequest);
 
             log.LogInformation($"Requeue from: {queue}");
 

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Azure.WebJobs;
@@ -18,8 +19,11 @@ namespace Functions.Activities
         }
 
         [FunctionName(nameof(BuildDefinitionsActivity))]
-        public List<BuildDefinition> Run([ActivityTrigger] Project project)
+        public IList<BuildDefinition> Run([ActivityTrigger] Project project)
         {
+            if (project == null)
+                throw new ArgumentNullException(nameof(project));
+
             var items = _azuredo.Get(Builds.BuildDefinitions(project.Id));
 
             return items.ToList();

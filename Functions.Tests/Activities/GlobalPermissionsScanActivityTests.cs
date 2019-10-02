@@ -6,6 +6,7 @@ using Moq;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
 using Shouldly;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -77,8 +78,8 @@ namespace Functions.Tests.Activities
             // Assert
             result.Rules.ShouldContain(r => r.Reconcile != null);
             result.Rules.ShouldContain(r => r.Reconcile.Impact.Any());
-            result.Rules.ShouldContain(r => r.Reconcile.Url == $"https://{config.FunctionAppHostname}" +
-                $"/api/reconcile/{config.Organization}/{dummyreq.Project.Id}/globalpermissions/{ruleName}");
+            result.Rules.ShouldContain(r => r.Reconcile.Url == new Uri($"https://{config.FunctionAppHostname}" +
+                $"/api/reconcile/{config.Organization}/{dummyreq.Project.Id}/globalpermissions/{ruleName}"));
         }
     }
 }

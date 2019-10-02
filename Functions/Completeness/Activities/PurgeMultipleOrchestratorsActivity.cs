@@ -12,6 +12,9 @@ namespace Functions.Completeness.Activities
         public async Task RunAsync([ActivityTrigger] DurableActivityContextBase context,
             [OrchestrationClient] DurableOrchestrationClientBase client)
         {
+            if (client == null)
+                throw new ArgumentNullException(nameof(client));
+
             const int purgeFromDaysAgo = 365;
             const int keepFromDaysAgo = 30;
 

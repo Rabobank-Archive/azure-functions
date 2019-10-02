@@ -22,6 +22,8 @@ namespace Functions
         private readonly IVstsRestClient _azuredo;
         private readonly EnvironmentConfig _config;
 
+        private const int ReportsToDisplay = 50;
+
         public BuildCompletedFunction(
             ILogAnalyticsClient client,
             IServiceHookScan<BuildScanReport> scan,
@@ -72,7 +74,7 @@ namespace Functions
                 .Reports
                 .Concat(new[] { report })
                 .OrderByDescending(x => x.CreatedDate)
-                .Take(50)
+                .Take(ReportsToDisplay)
                 .ToList();
 
             await _azuredo.PutAsync(Requests.ExtensionManagement.ExtensionData<ExtensionDataReports<BuildScanReport>>(

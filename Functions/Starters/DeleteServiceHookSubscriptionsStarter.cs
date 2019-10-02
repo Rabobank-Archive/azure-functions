@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Functions.Orchestrators;
+using System;
 
 namespace Functions.Starters
 {
@@ -18,6 +19,9 @@ namespace Functions.Starters
         public async Task RunAsync(string input,
             [OrchestrationClient] DurableOrchestrationClientBase starter)
         {
+            if (starter == null)
+                throw new ArgumentNullException(nameof(starter));
+
             await starter.StartNewAsync(nameof(DeleteServiceHookSubscriptionsOrchestrator), _config.EventQueueStorageAccountName);
         }
     }

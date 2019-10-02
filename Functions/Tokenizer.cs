@@ -18,7 +18,8 @@ namespace Functions
 
         public Tokenizer(string secret)
         {
-            if (secret == null) throw new ArgumentNullException(nameof(secret));
+            if (secret == null)
+                throw new ArgumentNullException(nameof(secret));
             _key = Encoding.ASCII.GetBytes(secret);
         }
 

@@ -4,6 +4,7 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -17,6 +18,8 @@ namespace Functions
         private readonly IRulesProvider _ruleProvider;
         private readonly ITokenizer _tokenizer;
         private readonly IVstsRestClient _client;
+
+        private const int PermissionBit = 3;
 
         public ReconcileFunction(IVstsRestClient client, IRulesProvider ruleProvider, ITokenizer tokenizer)
         {
@@ -104,7 +107,7 @@ namespace Functions
         {
             var permissions = await _client.GetAsync(Requests.Permissions.PermissionsGroupProjectId(project, id));
             return permissions.Security.Permissions.Any(x =>
-                x.DisplayName == "Manage project properties" && x.PermissionId == 3);
+                x.DisplayName == "Manage project properties" && x.PermissionId == PermissionBit);
         }
 
         public static Reconcile ReconcileFromRule(IReconcile rule,
@@ -113,25 +116,34 @@ namespace Functions
             string scope,
             string itemId)
         {
+            if (environmentConfig == null)
+                throw new ArgumentNullException(nameof(environmentConfig));
+
             return rule != null ? new Reconcile
             {
-                Url = $"https://{environmentConfig.FunctionAppHostname}/api/reconcile/{environmentConfig.Organization}/{projectId}/{scope}/{rule.GetType().Name}/{itemId}",
+                Url = new Uri($"https://{environmentConfig.FunctionAppHostname}/api/reconcile/{environmentConfig.Organization}/{projectId}/{scope}/{rule.GetType().Name}/{itemId}"),
                 Impact = rule.Impact
             } : null;
         }
 
         public static Reconcile ReconcileFromRule(EnvironmentConfig environmentConfig, string project, IProjectReconcile rule)
         {
+            if (environmentConfig == null)
+                throw new ArgumentNullException(nameof(environmentConfig));
+
             return rule != null ? new Reconcile
             {
-                Url = $"https://{environmentConfig.FunctionAppHostname}/api/reconcile/{environmentConfig.Organization}/{project}/globalpermissions/{rule.GetType().Name}",
+                Url = new Uri ($"https://{environmentConfig.FunctionAppHostname}/api/reconcile/{environmentConfig.Organization}/{project}/globalpermissions/{rule.GetType().Name}"),
                 Impact = rule.Impact
             } : null;
         }
 
-        public static string HasReconcilePermissionUrl(EnvironmentConfig environmentConfig, string projectId)
+        public static Uri HasReconcilePermissionUrl(EnvironmentConfig environmentConfig, string projectId)
         {
-            return $"https://{environmentConfig.FunctionAppHostname}/api/reconcile/{environmentConfig.Organization}/{projectId}/haspermissions";
+            if (environmentConfig == null)
+                throw new ArgumentNullException(nameof(environmentConfig));
+
+            return new Uri($"https://{environmentConfig.FunctionAppHostname}/api/reconcile/{environmentConfig.Organization}/{projectId}/haspermissions");
         }
     }
 }
