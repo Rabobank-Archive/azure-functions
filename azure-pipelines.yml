@@ -17,7 +17,7 @@ steps:
   - task: DotNetCoreCLI@2
     displayName: Build
     inputs:
-      arguments: '--configuration release'
+      arguments: '--configuration release --no-restore'
 
   - task: CmdLine@2
     displayName: Create local MSSQLLocalDB and run AzureStorageEmulator (for Testing)
@@ -31,7 +31,7 @@ steps:
     displayName: Test
     inputs:
       command: test
-      arguments: '--configuration release /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[xunit*]*"'
+      arguments: '--configuration release --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[xunit*]*"'
     env:
       AzureWebJobsStorage: UseDevelopmentStorage=true
 
@@ -41,7 +41,7 @@ steps:
       command: publish
       publishWebProjects: false
       projects: '$(build.sourcesdirectory)/Functions/Functions.csproj'
-      arguments: '--configuration release --output $(build.artifactstagingdirectory)'
+      arguments: '--configuration release --no-build --output $(build.artifactstagingdirectory)'
 
   - task: CopyFiles@2
     inputs:
