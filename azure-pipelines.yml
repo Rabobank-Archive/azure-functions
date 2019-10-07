@@ -32,6 +32,8 @@ steps:
     inputs:
       command: test
       arguments: '--configuration release /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[xunit*]*"'
+    env:
+      AzureWebJobsStorage: UseDevelopmentStorage=true
 
   - task: DotNetCoreCLI@2
     displayName: Publish
