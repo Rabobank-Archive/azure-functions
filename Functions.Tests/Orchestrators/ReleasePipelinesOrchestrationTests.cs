@@ -11,6 +11,7 @@ using Microsoft.Azure.WebJobs;
 using Moq;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService.Response;
+using Shouldly;
 using Xunit;
 using Task = System.Threading.Tasks.Task;
 
@@ -79,21 +80,15 @@ namespace Functions.Tests.Orchestrators
                     It.IsAny<IEnumerable<PreventiveLogItem>>()))
                 .Returns(Task.CompletedTask);
 
-            starter
-                .Setup(x => x.CallActivityAsync<IList<ProductionItem>>(
-                    nameof(LinkCisToBuildPipelinesActivity), 
-                    It.IsAny<(ReleaseDefinition, IList<string>, string)>()))
-                .ReturnsAsync(_fixture.Create<IList<ProductionItem>>())
-                .Verifiable();
-
             var environmentConfig = _fixture.Create<EnvironmentConfig>();
 
             //Act
             var function = new ReleasePipelinesOrchestration(environmentConfig);
-            await function.RunAsync(starter.Object);
+            var result = await function.RunAsync(starter.Object);
 
             //Assert           
             mocks.VerifyAll();
+            result.ShouldNotBeNull();
         }
     }
 }

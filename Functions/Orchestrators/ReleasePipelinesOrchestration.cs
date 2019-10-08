@@ -68,23 +68,9 @@ namespace Functions.Orchestrators
 
             return new ItemOrchestratorRequest
             {
-                Project = request.Project,
-                ProductionItems = (await Task.WhenAll(releasePipelines
-                    .Where(r => request.ProductionItems.Select(p => p.ItemId).Contains(r.Id))
-                    .Select(r => context.CallActivityAsync<IList<ProductionItem>>(
-                        nameof(LinkCisToBuildPipelinesActivity), (r, request.ProductionItems.First(
-                            p => p.ItemId == r.Id).CiIdentifiers, request.Project.Id)))))
-                    .SelectMany(p => p)
-                    .GroupBy(p => p.ItemId)
-                    .Select(g => new ProductionItem
-                    {
-                        ItemId = g.Key,
-                        CiIdentifiers = g
-                            .SelectMany(p => p.CiIdentifiers)
-                            .Distinct()
-                            .ToList()
-                    })
-                    .ToList()
+                ProductionItems = LinkConfigurationItemHelper.LinkCisToBuildPipelines(releasePipelines,
+                    request.ProductionItems, request.Project),
+                Project = request.Project
             };
         }
     }
