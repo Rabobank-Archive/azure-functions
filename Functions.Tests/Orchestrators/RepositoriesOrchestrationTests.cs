@@ -40,7 +40,7 @@ namespace Functions.Tests.Orchestrators
 
             starter
                 .Setup(x => x.CallActivityWithRetryAsync<ItemExtensionData>(
-                    nameof(RepositoriesScanActivity), It.IsAny<RetryOptions>(), 
+                    nameof(ScanRepositoriesActivity), It.IsAny<RetryOptions>(), 
                     It.IsAny<RepositoriesScanActivityRequest>()))
                 .ReturnsAsync(fixture.Create<ItemExtensionData>())
                 .Verifiable();
@@ -58,17 +58,16 @@ namespace Functions.Tests.Orchestrators
                 .Setup(x => x.CurrentUtcDateTime).Returns(new DateTime());
             
             starter
-                .Setup(x => x.CallActivityAsync(nameof(ExtensionDataUploadActivity),
+                .Setup(x => x.CallActivityAsync(nameof(UploadExtensionDataActivity),
                     It.Is<(ItemsExtensionData data, string scope)>(t => 
                     t.scope == RuleScopes.Repositories)))
                 .Returns(Task.CompletedTask);
 
             starter
-                .Setup(x => x.CallActivityAsync(nameof(LogAnalyticsUploadActivity),
-                    It.Is<LogAnalyticsUploadActivityRequest>(l =>
-                    l.PreventiveLogItems.All(p => p.Scope == RuleScopes.Repositories))))
+                .Setup(x => x.CallActivityAsync(nameof(UploadPreventiveRuleLogsActivity),
+                    It.IsAny<IEnumerable<PreventiveLogItem>>()))
                 .Returns(Task.CompletedTask);
-            
+
             var environmentConfig = fixture.Create<EnvironmentConfig>();
 
             //Act

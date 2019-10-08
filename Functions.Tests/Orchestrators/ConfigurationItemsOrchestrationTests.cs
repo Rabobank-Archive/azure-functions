@@ -40,7 +40,7 @@ namespace Functions.Tests.Orchestrators
 
             //Assert
             context.Verify(
-                x => x.CallActivityAsync(nameof(LogAnalyticsConfigurationItemsUploadActivity),
+                x => x.CallActivityAsync(nameof(UploadConfigurationItemLogsActivity),
                     It.IsAny<List<ConfigurationItem>>()), Times.Once);
         }
     }

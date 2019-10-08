@@ -10,6 +10,7 @@ using AzDoCompliancy.CustomStatus;
 using Xunit;
 using System;
 using SecurePipelineScan.Rules.Security;
+using System.Collections.Generic;
 
 namespace Functions.Tests.Orchestrators
 {
@@ -42,21 +43,20 @@ namespace Functions.Tests.Orchestrators
 
             starter
                 .Setup(x => x.CallActivityWithRetryAsync<ItemExtensionData>(
-                    nameof(GlobalPermissionsScanActivity), It.IsAny<RetryOptions>(),
+                    nameof(ScanGlobalPermissionsActivity), It.IsAny<RetryOptions>(),
                     It.IsAny<ItemOrchestratorRequest>()))
                 .ReturnsAsync(fixture.Create<ItemExtensionData>())
                 .Verifiable();
 
             starter
-                .Setup(x => x.CallActivityAsync(nameof(ExtensionDataUploadActivity),
+                .Setup(x => x.CallActivityAsync(nameof(UploadExtensionDataActivity),
                     It.Is<(ItemsExtensionData data, string scope)>(d =>
                     d.scope == RuleScopes.GlobalPermissions)))
                 .Returns(Task.CompletedTask);
 
             starter
-                .Setup(x => x.CallActivityAsync(nameof(LogAnalyticsUploadActivity), 
-                    It.Is<LogAnalyticsUploadActivityRequest>(l => l.PreventiveLogItems.All(p => 
-                    p.Scope == RuleScopes.GlobalPermissions && p.ScanId == "supervisorId"))))
+                .Setup(x => x.CallActivityAsync(nameof(UploadPreventiveRuleLogsActivity),
+                    It.IsAny<IEnumerable<PreventiveLogItem>>()))
                 .Returns(Task.CompletedTask);
 
             //Act

@@ -4,6 +4,7 @@ using Functions.Model;
 using Microsoft.Azure.WebJobs;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService.Response;
+using System;
 using Task = System.Threading.Tasks.Task;
 
 namespace Functions.Orchestrators
@@ -13,23 +14,27 @@ namespace Functions.Orchestrators
         [FunctionName(nameof(ProjectScanOrchestration))]
         public async Task RunAsync([OrchestrationTrigger] DurableOrchestrationContextBase context)
         {
+            if (context == null)
+                throw new ArgumentNullException(nameof(context));
+
             var project = context.GetInput<Project>();
 
             var request = await context.CallActivityWithRetryAsync<ItemOrchestratorRequest>(
-                nameof(GetDataFromTableStorageActivity), RetryHelper.ActivityRetryOptions, project);
+                nameof(LinkCisToReleasePipelinesActivity), RetryHelper.ActivityRetryOptions, project);
 
             await context.CallSubOrchestratorAsync(nameof(GlobalPermissionsOrchestration),
                 OrchestrationIdHelper.CreateProjectScanScopeOrchestrationId(context.InstanceId,
                 RuleScopes.GlobalPermissions), request);
 
-            var (buildRequest, repositoryRequest) = await context.CallSubOrchestratorAsync
-                <(ItemOrchestratorRequest, ItemOrchestratorRequest)>(nameof(ReleasePipelinesOrchestration), 
-                OrchestrationIdHelper.CreateProjectScanScopeOrchestrationId(context.InstanceId, 
-                RuleScopes.ReleasePipelines), request);
+            var buildRequest = 
+                await context.CallSubOrchestratorAsync<ItemOrchestratorRequest>(
+                nameof(ReleasePipelinesOrchestration), OrchestrationIdHelper.CreateProjectScanScopeOrchestrationId(
+                context.InstanceId, RuleScopes.ReleasePipelines), request);
 
-            await context.CallSubOrchestratorAsync(nameof(BuildPipelinesOrchestration),
-               OrchestrationIdHelper.CreateProjectScanScopeOrchestrationId(context.InstanceId,
-               RuleScopes.BuildPipelines), buildRequest);
+            var repositoryRequest =
+                await context.CallSubOrchestratorAsync<ItemOrchestratorRequest>(
+                nameof(BuildPipelinesOrchestration), OrchestrationIdHelper.CreateProjectScanScopeOrchestrationId(
+                context.InstanceId, RuleScopes.BuildPipelines), buildRequest);
 
             await context.CallSubOrchestratorAsync(nameof(RepositoriesOrchestration),
                 OrchestrationIdHelper.CreateProjectScanScopeOrchestrationId(context.InstanceId,

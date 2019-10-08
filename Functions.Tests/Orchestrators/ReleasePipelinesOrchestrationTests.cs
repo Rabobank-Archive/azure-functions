@@ -11,7 +11,6 @@ using Microsoft.Azure.WebJobs;
 using Moq;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService.Response;
-using Shouldly;
 using Xunit;
 using Task = System.Threading.Tasks.Task;
 
@@ -54,15 +53,15 @@ namespace Functions.Tests.Orchestrators
 
             starter
                 .Setup(x => x.CallActivityWithRetryAsync<ItemExtensionData>(
-                    nameof(ReleasePipelinesScanActivity), It.IsAny<RetryOptions>(),
+                    nameof(ScanReleasePipelinesActivity), It.IsAny<RetryOptions>(),
                     It.IsAny<ReleasePipelinesScanActivityRequest>()))
                 .ReturnsAsync(_fixture.Create<ItemExtensionData>())
                 .Verifiable();
 
             starter
                 .Setup(x => x.CallActivityWithRetryAsync<List<ReleaseDefinition>>(
-                    nameof(ReleaseDefinitionsForProjectActivity), It.IsAny<RetryOptions>(),
-                    It.IsAny<Project>()))
+                    nameof(GetReleasePipelinesActivity), It.IsAny<RetryOptions>(),
+                    It.IsAny<string>()))
                 .ReturnsAsync(_fixture.CreateMany<ReleaseDefinition>().ToList())
                 .Verifiable();
 
@@ -70,22 +69,21 @@ namespace Functions.Tests.Orchestrators
                 .Setup(x => x.CurrentUtcDateTime).Returns(new DateTime());
 
             starter
-                .Setup(x => x.CallActivityAsync(nameof(ExtensionDataUploadActivity),
+                .Setup(x => x.CallActivityAsync(nameof(UploadExtensionDataActivity),
                     It.Is<(ItemsExtensionData data, string scope)>(t => 
                     t.scope == RuleScopes.ReleasePipelines)))
                 .Returns(Task.CompletedTask);
 
             starter
-                .Setup(x => x.CallActivityAsync(nameof(LogAnalyticsUploadActivity),
-                    It.Is<LogAnalyticsUploadActivityRequest>(l =>
-                    l.PreventiveLogItems.All(p => p.Scope == RuleScopes.ReleasePipelines))))
+                .Setup(x => x.CallActivityAsync(nameof(UploadPreventiveRuleLogsActivity),
+                    It.IsAny<IEnumerable<PreventiveLogItem>>()))
                 .Returns(Task.CompletedTask);
 
             starter
-                .Setup(x => x.CallActivityWithRetryAsync<ReleaseBuildsReposLink>(
-                    nameof(GetReleaseBuildRepoLinksActivity), It.IsAny<RetryOptions>(),
-                    It.IsAny<ReleasePipelinesScanActivityRequest>()))
-                .ReturnsAsync(_fixture.Create<ReleaseBuildsReposLink>())
+                .Setup(x => x.CallActivityAsync<IList<ProductionItem>>(
+                    nameof(LinkCisToBuildPipelinesActivity), 
+                    It.IsAny<(ReleaseDefinition, IList<string>, string)>()))
+                .ReturnsAsync(_fixture.Create<IList<ProductionItem>>())
                 .Verifiable();
 
             var environmentConfig = _fixture.Create<EnvironmentConfig>();
@@ -96,124 +94,6 @@ namespace Functions.Tests.Orchestrators
 
             //Assert           
             mocks.VerifyAll();
-        }
-
-        [Fact]
-        public void ShouldCreateRequestsWithCiIdentifiersOfMultipleReleasePipelines()
-        {
-            //Arrange
-            var releaseBuildRepoLinks = new List<ReleaseBuildsReposLink>
-            {
-                new ReleaseBuildsReposLink
-                {
-                    ReleasePipelineId = "rel1",
-                    BuildPipelineIds = new List<string> { "b1", "b2" },
-                    RepositoryIds = new List<string> { "rep1" }
-                },
-                new ReleaseBuildsReposLink
-                {
-                    ReleasePipelineId = "rel2",
-                    BuildPipelineIds = new List<string> { "b1", "b2" },
-                    RepositoryIds = new List<string> { "rep1" }
-                }
-            };
-            var request = new ItemOrchestratorRequest
-            {
-                Project = new Project(),
-                ProductionItems = new List<ProductionItem>
-                {
-                    new ProductionItem { ItemId = "rel1", CiIdentifiers = new List<string>() { "c1", "c2" } },
-                    new ProductionItem { ItemId = "rel2", CiIdentifiers = new List<string>() { "c3", "c4" } },
-                }
-            };
-
-            //Act
-            var function = new ReleasePipelinesOrchestration(
-                new Fixture().Create<EnvironmentConfig>());
-            var (buildRequest, repoRequest) = 
-                function.CreateItemOrchestratorRequests(releaseBuildRepoLinks, request);
-
-            //Assert
-            buildRequest.ProductionItems.Count.ShouldBe(2);
-            buildRequest.ProductionItems[0].CiIdentifiers.Count.ShouldBe(4);
-            repoRequest.ProductionItems.Count.ShouldBe(1);
-            repoRequest.ProductionItems[0].CiIdentifiers.Count.ShouldBe(4);
-        }
-
-        [Fact]
-        public void ShouldCreateRequestsWithoutCiIdentifiersOfOtherReleasePipelines()
-        {
-            //Arrange
-            var releaseBuildRepoLinks = new List<ReleaseBuildsReposLink>
-            {
-                new ReleaseBuildsReposLink
-                {
-                    ReleasePipelineId = "rel1",
-                    BuildPipelineIds = new List<string> { "b1" },
-                    RepositoryIds = new List<string> { "rep1" }
-                }
-            };
-            var request = new ItemOrchestratorRequest
-            {
-                Project = new Project(),
-                ProductionItems = new List<ProductionItem>
-                {
-                    new ProductionItem { ItemId = "otherRelease", CiIdentifiers = new List<string>() { "c1" } },
-                    new ProductionItem { ItemId = "rel1", CiIdentifiers = new List<string>() { "c2" } },
-                }
-            };
-
-            //Act
-            var function = new ReleasePipelinesOrchestration(
-                new Fixture().Create<EnvironmentConfig>());
-            var (buildRequest, repoRequest) =
-                function.CreateItemOrchestratorRequests(releaseBuildRepoLinks, request);
-
-            //Assert
-            buildRequest.ProductionItems[0].CiIdentifiers.ShouldContain("c2");
-            buildRequest.ProductionItems[0].CiIdentifiers.ShouldNotContain("c1");
-            repoRequest.ProductionItems[0].CiIdentifiers.ShouldContain("c2");
-            repoRequest.ProductionItems[0].CiIdentifiers.ShouldNotContain("c1");
-        }
-
-        [Fact]
-        public void ShouldCreateRequestsWithoutDoubleCiIdentifiers()
-        {
-            //Arrange
-            var releaseBuildRepoLinks = new List<ReleaseBuildsReposLink>
-            {
-                new ReleaseBuildsReposLink
-                {
-                    ReleasePipelineId = "rel1",
-                    BuildPipelineIds = new List<string> { "b1" },
-                    RepositoryIds = new List<string> { "rep1" }
-                },
-                new ReleaseBuildsReposLink
-                {
-                    ReleasePipelineId = "rel2",
-                    BuildPipelineIds = new List<string> { "b1" },
-                    RepositoryIds = new List<string> { "rep1" }
-                }
-            };
-            var request = new ItemOrchestratorRequest
-            {
-                Project = new Project(),
-                ProductionItems = new List<ProductionItem>
-                    {
-                        new ProductionItem { ItemId = "rel1", CiIdentifiers = new List<string>() { "c1", "c2" } },
-                        new ProductionItem { ItemId = "rel2", CiIdentifiers = new List<string>() { "c1", "c2" } },
-                    }
-            };
-
-            //Act
-            var function = new ReleasePipelinesOrchestration(
-                new Fixture().Create<EnvironmentConfig>());
-            var(buildRequest, repoRequest) = 
-                    function.CreateItemOrchestratorRequests(releaseBuildRepoLinks, request);
-
-            //Assert
-            buildRequest.ProductionItems[0].CiIdentifiers.Count.ShouldBe(2);
-            repoRequest.ProductionItems[0].CiIdentifiers.Count.ShouldBe(2);
         }
     }
 }

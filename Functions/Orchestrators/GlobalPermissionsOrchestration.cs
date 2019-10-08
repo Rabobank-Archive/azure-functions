@@ -27,7 +27,8 @@ namespace Functions.Orchestrators
 
             context.SetCustomStatus(new ScanOrchestrationStatus
             {
-                Project = request.Project.Name, Scope = RuleScopes.GlobalPermissions
+                Project = request.Project.Name,
+                Scope = RuleScopes.GlobalPermissions
             });
 
             var data = new ItemsExtensionData
@@ -41,16 +42,14 @@ namespace Functions.Orchestrators
                 Reports = new List<ItemExtensionData>
                 {
                     await context.CallActivityWithRetryAsync<ItemExtensionData>(nameof(
-                        GlobalPermissionsScanActivity), RetryHelper.ActivityRetryOptions, request)
+                        ScanGlobalPermissionsActivity), RetryHelper.ActivityRetryOptions, request)
                 }
             };
 
-            await context.CallActivityAsync(nameof(LogAnalyticsUploadActivity), new LogAnalyticsUploadActivityRequest
-            {
-                PreventiveLogItems = data.Flatten(RuleScopes.GlobalPermissions, context.InstanceId)
-            });
+            await context.CallActivityAsync(nameof(UploadPreventiveRuleLogsActivity), 
+                data.Flatten(RuleScopes.GlobalPermissions, context.InstanceId));
 
-            await context.CallActivityAsync(nameof(ExtensionDataUploadActivity), 
+            await context.CallActivityAsync(nameof(UploadExtensionDataActivity), 
                 (permissions: data, RuleScopes.GlobalPermissions));
         }
     }

@@ -19,7 +19,7 @@ namespace Functions.Orchestrators
                 await context.CallActivityAsync<List<ConfigurationItem>>(
                     nameof(GetConfigurationItemsFromTableStorageActivity), null);
 
-            await context.CallActivityAsync(nameof(LogAnalyticsConfigurationItemsUploadActivity), configurationItems);
+            await context.CallActivityAsync(nameof(UploadConfigurationItemLogsActivity), configurationItems);
         }
     }
 }

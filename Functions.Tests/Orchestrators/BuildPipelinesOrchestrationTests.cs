@@ -39,15 +39,15 @@ namespace Functions.Tests.Orchestrators
                 .Verifiable();
 
             starter.Setup(x => x.CallActivityWithRetryAsync<ItemExtensionData>(
-                nameof(BuildPipelinesScanActivity), It.IsAny<RetryOptions>(), 
+                nameof(ScanBuildPipelinesActivity), It.IsAny<RetryOptions>(), 
                     It.IsAny<BuildPipelinesScanActivityRequest>()))
                 .ReturnsAsync(fixture.Create<ItemExtensionData>())
                 .Verifiable();
             
             starter
                 .Setup(x => x.CallActivityWithRetryAsync<List<BuildDefinition>>(
-                    nameof(BuildDefinitionsActivity), It.IsAny<RetryOptions>(),
-                    It.IsAny<Project>()))
+                    nameof(GetBuildPipelinesActivity), It.IsAny<RetryOptions>(),
+                    It.IsAny<string>()))
                 .ReturnsAsync(fixture.CreateMany<BuildDefinition>().ToList())
                 .Verifiable();
             
@@ -55,15 +55,14 @@ namespace Functions.Tests.Orchestrators
                 .Setup(x => x.CurrentUtcDateTime).Returns(new DateTime());
                 
             starter
-                .Setup(x => x.CallActivityAsync(nameof(ExtensionDataUploadActivity),
+                .Setup(x => x.CallActivityAsync(nameof(UploadExtensionDataActivity),
                     It.Is<(ItemsExtensionData data, string scope)>(t => 
                     t.scope == RuleScopes.BuildPipelines)))
                 .Returns(Task.CompletedTask);
 
             starter
-                .Setup(x => x.CallActivityAsync(nameof(LogAnalyticsUploadActivity),
-                    It.Is<LogAnalyticsUploadActivityRequest>(l =>
-                    l.PreventiveLogItems.All(p => p.Scope == RuleScopes.BuildPipelines))))
+                .Setup(x => x.CallActivityAsync(nameof(UploadPreventiveRuleLogsActivity),
+                    It.IsAny<IEnumerable<PreventiveLogItem>>()))
                 .Returns(Task.CompletedTask);
 
             var environmentConfig = fixture.Create<EnvironmentConfig>();

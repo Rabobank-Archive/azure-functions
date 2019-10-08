@@ -22,7 +22,7 @@ namespace Functions.Orchestrators
         }
 
         [FunctionName(nameof(ReleasePipelinesOrchestration))]
-        public async Task<(ItemOrchestratorRequest, ItemOrchestratorRequest)> RunAsync(
+        public async Task<ItemOrchestratorRequest> RunAsync(
             [OrchestrationTrigger] DurableOrchestrationContextBase context)
         {
             var request = context.GetInput<ItemOrchestratorRequest>();
@@ -33,8 +33,9 @@ namespace Functions.Orchestrators
                 Scope = RuleScopes.ReleasePipelines
             });
 
-            var releaseDefinitions = await context.CallActivityWithRetryAsync<List<Response.ReleaseDefinition>>(
-                nameof(ReleaseDefinitionsForProjectActivity), RetryHelper.ActivityRetryOptions, request.Project);
+            var releasePipelines = 
+                await context.CallActivityWithRetryAsync<List<Response.ReleaseDefinition>>(
+                nameof(GetReleasePipelinesActivity), RetryHelper.ActivityRetryOptions, request.Project.Id);
 
             var data = new ItemsExtensionData
             {
@@ -44,100 +45,47 @@ namespace Functions.Orchestrators
                     _config, request.Project.Name, RuleScopes.ReleasePipelines),
                 HasReconcilePermissionUrl = ReconcileFunction.HasReconcilePermissionUrl(
                     _config, request.Project.Id),
-                Reports = await Task.WhenAll(releaseDefinitions.Select(b =>
-                    context.CallActivityWithRetryAsync<ItemExtensionData>(nameof(ReleasePipelinesScanActivity),
-                        RetryHelper.ActivityRetryOptions, new ReleasePipelinesScanActivityRequest
-                        {
-                            Project = request.Project,
-                            ReleaseDefinition = b,
-                            CiIdentifiers = request.ProductionItems
-                                .Where(r => r.ItemId == b.Id)
-                                .SelectMany(r => r.CiIdentifiers)
-                                .ToList()
-                        })))
-            };
-
-            await context.CallActivityAsync(nameof(LogAnalyticsUploadActivity),
-                new LogAnalyticsUploadActivityRequest
-                {
-                    PreventiveLogItems = data.Flatten(RuleScopes.ReleasePipelines, context.InstanceId)
-                });
-
-            await context.CallActivityAsync(nameof(ExtensionDataUploadActivity),
-                (releasePipelines: data, RuleScopes.ReleasePipelines));
-
-            var releaseBuildRepoLinks = new List<ReleaseBuildsReposLink>
-            (
-                await Task.WhenAll(releaseDefinitions
-                .Where(r => request.ProductionItems.Select(p => p.ItemId).Contains(r.Id))
-                .Select(r => context.CallActivityWithRetryAsync<ReleaseBuildsReposLink>(
-                    nameof(GetReleaseBuildRepoLinksActivity), RetryHelper.ActivityRetryOptions, 
+                Reports = 
+                    await Task.WhenAll(releasePipelines.Select(r =>
+                    context.CallActivityWithRetryAsync<ItemExtensionData>(
+                    nameof(ScanReleasePipelinesActivity), RetryHelper.ActivityRetryOptions, 
                     new ReleasePipelinesScanActivityRequest
                     {
                         Project = request.Project,
-                        ReleaseDefinition = r
+                        ReleaseDefinition = r,
+                        CiIdentifiers = request.ProductionItems
+                            .Where(p => p.ItemId == r.Id)
+                            .SelectMany(p => p.CiIdentifiers)
+                            .ToList()
                     })))
-            );
+            };
 
-            return CreateItemOrchestratorRequests(releaseBuildRepoLinks, request);
-        }
+            await context.CallActivityAsync(nameof(UploadPreventiveRuleLogsActivity),
+                data.Flatten(RuleScopes.ReleasePipelines, context.InstanceId));
 
-        public (ItemOrchestratorRequest, ItemOrchestratorRequest) CreateItemOrchestratorRequests(
-            IList<ReleaseBuildsReposLink> releaseBuildRepoLinks, ItemOrchestratorRequest cisPerRelease)
-        {
-            var releasesPerBuild = new Dictionary<string, IList<string>>();
-            releaseBuildRepoLinks
-                .Where(l => l.BuildPipelineIds != null)
-                .SelectMany(l => l.BuildPipelineIds)
-                .Distinct()
-                .ToList()
-                .ForEach(b => releasesPerBuild.Add(b, releaseBuildRepoLinks
-                    .Where(l => l.BuildPipelineIds != null && l.BuildPipelineIds.Contains(b))
-                    .Select(l => l.ReleasePipelineId)
-                    .ToList()));
+            await context.CallActivityAsync(nameof(UploadExtensionDataActivity),
+                (releasePipelines: data, RuleScopes.ReleasePipelines));
 
-            var releasesPerRepo = new Dictionary<string, IList<string>>();
-            releaseBuildRepoLinks
-                .Where(l => l.RepositoryIds != null)
-                .SelectMany(l => l.RepositoryIds)
-                .Distinct()
-                .ToList()
-                .ForEach(r => releasesPerRepo.Add(r, releaseBuildRepoLinks
-                    .Where(l => l.RepositoryIds != null && l.RepositoryIds.Contains(r))
-                    .Select(l => l.ReleasePipelineId)
-                    .ToList()));
-
-            return (
-                new ItemOrchestratorRequest
-                {
-                    Project = cisPerRelease.Project,
-                    ProductionItems = releasesPerBuild
-                        .Select(b => new ProductionItem
-                        {
-                            ItemId = b.Key,
-                            CiIdentifiers = cisPerRelease.ProductionItems
-                                .Where(r => b.Value.Contains(r.ItemId))
-                                .SelectMany(c => c.CiIdentifiers)
-                                .Distinct()
-                                .ToList()
-                        })
-                        .ToList()
-                },
-                new ItemOrchestratorRequest
-                {
-                    Project = cisPerRelease.Project,
-                    ProductionItems = releasesPerRepo
-                        .Select(b => new ProductionItem
-                        {
-                            ItemId = b.Key,
-                            CiIdentifiers = cisPerRelease.ProductionItems
-                                .Where(r => b.Value.Contains(r.ItemId))
-                                .SelectMany(c => c.CiIdentifiers)
-                                .Distinct()
-                                .ToList()
-                        })
-                        .ToList()
-                });
+            return new ItemOrchestratorRequest
+            {
+                Project = request.Project,
+                ProductionItems = (await Task.WhenAll(releasePipelines
+                    .Where(r => request.ProductionItems.Select(p => p.ItemId).Contains(r.Id))
+                    .Select(r => context.CallActivityAsync<IList<ProductionItem>>(
+                        nameof(LinkCisToBuildPipelinesActivity), (r, request.ProductionItems.First(
+                            p => p.ItemId == r.Id).CiIdentifiers, request.Project.Id)))))
+                    .SelectMany(p => p)
+                    .GroupBy(p => p.ItemId)
+                    .Select(g => new ProductionItem
+                    {
+                        ItemId = g.Key,
+                        CiIdentifiers = g
+                            .SelectMany(p => p.CiIdentifiers)
+                            .Distinct()
+                            .ToList()
+                    })
+                    .ToList()
+            };
         }
     }
 }
