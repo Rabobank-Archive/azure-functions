@@ -23,13 +23,13 @@ namespace Functions.Activities
         }
 
         [FunctionName(nameof(CreateHooksActivity))]
-        public async Task RunAsync([ActivityTrigger] (IList<Response.Hook>, Response.Project) data)
+        public async Task RunAsync([ActivityTrigger] (IList<Response.Hook>, Response.Project) input)
         {
-            if (data.Item1 == null || data.Item2 == null)
-                throw new ArgumentNullException(nameof(data));
+            if (input.Item1 == null || input.Item2 == null)
+                throw new ArgumentNullException(nameof(input));
 
-            var existingHooks = data.Item1;
-            var project = data.Item2;
+            var existingHooks = input.Item1;
+            var project = input.Item2;
 
             await AddHookIfNotSubscribedAsync(
                 Hooks.AddHookSubscription(),

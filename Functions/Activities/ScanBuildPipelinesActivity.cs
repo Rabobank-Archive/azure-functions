@@ -26,14 +26,14 @@ namespace Functions.Activities
 
         [FunctionName(nameof(ScanBuildPipelinesActivity))]
         public async Task<ItemExtensionData> RunAsync(
-            [ActivityTrigger] (Response.Project, Response.BuildDefinition, IList<string>) data)
+            [ActivityTrigger] (Response.Project, Response.BuildDefinition, IList<string>) input)
         {
-            if (data.Item1 == null || data.Item2 == null || data.Item3 == null)
-                throw new ArgumentNullException(nameof(data));
+            if (input.Item1 == null || input.Item2 == null || input.Item3 == null)
+                throw new ArgumentNullException(nameof(input));
 
-            var project = data.Item1;
-            var buildPipeline = data.Item2;
-            var ciIdentifiers = data.Item3;
+            var project = input.Item1;
+            var buildPipeline = input.Item2;
+            var ciIdentifiers = input.Item3;
 
             var rules = _rulesProvider.BuildRules(_azuredo).ToList();
 

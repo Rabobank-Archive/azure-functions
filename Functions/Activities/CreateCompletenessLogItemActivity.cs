@@ -13,14 +13,14 @@ namespace Functions.Activities
     public class CreateCompletenessLogItemActivity
     {
         [FunctionName(nameof(CreateCompletenessLogItemActivity))]
-        public CompletenessLogItem Run([ActivityTrigger] (DateTime, Orchestrator, IList<Orchestrator>) data)
+        public CompletenessLogItem Run([ActivityTrigger] (DateTime, Orchestrator, IList<Orchestrator>) input)
         {
-            if (data.Item2 == null || data.Item3 == null)
-                throw new ArgumentNullException(nameof(data));
+            if (input.Item2 == null || input.Item3 == null)
+                throw new ArgumentNullException(nameof(input));
 
-            var analysisCompleted = data.Item1;
-            var supervisor = data.Item2;
-            var projectScanners = data.Item3;
+            var analysisCompleted = input.Item1;
+            var supervisor = input.Item2;
+            var projectScanners = input.Item3;
 
             var serializer = new JsonSerializer();
             serializer.Converters.Add(new CustomStatusConverter());

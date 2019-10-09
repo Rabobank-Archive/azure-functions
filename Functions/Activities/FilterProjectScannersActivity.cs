@@ -10,13 +10,13 @@ namespace Functions.Activities
     public class FilterProjectScannersActivity
     {
         [FunctionName(nameof(FilterProjectScannersActivity))]
-        public IList<Orchestrator> Run([ActivityTrigger] (Orchestrator, IList<Orchestrator>) data)
+        public IList<Orchestrator> Run([ActivityTrigger] (Orchestrator, IList<Orchestrator>) input)
         {
-            if (data.Item1 == null || data.Item2 == null)
-                throw new ArgumentNullException(nameof(data));
+            if (input.Item1 == null || input.Item2 == null)
+                throw new ArgumentNullException(nameof(input));
 
-            var supervisor = data.Item1;
-            var allProjectScanners = data.Item2;
+            var supervisor = input.Item1;
+            var allProjectScanners = input.Item2;
 
             return allProjectScanners
                 .Where(i => OrchestrationHelper.GetSupervisorId(i.InstanceId) == supervisor.InstanceId)

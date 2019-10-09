@@ -67,7 +67,7 @@ namespace Functions.Tests.Activities
 
             var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () => 
                 await activity.RunAsync((null, null, null)));
-            exception.Message.ShouldContainWithoutWhitespace("Value cannot be null. Parameter name: data");
+            exception.Message.ShouldContainWithoutWhitespace("Value cannot be null. Parameter name: input");
         }
         
         [Fact]
@@ -93,7 +93,7 @@ namespace Functions.Tests.Activities
 
             var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () => 
                 await activity.RunAsync((null, releasePipeline, ciIdentifiers)));
-            exception.Message.ShouldContainWithoutWhitespace("Value cannot be null. Parameter name: data");
+            exception.Message.ShouldContainWithoutWhitespace("Value cannot be null. Parameter name: input");
         }
 
         [Fact]
@@ -119,7 +119,7 @@ namespace Functions.Tests.Activities
 
             var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () => 
                 await activity.RunAsync((project, null, ciIdentifiers)));
-            exception.Message.ShouldContainWithoutWhitespace("Value cannot be null. Parameter name: data");
+            exception.Message.ShouldContainWithoutWhitespace("Value cannot be null. Parameter name: input");
         }
     }
 }

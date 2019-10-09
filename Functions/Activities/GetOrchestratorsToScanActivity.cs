@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Functions.Model;
 using Functions.Helpers;
+using Functions.Orchestrators;
 using Microsoft.Azure.WebJobs;
 
 namespace Functions.Activities
@@ -39,10 +40,10 @@ namespace Functions.Activities
                         DateTime.Now, runtimeStatuses, 1000, continuationToken)
                     .ConfigureAwait(false);
                 supervisors.AddRange(orchestratorsPage.DurableOrchestrationState
-                    .Where(x => x.Name == "ProjectScanSupervisor")
+                    .Where(x => x.Name == nameof(ProjectScanSupervisor))
                     .Select(OrchestrationHelper.ConvertToOrchestrator));
                 projectScanners.AddRange(orchestratorsPage.DurableOrchestrationState
-                    .Where(x => x.Name == "ProjectScanOrchestrator")
+                    .Where(x => x.Name == nameof(ProjectScanOrchestrator))
                     .Select(OrchestrationHelper.ConvertToOrchestrator));
                 continuationToken = orchestratorsPage.ContinuationToken;
             } while (Encoding.UTF8.GetString(Convert.FromBase64String(continuationToken)) != "null");

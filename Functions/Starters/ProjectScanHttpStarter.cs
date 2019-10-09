@@ -35,7 +35,7 @@ namespace Functions.Starters
 
         [FunctionName(nameof(ProjectScanHttpStarter))]
         public async Task<HttpResponseMessage> RunAsync(
-            [HttpTrigger(AuthorizationLevel.Anonymous, Route = "scan/{organization}/{project}/{scope}")]
+            [HttpTrigger(AuthorizationLevel.Anonymous, Route = "scan/{organization}/{projectName}/{scope}")]
             HttpRequestMessage request, string organization, string projectName, string scope,
             [OrchestrationClient] DurableOrchestrationClientBase starter)
         {

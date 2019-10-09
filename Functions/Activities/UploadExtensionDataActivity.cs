@@ -19,9 +19,9 @@ namespace Functions.Activities
         }
 
         [FunctionName(nameof(UploadExtensionDataActivity))]
-        public async Task RunAsync([ActivityTrigger] DurableActivityContext inputs)
+        public async Task RunAsync([ActivityTrigger] DurableActivityContext input)
         {
-            var (data, scope) = inputs.GetInput<(ItemsExtensionData, string)>();
+            var (data, scope) = input.GetInput<(ItemsExtensionData, string)>();
             await _azuredo.PutAsync(ExtensionManagement.ExtensionData<ExtensionDataReports>(
                 "tas", _config.ExtensionName, scope), data)
                 .ConfigureAwait(false);

@@ -26,13 +26,13 @@ namespace Functions.Activities
 
         [FunctionName(nameof(ScanGlobalPermissionsActivity))]
         public async Task<ItemExtensionData> RunAsync([ActivityTrigger]
-            (Response.Project, IList<ProductionItem>) data)
+            (Response.Project, IList<ProductionItem>) input)
         {
-            if (data.Item1 == null)
-                throw new ArgumentNullException(nameof(data));
+            if (input.Item1 == null)
+                throw new ArgumentNullException(nameof(input));
 
-            var project = data.Item1;
-            var productionItems = data.Item2;
+            var project = input.Item1;
+            var productionItems = input.Item2;
 
             var rules = _rulesProvider.GlobalPermissions(_azuredo);
 

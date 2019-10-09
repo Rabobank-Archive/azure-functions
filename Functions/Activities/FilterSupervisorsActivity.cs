@@ -9,13 +9,13 @@ namespace Functions.Activities
     public class FilterSupervisorsActivity
     {
         [FunctionName(nameof(FilterSupervisorsActivity))]
-        public IList<Orchestrator> Run([ActivityTrigger] (IList<Orchestrator>, IList<string>) data)
+        public IList<Orchestrator> Run([ActivityTrigger] (IList<Orchestrator>, IList<string>) input)
         {
-            if (data.Item1 == null || data.Item2 == null)
-                throw new ArgumentNullException(nameof(data));
+            if (input.Item1 == null || input.Item2 == null)
+                throw new ArgumentNullException(nameof(input));
 
-            var allSupervisors = data.Item1;
-            var scannedSupervisors = data.Item2;
+            var allSupervisors = input.Item1;
+            var scannedSupervisors = input.Item2;
 
             var runtimeStatusesToScan = new List<OrchestrationRuntimeStatus>
             {
