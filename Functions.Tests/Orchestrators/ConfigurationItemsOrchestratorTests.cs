@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Dynamitey.DynamicObjects;
 using Functions.Activities;
 using Functions.Model;
 using Functions.Orchestrators;

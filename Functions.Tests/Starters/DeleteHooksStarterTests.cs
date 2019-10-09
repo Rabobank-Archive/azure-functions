@@ -1,4 +1,3 @@
-using System.Net.Http;
 using AutoFixture;
 using Functions.Orchestrators;
 using Functions.Starters;

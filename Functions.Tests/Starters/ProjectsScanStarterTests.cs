@@ -1,5 +1,6 @@
 using Functions.Orchestrators;
 using Functions.Starters;
+using Functions.Tests.Helpers;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Timers;
 using Moq;

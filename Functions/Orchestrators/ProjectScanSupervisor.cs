@@ -6,7 +6,6 @@ using System.Linq;
 using Functions.Helpers;
 using Task = System.Threading.Tasks.Task;
 using System.Threading;
-using System;
 
 namespace Functions.Orchestrators
 {

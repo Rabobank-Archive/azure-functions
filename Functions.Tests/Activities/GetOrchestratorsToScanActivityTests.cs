@@ -83,7 +83,7 @@ namespace Functions.Tests.Activities
 
             //Act
             var func = new GetOrchestratorsToScanActivity();
-            (var supervisors, var projectScanOrchestrators) = await func.RunAsync(null, client);
+            var (supervisors, _) = await func.RunAsync(null, client);
 
             // Assert
             supervisors[0].CustomStatus.ShouldBeNull();

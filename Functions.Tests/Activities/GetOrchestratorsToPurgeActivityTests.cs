@@ -52,7 +52,7 @@ namespace Functions.Tests.Activities
 
             //Act
             var func = new GetOrchestratorsToPurgeActivity();
-            (var runningOrchestratorIds, var subOrchestratorIds) = await func.RunAsync(null, client);
+            var (_, subOrchestratorIds) = await func.RunAsync(null, client);
 
             //Assert
             subOrchestratorIds.Count.ShouldBe(7);
@@ -85,7 +85,7 @@ namespace Functions.Tests.Activities
 
             //Act
             var func = new GetOrchestratorsToPurgeActivity();
-            (var runningOrchestratorIds, var subOrchestratorIds) = await func.RunAsync(null, client);
+            var (runningOrchestratorIds, _) = await func.RunAsync(null, client);
 
             //Assert
             runningOrchestratorIds.Count.ShouldBe(expected);

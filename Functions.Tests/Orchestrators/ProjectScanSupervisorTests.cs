@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 using AzDoCompliancy.CustomStatus;
+using Functions.Tests.Helpers;
 
 namespace Functions.Tests.Orchestrators
 {

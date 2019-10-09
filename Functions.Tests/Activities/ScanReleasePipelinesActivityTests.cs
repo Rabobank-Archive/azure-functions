@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using AutoFixture;
 using AutoFixture.AutoMoq;
 using Functions.Activities;
-using Functions.Model;
 using Moq;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;

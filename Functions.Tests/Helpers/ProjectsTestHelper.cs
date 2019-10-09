@@ -1,12 +1,12 @@
-using SecurePipelineScan.VstsService.Response;
-using Shouldly;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AutoFixture;
+using SecurePipelineScan.VstsService.Response;
+using Shouldly;
 using Xunit;
-using System;
 
-namespace Functions.Tests
+namespace Functions.Tests.Helpers
 {
     public class ProjectsTestHelper
     {

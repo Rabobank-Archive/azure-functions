@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using AutoFixture;
 using Xunit;
 using Functions.Activities;
-using Functions.Model;
 
 namespace Functions.Tests.Orchestrators
 {
