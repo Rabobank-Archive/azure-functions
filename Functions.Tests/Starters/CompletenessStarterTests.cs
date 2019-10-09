@@ -6,7 +6,7 @@ using Microsoft.Azure.WebJobs.Extensions.Timers;
 using NSubstitute;
 using Xunit;
 
-namespace Functions.Tests.Completeness.Starters
+namespace Functions.Tests.Starters
 {
     public class CompletenessStarterTests
     {
