@@ -124,8 +124,8 @@ namespace Functions.Tests.Starters
             var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object);
             await function.RunAsync(request, "somecompany", "TAS", RuleScopes.GlobalPermissions, mock.Object);
 
-            mock.Verify(x => x.StartNewAsync(nameof(GlobalPermissionsOrchestration), 
-                It.IsAny<ItemOrchestratorRequest>()));
+            mock.Verify(x => x.StartNewAsync(nameof(GlobalPermissionsOrchestrator), 
+                It.IsAny<(Response.Project, List<ProductionItem>)>()));
         }
 
         [Fact]
@@ -153,8 +153,8 @@ namespace Functions.Tests.Starters
             var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object);
             await function.RunAsync(request, "somecompany", "TAS", RuleScopes.Repositories, mock.Object);
 
-            mock.Verify(x => x.StartNewAsync(nameof(RepositoriesOrchestration), 
-                It.IsAny<ItemOrchestratorRequest>()));
+            mock.Verify(x => x.StartNewAsync(nameof(RepositoriesOrchestrator), 
+                It.IsAny<(Response.Project, List<ProductionItem>)>()));
         }
 
         [Fact]
@@ -182,8 +182,8 @@ namespace Functions.Tests.Starters
             var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object);
             await function.RunAsync(request, "somecompany", "TAS", RuleScopes.BuildPipelines, mock.Object);
 
-            mock.Verify(x => x.StartNewAsync(nameof(BuildPipelinesOrchestration),
-                It.IsAny<ItemOrchestratorRequest>()));
+            mock.Verify(x => x.StartNewAsync(nameof(BuildPipelinesOrchestrator),
+                It.IsAny<(Response.Project, List<ProductionItem>)>()));
         }
 
         [Fact]
@@ -210,8 +210,8 @@ namespace Functions.Tests.Starters
             var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object);
             await function.RunAsync(request, "somecompany", "TAS", RuleScopes.ReleasePipelines, mock.Object);
 
-            mock.Verify(x => x.StartNewAsync(nameof(ReleasePipelinesOrchestration),
-                It.IsAny<ItemOrchestratorRequest>()));
+            mock.Verify(x => x.StartNewAsync(nameof(ReleasePipelinesOrchestrator),
+                It.IsAny<(Response.Project, List<ProductionItem>)>()));
         }
 
         private static ClaimsPrincipal PrincipalWithClaims() =>

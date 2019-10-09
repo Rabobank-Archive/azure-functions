@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Functions.Completeness.Activities;
+using Functions.Activities;
 using Microsoft.Azure.WebJobs;
 
-namespace Functions.Completeness.Orchestrators
+namespace Functions.Orchestrators
 {
     public class OrchestratorCleanUpOrchestrator
     {

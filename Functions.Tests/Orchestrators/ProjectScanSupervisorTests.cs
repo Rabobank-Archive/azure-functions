@@ -31,7 +31,7 @@ namespace Functions.Tests.Orchestrators
 
             //Assert
             orchestrationClientMock.Verify(
-                x => x.CallSubOrchestratorAsync(nameof(ProjectScanOrchestration), It.IsAny<string>(), It.IsAny<object>()),
+                x => x.CallSubOrchestratorAsync(nameof(ProjectScanOrchestrator), It.IsAny<string>(), It.IsAny<object>()),
                 Times.Exactly(count));
         }
 
@@ -71,7 +71,7 @@ namespace Functions.Tests.Orchestrators
 
             //Assert
             orchestrationClientMock.Verify(
-                x => x.CallSubOrchestratorAsync(nameof(ProjectScanOrchestration),
+                x => x.CallSubOrchestratorAsync(nameof(ProjectScanOrchestrator),
                     It.Is<string>(i => i.Contains(projects.First().Id)), It.IsAny<object>()));
         }
         
@@ -91,7 +91,7 @@ namespace Functions.Tests.Orchestrators
 
             //Assert
             orchestrationClientMock.Verify(
-                x => x.CallSubOrchestratorAsync(nameof(ProjectScanOrchestration),
+                x => x.CallSubOrchestratorAsync(nameof(ProjectScanOrchestrator),
                     It.Is<string>(i => i.Contains(orchestrationClientMock.Object.InstanceId)), It.IsAny<object>()));
         }
     }

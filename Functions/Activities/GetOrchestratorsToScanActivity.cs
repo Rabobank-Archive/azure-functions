@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Functions.Completeness.Model;
+using Functions.Model;
+using Functions.Helpers;
 using Microsoft.Azure.WebJobs;
 
-namespace Functions.Completeness.Activities
+namespace Functions.Activities
 {
     public class GetOrchestratorsToScanActivity
     {
@@ -39,27 +40,14 @@ namespace Functions.Completeness.Activities
                     .ConfigureAwait(false);
                 supervisors.AddRange(orchestratorsPage.DurableOrchestrationState
                     .Where(x => x.Name == "ProjectScanSupervisor")
-                    .Select(ConvertToOrchestrator));
+                    .Select(OrchestrationHelper.ConvertToOrchestrator));
                 projectScanners.AddRange(orchestratorsPage.DurableOrchestrationState
-                    .Where(x => x.Name == "ProjectScanOrchestration")
-                    .Select(ConvertToOrchestrator));
+                    .Where(x => x.Name == "ProjectScanOrchestrator")
+                    .Select(OrchestrationHelper.ConvertToOrchestrator));
                 continuationToken = orchestratorsPage.ContinuationToken;
-            }
-            while (Encoding.UTF8.GetString(Convert.FromBase64String(continuationToken)) != "null");
+            } while (Encoding.UTF8.GetString(Convert.FromBase64String(continuationToken)) != "null");
 
             return (supervisors, projectScanners);
-        }
-
-        private static Orchestrator ConvertToOrchestrator(DurableOrchestrationStatus orchestrator)
-        {
-            return new Orchestrator
-            {
-                Name = orchestrator.Name,
-                InstanceId = orchestrator.InstanceId,
-                CreatedTime = orchestrator.CreatedTime,
-                RuntimeStatus = orchestrator.RuntimeStatus,
-                CustomStatus = orchestrator.CustomStatus
-            };
         }
     }
 }

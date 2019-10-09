@@ -8,6 +8,7 @@ using Response = SecurePipelineScan.VstsService.Response;
 using Shouldly;
 using System.Threading.Tasks;
 using Xunit;
+using System.Collections.Generic;
 
 namespace Functions.Tests.Activities
 {
@@ -25,7 +26,9 @@ namespace Functions.Tests.Activities
                 .Verifiable();
 
             var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
-            var request = fixture.Create<BuildPipelinesScanActivityRequest>();
+            var project = fixture.Create<Response.Project>();
+            var buildPipeline = fixture.Create<Response.BuildDefinition>();
+            var ciIdentifiers = fixture.Create<List<string>>();
 
             // Act
             var activity = new ScanBuildPipelinesActivity(
@@ -33,7 +36,7 @@ namespace Functions.Tests.Activities
                 client.Object,
                 provider.Object);
 
-            var result = await activity.RunAsync(request);
+            var result = await activity.RunAsync((project, buildPipeline, ciIdentifiers));
 
             // Assert
             result.ShouldNotBeNull();

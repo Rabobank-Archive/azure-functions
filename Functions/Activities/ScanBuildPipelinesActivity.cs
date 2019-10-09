@@ -2,7 +2,9 @@
 using Microsoft.Azure.WebJobs;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
+using Response = SecurePipelineScan.VstsService.Response;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -24,21 +26,21 @@ namespace Functions.Activities
 
         [FunctionName(nameof(ScanBuildPipelinesActivity))]
         public async Task<ItemExtensionData> RunAsync(
-            [ActivityTrigger] BuildPipelinesScanActivityRequest request)
+            [ActivityTrigger] (Response.Project, Response.BuildDefinition, IList<string>) data)
         {
-            if (request == null)
-                throw new ArgumentNullException(nameof(request));
-            if (request.Project == null)
-                throw new ArgumentNullException(nameof(request.Project));
-            if (request.BuildDefinition == null)
-                throw new ArgumentNullException(nameof(request.BuildDefinition));
+            if (data.Item1 == null || data.Item2 == null || data.Item3 == null)
+                throw new ArgumentNullException(nameof(data));
+
+            var project = data.Item1;
+            var buildPipeline = data.Item2;
+            var ciIdentifiers = data.Item3;
 
             var rules = _rulesProvider.BuildRules(_azuredo).ToList();
 
             return new ItemExtensionData
             {
-                Item = request.BuildDefinition.Name,
-                ItemId = request.BuildDefinition.Id,
+                Item = buildPipeline.Name,
+                ItemId = buildPipeline.Id,
                 Rules = await Task.WhenAll(rules.Select(async rule =>
                     new EvaluatedRule
                     {
@@ -46,14 +48,14 @@ namespace Functions.Activities
                         Description = rule.Description,
                         Why = rule.Why,
                         IsSox = rule.IsSox,
-                        Status = await rule.EvaluateAsync(request.Project.Id, request.BuildDefinition)
+                        Status = await rule.EvaluateAsync(project.Id, buildPipeline)
                             .ConfigureAwait(false),
                         Reconcile = ReconcileFunction.ReconcileFromRule(rule as IReconcile, _config,
-                            request.Project.Id, RuleScopes.BuildPipelines, request.BuildDefinition.Id)
+                            project.Id, RuleScopes.BuildPipelines, buildPipeline.Id)
                     })
                     .ToList())
                     .ConfigureAwait(false),
-                CiIdentifiers = string.Join(",", request.CiIdentifiers)
+                CiIdentifiers = string.Join(",", ciIdentifiers)
             };
         }
     }

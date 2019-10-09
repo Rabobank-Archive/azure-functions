@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using AutoFixture;
 using AutoFixture.AutoNSubstitute;
 using AzDoCompliancy.CustomStatus;
-using Functions.Completeness.Activities;
+using Functions.Activities;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Newtonsoft.Json.Linq;
@@ -13,7 +13,7 @@ using NSubstitute;
 using Shouldly;
 using Xunit;
 
-namespace Functions.Tests.Completeness.Activities
+namespace Functions.Tests.Activities
 {
     public class GetOrchestratorsToPurgeActivityTests
     {
@@ -38,8 +38,8 @@ namespace Functions.Tests.Completeness.Activities
 
             var instances = _fixture.CreateMany<DurableOrchestrationStatus>(10).ToList();
             instances[3].Name = "ProjectScanSupervisor";
-            instances[6].Name = "ProjectScanOrchestration";
-            instances[9].Name = "ProjectScanOrchestration";
+            instances[6].Name = "ProjectScanOrchestrator";
+            instances[9].Name = "ProjectScanOrchestrator";
 
             var client = Substitute.For<DurableOrchestrationClientBase>();
             client

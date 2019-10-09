@@ -11,10 +11,7 @@ namespace Functions.Activities
     {
         private readonly ILogAnalyticsClient _client;
 
-        public UploadConfigurationItemLogsActivity(ILogAnalyticsClient client)
-        {
-            _client = client;
-        }
+        public UploadConfigurationItemLogsActivity(ILogAnalyticsClient client) => _client = client;
 
         [FunctionName(nameof(UploadConfigurationItemLogsActivity))]
         public async Task RunAsync([ActivityTrigger] IEnumerable<ConfigurationItem> request)

@@ -5,7 +5,6 @@ using Polly.Retry;
 using SecurePipelineScan.VstsService;
 using System;
 using System.Net;
-using System.Net.Sockets;
 using System.Threading.Tasks;
 
 namespace Functions.Helpers

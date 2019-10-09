@@ -1,12 +1,12 @@
 ﻿using System.Threading.Tasks;
-using Functions.Completeness.Orchestrators;
-using Functions.Completeness.Starters;
+using Functions.Orchestrators;
+using Functions.Starters;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Timers;
 using NSubstitute;
 using Xunit;
 
-namespace Functions.Tests.Completeness.Starters
+namespace Functions.Tests.Starters
 {
     public class OrchestratorCleanUpStarterTests
     {

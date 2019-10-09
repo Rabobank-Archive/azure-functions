@@ -28,12 +28,13 @@ namespace Functions.Helpers
                              ItemId = a.DefinitionReference.Definition.Id,
                              CiIdentifiers = p.CiIdentifiers
                          };
+
             return GroupAndFilterProductionItems(result);
         }
 
         public static IList<ProductionItem> LinkCisToRepositories(
-                IList<BuildDefinition> buildPipelines, IList<ProductionItem> productionItems,
-                Project project)
+            IList<BuildDefinition> buildPipelines, IList<ProductionItem> productionItems,
+            Project project)
         {
             if (buildPipelines == null)
                 throw new ArgumentNullException(nameof(buildPipelines));
@@ -51,6 +52,7 @@ namespace Functions.Helpers
                              ItemId = b.Repository.Id,
                              CiIdentifiers = p.CiIdentifiers
                          };
+
             return GroupAndFilterProductionItems(result);
         }
 

@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Functions.Model;
 using Microsoft.Azure.WebJobs;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
+using Response = SecurePipelineScan.VstsService.Response;
 
 namespace Functions.Activities
 {
@@ -24,21 +26,23 @@ namespace Functions.Activities
 
         [FunctionName(nameof(ScanRepositoriesActivity))]
         public async Task<ItemExtensionData> RunAsync(
-            [ActivityTrigger] RepositoriesScanActivityRequest request)
+            [ActivityTrigger] (Response.Project, Response.Repository,  
+            IEnumerable<Response.MinimumNumberOfReviewersPolicy>, IList<string>) data)
         {
-            if (request == null)
-                throw new ArgumentNullException(nameof(request));
-            if (request.Project == null)
-                throw new ArgumentNullException(nameof(request.Project));
-            if (request.Policies == null)
-                throw new ArgumentNullException(nameof(request.Policies));
+            if (data.Item1 == null || data.Item2 == null || data.Item3 == null || data.Item4 == null)
+                throw new ArgumentNullException(nameof(data));
+
+            var project = data.Item1;
+            var repository = data.Item2;
+            var policies = data.Item3;
+            var ciIdentifiers = data.Item4;
 
             var rules = _rulesProvider.RepositoryRules(_azuredo).ToList();
 
             return new ItemExtensionData
             {
-                Item = request.Repository.Name,
-                ItemId = request.Repository.Id,
+                Item = repository.Name,
+                ItemId = repository.Id,
                 Rules = await Task.WhenAll(rules.Select(async rule => 
                     new EvaluatedRule
                     {
@@ -46,14 +50,14 @@ namespace Functions.Activities
                         Description = rule.Description,
                         Why = rule.Why,
                         IsSox = rule.IsSox,
-                        Status = await rule.EvaluateAsync(request.Project.Id, request.Repository.Id, request.Policies)
+                        Status = await rule.EvaluateAsync(project.Id, repository.Id, policies)
                             .ConfigureAwait(false),
-                        Reconcile = ReconcileFunction.ReconcileFromRule(rule as IReconcile, _config, 
-                            request.Project.Id, RuleScopes.Repositories, request.Repository.Id)
+                        Reconcile = ReconcileFunction.ReconcileFromRule(rule as IReconcile, _config,
+                            project.Id, RuleScopes.Repositories, repository.Id)
                     })
                     .ToList())
                     .ConfigureAwait(false),
-                CiIdentifiers = string.Join(",", request.CiIdentifiers)
+                CiIdentifiers = string.Join(",", ciIdentifiers)
             };
         }
     }

@@ -12,10 +12,7 @@ namespace Functions.Starters
     {
         private readonly IVstsRestClient _azuredo;
 
-        public ProjectsScanStarter(IVstsRestClient azuredo)
-        {
-            _azuredo = azuredo;
-        }
+        public ProjectsScanStarter(IVstsRestClient azuredo) => _azuredo = azuredo;
 
         [FunctionName(nameof(ProjectsScanStarter))]
         public async Task RunAsync(

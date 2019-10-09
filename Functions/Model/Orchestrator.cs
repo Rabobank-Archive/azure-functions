@@ -2,7 +2,7 @@
 using Newtonsoft.Json.Linq;
 using System;
 
-namespace Functions.Completeness.Model
+namespace Functions.Model
 {
     public class Orchestrator
     {

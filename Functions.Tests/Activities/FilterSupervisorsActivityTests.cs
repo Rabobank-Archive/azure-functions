@@ -3,15 +3,14 @@ using System.Linq;
 using AutoFixture;
 using AutoFixture.AutoNSubstitute;
 using AzDoCompliancy.CustomStatus;
-using Functions.Completeness.Activities;
-using Functions.Completeness.Requests;
-using Functions.Completeness.Model;
+using Functions.Activities;
+using Functions.Model;
 using Microsoft.Azure.WebJobs;
 using Newtonsoft.Json.Linq;
 using Shouldly;
 using Xunit;
 
-namespace Functions.Tests.Completeness.Activities
+namespace Functions.Tests.Activities
 {
     public class FilterSupervisorsActivityTests
     {
@@ -38,15 +37,10 @@ namespace Functions.Tests.Completeness.Activities
                 instances[6].InstanceId,
                 _fixture.Create<string>()
             };
-            var request = new FilterSupervisorsRequest
-            {
-                AllSupervisors = instances,
-                ScannedSupervisors = instanceIds
-            };
 
             //Act
             var fun = new FilterSupervisorsActivity();
-            var filteredInstances = fun.Run(request);
+            var filteredInstances = fun.Run((instances, instanceIds));
 
             //Assert
             filteredInstances.Count.ShouldBe(7);

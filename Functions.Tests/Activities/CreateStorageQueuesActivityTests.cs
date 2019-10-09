@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Functions.Activities;
-using Functions.Helpers;
+using Functions.Model;
 using Microsoft.Azure.WebJobs;
 using Microsoft.WindowsAzure.Storage.Queue;
 using Moq;

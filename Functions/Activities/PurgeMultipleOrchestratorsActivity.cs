@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using DurableTask.Core;
 using Microsoft.Azure.WebJobs;
 
-namespace Functions.Completeness.Activities
+namespace Functions.Activities
 {
     public class PurgeMultipleOrchestratorsActivity
     {

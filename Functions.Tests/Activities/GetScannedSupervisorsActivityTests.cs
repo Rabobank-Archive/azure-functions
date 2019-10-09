@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using AutoFixture;
 using AutoFixture.AutoNSubstitute;
-using Functions.Completeness.Activities;
+using Functions.Activities;
 using LogAnalytics.Client;
 using LogAnalytics.Client.Response;
 using Microsoft.Azure.WebJobs;
@@ -9,7 +9,7 @@ using NSubstitute;
 using Shouldly;
 using Xunit;
 
-namespace Functions.Tests.Completeness.Activities
+namespace Functions.Tests.Activities
 {
     public class GetScannedSupervisorsActivityTests
     {

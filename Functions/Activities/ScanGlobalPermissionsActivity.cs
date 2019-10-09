@@ -2,9 +2,11 @@ using Functions.Model;
 using Microsoft.Azure.WebJobs;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
+using Response = SecurePipelineScan.VstsService.Response;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace Functions.Activities
 {
@@ -24,12 +26,13 @@ namespace Functions.Activities
 
         [FunctionName(nameof(ScanGlobalPermissionsActivity))]
         public async Task<ItemExtensionData> RunAsync([ActivityTrigger]
-            ItemOrchestratorRequest request)
+            (Response.Project, IList<ProductionItem>) data)
         {
-            if (request == null)
-                throw new ArgumentNullException(nameof(request));
-            if (request.Project == null)
-                throw new ArgumentNullException(nameof(request.Project));
+            if (data.Item1 == null)
+                throw new ArgumentNullException(nameof(data));
+
+            var project = data.Item1;
+            var productionItems = data.Item2;
 
             var rules = _rulesProvider.GlobalPermissions(_azuredo);
 
@@ -44,14 +47,14 @@ namespace Functions.Activities
                         Description = r.Description,
                         Why = r.Why,
                         IsSox = r.IsSox,
-                        Status = await r.EvaluateAsync(request.Project.Id)
+                        Status = await r.EvaluateAsync(project.Id)
                             .ConfigureAwait(false),
                         Reconcile = ReconcileFunction.ReconcileFromRule(
-                            _config, request.Project.Id, r as IProjectReconcile)
+                            _config, project.Id, r as IProjectReconcile)
                     })
                     .ToList())
                     .ConfigureAwait(false),
-                CiIdentifiers = string.Join(",", request.ProductionItems
+                CiIdentifiers = string.Join(",", productionItems
                     .SelectMany(p => p.CiIdentifiers)
                     .Distinct())
             };

@@ -1,17 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Functions.Completeness.Requests;
-using Functions.Completeness.Model;
+using Functions.Model;
 using Microsoft.Azure.WebJobs;
 
-namespace Functions.Completeness.Activities
+namespace Functions.Activities
 {
     public class FilterSupervisorsActivity
     {
         [FunctionName(nameof(FilterSupervisorsActivity))]
-        public IList<Orchestrator> Run([ActivityTrigger] FilterSupervisorsRequest request)
+        public IList<Orchestrator> Run([ActivityTrigger] (IList<Orchestrator>, IList<string>) data)
         {
+            if (data.Item1 == null || data.Item2 == null)
+                throw new ArgumentNullException(nameof(data));
+
+            var allSupervisors = data.Item1;
+            var scannedSupervisors = data.Item2;
+
             var runtimeStatusesToScan = new List<OrchestrationRuntimeStatus>
             {
                 OrchestrationRuntimeStatus.Completed,
@@ -21,11 +26,8 @@ namespace Functions.Completeness.Activities
                 OrchestrationRuntimeStatus.Unknown
             };
 
-            if (request == null)
-                throw new ArgumentNullException(nameof(request));
-
-            return request.AllSupervisors
-                .Where(i => !request.ScannedSupervisors.Contains(i.InstanceId) &&
+            return allSupervisors
+                .Where(i => !scannedSupervisors.Contains(i.InstanceId) &&
                     runtimeStatusesToScan.Contains(i.RuntimeStatus) &&
                     i.CustomStatus != null)
                 .ToList();

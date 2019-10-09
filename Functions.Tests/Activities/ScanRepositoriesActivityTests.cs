@@ -4,9 +4,11 @@ using Functions.Activities;
 using Moq;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
+using Response = SecurePipelineScan.VstsService.Response;
 using Shouldly;
 using System.Threading.Tasks;
 using Xunit;
+using System.Collections.Generic;
 
 namespace Functions.Tests.Activities
 {
@@ -25,7 +27,8 @@ namespace Functions.Tests.Activities
 
             var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
 
-            var request = fixture.Create<RepositoriesScanActivityRequest>();
+            var request = fixture.Create<(Response.Project, Response.Repository, 
+                IEnumerable<Response.MinimumNumberOfReviewersPolicy>, IList<string>)>();
 
             // Act
             var activity = new ScanRepositoriesActivity(

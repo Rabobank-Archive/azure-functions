@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 
-namespace Functions.Completeness.Activities
+namespace Functions.Activities
 {
     public class GetOrchestratorsToPurgeActivity
     {
@@ -41,7 +41,7 @@ namespace Functions.Completeness.Activities
                     .Where(x => x.RuntimeStatus == OrchestrationRuntimeStatus.Running)
                     .Select(x => x.InstanceId));
                 subOrchestratorIds.AddRange(orchestratorsPage.DurableOrchestrationState
-                    .Where(x => x.Name != "ProjectScanSupervisor" && x.Name != "ProjectScanOrchestration")
+                    .Where(x => x.Name != "ProjectScanSupervisor" && x.Name != "ProjectScanOrchestrator")
                     .Select(x => x.InstanceId));
                 continuationToken = orchestratorsPage.ContinuationToken;
             }

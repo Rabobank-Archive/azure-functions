@@ -28,6 +28,7 @@ namespace Functions.Activities
             var result = await Task.WhenAll(releasePipelines.Select(
                 r => _azuredo.GetAsync(ReleaseManagement.Definition(projectId, r.Id))))
                 .ConfigureAwait(false);
+
             return result.ToList();
         }
     }

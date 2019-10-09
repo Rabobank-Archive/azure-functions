@@ -3,13 +3,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoFixture;
 using AutoFixture.AutoNSubstitute;
-using Functions.Completeness.Activities;
-using Functions.Completeness.Orchestrators;
+using Functions.Activities;
+using Functions.Orchestrators;
 using Microsoft.Azure.WebJobs;
 using NSubstitute;
 using Xunit;
 
-namespace Functions.Tests.Completeness.Orchestrators
+namespace Functions.Tests.Orchestrators
 {
     public class OrchestratorCleanUpOrchestratorTests
     {

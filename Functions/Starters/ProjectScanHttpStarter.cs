@@ -21,10 +21,10 @@ namespace Functions.Starters
 
         private static readonly IDictionary<string, string> Scopes = new Dictionary<string, string>
         {
-            [RuleScopes.GlobalPermissions] = nameof(GlobalPermissionsOrchestration),
-            [RuleScopes.Repositories] = nameof(RepositoriesOrchestration),
-            [RuleScopes.BuildPipelines] = nameof(BuildPipelinesOrchestration),
-            [RuleScopes.ReleasePipelines] = nameof(ReleasePipelinesOrchestration)
+            [RuleScopes.GlobalPermissions] = nameof(GlobalPermissionsOrchestrator),
+            [RuleScopes.Repositories] = nameof(RepositoriesOrchestrator),
+            [RuleScopes.BuildPipelines] = nameof(BuildPipelinesOrchestrator),
+            [RuleScopes.ReleasePipelines] = nameof(ReleasePipelinesOrchestrator)
         };
 
         public ProjectScanHttpStarter(ITokenizer tokenizer, IVstsRestClient azuredo)
@@ -36,7 +36,7 @@ namespace Functions.Starters
         [FunctionName(nameof(ProjectScanHttpStarter))]
         public async Task<HttpResponseMessage> RunAsync(
             [HttpTrigger(AuthorizationLevel.Anonymous, Route = "scan/{organization}/{project}/{scope}")]
-            HttpRequestMessage request, string organization, string project, string scope,
+            HttpRequestMessage request, string organization, string projectName, string scope,
             [OrchestrationClient] DurableOrchestrationClientBase starter)
         {
             if (starter == null)
@@ -47,16 +47,13 @@ namespace Functions.Starters
                 return new HttpResponseMessage(HttpStatusCode.Unauthorized);
             }
 
-            var orchestratorRequest = new ItemOrchestratorRequest
-            {
-                Project = await _azuredo.GetAsync(Project.ProjectByName(project)),
-                ProductionItems = new List<ProductionItem>()
-            };
+            var project = await _azuredo.GetAsync(Project.ProjectByName(projectName));
+            var productionItems = new List<ProductionItem>();
 
-            if (orchestratorRequest.Project == null)
+            if (project == null)
                 return new HttpResponseMessage(HttpStatusCode.NotFound);
 
-            var instanceId = await starter.StartNewAsync(Orchestration(scope), orchestratorRequest);
+            var instanceId = await starter.StartNewAsync(Orchestration(scope), (project, productionItems));
             return await starter.WaitForCompletionOrCreateCheckStatusResponseAsync(request, instanceId, 
                 TimeSpan.FromSeconds(TimeOut));
         }

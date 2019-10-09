@@ -1,32 +1,24 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Functions.Completeness.Model;
+using Functions.Model;
 using LogAnalytics.Client;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 
-namespace Functions.Completeness.Activities
+namespace Functions.Activities
 {
     public class UploadCompletenessLogsActivity
     {
         private readonly ILogAnalyticsClient _client;
 
-        public UploadCompletenessLogsActivity(ILogAnalyticsClient client)
-        {
-            _client = client;
-        }
+        public UploadCompletenessLogsActivity(ILogAnalyticsClient client) => _client = client;
 
         [FunctionName(nameof(UploadCompletenessLogsActivity))]
-        public Task RunAsync([ActivityTrigger] CompletenessReport request, ILogger logger)
+        public async Task RunAsync([ActivityTrigger] CompletenessLogItem request, ILogger logger)
         {
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
 
-            return RunInternalAsync(request, logger);
-        }
-
-        private async Task RunInternalAsync(CompletenessReport request, ILogger logger)
-        {
             await _client.AddCustomLogJsonAsync("completeness_log", new[] { request }, "AnalysisCompleted")
                 .ConfigureAwait(false);
 

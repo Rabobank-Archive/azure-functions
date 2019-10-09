@@ -9,18 +9,13 @@ namespace Functions.Activities
     public class GetRepositoriesAndPoliciesActivity
     {
         private readonly IVstsRestClient _azuredo;
-        
-        public GetRepositoriesAndPoliciesActivity(IVstsRestClient azuredo)
-        {
-            _azuredo = azuredo;
-        }
-     
+
+        public GetRepositoriesAndPoliciesActivity(IVstsRestClient azuredo) => _azuredo = azuredo;
+
         [FunctionName(nameof(GetRepositoriesAndPoliciesActivity))]
-        public (IEnumerable<Response.Repository>, IEnumerable<Response.MinimumNumberOfReviewersPolicy>) 
-            Run([ActivityTrigger] Response.Project project)
-        {
-            return (_azuredo.Get(Repository.Repositories(project.Id)),
+        public (IEnumerable<Response.Repository>, IEnumerable<Response.MinimumNumberOfReviewersPolicy>)
+            Run([ActivityTrigger] Response.Project project) =>
+                (_azuredo.Get(Repository.Repositories(project.Id)),
                 _azuredo.Get(Policies.MinimumNumberOfReviewersPolicies(project.Id)));
-        }
     }
 }

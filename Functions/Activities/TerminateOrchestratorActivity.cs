@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 
-namespace Functions.Completeness.Activities
+namespace Functions.Activities
 {
     public class TerminateOrchestratorActivity
     {

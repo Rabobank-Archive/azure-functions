@@ -11,13 +11,10 @@ namespace Functions.Activities
     {
         private readonly ILogAnalyticsClient _client;
 
-        public UploadPreventiveRuleLogsActivity(ILogAnalyticsClient client)
-        {
-            _client = client;
-        }
+        public UploadPreventiveRuleLogsActivity(ILogAnalyticsClient client) => _client = client;
 
         [FunctionName(nameof(UploadPreventiveRuleLogsActivity))]
-        public async Task RunAsync([ActivityTrigger] IEnumerable<PreventiveLogItem> items)
+        public async Task RunAsync([ActivityTrigger] IEnumerable<PreventiveRuleLogItem> items)
         {
             if (items == null)
                 throw new ArgumentNullException(nameof(items));

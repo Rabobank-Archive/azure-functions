@@ -2,9 +2,9 @@
 using Microsoft.Azure.WebJobs;
 using NSubstitute;
 using Xunit;
-using Functions.Completeness.Activities;
+using Functions.Activities;
 
-namespace Functions.Tests.Completeness.Activities
+namespace Functions.Tests.Activities
 {
     public class PurgeSingleOrchestratorActivityTests
     {

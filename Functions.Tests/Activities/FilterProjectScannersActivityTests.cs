@@ -3,14 +3,13 @@ using System.Linq;
 using AutoFixture;
 using AutoFixture.AutoNSubstitute;
 using AzDoCompliancy.CustomStatus;
-using Functions.Completeness.Activities;
-using Functions.Completeness.Requests;
-using Functions.Completeness.Model;
+using Functions.Activities;
+using Functions.Model;
 using Newtonsoft.Json.Linq;
 using Shouldly;
 using Xunit;
 
-namespace Functions.Tests.Completeness.Activities
+namespace Functions.Tests.Activities
 {
     public class FilterProjectScannersActivityTests
     {
@@ -27,18 +26,15 @@ namespace Functions.Tests.Completeness.Activities
         public void ShouldReturnOnlyInstancesForParent()
         {
             //Arrange
-            var request = new SingleCompletenessCheckRequest
-            {
-                Supervisor = _fixture.Build<Orchestrator>()
+            var supervisor = _fixture.Build<Orchestrator>()
                     .With(o => o.InstanceId, "1234-5678-90")
                     .With(d => d.CustomStatus, JToken.FromObject(new CustomStatusBase()))
-                    .Create(),
-                AllProjectScanners = CreateInstancesList("1234-5678-90", 10, 20)
-            };
+                    .Create();
+            var allProjectScanners = CreateInstancesList("1234-5678-90", 10, 20);
 
             //Act
             var fun = new FilterProjectScannersActivity();
-            var filteredInstances = fun.Run(request);
+            var filteredInstances = fun.Run((supervisor, allProjectScanners));
 
             //Assert
             filteredInstances.Count.ShouldBe(10);
@@ -48,15 +44,12 @@ namespace Functions.Tests.Completeness.Activities
         public void ShouldNotCrashWhenNoParentInInstanceId()
         {
             //Arrange
-            var request = new SingleCompletenessCheckRequest
-            {
-                Supervisor = _fixture.Create<Orchestrator>(),
-                AllProjectScanners = _fixture.CreateMany<Orchestrator>(10).ToList()
-            };
+            var supervisor = _fixture.Create<Orchestrator>();
+            var allProjectScanners = _fixture.CreateMany<Orchestrator>(10).ToList();
 
             //Act
             var fun = new FilterProjectScannersActivity();
-            var filteredInstances = fun.Run(request);
+            var filteredInstances = fun.Run((supervisor, allProjectScanners));
 
             //Assert
             filteredInstances.Count.ShouldBe(0);

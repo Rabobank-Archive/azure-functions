@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using Functions.Helpers;
+using Functions.Model;
 using Microsoft.Azure.WebJobs;
 using Microsoft.WindowsAzure.Storage.Queue;
 using Unmockable;
@@ -10,10 +10,8 @@ namespace Functions.Activities
     {
         private readonly IUnmockable<CloudQueueClient> _cloudQueueClient;
 
-        public CreateStorageQueuesActivity(IUnmockable<CloudQueueClient> cloudQueueClient)
-        {
+        public CreateStorageQueuesActivity(IUnmockable<CloudQueueClient> cloudQueueClient) => 
             _cloudQueueClient = cloudQueueClient;
-        }
 
         [FunctionName(nameof(CreateStorageQueuesActivity))]
         public async Task RunAsync([ActivityTrigger] DurableActivityContextBase context)

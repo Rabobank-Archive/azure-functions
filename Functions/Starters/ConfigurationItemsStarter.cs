@@ -15,7 +15,7 @@ namespace Functions.Starters
             if (orchestrationClientBase == null)
                 throw new ArgumentNullException(nameof(orchestrationClientBase));
 
-            await orchestrationClientBase.StartNewAsync(nameof(ConfigurationItemsOrchestration), null);
+            await orchestrationClientBase.StartNewAsync(nameof(ConfigurationItemsOrchestrator), null);
         }
     }
 }

@@ -13,7 +13,6 @@ namespace Functions.Model
 
     public class ExtensionDataReports<TReport> : ExtensionDataReports
     {
-
         public IList<TReport> Reports { get; set; }
     }
 }

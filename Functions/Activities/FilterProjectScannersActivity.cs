@@ -1,19 +1,25 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Functions.Completeness.Requests;
-using Functions.Completeness.Model;
+using Functions.Model;
 using Functions.Helpers;
 using Microsoft.Azure.WebJobs;
+using System;
 
-namespace Functions.Completeness.Activities
+namespace Functions.Activities
 {
     public class FilterProjectScannersActivity
     {
         [FunctionName(nameof(FilterProjectScannersActivity))]
-        public IList<Orchestrator> Run([ActivityTrigger] SingleCompletenessCheckRequest request)
+        public IList<Orchestrator> Run([ActivityTrigger] (Orchestrator, IList<Orchestrator>) data)
         {
-            return request.AllProjectScanners
-                .Where(i => OrchestrationIdHelper.GetSupervisorId(i.InstanceId) == request.Supervisor.InstanceId)
+            if (data.Item1 == null || data.Item2 == null)
+                throw new ArgumentNullException(nameof(data));
+
+            var supervisor = data.Item1;
+            var allProjectScanners = data.Item2;
+
+            return allProjectScanners
+                .Where(i => OrchestrationHelper.GetSupervisorId(i.InstanceId) == supervisor.InstanceId)
                 .ToList();
         }
     }

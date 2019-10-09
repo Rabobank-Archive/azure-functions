@@ -4,16 +4,13 @@ using System.Threading.Tasks;
 using LogAnalytics.Client;
 using Microsoft.Azure.WebJobs;
 
-namespace Functions.Completeness.Activities
+namespace Functions.Activities
 {
     public class GetScannedSupervisorsActivity
     {
         private readonly ILogAnalyticsClient _client;
 
-        public GetScannedSupervisorsActivity(ILogAnalyticsClient client)
-        {
-            _client = client;
-        }
+        public GetScannedSupervisorsActivity(ILogAnalyticsClient client) => _client = client;
 
         [FunctionName(nameof(GetScannedSupervisorsActivity))]
         public async Task<List<string>> RunAsync([ActivityTrigger] DurableActivityContextBase context)

@@ -1,6 +1,6 @@
 using Xunit;
 using Shouldly;
-using static Functions.Helpers.OrchestrationIdHelper;
+using static Functions.Helpers.OrchestrationHelper;
 
 namespace Functions.Tests.Helpers
 {

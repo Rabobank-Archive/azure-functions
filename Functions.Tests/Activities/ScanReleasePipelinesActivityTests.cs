@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using AutoFixture;
 using AutoFixture.AutoMoq;
 using Functions.Activities;
+using Functions.Model;
 using Moq;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
@@ -26,7 +28,9 @@ namespace Functions.Tests.Activities
                 .Verifiable();
 
             var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
-            var request = fixture.Create<ReleasePipelinesScanActivityRequest>();
+            var project = fixture.Create<Project>();
+            var releasePipeline = fixture.Create<ReleaseDefinition>();
+            var ciIdentifiers = fixture.Create<IList<string>>();
 
             // Act
             var activity = new ScanReleasePipelinesActivity(
@@ -34,7 +38,7 @@ namespace Functions.Tests.Activities
                 client.Object,
                 provider.Object);
 
-            var result = await activity.RunAsync(request);
+            var result = await activity.RunAsync((project, releasePipeline, ciIdentifiers));
 
             // Assert
             result.ShouldNotBeNull();
@@ -61,8 +65,9 @@ namespace Functions.Tests.Activities
                 client.Object,
                 provider.Object);
 
-            var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () => await activity.RunAsync(null));
-            exception.Message.ShouldContainWithoutWhitespace("Value cannot be null. Parameter name: request");
+            var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () => 
+                await activity.RunAsync((null, null, null)));
+            exception.Message.ShouldContainWithoutWhitespace("Value cannot be null. Parameter name: data");
         }
         
         [Fact]
@@ -77,11 +82,8 @@ namespace Functions.Tests.Activities
                 .Verifiable();
 
             var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
-            var request = new ReleasePipelinesScanActivityRequest
-            {
-                Project = null, ReleaseDefinition = fixture.Create<ReleaseDefinition>()
-            };
-
+            var releasePipeline = fixture.Create<ReleaseDefinition>();
+            var ciIdentifiers = fixture.Create<IList<string>>();
 
             // Act
             var activity = new ScanReleasePipelinesActivity(
@@ -89,8 +91,9 @@ namespace Functions.Tests.Activities
                 client.Object,
                 provider.Object);
 
-            var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () => await activity.RunAsync(request));
-            exception.Message.ShouldContainWithoutWhitespace("Value cannot be null. Parameter name: Project");
+            var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () => 
+                await activity.RunAsync((null, releasePipeline, ciIdentifiers)));
+            exception.Message.ShouldContainWithoutWhitespace("Value cannot be null. Parameter name: data");
         }
 
         [Fact]
@@ -105,11 +108,8 @@ namespace Functions.Tests.Activities
                 .Verifiable();
 
             var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
-            var request = new ReleasePipelinesScanActivityRequest
-            {
-                Project = fixture.Create<Project>(), ReleaseDefinition = null
-            };
-
+            var project = fixture.Create<Project>();
+            var ciIdentifiers = fixture.Create<IList<string>>();
 
             // Act
             var activity = new ScanReleasePipelinesActivity(
@@ -117,8 +117,9 @@ namespace Functions.Tests.Activities
                 client.Object,
                 provider.Object);
 
-            var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () => await activity.RunAsync(request));
-            exception.Message.ShouldContainWithoutWhitespace("Value cannot be null. Parameter name: ReleaseDefinition");
+            var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () => 
+                await activity.RunAsync((project, null, ciIdentifiers)));
+            exception.Message.ShouldContainWithoutWhitespace("Value cannot be null. Parameter name: data");
         }
     }
 }

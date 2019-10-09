@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Functions.Model;
 using Microsoft.Azure.WebJobs;
-using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
 
 namespace Functions.Activities
@@ -11,10 +10,8 @@ namespace Functions.Activities
     {
         private readonly CloudTableClient _tableClient;
 
-        public GetConfigurationItemsFromTableStorageActivity(CloudTableClient tableClient)
-        {
+        public GetConfigurationItemsFromTableStorageActivity(CloudTableClient tableClient) => 
             _tableClient = tableClient;
-        }
 
         [FunctionName(nameof(GetConfigurationItemsFromTableStorageActivity))]
         public async Task<List<ConfigurationItem>> RunAsync([ActivityTrigger] DurableActivityContextBase context)
