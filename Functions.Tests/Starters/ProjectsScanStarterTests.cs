@@ -27,7 +27,7 @@ namespace Functions.Tests.Starters
                 .Returns(projects);
 
             //Act
-            var fun = new ProjectsScanStarter(clientMock.Object);
+            var fun = new ProjectScanStarter(clientMock.Object);
             await fun.RunAsync(timerInfoMock, orchestrationClientMock.Object);
 
             //Assert
@@ -48,7 +48,7 @@ namespace Functions.Tests.Starters
                 .Returns(projects);
 
             //Act
-            var fun = new ProjectsScanStarter(clientMock.Object);
+            var fun = new ProjectScanStarter(clientMock.Object);
             await fun.RunAsync(timerInfoMock, orchestrationClientMock.Object);
 
             //Assert

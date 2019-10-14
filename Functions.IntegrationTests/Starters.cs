@@ -43,7 +43,7 @@ namespace Functions.IntegrationTests
                 var jobs = host.Services.GetService<IJobHost>();
 
                 // Act
-                await jobs.CallAsync(nameof(ProjectsScanStarter), new Dictionary<string, object>
+                await jobs.CallAsync(nameof(ProjectScanStarter), new Dictionary<string, object>
                 {
                     ["timerInfo"] = fixture.Create<TimerInfo>()
                 });

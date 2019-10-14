@@ -8,13 +8,13 @@ using System.Threading.Tasks;
 
 namespace Functions.Starters
 {
-    public class ProjectsScanStarter
+    public class ProjectScanStarter
     {
         private readonly IVstsRestClient _azuredo;
 
-        public ProjectsScanStarter(IVstsRestClient azuredo) => _azuredo = azuredo;
+        public ProjectScanStarter(IVstsRestClient azuredo) => _azuredo = azuredo;
 
-        [FunctionName(nameof(ProjectsScanStarter))]
+        [FunctionName(nameof(ProjectScanStarter))]
         public async Task RunAsync(
             [TimerTrigger("0 0 20 * * *", RunOnStartup=false)] TimerInfo timerInfo,
             [OrchestrationClient] DurableOrchestrationClientBase orchestrationClientBase)
