@@ -9,7 +9,6 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Functions.Model;
 using Xunit;
 using Response = SecurePipelineScan.VstsService.Response;
 

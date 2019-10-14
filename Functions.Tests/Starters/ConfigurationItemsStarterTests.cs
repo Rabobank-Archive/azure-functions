@@ -10,8 +10,6 @@ namespace Functions.Tests.Starters
 {
     public class ConfigurationItemsStarterTests
     {
-        
-        
         [Fact]
         public async Task RunShouldCallOrchestratorFunctionOnce()
         {
@@ -25,7 +23,7 @@ namespace Functions.Tests.Starters
 
             //Assert
             orchestrationClientMock.Verify(
-                x => x.StartNewAsync(nameof(ConfigurationItemsOrchestration), It.IsAny<object>()),
+                x => x.StartNewAsync(nameof(ConfigurationItemsOrchestrator), It.IsAny<object>()),
                 Times.Once());
         }
         

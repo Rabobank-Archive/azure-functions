@@ -1,5 +1,6 @@
 using Functions.Orchestrators;
 using Functions.Starters;
+using Functions.Tests.Helpers;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Timers;
 using Moq;
@@ -26,7 +27,7 @@ namespace Functions.Tests.Starters
                 .Returns(projects);
 
             //Act
-            var fun = new ProjectsScanStarter(clientMock.Object);
+            var fun = new ProjectScanStarter(clientMock.Object);
             await fun.RunAsync(timerInfoMock, orchestrationClientMock.Object);
 
             //Assert
@@ -47,7 +48,7 @@ namespace Functions.Tests.Starters
                 .Returns(projects);
 
             //Act
-            var fun = new ProjectsScanStarter(clientMock.Object);
+            var fun = new ProjectScanStarter(clientMock.Object);
             await fun.RunAsync(timerInfoMock, orchestrationClientMock.Object);
 
             //Assert

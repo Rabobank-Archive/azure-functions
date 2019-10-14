@@ -11,15 +11,10 @@ namespace Functions.Activities
     {
         private readonly IVstsRestClient _client;
 
-        public GetProjectsActivity(IVstsRestClient client)
-        {
-            _client = client;
-        }
+        public GetProjectsActivity(IVstsRestClient client) => _client = client;
 
         [FunctionName(nameof(GetProjectsActivity))]
-        public IEnumerable<Response.Project> Run([ActivityTrigger] DurableActivityContextBase context)
-        {
-            return _client.Get(Project.Projects()).ToList();
-        }
+        public IEnumerable<Response.Project> Run([ActivityTrigger] DurableActivityContextBase context) => 
+            _client.Get(Project.Projects()).ToList();
     }
 }

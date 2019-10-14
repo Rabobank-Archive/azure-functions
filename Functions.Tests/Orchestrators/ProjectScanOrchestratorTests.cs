@@ -4,6 +4,7 @@ using Functions.Model;
 using Functions.Orchestrators;
 using Microsoft.Azure.WebJobs;
 using Moq;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
 using Response = SecurePipelineScan.VstsService.Response;
@@ -29,37 +30,42 @@ namespace Functions.Tests.Orchestrators
                 .Returns(fixture.Create<string>());
 
             starter
-                .Setup(x => x.CallActivityWithRetryAsync<ItemOrchestratorRequest>(
-                    nameof(GetDataFromTableStorageActivity), It.IsAny<RetryOptions>(), It.IsAny<Response.Project>()))
-                .ReturnsAsync(fixture.Create<ItemOrchestratorRequest>())
+                .Setup(x => x.CallActivityWithRetryAsync<IList<ProductionItem>>(
+                    nameof(GetDeploymentMethodsActivity), It.IsAny<RetryOptions>(), 
+                    It.IsAny<Response.Project>()))
+                .ReturnsAsync(fixture.Create<IList<ProductionItem>>())
                 .Verifiable();
 
             starter
                 .Setup(x => x.CallSubOrchestratorAsync(
-                    nameof(GlobalPermissionsOrchestration), It.IsAny<string>(), It.IsAny<ItemOrchestratorRequest>()))
+                    nameof(GlobalPermissionsOrchestrator), It.IsAny<string>(), 
+                    It.IsAny<(Response.Project, IList<ProductionItem>)>()))
                 .Returns(Task.CompletedTask)
                 .Verifiable();
 
             starter
-                .Setup(x => x.CallSubOrchestratorAsync<(ItemOrchestratorRequest, ItemOrchestratorRequest)>(
-                    nameof(ReleasePipelinesOrchestration), It.IsAny<string>(), It.IsAny<ItemOrchestratorRequest>()))
-                .ReturnsAsync((fixture.Create<ItemOrchestratorRequest>(), fixture.Create<ItemOrchestratorRequest>()))
+                .Setup(x => x.CallSubOrchestratorAsync<IList<ProductionItem>>(
+                    nameof(ReleasePipelinesOrchestrator), It.IsAny<string>(), 
+                    It.IsAny<(Response.Project, IList<ProductionItem>)>()))
+                .ReturnsAsync(fixture.Create<IList<ProductionItem>>())
+                .Verifiable();
+
+            starter
+                .Setup(x => x.CallSubOrchestratorAsync<IList<ProductionItem>>(
+                    nameof(BuildPipelinesOrchestrator), It.IsAny<string>(), 
+                    It.IsAny<(Response.Project, IList<ProductionItem>)>()))
+                .ReturnsAsync(fixture.Create<IList<ProductionItem>>())
                 .Verifiable();
 
             starter
                 .Setup(x => x.CallSubOrchestratorAsync(
-                    nameof(RepositoriesOrchestration), It.IsAny<string>(), It.IsAny<ItemOrchestratorRequest>()))
-                .Returns(Task.CompletedTask)
-                .Verifiable();
-
-            starter
-                .Setup(x => x.CallSubOrchestratorAsync(
-                    nameof(BuildPipelinesOrchestration), It.IsAny<string>(), It.IsAny<ItemOrchestratorRequest>()))
+                    nameof(RepositoriesOrchestrator), It.IsAny<string>(), 
+                    It.IsAny<(Response.Project, IList<ProductionItem>)>()))
                 .Returns(Task.CompletedTask)
                 .Verifiable();
 
             //Act
-            var fun = new ProjectScanOrchestration();
+            var fun = new ProjectScanOrchestrator();
             await fun.RunAsync(starter.Object);
 
             //Assert           

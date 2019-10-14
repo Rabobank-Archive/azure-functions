@@ -20,6 +20,5 @@ namespace Functions.Model
         public string SoLevel3 { get; set; }
         public string SoLevel4 { get; set; }
         public string SoLevel5 { get; set; }
-
     }
 }

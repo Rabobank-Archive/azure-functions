@@ -40,7 +40,7 @@ namespace Functions.Tests
                 }
             };
 
-            var expected = new PreventiveLogItem
+            var expected = new PreventiveRuleLogItem
             {
                 Project = "TAS",
                 ProjectId = "projId",

@@ -6,7 +6,6 @@ using System.Linq;
 using Functions.Helpers;
 using Task = System.Threading.Tasks.Task;
 using System.Threading;
-using System;
 
 namespace Functions.Orchestrators
 {
@@ -28,8 +27,8 @@ namespace Functions.Orchestrators
             DurableOrchestrationContextBase context, Project project, int index)
         {
             await context.CreateTimer(context.CurrentUtcDateTime.AddSeconds(index * TimerInterval), CancellationToken.None);
-            await context.CallSubOrchestratorAsync(nameof(ProjectScanOrchestration),
-                OrchestrationIdHelper.CreateProjectScanOrchestrationId(context.InstanceId, project.Id), project);
+            await context.CallSubOrchestratorAsync(nameof(ProjectScanOrchestrator),
+                OrchestrationHelper.CreateProjectScanOrchestrationId(context.InstanceId, project.Id), project);
         }
     }
 }
