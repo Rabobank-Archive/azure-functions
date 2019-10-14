@@ -5,6 +5,7 @@ using Polly.Retry;
 using SecurePipelineScan.VstsService;
 using System;
 using System.Net;
+using System.Net.Sockets;
 using System.Threading.Tasks;
 
 namespace Functions.Helpers
@@ -40,13 +41,9 @@ namespace Functions.Helpers
         private static bool IsRetryableActivity(Exception exception)
         {
             return exception.InnerException != null &&
-                // Handle rate limits (happens if we got blocked by rate limits)
                 (exception.InnerException.Message.Contains("Call failed with status code 429") ||
-                // Handle timeout (happens if we got delayed by rate limits)
-                exception.InnerException.Message.Contains(
-                    "A connection attempt failed because the connected party did not properly respond after a period of time") ||
-                exception.InnerException.Message.Contains(
-                    "An existing connection was forcibly closed by the remote host"));
+                exception.InnerException is SocketException ||
+                exception.InnerException is TaskCanceledException);
         }
     }
 }
