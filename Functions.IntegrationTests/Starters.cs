@@ -35,6 +35,7 @@ namespace Functions.IntegrationTests
                         .AddSingleton(fixture.Create<IVstsRestClient>())
                         .AddSingleton(fixture.Create<ILogAnalyticsClient>())
                         .AddSingleton(CloudStorageAccount.DevelopmentStorageAccount.CreateCloudTableClient().Wrap())
+                        .AddSingleton(CloudStorageAccount.DevelopmentStorageAccount.CreateCloudQueueClient().Wrap())
                         .AddSingleton(fixture.Create<EnvironmentConfig>())
                         .AddSingleton(fixture.Create<IRulesProvider>())))
                     .Build())
