@@ -13,7 +13,7 @@ Time-triggered  | controleren van compleetheid van de compliancy check
 
 ### Rules
 
-Functionele rules voor het controleren en oplossen van compliancy van projecten.
+Functionele [rules](https://dev.azure.com/somecompany/TAS/_git/azdo-compliancy-rules) voor het controleren en oplossen van compliancy van projecten.
 
 ### VstsRestClient
 
@@ -51,3 +51,11 @@ De function controleert of de scan op 600+ team projects succesvol is afgerond. 
 op de REST API en null reference exception in code kan het voorkomen dat analyze voortijdig wordt afgebroken. 
 
 ![completeness](docs/completeness.png)
+
+## Configuration Items Deployment Method (SM9)
+
+De koppeling tussen Configuration Items en bijbehorende release piplines is vastgelegd in SM9.
+Deze data wordt opgehaald met een function in een aparte resource group met toegang tot de on-premises
+CMDB in SM9 en wordt beschikbaar gemaakt via table storage.
+
+![sm9](docs/sm9.png)
