@@ -30,7 +30,7 @@ namespace Functions.Tests.Activities
             var organization = fixture.Create<string>();
 
             // Act
-            var fun = new GetDeploymentMethodsActivity(client.Wrap(),
+            var fun = new GetDeploymentMethodsActivity(client,
                 new EnvironmentConfig { Organization = organization });
             var result = await fun.RunAsync(project);
 
@@ -53,7 +53,7 @@ namespace Functions.Tests.Activities
             var organization = fixture.Create<string>();
 
             // Act
-            var fun = new GetDeploymentMethodsActivity(client.Wrap(),
+            var fun = new GetDeploymentMethodsActivity(client,
                 new EnvironmentConfig { Organization = organization });
             var result = await fun.RunAsync(project);
 
@@ -78,7 +78,7 @@ namespace Functions.Tests.Activities
                 .ConfigureAwait(false);
 
             // Act
-            var fun = new GetDeploymentMethodsActivity(client.Wrap(),
+            var fun = new GetDeploymentMethodsActivity(client,
                 new EnvironmentConfig { Organization = organization });
             var result = await fun.RunAsync(project);
 
@@ -103,7 +103,7 @@ namespace Functions.Tests.Activities
                 .ConfigureAwait(false);
 
             // Act
-            var fun = new GetDeploymentMethodsActivity(client.Wrap(),
+            var fun = new GetDeploymentMethodsActivity(client,
                 new EnvironmentConfig { Organization = organization });
             var result = await fun.RunAsync(project);
 
@@ -128,7 +128,7 @@ namespace Functions.Tests.Activities
                 .ConfigureAwait(false);
 
             // Act
-            var fun = new GetDeploymentMethodsActivity(client.Wrap(),
+            var fun = new GetDeploymentMethodsActivity(client,
                 new EnvironmentConfig { Organization = organization });
             var result = await fun.RunAsync(project);
 
@@ -153,7 +153,7 @@ namespace Functions.Tests.Activities
                 .ConfigureAwait(false);
 
             // Act
-            var fun = new GetDeploymentMethodsActivity(client.Wrap(),
+            var fun = new GetDeploymentMethodsActivity(client,
                 new EnvironmentConfig { Organization = organization });
             var result = await fun.RunAsync(project);
 

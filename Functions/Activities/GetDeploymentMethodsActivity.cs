@@ -12,10 +12,10 @@ namespace Functions.Activities
 {
     public class GetDeploymentMethodsActivity
     {
-        private readonly IUnmockable<CloudTableClient> _client;
+        private readonly CloudTableClient _client;
         private readonly EnvironmentConfig _config;
 
-        public GetDeploymentMethodsActivity(IUnmockable<CloudTableClient> client, 
+        public GetDeploymentMethodsActivity(CloudTableClient client, 
             EnvironmentConfig config)
         {
             _client = client;
@@ -32,7 +32,7 @@ namespace Functions.Activities
                 TableQuery.GenerateFilterCondition("Organization", QueryComparisons.Equal, _config.Organization),
                 TableOperators.And,
                 TableQuery.GenerateFilterCondition("ProjectId", QueryComparisons.Equal, project.Id)));
-            var table = _client.Execute(c => c.GetTableReference("DeploymentMethod"));
+            var table = _client.GetTableReference("DeploymentMethod");
 
             if (!await table.ExistsAsync().ConfigureAwait(false))
                 return new List<ProductionItem>();
