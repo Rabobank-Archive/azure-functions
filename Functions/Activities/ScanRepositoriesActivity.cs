@@ -48,7 +48,7 @@ namespace Functions.Activities
                     {
                         Name = rule.GetType().Name,
                         Description = rule.Description,
-                        Why = rule.Why,
+                        Link = rule.Link,
                         IsSox = rule.IsSox,
                         Status = await rule.EvaluateAsync(project.Id, repository.Id, policies)
                             .ConfigureAwait(false),

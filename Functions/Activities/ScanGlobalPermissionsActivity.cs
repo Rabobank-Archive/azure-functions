@@ -45,7 +45,7 @@ namespace Functions.Activities
                     {
                         Name = r.GetType().Name,
                         Description = r.Description,
-                        Why = r.Why,
+                        Link = r.Link,
                         IsSox = r.IsSox,
                         Status = await r.EvaluateAsync(project.Id)
                             .ConfigureAwait(false),
