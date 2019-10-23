@@ -48,7 +48,7 @@ namespace Functions.Activities
                         Description = rule.Description,
                         Link = rule.Link,
                         IsSox = rule.IsSox,
-                        Status = await rule.EvaluateAsync(project.Id, releasePipeline)
+                        Status = await rule.EvaluateAsync(project.Id, "stageID", releasePipeline)
                             .ConfigureAwait(false),
                         Reconcile = ReconcileFunction.ReconcileFromRule(rule as IReconcile, _config,
                             project.Id, RuleScopes.ReleasePipelines, releasePipeline.Id)

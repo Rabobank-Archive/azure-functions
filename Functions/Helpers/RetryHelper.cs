@@ -38,12 +38,12 @@ namespace Functions.Helpers
                 RetryTimeout = TimeSpan.FromSeconds(RetryTimeout) 
             };
 
-        private static bool IsRetryableActivity(Exception exception)
-        {
-            return exception.InnerException != null &&
+        private static bool IsRetryableActivity(Exception exception) => 
+            exception.InnerException != null &&
                 (exception.InnerException.Message.Contains("Call failed with status code 429") ||
+                exception.InnerException.Message.Contains("A connection attempt failed because " +
+                    "the connected party did not properly respond after a period of time") ||
                 exception.InnerException is SocketException ||
                 exception.InnerException is TaskCanceledException);
-        }
     }
 }

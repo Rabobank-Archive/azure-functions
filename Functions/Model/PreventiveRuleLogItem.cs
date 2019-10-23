@@ -10,7 +10,7 @@ namespace Functions.Model
         public string Item { get; set; }
         public string ItemId { get; set; }
         public string Rule { get; set; }
-        public bool Status { get; set; }
+        public bool? Status { get; set; }
         public bool IsSox { get; set; }
         public DateTime EvaluatedDate { get; set; }
         public string ScanId { get; set; }
