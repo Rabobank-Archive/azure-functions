@@ -6,7 +6,8 @@ using Functions.Model;
 using Microsoft.Azure.WebJobs;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
-using Response = SecurePipelineScan.VstsService.Response;
+using SecurePipelineScan.VstsService.Response;
+using Task = System.Threading.Tasks.Task;
 
 namespace Functions.Activities
 {
@@ -26,36 +27,53 @@ namespace Functions.Activities
 
         [FunctionName(nameof(ScanReleasePipelinesActivity))]
         public async Task<ItemExtensionData> RunAsync(
-            [ActivityTrigger] (Response.Project, Response.ReleaseDefinition, IList<string>) input)
+            [ActivityTrigger]
+            (Project project, ReleaseDefinition releasePipeline, IList<DeploymentMethod> deploymentMethods) input)
         {
-            if (input.Item1 == null || input.Item2 == null || input.Item3 == null)
+            if (input.project == null || input.releasePipeline == null || input.deploymentMethods == null)
+            {
                 throw new ArgumentNullException(nameof(input));
+            }
 
-            var project = input.Item1;
-            var releasePipeline = input.Item2;
-            var ciIdentifiers = input.Item3;
-
+            var project = input.project;
+            var pipeline = input.releasePipeline;
+            var deploymentMethods = input.deploymentMethods;
             var rules = _rulesProvider.ReleaseRules(_azuredo).ToList();
+
+            var stageIds = deploymentMethods.Where(d =>
+                d.Organization == _config.Organization &&
+                d.ProjectId == project.Id &&
+                d.PipelineId == pipeline.Id &&
+                !string.IsNullOrWhiteSpace(d.StageId)).Select(d => d.StageId).ToList();
 
             return new ItemExtensionData
             {
-                Item = releasePipeline.Name,
-                ItemId = releasePipeline.Id,
+                Item = pipeline.Name,
+                ItemId = pipeline.Id,
                 Rules = await Task.WhenAll(rules.Select(async rule =>
-                    new EvaluatedRule
-                    {
-                        Name = rule.GetType().Name,
-                        Description = rule.Description,
-                        Link = rule.Link,
-                        IsSox = rule.IsSox,
-                        Status = await rule.EvaluateAsync(project.Id, "stageID", releasePipeline)
-                            .ConfigureAwait(false),
-                        Reconcile = ReconcileFunction.ReconcileFromRule(rule as IReconcile, _config,
-                            project.Id, RuleScopes.ReleasePipelines, releasePipeline.Id)
-                    })
-                    .ToList())
+                        {
+                            var status = stageIds.Any()
+                                ? (await Task.WhenAll(stageIds.Select(async stageId =>
+                                        await rule.EvaluateAsync(project.Id, stageId, pipeline)
+                                            .ConfigureAwait(false)))
+                                    .ConfigureAwait(false)).All(s => s)
+                                : await rule.EvaluateAsync(project.Id, null, pipeline)
+                                    .ConfigureAwait(false);
+
+                            return new EvaluatedRule
+                            {
+                                Name = rule.GetType().Name,
+                                Description = rule.Description,
+                                Link = rule.Link,
+                                IsSox = rule.IsSox,
+                                Status = status,
+                                Reconcile = ReconcileFunction.ReconcileFromRule(rule as IReconcile, _config,
+                                    project.Id, RuleScopes.ReleasePipelines, pipeline.Id)
+                            };
+                        })
+                        .ToList())
                     .ConfigureAwait(false),
-                CiIdentifiers = string.Join(",", ciIdentifiers)
+                CiIdentifiers = string.Join(",", deploymentMethods.Select(dm => dm.CiIdentifier))
             };
         }
     }

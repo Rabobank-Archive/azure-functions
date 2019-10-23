@@ -1,11 +1,11 @@
-using Xunit;
-using AutoFixture;
-using SecurePipelineScan.VstsService.Response;
-using Functions.Model;
-using static Functions.Helpers.LinkConfigurationItemHelper;
-using System.Linq;
-using Shouldly;
 using System;
+using System.Linq;
+using AutoFixture;
+using Functions.Model;
+using SecurePipelineScan.VstsService.Response;
+using Shouldly;
+using Xunit;
+using static Functions.Helpers.LinkConfigurationItemHelper;
 
 namespace Functions.Tests.Helpers
 {
@@ -26,7 +26,10 @@ namespace Functions.Tests.Helpers
             //Assert
             var item = result.Single();
             item.ItemId.ShouldBe("b1");
-            item.CiIdentifiers.ShouldBe(new[] { "c1", "c2" });
+            item.DeploymentInfo[0].CiIdentifier.ShouldBe("c1");
+            item.DeploymentInfo[0].StageId.ShouldBe("s1");
+            item.DeploymentInfo[1].CiIdentifier.ShouldBe("c2");
+            item.DeploymentInfo[1].StageId.ShouldBe("s2");
         }
 
         [Fact]
@@ -44,7 +47,7 @@ namespace Functions.Tests.Helpers
             var result = LinkCisToBuildPipelines(releasePipelines, productionItems, project);
 
             //Assert
-            result.Count().ShouldBe(5);
+            result.Count.ShouldBe(5);
         }
 
         [Fact]
@@ -53,15 +56,21 @@ namespace Functions.Tests.Helpers
             //Arrange
             var fixture = SetupFixtureBuild();
             var releasePipelines = fixture.CreateMany<ReleaseDefinition>(2).ToList();
-            var productionItems = new[] {
+            var productionItems = new[]
+            {
                 fixture.Build<ProductionItem>()
                     .With(x => x.ItemId, "r1")
-                    .With(x => x.CiIdentifiers, new[] { "c1" })
+                    .With(x => x.DeploymentInfo, new[]
+                    {
+                        new DeploymentMethod{CiIdentifier = "c1", StageId = "s1"}
+                    })
                     .Create(),
-               fixture.Build<ProductionItem>()
+                fixture.Build<ProductionItem>()
                     .With(x => x.ItemId, "r1")
-                    .With(x => x.CiIdentifiers, new[] { "c2" })
-                    .Create()
+                    .With(x => x.DeploymentInfo, new[]
+                    {
+                        new DeploymentMethod{CiIdentifier = "c2", StageId = "s2"}
+                    }).Create()
             };
             var project = fixture.Create<Project>();
 
@@ -71,7 +80,10 @@ namespace Functions.Tests.Helpers
             //Assert
             var item = result.Single();
             item.ItemId.ShouldBe("b1");
-            item.CiIdentifiers.ShouldBe(new[] { "c1", "c2" });
+            item.DeploymentInfo[0].CiIdentifier.ShouldBe("c1");
+            item.DeploymentInfo[0].StageId.ShouldBe("s1");
+            item.DeploymentInfo[1].CiIdentifier.ShouldBe("c2");
+            item.DeploymentInfo[1].StageId.ShouldBe("s2");
         }
 
         [Fact]
@@ -80,14 +92,23 @@ namespace Functions.Tests.Helpers
             //Arrange
             var fixture = SetupFixtureBuild();
             var releasePipelines = fixture.CreateMany<ReleaseDefinition>(2).ToList();
-            var productionItems = new[] {
+            var productionItems = new[]
+            {
                 fixture.Build<ProductionItem>()
                     .With(x => x.ItemId, "r1")
-                    .With(x => x.CiIdentifiers, new[] { "c1", "c2" })
+                    .With(x => x.DeploymentInfo, new[]
+                    {
+                        new DeploymentMethod{CiIdentifier = "c1", StageId = "s1"},
+                        new DeploymentMethod{CiIdentifier = "c2", StageId = "s2"}
+                    })
                     .Create(),
-               fixture.Build<ProductionItem>()
+                fixture.Build<ProductionItem>()
                     .With(x => x.ItemId, "r1")
-                    .With(x => x.CiIdentifiers, new[] { "c1", "c3" })
+                    .With(x => x.DeploymentInfo, new[]
+                    {
+                        new DeploymentMethod{CiIdentifier = "c1", StageId = "s1"},
+                        new DeploymentMethod{CiIdentifier = "c3", StageId = "s3"}
+                    })
                     .Create()
             };
             var project = fixture.Create<Project>();
@@ -98,7 +119,20 @@ namespace Functions.Tests.Helpers
             //Assert
             var item = result.Single();
             item.ItemId.ShouldBe("b1");
-            item.CiIdentifiers.ShouldBe(new[] { "c1", "c2", "c3" });
+            item.DeploymentInfo[0].CiIdentifier.ShouldBe("c1");
+            item.DeploymentInfo[0].StageId.ShouldBe("s1");
+            item.DeploymentInfo[1].CiIdentifier.ShouldBe("c2");
+            item.DeploymentInfo[1].StageId.ShouldBe("s2");
+            item.DeploymentInfo[2].CiIdentifier.ShouldBe("c3");
+            item.DeploymentInfo[2].StageId.ShouldBe("s3");
+
+
+            //item.DeploymentInfo.ShouldBe(new[]
+            //{
+            //    new DeploymentMethod{CiIdentifier = "c1", StageId = "s1"},
+            //    new DeploymentMethod{CiIdentifier = "c2", StageId = "s2"},
+            //    new DeploymentMethod{CiIdentifier = "c3", StageId = "s3"}
+            //});
         }
 
         [Fact]
@@ -159,7 +193,7 @@ namespace Functions.Tests.Helpers
 
         private static Fixture SetupFixtureBuild()
         {
-            var fixture = new Fixture { RepeatCount = 1 };
+            var fixture = new Fixture {RepeatCount = 1};
 
             fixture.Customize<Artifact>(ctx => ctx
                 .With(x => x.Type, "Build"));
@@ -172,7 +206,11 @@ namespace Functions.Tests.Helpers
 
             fixture.Customize<ProductionItem>(ctx => ctx
                 .With(x => x.ItemId, "r1")
-                .With(x => x.CiIdentifiers, new[] { "c1", "c2" }));
+                .With(x => x.DeploymentInfo, new[]
+                {
+                    new DeploymentMethod{CiIdentifier = "c1", StageId = "s1"},
+                    new DeploymentMethod{CiIdentifier = "c2", StageId = "s2"}
+                }));
 
             return fixture;
         }
@@ -192,7 +230,11 @@ namespace Functions.Tests.Helpers
             //Assert
             var item = result.Single();
             item.ItemId.ShouldBe("r1");
-            item.CiIdentifiers.ShouldBe(new[] { "c1", "c2" });
+
+            item.DeploymentInfo[0].CiIdentifier.ShouldBe("c1");
+            item.DeploymentInfo[0].StageId.ShouldBe("s1");
+            item.DeploymentInfo[1].CiIdentifier.ShouldBe("c2");
+            item.DeploymentInfo[1].StageId.ShouldBe("s2");
         }
 
         [Fact]
@@ -212,7 +254,7 @@ namespace Functions.Tests.Helpers
             var result = LinkCisToRepositories(buildPipelines, productionItems, project);
 
             //Assert
-            result.Count().ShouldBe(5);
+            result.Count.ShouldBe(5);
         }
 
         [Fact]
@@ -221,14 +263,15 @@ namespace Functions.Tests.Helpers
             //Arrange
             var fixture = SetupFixtureRepo();
             var buildPipelines = fixture.CreateMany<BuildDefinition>(2).ToList();
-            var productionItems = new[] {
+            var productionItems = new[]
+            {
                 fixture.Build<ProductionItem>()
                     .With(x => x.ItemId, "b1")
-                    .With(x => x.CiIdentifiers, new[] { "c1" })
+                    .With(x => x.DeploymentInfo, new[] {new DeploymentMethod{CiIdentifier = "c1", StageId = "s1"}})
                     .Create(),
                 fixture.Build<ProductionItem>()
                     .With(x => x.ItemId, "b1")
-                    .With(x => x.CiIdentifiers, new[] { "c2" })
+                    .With(x => x.DeploymentInfo, new[] {new DeploymentMethod{CiIdentifier = "c2", StageId = "s2"}})
                     .Create()
             };
             var project = fixture.Create<Project>();
@@ -239,7 +282,10 @@ namespace Functions.Tests.Helpers
             //Assert
             var item = result.Single();
             item.ItemId.ShouldBe("r1");
-            item.CiIdentifiers.ShouldBe(new[] { "c1", "c2" });
+            item.DeploymentInfo[0].CiIdentifier.ShouldBe("c1");
+            item.DeploymentInfo[0].StageId.ShouldBe("s1");
+            item.DeploymentInfo[1].CiIdentifier.ShouldBe("c2");
+            item.DeploymentInfo[1].StageId.ShouldBe("s2");
         }
 
         [Fact]
@@ -248,15 +294,22 @@ namespace Functions.Tests.Helpers
             //Arrange
             var fixture = SetupFixtureRepo();
             var buildPipelines = fixture.CreateMany<BuildDefinition>(2).ToList();
-            var productionItems = new[] {
+            var productionItems = new[]
+            {
                 fixture.Build<ProductionItem>()
                     .With(x => x.ItemId, "b1")
-                    .With(x => x.CiIdentifiers, new[] { "c1", "c2" })
-                    .Create(),
+                    .With(x => x.DeploymentInfo, new[]
+                    {
+                        new DeploymentMethod{CiIdentifier = "c1", StageId = "s1"},
+                        new DeploymentMethod{CiIdentifier = "c2", StageId = "s2"}
+                    }).Create(),
                 fixture.Build<ProductionItem>()
                     .With(x => x.ItemId, "b1")
-                    .With(x => x.CiIdentifiers, new[] { "c1", "c3" })
-                    .Create()
+                    .With(x => x.DeploymentInfo, new[]
+                    {
+                        new DeploymentMethod{CiIdentifier = "c1", StageId = "s1"},
+                        new DeploymentMethod{CiIdentifier = "c3", StageId = "s3"}
+                    }).Create()
             };
             var project = fixture.Create<Project>();
 
@@ -266,7 +319,20 @@ namespace Functions.Tests.Helpers
             //Assert
             var item = result.Single();
             item.ItemId.ShouldBe("r1");
-            item.CiIdentifiers.ShouldBe(new[] { "c1", "c2", "c3" });
+            item.DeploymentInfo[0].CiIdentifier.ShouldBe("c1");
+            item.DeploymentInfo[0].StageId.ShouldBe("s1");
+            item.DeploymentInfo[1].CiIdentifier.ShouldBe("c2");
+            item.DeploymentInfo[1].StageId.ShouldBe("s2");
+            item.DeploymentInfo[2].CiIdentifier.ShouldBe("c3");
+            item.DeploymentInfo[2].StageId.ShouldBe("s3");
+
+
+            //item.DeploymentInfo.ShouldBe(new[]
+            //{
+            //    new DeploymentMethod{CiIdentifier = "c1", StageId = "s1"},
+            //    new DeploymentMethod{CiIdentifier = "c2", StageId = "s2"},
+            //    new DeploymentMethod{CiIdentifier = "c3", StageId = "s3"}
+            //});
         }
 
         [Fact]
@@ -309,7 +375,7 @@ namespace Functions.Tests.Helpers
 
         private static Fixture SetupFixtureRepo()
         {
-            var fixture = new Fixture { RepeatCount = 1 };
+            var fixture = new Fixture {RepeatCount = 1};
 
             fixture.Customize<BuildDefinition>(ctx => ctx
                 .With(x => x.Id, "b1"));
@@ -321,7 +387,11 @@ namespace Functions.Tests.Helpers
 
             fixture.Customize<ProductionItem>(ctx => ctx
                 .With(x => x.ItemId, "b1")
-                .With(x => x.CiIdentifiers, new[] { "c1", "c2" }));
+                .With(x => x.DeploymentInfo, new[]
+                {
+                    new DeploymentMethod{CiIdentifier = "c1", StageId = "s1"},
+                    new DeploymentMethod{CiIdentifier = "c2", StageId = "s2"}
+                }));
 
             return fixture;
         }

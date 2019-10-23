@@ -47,7 +47,7 @@ namespace Functions.Orchestrators
                     nameof(ScanReleasePipelinesActivity), RetryHelper.ActivityRetryOptions, 
                     (project, r, productionItems
                         .Where(p => p.ItemId == r.Id)
-                        .SelectMany(p => p.CiIdentifiers)
+                        .SelectMany(p => p.DeploymentInfo)
                         .ToList()))))
             };
 
