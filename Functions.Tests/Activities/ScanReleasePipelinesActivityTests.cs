@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AutoFixture;
 using AutoFixture.AutoMoq;
+using AutoFixture.Kernel;
 using Functions.Activities;
+using Functions.Model;
 using Moq;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
@@ -15,34 +18,108 @@ namespace Functions.Tests.Activities
 {
     public class ScanReleasePipelinesActivityTests
     {
-        [Fact]
-        public async Task EvaluatesRulesAndReturnsReport()
+        [Theory]
+        [InlineData(true, true, true, true)]
+        [InlineData(false, false, false, false)]
+        [InlineData(true, false, true, false)]
+        public async Task EvaluatesRules_ShouldOnlyBeTrueIfAllStagesAreCompliant(
+            bool stage0RuleResult,
+            bool stage1RuleResult,
+            bool stage2RuleResult,
+            bool expected)
         {
             // Arrange
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
-            var provider = new Mock<IRulesProvider>();
-            provider
-                .Setup(x => x.ReleaseRules(It.IsAny<IVstsRestClient>()))
-                .Returns(fixture.CreateMany<IReleasePipelineRule>())
-                .Verifiable();
-
+            var config = fixture.Create<EnvironmentConfig>();
+            var provider = CreateRulesProvider(fixture, 3,
+                (stageId: "0", ruleResult: stage0RuleResult),
+                (stageId: "1", ruleResult: stage1RuleResult),
+                (stageId: "2", ruleResult: stage2RuleResult));
             var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
             var project = fixture.Create<Project>();
-            var releasePipeline = fixture.Create<ReleaseDefinition>();
-            var ciIdentifiers = fixture.Create<IList<string>>();
+            var pipeline = fixture.Create<ReleaseDefinition>();
+            var deploymentMethods = fixture.CreateMany<DeploymentMethod>(3).ToList();
+            for (var i = 0; i < deploymentMethods.Count; i++)
+            {
+                var deploymentMethod = deploymentMethods[i];
+                deploymentMethod.Organization = config.Organization;
+                deploymentMethod.ProjectId = project.Id;
+                deploymentMethod.PipelineId = pipeline.Id;
+                deploymentMethod.StageId = i.ToString();
+            }
 
             // Act
-            var activity = new ScanReleasePipelinesActivity(
-                fixture.Create<EnvironmentConfig>(),
-                client.Object,
-                provider.Object);
-
-            var result = await activity.RunAsync((project, releasePipeline, ciIdentifiers));
+            var activity = new ScanReleasePipelinesActivity(config, client.Object, provider);
+            var actual = await activity.RunAsync((project, pipeline, deploymentMethods));
 
             // Assert
-            result.ShouldNotBeNull();
-
+            actual.ShouldNotBeNull();
+            actual.Rules.ShouldNotBeNull();
+            actual.Rules.ShouldNotBeEmpty();
             client.VerifyAll();
+            Assert.Equal(expected, actual.Rules.All(r => r.Status));
+        }
+
+        [Fact]
+        public async Task EvaluatesRules_IfNoRulesApply_ThenReportShouldAlsoNotContainsRules()
+        {
+            // Arrange
+            var fixture = new Fixture().Customize(new AutoMoqCustomization());
+            var config = fixture.Create<EnvironmentConfig>();
+            var provider = CreateRulesProvider(fixture, 0);
+            var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
+            var project = fixture.Create<Project>();
+            var pipeline = fixture.Create<ReleaseDefinition>();
+            var deploymentMethods = fixture.CreateMany<DeploymentMethod>(3).ToList();
+            for (var i = 0; i < deploymentMethods.Count; i++)
+            {
+                var deploymentMethod = deploymentMethods[i];
+                deploymentMethod.Organization = config.Organization;
+                deploymentMethod.ProjectId = project.Id;
+                deploymentMethod.PipelineId = pipeline.Id;
+                deploymentMethod.StageId = i.ToString();
+            }
+
+            // Act
+            var activity = new ScanReleasePipelinesActivity(config, client.Object, provider);
+            var actual = await activity.RunAsync((project, pipeline, deploymentMethods));
+
+            // Assert
+            actual.ShouldNotBeNull();
+            client.VerifyAll();
+            actual.Rules.ShouldNotBeNull();
+            actual.Rules.ShouldBeEmpty();
+        }
+
+        [Fact]
+        public async Task EvaluatesRules_IfThereAreRulesButNoStageIds_ThenTheRulesShouldStillBeProcessed()
+        {
+            // Arrange
+            var fixture = new Fixture().Customize(new AutoMoqCustomization());
+            var config = fixture.Create<EnvironmentConfig>();
+            var provider = CreateRulesProvider(fixture, 3, (stageId: null, ruleResult: true));
+            var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
+            var project = fixture.Create<Project>();
+            var pipeline = fixture.Create<ReleaseDefinition>();
+            var deploymentMethods = fixture.CreateMany<DeploymentMethod>(3).ToList();
+            foreach (var deploymentMethod in deploymentMethods)
+            {
+                deploymentMethod.Organization = config.Organization;
+                deploymentMethod.ProjectId = project.Id;
+                deploymentMethod.PipelineId = pipeline.Id;
+                deploymentMethod.StageId = null;
+            }
+
+            // Act
+            var activity = new ScanReleasePipelinesActivity(config, client.Object, provider);
+            var actual = await activity.RunAsync((project, pipeline, deploymentMethods));
+
+            // Assert
+            actual.ShouldNotBeNull();
+            client.VerifyAll();
+            actual.Rules.ShouldNotBeNull();
+            actual.Rules.ShouldNotBeEmpty();
+            Assert.True(actual.Rules.All(r => r.Status));
         }
 
         [Fact]
@@ -64,11 +141,11 @@ namespace Functions.Tests.Activities
                 client.Object,
                 provider.Object);
 
-            var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () => 
+            var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () =>
                 await activity.RunAsync((null, null, null)));
             exception.Message.ShouldContainWithoutWhitespace("Value cannot be null. Parameter name: input");
         }
-        
+
         [Fact]
         public async Task RunWithNullProjectInRequestShouldThrowException()
         {
@@ -82,7 +159,7 @@ namespace Functions.Tests.Activities
 
             var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
             var releasePipeline = fixture.Create<ReleaseDefinition>();
-            var ciIdentifiers = fixture.Create<IList<string>>();
+            var deploymentMethods = fixture.Create<IList<DeploymentMethod>>();
 
             // Act
             var activity = new ScanReleasePipelinesActivity(
@@ -90,8 +167,8 @@ namespace Functions.Tests.Activities
                 client.Object,
                 provider.Object);
 
-            var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () => 
-                await activity.RunAsync((null, releasePipeline, ciIdentifiers)));
+            var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () =>
+                await activity.RunAsync((null, releasePipeline, deploymentMethods)));
             exception.Message.ShouldContainWithoutWhitespace("Value cannot be null. Parameter name: input");
         }
 
@@ -108,7 +185,7 @@ namespace Functions.Tests.Activities
 
             var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
             var project = fixture.Create<Project>();
-            var ciIdentifiers = fixture.Create<IList<string>>();
+            var deploymentMethods = fixture.Create<IList<DeploymentMethod>>();
 
             // Act
             var activity = new ScanReleasePipelinesActivity(
@@ -116,9 +193,34 @@ namespace Functions.Tests.Activities
                 client.Object,
                 provider.Object);
 
-            var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () => 
-                await activity.RunAsync((project, null, ciIdentifiers)));
+            var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () =>
+                await activity.RunAsync((project, null, deploymentMethods)));
             exception.Message.ShouldContainWithoutWhitespace("Value cannot be null. Parameter name: input");
+        }
+
+        private IRulesProvider CreateRulesProvider(ISpecimenBuilder fixture, int numRules,
+            params (string stageId, bool ruleResult)[] ruleResults)
+        {
+            var provider = new Mock<IRulesProvider>();
+            var rules = fixture.CreateMany<Mock<IReleasePipelineRule>>(numRules).ToArray();
+            foreach (var rule in rules)
+            {
+                foreach (var (stageId, ruleResult) in ruleResults)
+                {
+                    rule.Setup(
+                            r => r.EvaluateAsync(
+                                It.IsAny<string>(),
+                                It.Is<string>(s => s == stageId),
+                                It.IsAny<ReleaseDefinition>()))
+                        .ReturnsAsync(ruleResult);
+                }
+            }
+
+            provider
+                .Setup(x => x.ReleaseRules(It.IsAny<IVstsRestClient>()))
+                .Returns(rules.Select(r => r.Object))
+                .Verifiable();
+            return provider.Object;
         }
     }
 }

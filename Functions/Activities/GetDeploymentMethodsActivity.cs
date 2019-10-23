@@ -6,7 +6,6 @@ using Functions.Model;
 using Microsoft.Azure.WebJobs;
 using Microsoft.WindowsAzure.Storage.Table;
 using SecurePipelineScan.VstsService.Response;
-using Unmockable;
 
 namespace Functions.Activities
 {
@@ -52,9 +51,8 @@ namespace Functions.Activities
                 .Select(g => new ProductionItem
                 {
                     ItemId = g.Key,
-                    CiIdentifiers = g.Select(x => x.CiIdentifier).ToList()
-                })
-                .ToList();
+                    DeploymentInfo = g.ToList()
+                }).ToList();
         }
     }
 }
