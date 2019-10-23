@@ -57,7 +57,7 @@ namespace Functions.Tests.Activities
             actual.Rules.ShouldNotBeNull();
             actual.Rules.ShouldNotBeEmpty();
             client.VerifyAll();
-            Assert.Equal(expected, actual.Rules.All(r => r.Status));
+            Assert.Equal(expected, actual.Rules.All(r => r.Status.GetValueOrDefault()));
         }
 
         [Fact]
@@ -119,7 +119,7 @@ namespace Functions.Tests.Activities
             client.VerifyAll();
             actual.Rules.ShouldNotBeNull();
             actual.Rules.ShouldNotBeEmpty();
-            Assert.True(actual.Rules.All(r => r.Status));
+            Assert.True(actual.Rules.All(r => r.Status.GetValueOrDefault()));
         }
 
         [Fact]
