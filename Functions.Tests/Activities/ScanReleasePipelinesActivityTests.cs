@@ -61,12 +61,12 @@ namespace Functions.Tests.Activities
         }
 
         [Fact]
-        public async Task EvaluatesRules_ReportShouldNotContainsRules()
+        public async Task EvaluatesRules_IfNoRulesApply_ThenReportShouldAlsoNotContainsRules()
         {
             // Arrange
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
             var config = fixture.Create<EnvironmentConfig>();
-            var provider = CreateRulesProvider(fixture, 3);
+            var provider = CreateRulesProvider(fixture, 0);
             var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
             var project = fixture.Create<Project>();
             var pipeline = fixture.Create<ReleaseDefinition>();
@@ -82,13 +82,44 @@ namespace Functions.Tests.Activities
 
             // Act
             var activity = new ScanReleasePipelinesActivity(config, client.Object, provider);
-            var result = await activity.RunAsync((project, pipeline, deploymentMethods));
+            var actual = await activity.RunAsync((project, pipeline, deploymentMethods));
 
             // Assert
-            result.ShouldNotBeNull();
+            actual.ShouldNotBeNull();
             client.VerifyAll();
-            result.Rules.ShouldNotBeNull();
-            result.Rules.ShouldBeEmpty();
+            actual.Rules.ShouldNotBeNull();
+            actual.Rules.ShouldBeEmpty();
+        }
+
+        [Fact]
+        public async Task EvaluatesRules_IfThereAreRulesButNoStageIds_ThenTheRulesShouldStillBeProcessed()
+        {
+            // Arrange
+            var fixture = new Fixture().Customize(new AutoMoqCustomization());
+            var config = fixture.Create<EnvironmentConfig>();
+            var provider = CreateRulesProvider(fixture, 3, (stageId: null, ruleResult: true));
+            var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
+            var project = fixture.Create<Project>();
+            var pipeline = fixture.Create<ReleaseDefinition>();
+            var deploymentMethods = fixture.CreateMany<DeploymentMethod>(3).ToList();
+            foreach (var deploymentMethod in deploymentMethods)
+            {
+                deploymentMethod.Organization = config.Organization;
+                deploymentMethod.ProjectId = project.Id;
+                deploymentMethod.PipelineId = pipeline.Id;
+                deploymentMethod.StageId = null;
+            }
+
+            // Act
+            var activity = new ScanReleasePipelinesActivity(config, client.Object, provider);
+            var actual = await activity.RunAsync((project, pipeline, deploymentMethods));
+
+            // Assert
+            actual.ShouldNotBeNull();
+            client.VerifyAll();
+            actual.Rules.ShouldNotBeNull();
+            actual.Rules.ShouldNotBeEmpty();
+            Assert.True(actual.Rules.All(r => r.Status));
         }
 
         [Fact]

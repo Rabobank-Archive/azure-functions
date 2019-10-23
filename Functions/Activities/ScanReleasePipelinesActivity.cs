@@ -43,7 +43,8 @@ namespace Functions.Activities
             var stageIds = deploymentMethods.Where(d =>
                 d.Organization == _config.Organization &&
                 d.ProjectId == project.Id &&
-                d.PipelineId == pipeline.Id).Select(dm => dm.StageId);
+                d.PipelineId == pipeline.Id &&
+                !string.IsNullOrWhiteSpace(d.StageId)).Select(d => d.StageId).ToList();
 
             return new ItemExtensionData
             {
@@ -51,10 +52,13 @@ namespace Functions.Activities
                 ItemId = pipeline.Id,
                 Rules = await Task.WhenAll(rules.Select(async rule =>
                         {
-                            var status = (await Task.WhenAll(stageIds.Select(async stageId =>
-                                    await rule.EvaluateAsync(project.Id, stageId, pipeline)
-                                        .ConfigureAwait(false)))
-                                .ConfigureAwait(false)).All(s => s);
+                            var status = stageIds.Any()
+                                ? (await Task.WhenAll(stageIds.Select(async stageId =>
+                                        await rule.EvaluateAsync(project.Id, stageId, pipeline)
+                                            .ConfigureAwait(false)))
+                                    .ConfigureAwait(false)).All(s => s)
+                                : await rule.EvaluateAsync(project.Id, null, pipeline)
+                                    .ConfigureAwait(false);
 
                             return new EvaluatedRule
                             {
