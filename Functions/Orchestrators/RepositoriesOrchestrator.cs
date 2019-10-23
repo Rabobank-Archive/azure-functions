@@ -45,7 +45,7 @@ namespace Functions.Orchestrators
                     context.CallActivityWithRetryAsync<ItemExtensionData>(nameof(ScanRepositoriesActivity),
                     RetryHelper.ActivityRetryOptions, (project, r, policies, productionItems
                         .Where(p => p.ItemId == r.Id)
-                        .SelectMany(p => p.CiIdentifiers)
+                        .SelectMany(p => p.DeploymentInfo)
                         .ToList()))))
             };
             

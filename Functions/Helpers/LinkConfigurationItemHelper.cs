@@ -26,7 +26,7 @@ namespace Functions.Helpers
                          select new ProductionItem
                          {
                              ItemId = a.DefinitionReference.Definition.Id,
-                             CiIdentifiers = p.CiIdentifiers
+                             DeploymentInfo = p.DeploymentInfo
                          };
 
             return GroupAndFilterProductionItems(result);
@@ -50,7 +50,7 @@ namespace Functions.Helpers
                          select new ProductionItem
                          {
                              ItemId = b.Repository.Id,
-                             CiIdentifiers = p.CiIdentifiers
+                             DeploymentInfo = p.DeploymentInfo
                          };
 
             return GroupAndFilterProductionItems(result);
@@ -64,12 +64,11 @@ namespace Functions.Helpers
                 .Select(g => new ProductionItem
                 {
                     ItemId = g.Key,
-                    CiIdentifiers = g
-                        .SelectMany(p => p.CiIdentifiers)
-                        .Distinct()
+                    DeploymentInfo = g
+                        .SelectMany(p => p.DeploymentInfo)
+                        .Distinct(new DeploymentMethodEqualityComparer())
                         .ToList()
-                })
-                .ToList();
+                }).ToList();
         }
     }
 }
