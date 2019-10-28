@@ -56,7 +56,7 @@ namespace Functions.Activities
                                 ? (await Task.WhenAll(stageIds.Select(async stageId =>
                                         await rule.EvaluateAsync(project.Id, stageId, pipeline)
                                             .ConfigureAwait(false)))
-                                    .ConfigureAwait(false)).All(s => s)
+                                    .ConfigureAwait(false)).All(s => s ?? false)
                                 : await rule.EvaluateAsync(project.Id, null, pipeline)
                                     .ConfigureAwait(false);
 
