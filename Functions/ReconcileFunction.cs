@@ -105,7 +105,7 @@ namespace Functions
                 ? HttpUtility.ParseQueryString(request.RequestUri?.Query) 
                 : null;
 
-            var userId = query.Get("userId");
+            var userId = query?.Get("userId");
 
             return new OkObjectResult(await HasPermissionToReconcileAsync(project, id, userId));
         }
