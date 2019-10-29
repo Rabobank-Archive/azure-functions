@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Web;
 using Requests = SecurePipelineScan.VstsService.Requests;
 
 namespace Functions
@@ -100,12 +101,29 @@ namespace Functions
                 return new UnauthorizedResult();
             }
 
-            return new OkObjectResult(await HasPermissionToReconcileAsync(project, id));
+            var query = request.RequestUri?.Query != null 
+                ? HttpUtility.ParseQueryString(request.RequestUri?.Query) 
+                : null;
+
+            var userId = query.Get("userId");
+
+            return new OkObjectResult(await HasPermissionToReconcileAsync(project, id, userId));
         }
 
-        private async Task<bool> HasPermissionToReconcileAsync(string project, string id)
+        private async Task<bool> HasPermissionToReconcileAsync(string project, string id, string userId = null)
         {
             var permissions = await _client.GetAsync(Requests.Permissions.PermissionsGroupProjectId(project, id));
+
+            if (permissions == null) 
+            {
+                permissions = await _client.GetAsync(Requests.Permissions.PermissionsGroupProjectId(project, userId));
+                
+                if (permissions == null)
+                {
+                    return false;
+                }
+            }
+
             return permissions.Security.Permissions.Any(x =>
                 x.DisplayName == "Manage project properties" && x.PermissionId == PermissionBit);
         }
