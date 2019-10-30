@@ -169,6 +169,82 @@ namespace Functions.Tests
         }
 
         [Fact]
+        public async Task CanCheckPermissionsForUserWithUnknownVsIInTokenAndValidUserId()
+        {
+            var fixture = new Fixture();
+            ManageProjectPropertiesPermission(fixture);
+
+            var tokenizer = new Mock<ITokenizer>();
+            tokenizer
+                .Setup(x => x.Principal(It.IsAny<string>()))
+                .Returns(PrincipalWithClaims());
+
+            var client = new Mock<IVstsRestClient>();
+            client
+                .Setup(x => x.GetAsync(It.Is<IVstsRequest<Response.PermissionsProjectId>>(req =>
+                    req.QueryParams.Values.Contains("ab84d5a2-4b8d-68df-9ad3-cc9c8884270c"))))
+                .Returns(Task.FromResult<Response.PermissionsProjectId>(null))
+                .Verifiable();
+
+            client
+                .Setup(x => x.GetAsync(It.Is<IVstsRequest<Response.PermissionsProjectId>>(req =>
+                    req.QueryParams.Values.Contains("ef2e3683-8fb5-439d-9dc9-53af732e6387"))))
+                .Returns(Task.FromResult(fixture.Create<Response.PermissionsProjectId>()))
+                .Verifiable();
+
+            var request = new HttpRequestMessage();
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
+            request.RequestUri = new System.Uri("https://dev.azure.com/reconcile/somecompany/TAS/haspermissions?userId=ef2e3683-8fb5-439d-9dc9-53af732e6387");
+            //var query = System.Web.HttpUtility.ParseQueryString(request.RequestUri.Query);
+            //query.Set("userId", "guid");
+
+            var function = new ReconcileFunction(client.Object, new Mock<IRulesProvider>().Object, tokenizer.Object);
+            (await function
+                .HasPermissionAsync(request, "somecompany", "TAS"))
+                .ShouldBeOfType<OkObjectResult>()
+                .Value
+                .ShouldBe(true);
+            client.Verify();
+        }
+
+        [Fact]
+        public async Task CanCheckPermissionsForUserWithUnknownVsIInTokenAndInvalidUserId()
+        {
+            var fixture = new Fixture();
+            ManageProjectPropertiesPermission(fixture);
+
+            var tokenizer = new Mock<ITokenizer>();
+            tokenizer
+                .Setup(x => x.Principal(It.IsAny<string>()))
+                .Returns(PrincipalWithClaims());
+
+            var client = new Mock<IVstsRestClient>();
+            client
+                .Setup(x => x.GetAsync(It.Is<IVstsRequest<Response.PermissionsProjectId>>(req =>
+                    req.QueryParams.Values.Contains("ab84d5a2-4b8d-68df-9ad3-cc9c8884270c"))))
+                .Returns(Task.FromResult<Response.PermissionsProjectId>(null))
+                .Verifiable();
+
+            client
+                .Setup(x => x.GetAsync(It.Is<IVstsRequest<Response.PermissionsProjectId>>(req =>
+                    req.QueryParams.Values.Contains("ef2e3683-8fb5-439d-9dc9-53af732e6387"))))
+                .Returns(Task.FromResult<Response.PermissionsProjectId>(null))
+                .Verifiable();
+
+            var request = new HttpRequestMessage();
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
+            request.RequestUri = new System.Uri("https://dev.azure.com/reconcile/somecompany/TAS/haspermissions?userId=ef2e3683-8fb5-439d-9dc9-53af732e6387");
+
+            var function = new ReconcileFunction(client.Object, new Mock<IRulesProvider>().Object, tokenizer.Object);
+            (await function
+                .HasPermissionAsync(request, "somecompany", "TAS"))
+                .ShouldBeOfType<OkObjectResult>()
+                .Value
+                .ShouldBe(false);
+            client.Verify();
+        }
+
+        [Fact]
         public async Task UnauthorizedWithoutHeaderWhenReconcile()
         {
             var ruleProvider = new Mock<IRulesProvider>();
