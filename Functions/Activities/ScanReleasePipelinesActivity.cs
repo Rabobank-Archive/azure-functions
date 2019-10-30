@@ -52,13 +52,34 @@ namespace Functions.Activities
                 ItemId = pipeline.Id,
                 Rules = await Task.WhenAll(rules.Select(async rule =>
                         {
-                            var status = stageIds.Any()
-                                ? (await Task.WhenAll(stageIds.Select(async stageId =>
-                                        await rule.EvaluateAsync(project.Id, stageId, pipeline)
-                                            .ConfigureAwait(false)))
-                                    .ConfigureAwait(false)).All(s => s ?? false)
-                                : await rule.EvaluateAsync(project.Id, null, pipeline)
+                            bool? status;
+                            if (!stageIds.Any())
+                            {
+                                // if no specific stageId is provided, we assume that the rule does not
+                                // need it and pass null.
+                                status = await rule.EvaluateAsync(project.Id, null, pipeline)
                                     .ConfigureAwait(false);
+                            }
+                            else
+                            {
+                                // if we have stageId's, we will invoke the rule for each
+                                // one of them.
+                                var results = await Task.WhenAll(stageIds.Select(async stageId =>
+                                    await rule.EvaluateAsync(project.Id, stageId, pipeline)
+                                        .ConfigureAwait(false))).ConfigureAwait(false);
+
+                                if (results.Any(r => r == null))
+                                {
+                                    // If any of the results above is null (could not be determined), it mean that the status
+                                    // cannot be determined.
+                                    status = null;
+                                }
+                                else
+                                {
+                                    // otherwise, all results must be true for the status to be true.
+                                    status = results.All(r => r.HasValue && r.Value);
+                                }
+                            }
 
                             return new EvaluatedRule
                             {
