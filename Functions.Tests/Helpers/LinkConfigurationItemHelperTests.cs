@@ -125,14 +125,6 @@ namespace Functions.Tests.Helpers
             item.DeploymentInfo[1].StageId.ShouldBe("s2");
             item.DeploymentInfo[2].CiIdentifier.ShouldBe("c3");
             item.DeploymentInfo[2].StageId.ShouldBe("s3");
-
-
-            //item.DeploymentInfo.ShouldBe(new[]
-            //{
-            //    new DeploymentMethod{CiIdentifier = "c1", StageId = "s1"},
-            //    new DeploymentMethod{CiIdentifier = "c2", StageId = "s2"},
-            //    new DeploymentMethod{CiIdentifier = "c3", StageId = "s3"}
-            //});
         }
 
         [Fact]
@@ -325,14 +317,6 @@ namespace Functions.Tests.Helpers
             item.DeploymentInfo[1].StageId.ShouldBe("s2");
             item.DeploymentInfo[2].CiIdentifier.ShouldBe("c3");
             item.DeploymentInfo[2].StageId.ShouldBe("s3");
-
-
-            //item.DeploymentInfo.ShouldBe(new[]
-            //{
-            //    new DeploymentMethod{CiIdentifier = "c1", StageId = "s1"},
-            //    new DeploymentMethod{CiIdentifier = "c2", StageId = "s2"},
-            //    new DeploymentMethod{CiIdentifier = "c3", StageId = "s3"}
-            //});
         }
 
         [Fact]
