@@ -23,10 +23,10 @@ namespace Functions.Tests.Activities
         [InlineData(false, false, false, false)]
         [InlineData(true, false, true, false)]
         public async Task EvaluatesRules_ShouldOnlyBeTrueIfAllStagesAreCompliant(
-            bool stage0RuleResult,
-            bool stage1RuleResult,
-            bool stage2RuleResult,
-            bool expected)
+            bool? stage0RuleResult,
+            bool? stage1RuleResult,
+            bool? stage2RuleResult,
+            bool? expected)
         {
             // Arrange
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
@@ -123,6 +123,45 @@ namespace Functions.Tests.Activities
         }
 
         [Fact]
+        public async Task EvaluatesRules_IfForAnyOfTheStagesRuleEvaluatesToNull_ThenTheRulesStatusShouldAlsoBeNull()
+        {
+            // Arrange
+            var fixture = new Fixture().Customize(new AutoMoqCustomization());
+            var config = fixture.Create<EnvironmentConfig>();
+            var provider = CreateRulesProvider(fixture, 3, 
+                (stageId: "0", ruleResult: true),
+                // one of the checks returns null because the result could not be determined
+                (stageId: "1", ruleResult: null),
+                (stageId: "2", ruleResult: true));
+            var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
+            var project = fixture.Create<Project>();
+            var pipeline = fixture.Create<ReleaseDefinition>();
+            var deploymentMethods = fixture.CreateMany<DeploymentMethod>(3).ToList();
+            for (var i = 0; i < deploymentMethods.Count; i++)
+            {
+                var deploymentMethod = deploymentMethods[i];
+                deploymentMethod.Organization = config.Organization;
+                deploymentMethod.ProjectId = project.Id;
+                deploymentMethod.PipelineId = pipeline.Id;
+                deploymentMethod.StageId = i.ToString();
+            }
+
+            // Act
+            var activity = new ScanReleasePipelinesActivity(config, client.Object, provider);
+            var actual = await activity.RunAsync((project, pipeline, deploymentMethods));
+
+            // Assert
+            actual.ShouldNotBeNull();
+            client.VerifyAll();
+            actual.Rules.ShouldNotBeNull();
+            actual.Rules.ShouldNotBeEmpty();
+            Assert.All(actual.Rules, r =>
+            {
+                Assert.Null(r.Status);
+            });
+        }
+
+        [Fact]
         public async Task RunWithNullRequestShouldThrowException()
         {
             // Arrange
@@ -199,7 +238,7 @@ namespace Functions.Tests.Activities
         }
 
         private IRulesProvider CreateRulesProvider(ISpecimenBuilder fixture, int numRules,
-            params (string stageId, bool ruleResult)[] ruleResults)
+            params (string stageId, bool? ruleResult)[] ruleResults)
         {
             var provider = new Mock<IRulesProvider>();
             var rules = fixture.CreateMany<Mock<IReleasePipelineRule>>(numRules).ToArray();
