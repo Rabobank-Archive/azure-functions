@@ -38,10 +38,14 @@ namespace Functions
             string item = null)
         {
             var id = _tokenizer.IdentifierFromClaim(request);
-            if (id == null || !(await HasPermissionToReconcileAsync(project, id)))
-            {
+
+            if (id == null)
                 return new UnauthorizedResult();
-            }
+
+            var userId = GetUserIdFromQueryString(request);
+
+            if (!(await HasPermissionToReconcileAsync(project, id, userId)))
+                return new UnauthorizedResult();
 
             switch (scope)
             {
@@ -56,6 +60,57 @@ namespace Functions
                 default:
                     return new NotFoundObjectResult(scope);
             }
+        }
+
+        [FunctionName("HasPermissionToReconcileFunction")]
+        public async Task<IActionResult> HasPermissionAsync([HttpTrigger(AuthorizationLevel.Anonymous,
+            Route = "reconcile/{organization}/{project}/haspermissions")]HttpRequestMessage request,
+            string organization,
+            string project)
+        {
+            var id = _tokenizer.IdentifierFromClaim(request);
+            if (id == null)
+                return new UnauthorizedResult();
+
+            var userId = GetUserIdFromQueryString(request);
+
+            return new OkObjectResult(await HasPermissionToReconcileAsync(project, id, userId));
+        }
+
+        public static Reconcile ReconcileFromRule(IReconcile rule,
+    EnvironmentConfig environmentConfig,
+    string projectId,
+    string scope,
+    string itemId)
+        {
+            if (environmentConfig == null)
+                throw new ArgumentNullException(nameof(environmentConfig));
+
+            return rule != null ? new Reconcile
+            {
+                Url = new Uri($"https://{environmentConfig.FunctionAppHostname}/api/reconcile/{environmentConfig.Organization}/{projectId}/{scope}/{rule.GetType().Name}/{itemId}"),
+                Impact = rule.Impact
+            } : null;
+        }
+
+        public static Reconcile ReconcileFromRule(EnvironmentConfig environmentConfig, string project, IProjectReconcile rule)
+        {
+            if (environmentConfig == null)
+                throw new ArgumentNullException(nameof(environmentConfig));
+
+            return rule != null ? new Reconcile
+            {
+                Url = new Uri($"https://{environmentConfig.FunctionAppHostname}/api/reconcile/{environmentConfig.Organization}/{project}/globalpermissions/{rule.GetType().Name}"),
+                Impact = rule.Impact
+            } : null;
+        }
+
+        public static Uri HasReconcilePermissionUrl(EnvironmentConfig environmentConfig, string projectId)
+        {
+            if (environmentConfig == null)
+                throw new ArgumentNullException(nameof(environmentConfig));
+
+            return new Uri($"https://{environmentConfig.FunctionAppHostname}/api/reconcile/{environmentConfig.Organization}/{projectId}/haspermissions");
         }
 
         private async Task<IActionResult> ReconcileGlobalPermissionsAsync(string project, string ruleName)
@@ -89,35 +144,23 @@ namespace Functions
             return new OkResult();
         }
 
-        [FunctionName("HasPermissionToReconcileFunction")]
-        public async Task<IActionResult> HasPermissionAsync([HttpTrigger(AuthorizationLevel.Anonymous,
-            Route = "reconcile/{organization}/{project}/haspermissions")]HttpRequestMessage request,
-            string organization,
-            string project)
+        private static string GetUserIdFromQueryString(HttpRequestMessage request)
         {
-            var id = _tokenizer.IdentifierFromClaim(request);
-            if (id == null)
-            {
-                return new UnauthorizedResult();
-            }
-
-            var query = request.RequestUri?.Query != null 
-                ? HttpUtility.ParseQueryString(request.RequestUri?.Query) 
+            var query = request.RequestUri?.Query != null
+                ? HttpUtility.ParseQueryString(request.RequestUri?.Query)
                 : null;
 
-            var userId = query?.Get("userId");
-
-            return new OkObjectResult(await HasPermissionToReconcileAsync(project, id, userId));
+            return query?.Get("userId");
         }
 
         private async Task<bool> HasPermissionToReconcileAsync(string project, string id, string userId = null)
         {
             var permissions = await _client.GetAsync(Requests.Permissions.PermissionsGroupProjectId(project, id));
 
-            if (permissions == null) 
+            if (permissions == null)
             {
                 permissions = await _client.GetAsync(Requests.Permissions.PermissionsGroupProjectId(project, userId));
-                
+
                 if (permissions == null)
                 {
                     return false;
@@ -126,42 +169,6 @@ namespace Functions
 
             return permissions.Security.Permissions.Any(x =>
                 x.DisplayName == "Manage project properties" && x.PermissionId == PermissionBit);
-        }
-
-        public static Reconcile ReconcileFromRule(IReconcile rule,
-            EnvironmentConfig environmentConfig,
-            string projectId,
-            string scope,
-            string itemId)
-        {
-            if (environmentConfig == null)
-                throw new ArgumentNullException(nameof(environmentConfig));
-
-            return rule != null ? new Reconcile
-            {
-                Url = new Uri($"https://{environmentConfig.FunctionAppHostname}/api/reconcile/{environmentConfig.Organization}/{projectId}/{scope}/{rule.GetType().Name}/{itemId}"),
-                Impact = rule.Impact
-            } : null;
-        }
-
-        public static Reconcile ReconcileFromRule(EnvironmentConfig environmentConfig, string project, IProjectReconcile rule)
-        {
-            if (environmentConfig == null)
-                throw new ArgumentNullException(nameof(environmentConfig));
-
-            return rule != null ? new Reconcile
-            {
-                Url = new Uri ($"https://{environmentConfig.FunctionAppHostname}/api/reconcile/{environmentConfig.Organization}/{project}/globalpermissions/{rule.GetType().Name}"),
-                Impact = rule.Impact
-            } : null;
-        }
-
-        public static Uri HasReconcilePermissionUrl(EnvironmentConfig environmentConfig, string projectId)
-        {
-            if (environmentConfig == null)
-                throw new ArgumentNullException(nameof(environmentConfig));
-
-            return new Uri($"https://{environmentConfig.FunctionAppHostname}/api/reconcile/{environmentConfig.Organization}/{projectId}/haspermissions");
         }
     }
 }
