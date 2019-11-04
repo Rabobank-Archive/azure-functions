@@ -44,10 +44,7 @@ namespace Functions.Orchestrators
                 Reports = await Task.WhenAll(releasePipelines.Select(r =>
                     context.CallActivityWithRetryAsync<ItemExtensionData>(
                     nameof(ScanReleasePipelinesActivity), RetryHelper.ActivityRetryOptions, 
-                    (project, r, productionItems
-                        .Where(p => p.ItemId == r.Id)
-                        .SelectMany(p => p.DeploymentInfo)
-                        .ToList()))))
+                    (project, r, GetDeploymentMethodsForReleaseDefinition(productionItems, r.Id)))))
             };
 
             await context.CallActivityAsync(nameof(UploadPreventiveRuleLogsActivity),
@@ -58,6 +55,13 @@ namespace Functions.Orchestrators
 
             return LinkConfigurationItemHelper.LinkCisToBuildPipelines(releasePipelines,
                 productionItems, project);
+        }
+
+        private static List<DeploymentMethod> GetDeploymentMethodsForReleaseDefinition(IEnumerable<ProductionItem> productionItems, string releaseDefinitionId)
+        {
+            return productionItems
+                .Where(p => p.ItemId == releaseDefinitionId)
+                .SelectMany(p => p.DeploymentInfo).ToList();
         }
     }
 }
