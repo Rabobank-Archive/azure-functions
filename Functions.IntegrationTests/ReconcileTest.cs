@@ -94,7 +94,12 @@ namespace Functions.IntegrationTests
         private static IEnumerable<object[]> Rules(Func<IRulesProvider, IEnumerable<IRule>> rules, string scope, string item)
         {
             var provider = new RulesProvider();
-            foreach (var rule in rules(provider).Select(x => x.GetType().Name))
+            var skip = new[]
+            {
+                "ProductionStageUsesArtifactFromSecureBranch"
+            };
+            
+            foreach (var rule in rules(provider).Select(x => x.GetType().Name).Except(skip))
             {
                 yield return new object[] {scope, rule, item};
             }

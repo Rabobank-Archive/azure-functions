@@ -23,7 +23,6 @@ namespace Functions.IntegrationTests
         public TestHost()
         {
             var config = new TestConfig();
-
             var fixture = new Fixture().Customize(new AutoNSubstituteCustomization {ConfigureMembers = true});
             
             _host = new HostBuilder()
