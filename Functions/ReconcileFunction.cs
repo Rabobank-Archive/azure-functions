@@ -52,11 +52,11 @@ namespace Functions
                 case RuleScopes.GlobalPermissions:
                     return await ReconcileGlobalPermissionsAsync(project, ruleName);
                 case RuleScopes.Repositories:
-                    return await ReconcileItemAsync(project, ruleName, item, _ruleProvider.RepositoryRules(_client));
+                    return await ReconcileItemAsync(project, ruleName, item, scope, _ruleProvider.RepositoryRules(_client));
                 case RuleScopes.BuildPipelines:
-                    return await ReconcileItemAsync(project, ruleName, item, _ruleProvider.BuildRules(_client));
+                    return await ReconcileItemAsync(project, ruleName, item, scope, _ruleProvider.BuildRules(_client));
                 case RuleScopes.ReleasePipelines:
-                    return await ReconcileItemAsync(project, ruleName, item, _ruleProvider.ReleaseRules(_client));
+                    return await ReconcileItemAsync(project, ruleName, item, scope, _ruleProvider.ReleaseRules(_client));
                 default:
                     return new NotFoundObjectResult(scope);
             }
@@ -129,8 +129,11 @@ namespace Functions
             return new OkResult();
         }
 
-        private static async Task<IActionResult> ReconcileItemAsync(string project, string ruleName, string item, IEnumerable<IRule> rules)
+        private static async Task<IActionResult> ReconcileItemAsync(string project, string ruleName, string item, string scope, IEnumerable<IRule> rules)
         {
+            if (string.IsNullOrEmpty(item))
+                throw new ArgumentNullException(nameof(item));
+
             var rule = rules
                 .OfType<IReconcile>()
                 .SingleOrDefault(x => x.GetType().Name == ruleName);
@@ -140,7 +143,7 @@ namespace Functions
                 return new NotFoundObjectResult($"Rule not found {ruleName}");
             }
 
-            await rule.ReconcileAsync(project, null, item);
+            await rule.ReconcileAsync(project, item, scope, null);
             return new OkResult();
         }
 
