@@ -131,6 +131,9 @@ namespace Functions
 
         private static async Task<IActionResult> ReconcileItemAsync(string project, string ruleName, string item, IEnumerable<IRule> rules)
         {
+            if (string.IsNullOrEmpty(item))
+                throw new ArgumentNullException(nameof(item));
+
             var rule = rules
                 .OfType<IReconcile>()
                 .SingleOrDefault(x => x.GetType().Name == ruleName);
@@ -140,7 +143,7 @@ namespace Functions
                 return new NotFoundObjectResult($"Rule not found {ruleName}");
             }
 
-            await rule.ReconcileAsync(project, item, null);
+            await rule.ReconcileAsync(project, null, item);
             return new OkResult();
         }
 
