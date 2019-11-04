@@ -140,7 +140,7 @@ namespace Functions
                 return new NotFoundObjectResult($"Rule not found {ruleName}");
             }
 
-            await rule.ReconcileAsync(project, null, item);
+            await rule.ReconcileAsync(project, item, null);
             return new OkResult();
         }
 
