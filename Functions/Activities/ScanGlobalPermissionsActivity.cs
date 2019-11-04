@@ -56,6 +56,7 @@ namespace Functions.Activities
                     .ConfigureAwait(false),
                 CiIdentifiers = string.Join(",", productionItems
                     .SelectMany(p => p.DeploymentInfo)
+                    .Select(d => d.CiIdentifier)
                     .Distinct())
             };
         }

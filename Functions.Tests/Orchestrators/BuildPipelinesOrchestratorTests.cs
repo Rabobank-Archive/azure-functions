@@ -40,7 +40,7 @@ namespace Functions.Tests.Orchestrators
 
             starter.Setup(x => x.CallActivityWithRetryAsync<ItemExtensionData>(
                 nameof(ScanBuildPipelinesActivity), It.IsAny<RetryOptions>(), 
-                    It.IsAny<(Project, BuildDefinition, List<DeploymentMethod>)>()))
+                    It.IsAny<(Project, BuildDefinition, List<string>)>()))
                 .ReturnsAsync(fixture.Create<ItemExtensionData>())
                 .Verifiable();
             

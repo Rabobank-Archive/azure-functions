@@ -47,6 +47,8 @@ namespace Functions.Orchestrators
                     RetryHelper.ActivityRetryOptions, (project, b, productionItems
                         .Where(r => r.ItemId == b.Id)
                         .SelectMany(r => r.DeploymentInfo)
+                        .Select(d => d.CiIdentifier)
+                        .Distinct()
                         .ToList()))))
             };
 

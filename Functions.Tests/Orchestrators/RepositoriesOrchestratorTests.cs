@@ -41,7 +41,7 @@ namespace Functions.Tests.Orchestrators
                 .Setup(x => x.CallActivityWithRetryAsync<ItemExtensionData>(
                     nameof(ScanRepositoriesActivity), It.IsAny<RetryOptions>(), 
                     It.IsAny<(Project, Repository, IEnumerable<MinimumNumberOfReviewersPolicy>, 
-                    List<DeploymentMethod>)>()))
+                    List<string>)>()))
                 .ReturnsAsync(fixture.Create<ItemExtensionData>())
                 .Verifiable();
             
