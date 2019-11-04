@@ -333,3 +333,5 @@ ASALocalRun/
 tools/
 reports/
 coverage.opencover.xml
+
+appsettings.user.json
