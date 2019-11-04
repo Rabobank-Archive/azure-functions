@@ -19,5 +19,7 @@ namespace Functions.IntegrationTests
         public string ExtensionSecret { get; set; }
         public string ProjectId { get; set; }
         public string ReleasePipelineId { get; set; }
+        public string BuildPipelineId { get; set; }
+        public string RepositoryId { get; set; }
     }
 }

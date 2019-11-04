@@ -6,6 +6,7 @@ using AzureFunctions.TestHelpers;
 using Functions.Starters;
 using LogAnalytics.Client;
 using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.WindowsAzure.Storage;
@@ -27,9 +28,8 @@ namespace Functions.IntegrationTests
 
             using (var host = new HostBuilder()
                 .ConfigureWebJobs(builder => builder
-                    .AddTimers()
                     .AddHttp()
-                    .AddDurableTaskInTestHub()
+                    .AddDurableTask(options => options.HubName = nameof(ProjectsScan))
                     .AddAzureStorageCoreServices()
                     .ConfigureServices(services => services
                         .AddSingleton(fixture.Create<IVstsRestClient>())
