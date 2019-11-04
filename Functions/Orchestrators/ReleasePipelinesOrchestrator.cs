@@ -23,14 +23,6 @@ namespace Functions.Orchestrators
             [OrchestrationTrigger] DurableOrchestrationContextBase context)
         {
             var (project, productionItems) = context.GetInput<(Response.Project, List<ProductionItem>)>();
-
-            var productionItemsCopy = productionItems;
-            if (!productionItemsCopy.Any())
-            {
-                productionItemsCopy = await context.CallActivityWithRetryAsync<List<ProductionItem>>(
-                    nameof(GetDeploymentMethodsActivity), RetryHelper.ActivityRetryOptions, project);
-            }
-
             context.SetCustomStatus(new ScanOrchestrationStatus
             {
                 Project = project.Name,
@@ -52,7 +44,7 @@ namespace Functions.Orchestrators
                 Reports = await Task.WhenAll(releasePipelines.Select(r =>
                     context.CallActivityWithRetryAsync<ItemExtensionData>(
                     nameof(ScanReleasePipelinesActivity), RetryHelper.ActivityRetryOptions, 
-                    (project, r, productionItemsCopy
+                    (project, r, productionItems
                         .Where(p => p.ItemId == r.Id)
                         .SelectMany(p => p.DeploymentInfo)
                         .ToList()))))

@@ -23,12 +23,13 @@ namespace Functions.Orchestrators
                 await StartProjectScanOrchestratorWithTimerAsync(context, p, i)));
         }
 
-        private async static Task StartProjectScanOrchestratorWithTimerAsync(
+        private static async Task StartProjectScanOrchestratorWithTimerAsync(
             DurableOrchestrationContextBase context, Project project, int index)
         {
             await context.CreateTimer(context.CurrentUtcDateTime.AddSeconds(index * TimerInterval), CancellationToken.None);
             await context.CallSubOrchestratorAsync(nameof(ProjectScanOrchestrator),
-                OrchestrationHelper.CreateProjectScanOrchestrationId(context.InstanceId, project.Id), project);
+                OrchestrationHelper.CreateProjectScanOrchestrationId(context.InstanceId, project.Id),
+                (project, (string)null));
         }
     }
 }

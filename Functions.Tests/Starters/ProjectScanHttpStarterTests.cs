@@ -11,10 +11,8 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Functions.Model;
 using Xunit;
 using Response = SecurePipelineScan.VstsService.Response;
-using System.Collections.Generic;
 using SecurePipelineScan.Rules.Security;
 
 namespace Functions.Tests.Starters
@@ -124,8 +122,8 @@ namespace Functions.Tests.Starters
             var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object);
             await function.RunAsync(request, "somecompany", "TAS", RuleScopes.GlobalPermissions, mock.Object);
 
-            mock.Verify(x => x.StartNewAsync(nameof(GlobalPermissionsOrchestrator), 
-                It.IsAny<(Response.Project, List<ProductionItem>)>()));
+            mock.Verify(x => x.StartNewAsync(nameof(ProjectScanOrchestrator),
+                It.Is<(Response.Project, string)>(t => t.Item1 == project && t.Item2 == RuleScopes.GlobalPermissions)));
         }
 
         [Fact]
@@ -153,8 +151,8 @@ namespace Functions.Tests.Starters
             var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object);
             await function.RunAsync(request, "somecompany", "TAS", RuleScopes.Repositories, mock.Object);
 
-            mock.Verify(x => x.StartNewAsync(nameof(RepositoriesOrchestrator), 
-                It.IsAny<(Response.Project, List<ProductionItem>)>()));
+            mock.Verify(x => x.StartNewAsync(nameof(ProjectScanOrchestrator),
+                It.Is<(Response.Project, string)>(t => t.Item1 == project && t.Item2 == RuleScopes.Repositories)));
         }
 
         [Fact]
@@ -182,8 +180,8 @@ namespace Functions.Tests.Starters
             var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object);
             await function.RunAsync(request, "somecompany", "TAS", RuleScopes.BuildPipelines, mock.Object);
 
-            mock.Verify(x => x.StartNewAsync(nameof(BuildPipelinesOrchestrator),
-                It.IsAny<(Response.Project, List<ProductionItem>)>()));
+            mock.Verify(x => x.StartNewAsync(nameof(ProjectScanOrchestrator),
+                It.Is<(Response.Project, string)>(t => t.Item1 == project && t.Item2 == RuleScopes.BuildPipelines)));
         }
 
         [Fact]
@@ -210,8 +208,8 @@ namespace Functions.Tests.Starters
             var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object);
             await function.RunAsync(request, "somecompany", "TAS", RuleScopes.ReleasePipelines, mock.Object);
 
-            mock.Verify(x => x.StartNewAsync(nameof(ReleasePipelinesOrchestrator),
-                It.IsAny<(Response.Project, List<ProductionItem>)>()));
+            mock.Verify(x => x.StartNewAsync(nameof(ProjectScanOrchestrator),
+                It.Is<(Response.Project, string)>(t => t.Item1 == project && t.Item2 == RuleScopes.ReleasePipelines)));
         }
 
         private static ClaimsPrincipal PrincipalWithClaims() =>
