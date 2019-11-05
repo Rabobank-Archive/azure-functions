@@ -41,7 +41,11 @@ namespace Functions.IntegrationTests
                     .Build())
             {
                 await host.StartAsync();
+                
                 var jobs = host.Services.GetService<IJobHost>();
+                await jobs
+                    .Terminate()
+                    .Purge();
 
                 // Act
                 await jobs.CallAsync(nameof(ProjectScanStarter), new Dictionary<string, object>
@@ -50,7 +54,10 @@ namespace Functions.IntegrationTests
                 });
                 
                 // Assert
-                await jobs.WaitForOrchestrationsCompletion();
+                await jobs
+                    .Ready()
+                    .ThrowIfFailed()
+                    .Purge();
             }
         }
     }

@@ -22,6 +22,11 @@ namespace Functions.IntegrationTests
         {
             _config = new TestConfig();
             _host = host;
+            _host
+                .Jobs
+                .Terminate()
+                .Purge()
+                .ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         [Theory]
@@ -36,8 +41,6 @@ namespace Functions.IntegrationTests
             var token = await SessionToken(client, "tas", _config.ExtensionName);
             var request = new DummyHttpRequest
             {
-                Scheme = "http",
-                Host = new HostString("dummy"),
                 Headers = {["Authorization"] = $"Bearer {token}"}
             };
 
@@ -53,7 +56,10 @@ namespace Functions.IntegrationTests
             });
 
             // Assert
-            await _host.Jobs.WaitForOrchestrationsCompletion();
+            await _host.Jobs
+                .Ready()
+                .ThrowIfFailed()
+                .Purge();
         }
 
         private static async Task<JToken> SessionToken(IVstsRestClient client, string publisher, string extension)
