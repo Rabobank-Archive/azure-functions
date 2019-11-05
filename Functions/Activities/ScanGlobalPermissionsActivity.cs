@@ -26,13 +26,13 @@ namespace Functions.Activities
 
         [FunctionName(nameof(ScanGlobalPermissionsActivity))]
         public async Task<ItemExtensionData> RunAsync([ActivityTrigger]
-            (Response.Project, IList<ProductionItem>) input)
+            (Response.Project, string) input)
         {
             if (input.Item1 == null)
                 throw new ArgumentNullException(nameof(input));
 
             var project = input.Item1;
-            var productionItems = input.Item2;
+            var ciIdentifiers = input.Item2;
 
             var rules = _rulesProvider.GlobalPermissions(_azuredo);
 
@@ -54,10 +54,7 @@ namespace Functions.Activities
                     })
                     .ToList())
                     .ConfigureAwait(false),
-                CiIdentifiers = string.Join(",", productionItems
-                    .SelectMany(p => p.DeploymentInfo)
-                    .Select(d => d.CiIdentifier)
-                    .Distinct())
+                CiIdentifiers = ciIdentifiers
             };
         }
     }

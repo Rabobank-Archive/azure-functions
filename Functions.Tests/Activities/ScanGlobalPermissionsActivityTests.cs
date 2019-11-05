@@ -34,7 +34,7 @@ namespace Functions.Tests.Activities
                 .Returns(new[] { rule.Object, rule.Object });
 
             var project = fixture.Create<Response.Project>();
-            var productionItems = fixture.Create<List<ProductionItem>>();
+            var ciIdentifiers = fixture.Create<string>();
 
             //Act
             var fun = new ScanGlobalPermissionsActivity(
@@ -42,7 +42,7 @@ namespace Functions.Tests.Activities
                 fixture.Create<EnvironmentConfig>(),
                 ruleSets.Object);
 
-            await fun.RunAsync((project, productionItems));
+            await fun.RunAsync((project, ciIdentifiers));
 
             //Assert
             rule.Verify(x => x.EvaluateAsync(It.IsAny<string>()), Times.AtLeastOnce());
@@ -58,7 +58,7 @@ namespace Functions.Tests.Activities
             var clientMock = new Mock<IVstsRestClient>();
 
             var project = fixture.Create<Response.Project>();
-            var productionItems = fixture.Create<List<ProductionItem>>();
+            var ciIdentifiers = fixture.Create<string>();
 
             var rule = new Mock<IProjectRule>();
             rule
@@ -76,7 +76,7 @@ namespace Functions.Tests.Activities
                 clientMock.Object,
                 config,
                 rulesProvider.Object);
-            var result = await fun.RunAsync((project, productionItems));
+            var result = await fun.RunAsync((project, ciIdentifiers));
 
             var ruleName = rule.Object.GetType().Name;
 

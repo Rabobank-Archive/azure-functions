@@ -9,22 +9,14 @@ namespace Functions.Helpers
         public bool Equals(DeploymentMethod x, DeploymentMethod y)
         {
             if (x == null)
-            {
                 throw new ArgumentNullException(nameof(x));
-            }
 
             if (y == null)
-            {
                 throw new ArgumentNullException(nameof(y));
-            }
 
-            // just to satisfy SonarQube
-            var result = x.CiIdentifier == y.CiIdentifier &&
-                         x.Organization == y.Organization;
-            result = result &&
-                     x.ProjectId == y.ProjectId &&
-                     x.PipelineId == y.PipelineId;
-            return result && x.StageId == y.StageId;
+            return x.CiIdentifier == y.CiIdentifier &&
+                   x.PipelineId == y.PipelineId &&
+                   x.StageId == y.StageId;
         }
 
         public int GetHashCode(DeploymentMethod obj)
@@ -35,8 +27,6 @@ namespace Functions.Helpers
             }
 
             return GetHashCodeForString(obj.CiIdentifier) ^
-                   GetHashCodeForString(obj.Organization) ^
-                   GetHashCodeForString(obj.ProjectId) ^
                    GetHashCodeForString(obj.PipelineId) ^
                    GetHashCodeForString(obj.StageId);
         }

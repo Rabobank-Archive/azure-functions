@@ -27,7 +27,7 @@ namespace Functions.Activities
         [FunctionName(nameof(ScanRepositoriesActivity))]
         public async Task<ItemExtensionData> RunAsync(
             [ActivityTrigger] (Response.Project, Response.Repository,  
-            IEnumerable<Response.MinimumNumberOfReviewersPolicy>, IList<string>) input)
+            IEnumerable<Response.MinimumNumberOfReviewersPolicy>, string) input)
         {
             if (input.Item1 == null || input.Item2 == null || input.Item3 == null || input.Item4 == null)
                 throw new ArgumentNullException(nameof(input));
@@ -57,7 +57,7 @@ namespace Functions.Activities
                     })
                     .ToList())
                     .ConfigureAwait(false),
-                CiIdentifiers = string.Join(",", ciIdentifiers)
+                CiIdentifiers = ciIdentifiers
             };
         }
     }

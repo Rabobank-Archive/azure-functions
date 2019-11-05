@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AzDoCompliancy.CustomStatus;
 using Functions.Activities;
 using Functions.Helpers;
@@ -42,13 +43,7 @@ namespace Functions.Orchestrators
                 HasReconcilePermissionUrl = ReconcileFunction.HasReconcilePermissionUrl(_config, 
                     project.Id),
                 Reports = await Task.WhenAll(repositories.Select(r =>
-                    context.CallActivityWithRetryAsync<ItemExtensionData>(nameof(ScanRepositoriesActivity),
-                    RetryHelper.ActivityRetryOptions, (project, r, policies, productionItems
-                        .Where(p => p.ItemId == r.Id)
-                        .SelectMany(p => p.DeploymentInfo)
-                        .Select(d => d.CiIdentifier)
-                        .Distinct()
-                        .ToList()))))
+                    StartScanActivityAsync(context, r, policies, project, productionItems)))
             };
             
             await context.CallActivityAsync(nameof(UploadPreventiveRuleLogsActivity),
@@ -57,5 +52,14 @@ namespace Functions.Orchestrators
             await context.CallActivityAsync(nameof(UploadExtensionDataActivity),
                 (repositories: data, RuleScopes.Repositories));
         }
+
+        private static Task<ItemExtensionData> StartScanActivityAsync(DurableOrchestrationContextBase context,
+                Repository repository, IEnumerable<MinimumNumberOfReviewersPolicy> policies, Project project, 
+                IEnumerable<ProductionItem> productionItems) =>
+            context.CallActivityWithRetryAsync<ItemExtensionData>(nameof(ScanRepositoriesActivity),
+                RetryHelper.ActivityRetryOptions, (project, repository, policies, 
+                LinkConfigurationItemHelper.GetCiIdentifiers(
+                productionItems
+                    .Where(r => r.ItemId == repository.Id))));
     }
 }

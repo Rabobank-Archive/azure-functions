@@ -38,18 +38,12 @@ namespace Functions.Orchestrators
             {
                 Id = project.Name,
                 Date = context.CurrentUtcDateTime,
-                RescanUrl = ProjectScanHttpStarter.RescanUrl(_config, project.Name, 
+                RescanUrl = ProjectScanHttpStarter.RescanUrl(_config, project.Name,
                     RuleScopes.BuildPipelines),
-                HasReconcilePermissionUrl = ReconcileFunction.HasReconcilePermissionUrl(_config, 
+                HasReconcilePermissionUrl = ReconcileFunction.HasReconcilePermissionUrl(_config,
                     project.Id),
                 Reports = await Task.WhenAll(buildPipelines.Select(b =>
-                    context.CallActivityWithRetryAsync<ItemExtensionData>(nameof(ScanBuildPipelinesActivity),
-                    RetryHelper.ActivityRetryOptions, (project, b, productionItems
-                        .Where(r => r.ItemId == b.Id)
-                        .SelectMany(r => r.DeploymentInfo)
-                        .Select(d => d.CiIdentifier)
-                        .Distinct()
-                        .ToList()))))
+                    StartScanActivityAsync(context, b, project, productionItems)))
             };
 
             await context.CallActivityAsync(nameof(UploadPreventiveRuleLogsActivity),
@@ -61,5 +55,12 @@ namespace Functions.Orchestrators
             return LinkConfigurationItemHelper.LinkCisToRepositories(buildPipelines,
                 productionItems, project);
         }
+
+        private static Task<ItemExtensionData> StartScanActivityAsync(DurableOrchestrationContextBase context, 
+                BuildDefinition b, Project project, IEnumerable<ProductionItem> productionItems) => 
+            context.CallActivityWithRetryAsync<ItemExtensionData>(nameof(ScanBuildPipelinesActivity),
+                RetryHelper.ActivityRetryOptions, (project, b, LinkConfigurationItemHelper.GetCiIdentifiers(
+                productionItems
+                    .Where(r => r.ItemId == b.Id))));
     }
 }

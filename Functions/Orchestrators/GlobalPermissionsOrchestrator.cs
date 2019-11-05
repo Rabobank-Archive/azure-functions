@@ -40,7 +40,7 @@ namespace Functions.Orchestrators
                 {
                     await context.CallActivityWithRetryAsync<ItemExtensionData>(nameof(
                         ScanGlobalPermissionsActivity), RetryHelper.ActivityRetryOptions, 
-                        (project, productionItems))
+                        (project, LinkConfigurationItemHelper.GetCiIdentifiers(productionItems)))
                 }
             };
 

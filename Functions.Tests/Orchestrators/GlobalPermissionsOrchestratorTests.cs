@@ -44,7 +44,7 @@ namespace Functions.Tests.Orchestrators
             starter
                 .Setup(x => x.CallActivityWithRetryAsync<ItemExtensionData>(
                     nameof(ScanGlobalPermissionsActivity), It.IsAny<RetryOptions>(),
-                    It.IsAny<(Response.Project, List<ProductionItem>)>()))
+                    It.IsAny<(Response.Project, string)>()))
                 .ReturnsAsync(fixture.Create<ItemExtensionData>())
                 .Verifiable();
 

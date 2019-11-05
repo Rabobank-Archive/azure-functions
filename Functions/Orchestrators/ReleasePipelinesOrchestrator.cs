@@ -29,7 +29,7 @@ namespace Functions.Orchestrators
                 Scope = RuleScopes.ReleasePipelines
             });
 
-            var releasePipelines = 
+            var releasePipelines =
                 await context.CallActivityWithRetryAsync<List<Response.ReleaseDefinition>>(
                 nameof(GetReleasePipelinesActivity), RetryHelper.ActivityRetryOptions, project.Id);
 
@@ -42,9 +42,8 @@ namespace Functions.Orchestrators
                 HasReconcilePermissionUrl = ReconcileFunction.HasReconcilePermissionUrl(
                     _config, project.Id),
                 Reports = await Task.WhenAll(releasePipelines.Select(r =>
-                    context.CallActivityWithRetryAsync<ItemExtensionData>(
-                    nameof(ScanReleasePipelinesActivity), RetryHelper.ActivityRetryOptions, 
-                    (project, r, GetDeploymentMethodsForReleaseDefinition(productionItems, r.Id)))))
+                    StartScanActivityAsync(context, r, project, productionItems
+                        .Where(p => p.ItemId == r.Id))))
             };
 
             await context.CallActivityAsync(nameof(UploadPreventiveRuleLogsActivity),
@@ -57,11 +56,10 @@ namespace Functions.Orchestrators
                 productionItems, project);
         }
 
-        private static List<DeploymentMethod> GetDeploymentMethodsForReleaseDefinition(IEnumerable<ProductionItem> productionItems, string releaseDefinitionId)
-        {
-            return productionItems
-                .Where(p => p.ItemId == releaseDefinitionId)
-                .SelectMany(p => p.DeploymentInfo).ToList();
-        }
+        private static Task<ItemExtensionData> StartScanActivityAsync(DurableOrchestrationContextBase context,
+                Response.ReleaseDefinition r, Response.Project project, IEnumerable<ProductionItem> productionItems) =>
+            context.CallActivityWithRetryAsync<ItemExtensionData>(
+                nameof(ScanReleasePipelinesActivity), RetryHelper.ActivityRetryOptions,
+                (project, r, productionItems));
     }
 }

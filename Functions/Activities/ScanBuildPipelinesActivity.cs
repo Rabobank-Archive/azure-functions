@@ -26,7 +26,7 @@ namespace Functions.Activities
 
         [FunctionName(nameof(ScanBuildPipelinesActivity))]
         public async Task<ItemExtensionData> RunAsync(
-            [ActivityTrigger] (Response.Project, Response.BuildDefinition, IList<string>) input)
+            [ActivityTrigger] (Response.Project, Response.BuildDefinition, string) input)
         {
             if (input.Item1 == null || input.Item2 == null || input.Item3 == null)
                 throw new ArgumentNullException(nameof(input));
@@ -55,7 +55,7 @@ namespace Functions.Activities
                     })
                     .ToList())
                     .ConfigureAwait(false),
-                CiIdentifiers = string.Join(",", ciIdentifiers)
+                CiIdentifiers = ciIdentifiers
             };
         }
     }

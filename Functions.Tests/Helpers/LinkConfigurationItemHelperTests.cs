@@ -87,47 +87,6 @@ namespace Functions.Tests.Helpers
         }
 
         [Fact]
-        public void ReturnsSingleProductionItemWithoutDoubleCisForABuildPipeline()
-        {
-            //Arrange
-            var fixture = SetupFixtureBuild();
-            var releasePipelines = fixture.CreateMany<ReleaseDefinition>(2).ToList();
-            var productionItems = new[]
-            {
-                fixture.Build<ProductionItem>()
-                    .With(x => x.ItemId, "r1")
-                    .With(x => x.DeploymentInfo, new[]
-                    {
-                        new DeploymentMethod{CiIdentifier = "c1", StageId = "s1"},
-                        new DeploymentMethod{CiIdentifier = "c2", StageId = "s2"}
-                    })
-                    .Create(),
-                fixture.Build<ProductionItem>()
-                    .With(x => x.ItemId, "r1")
-                    .With(x => x.DeploymentInfo, new[]
-                    {
-                        new DeploymentMethod{CiIdentifier = "c1", StageId = "s1"},
-                        new DeploymentMethod{CiIdentifier = "c3", StageId = "s3"}
-                    })
-                    .Create()
-            };
-            var project = fixture.Create<Project>();
-
-            //Act
-            var result = LinkCisToBuildPipelines(releasePipelines, productionItems, project);
-
-            //Assert
-            var item = result.Single();
-            item.ItemId.ShouldBe("b1");
-            item.DeploymentInfo[0].CiIdentifier.ShouldBe("c1");
-            item.DeploymentInfo[0].StageId.ShouldBe("s1");
-            item.DeploymentInfo[1].CiIdentifier.ShouldBe("c2");
-            item.DeploymentInfo[1].StageId.ShouldBe("s2");
-            item.DeploymentInfo[2].CiIdentifier.ShouldBe("c3");
-            item.DeploymentInfo[2].StageId.ShouldBe("s3");
-        }
-
-        [Fact]
         public void ReturnNoProductionItemsForBuildPipelinesInOtherProjects()
         {
             //Arrange
@@ -185,7 +144,7 @@ namespace Functions.Tests.Helpers
 
         private static Fixture SetupFixtureBuild()
         {
-            var fixture = new Fixture {RepeatCount = 1};
+            var fixture = new Fixture { RepeatCount = 1 };
 
             fixture.Customize<Artifact>(ctx => ctx
                 .With(x => x.Type, "Build"));
@@ -281,45 +240,6 @@ namespace Functions.Tests.Helpers
         }
 
         [Fact]
-        public void ReturnsSingleProductionItemWithoutDoubleCisForARepository()
-        {
-            //Arrange
-            var fixture = SetupFixtureRepo();
-            var buildPipelines = fixture.CreateMany<BuildDefinition>(2).ToList();
-            var productionItems = new[]
-            {
-                fixture.Build<ProductionItem>()
-                    .With(x => x.ItemId, "b1")
-                    .With(x => x.DeploymentInfo, new[]
-                    {
-                        new DeploymentMethod{CiIdentifier = "c1", StageId = "s1"},
-                        new DeploymentMethod{CiIdentifier = "c2", StageId = "s2"}
-                    }).Create(),
-                fixture.Build<ProductionItem>()
-                    .With(x => x.ItemId, "b1")
-                    .With(x => x.DeploymentInfo, new[]
-                    {
-                        new DeploymentMethod{CiIdentifier = "c1", StageId = "s1"},
-                        new DeploymentMethod{CiIdentifier = "c3", StageId = "s3"}
-                    }).Create()
-            };
-            var project = fixture.Create<Project>();
-
-            //Act
-            var result = LinkCisToRepositories(buildPipelines, productionItems, project);
-
-            //Assert
-            var item = result.Single();
-            item.ItemId.ShouldBe("r1");
-            item.DeploymentInfo[0].CiIdentifier.ShouldBe("c1");
-            item.DeploymentInfo[0].StageId.ShouldBe("s1");
-            item.DeploymentInfo[1].CiIdentifier.ShouldBe("c2");
-            item.DeploymentInfo[1].StageId.ShouldBe("s2");
-            item.DeploymentInfo[2].CiIdentifier.ShouldBe("c3");
-            item.DeploymentInfo[2].StageId.ShouldBe("s3");
-        }
-
-        [Fact]
         public void ReturnNoProductionItemsForRepositoriesInOtherProjects()
         {
             //Arrange
@@ -357,9 +277,39 @@ namespace Functions.Tests.Helpers
             result.ShouldBeEmpty();
         }
 
+        [Fact]
+        public void ReturnDistinctCiIdentifiers()
+        {
+            //Arrange
+            var fixture = SetupFixtureBuild();
+            var productionItems = new[]
+            {
+                fixture.Build<ProductionItem>()
+                    .With(x => x.ItemId, "r1")
+                    .With(x => x.DeploymentInfo, new[]
+                    {
+                        new DeploymentMethod{CiIdentifier = "c1", StageId = "s1"}
+                    })
+                    .Create(),
+                fixture.Build<ProductionItem>()
+                    .With(x => x.ItemId, "r1")
+                    .With(x => x.DeploymentInfo, new[]
+                    {
+                        new DeploymentMethod{CiIdentifier = "c1", StageId = "s2"},
+                        new DeploymentMethod{CiIdentifier = "c2", StageId = "s3"}
+                    }).Create()
+            };
+
+            //Act
+            var result = GetCiIdentifiers(productionItems);
+
+            //Assert
+            result.ShouldBe("c1,c2");
+        }
+
         private static Fixture SetupFixtureRepo()
         {
-            var fixture = new Fixture {RepeatCount = 1};
+            var fixture = new Fixture { RepeatCount = 1 };
 
             fixture.Customize<BuildDefinition>(ctx => ctx
                 .With(x => x.Id, "b1"));

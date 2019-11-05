@@ -47,10 +47,13 @@ namespace Functions.Tests.Activities
                 deploymentMethod.PipelineId = pipeline.Id;
                 deploymentMethod.StageId = i.ToString();
             }
+            var productionItems = fixture.CreateMany<ProductionItem>(1).ToList();
+            productionItems[0].DeploymentInfo = deploymentMethods;
+            productionItems[0].ItemId = pipeline.Id;
 
             // Act
             var activity = new ScanReleasePipelinesActivity(config, client.Object, provider);
-            var actual = await activity.RunAsync((project, pipeline, deploymentMethods));
+            var actual = await activity.RunAsync((project, pipeline, productionItems));
 
             // Assert
             actual.ShouldNotBeNull();
@@ -79,10 +82,13 @@ namespace Functions.Tests.Activities
                 deploymentMethod.PipelineId = pipeline.Id;
                 deploymentMethod.StageId = i.ToString();
             }
+            var productionItems = fixture.CreateMany<ProductionItem>(1).ToList();
+            productionItems[0].DeploymentInfo = deploymentMethods;
+            productionItems[0].ItemId = pipeline.Id;
 
             // Act
             var activity = new ScanReleasePipelinesActivity(config, client.Object, provider);
-            var actual = await activity.RunAsync((project, pipeline, deploymentMethods));
+            var actual = await activity.RunAsync((project, pipeline, productionItems));
 
             // Assert
             actual.ShouldNotBeNull();
@@ -109,10 +115,13 @@ namespace Functions.Tests.Activities
                 deploymentMethod.PipelineId = pipeline.Id;
                 deploymentMethod.StageId = null;
             }
+            var productionItems = fixture.CreateMany<ProductionItem>(1).ToList();
+            productionItems[0].DeploymentInfo = deploymentMethods;
+            productionItems[0].ItemId = pipeline.Id;
 
             // Act
             var activity = new ScanReleasePipelinesActivity(config, client.Object, provider);
-            var actual = await activity.RunAsync((project, pipeline, deploymentMethods));
+            var actual = await activity.RunAsync((project, pipeline, productionItems));
 
             // Assert
             actual.ShouldNotBeNull();
@@ -145,10 +154,13 @@ namespace Functions.Tests.Activities
                 deploymentMethod.PipelineId = pipeline.Id;
                 deploymentMethod.StageId = i.ToString();
             }
+            var productionItems = fixture.CreateMany<ProductionItem>(1).ToList();
+            productionItems[0].DeploymentInfo = deploymentMethods;
+            productionItems[0].ItemId = pipeline.Id;
 
             // Act
             var activity = new ScanReleasePipelinesActivity(config, client.Object, provider);
-            var actual = await activity.RunAsync((project, pipeline, deploymentMethods));
+            var actual = await activity.RunAsync((project, pipeline, productionItems));
 
             // Assert
             actual.ShouldNotBeNull();
@@ -198,7 +210,7 @@ namespace Functions.Tests.Activities
 
             var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
             var releasePipeline = fixture.Create<ReleaseDefinition>();
-            var deploymentMethods = fixture.Create<IList<DeploymentMethod>>();
+            var productionItems = fixture.Create<IList<ProductionItem>>();
 
             // Act
             var activity = new ScanReleasePipelinesActivity(
@@ -207,7 +219,7 @@ namespace Functions.Tests.Activities
                 provider.Object);
 
             var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () =>
-                await activity.RunAsync((null, releasePipeline, deploymentMethods)));
+                await activity.RunAsync((null, releasePipeline, productionItems)));
             exception.Message.ShouldContainWithoutWhitespace("Value cannot be null. Parameter name: input");
         }
 
@@ -224,7 +236,7 @@ namespace Functions.Tests.Activities
 
             var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
             var project = fixture.Create<Project>();
-            var deploymentMethods = fixture.Create<IList<DeploymentMethod>>();
+            var productionItems = fixture.Create<IList<ProductionItem>>();
 
             // Act
             var activity = new ScanReleasePipelinesActivity(
@@ -233,7 +245,7 @@ namespace Functions.Tests.Activities
                 provider.Object);
 
             var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () =>
-                await activity.RunAsync((project, null, deploymentMethods)));
+                await activity.RunAsync((project, null, productionItems)));
             exception.Message.ShouldContainWithoutWhitespace("Value cannot be null. Parameter name: input");
         }
 

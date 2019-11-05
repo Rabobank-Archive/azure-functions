@@ -28,7 +28,7 @@ namespace Functions.Tests.Activities
             var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
 
             var request = fixture.Create<(Response.Project, Response.Repository, 
-                IEnumerable<Response.MinimumNumberOfReviewersPolicy>, IList<string>)>();
+                IEnumerable<Response.MinimumNumberOfReviewersPolicy>, string)>();
 
             // Act
             var activity = new ScanRepositoriesActivity(

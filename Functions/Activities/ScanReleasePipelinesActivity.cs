@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Functions.Helpers;
 using Functions.Model;
 using Microsoft.Azure.WebJobs;
 using SecurePipelineScan.Rules.Security;
@@ -28,23 +29,22 @@ namespace Functions.Activities
         [FunctionName(nameof(ScanReleasePipelinesActivity))]
         public async Task<ItemExtensionData> RunAsync(
             [ActivityTrigger]
-            (Project project, ReleaseDefinition releasePipeline, IList<DeploymentMethod> deploymentMethods) input)
+            (Project project, ReleaseDefinition releasePipeline, IList<ProductionItem> productionItems) input)
         {
-            if (input.project == null || input.releasePipeline == null || input.deploymentMethods == null)
+            if (input.project == null || input.releasePipeline == null || input.productionItems == null)
             {
                 throw new ArgumentNullException(nameof(input));
             }
 
             var project = input.project;
             var pipeline = input.releasePipeline;
-            var deploymentMethods = input.deploymentMethods;
+            var productionItems = input.productionItems;
             var rules = _rulesProvider.ReleaseRules(_azuredo).ToList();
 
-            var stageIds = deploymentMethods.Where(d =>
-                d.Organization == _config.Organization &&
-                d.ProjectId == project.Id &&
-                d.PipelineId == pipeline.Id &&
-                !string.IsNullOrWhiteSpace(d.StageId)).Select(d => d.StageId).ToList();
+            var stageIds = productionItems
+                .SelectMany(p => p.DeploymentInfo)
+                .Where(d => d.PipelineId == pipeline.Id &&
+                    !string.IsNullOrWhiteSpace(d.StageId)).Select(d => d.StageId).ToList();
 
             return new ItemExtensionData
             {
@@ -94,7 +94,7 @@ namespace Functions.Activities
                         })
                         .ToList())
                     .ConfigureAwait(false),
-                CiIdentifiers = string.Join(",", deploymentMethods.Select(dm => dm.CiIdentifier))
+                CiIdentifiers = LinkConfigurationItemHelper.GetCiIdentifiers(productionItems)
             };
         }
     }

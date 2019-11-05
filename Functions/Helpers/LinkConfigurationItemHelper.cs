@@ -66,9 +66,14 @@ namespace Functions.Helpers
                     ItemId = g.Key,
                     DeploymentInfo = g
                         .SelectMany(p => p.DeploymentInfo)
-                        .Distinct(new DeploymentMethodEqualityComparer())
                         .ToList()
                 }).ToList();
         }
+
+        public static string GetCiIdentifiers(IEnumerable<ProductionItem> productionItems) =>
+            string.Join(",", productionItems
+                .SelectMany(r => r.DeploymentInfo)
+                .Select(d => d.CiIdentifier)
+                .Distinct());
     }
 }
