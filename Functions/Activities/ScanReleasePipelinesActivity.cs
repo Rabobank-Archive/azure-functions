@@ -39,7 +39,8 @@ namespace Functions.Activities
             var project = input.project;
             var pipeline = input.releasePipeline;
             var productionItems = input.productionItems;
-            var rules = _rulesProvider.ReleaseRules(_azuredo).ToList();
+            var rules = _rulesProvider.ReleaseRules(_azuredo)
+                .Where(x => !(x is ProductionStageUsesArtifactFromSecureBranch)).ToList();
 
             var stageIds = productionItems
                 .SelectMany(p => p.DeploymentInfo)
