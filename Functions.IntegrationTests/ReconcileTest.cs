@@ -22,11 +22,6 @@ namespace Functions.IntegrationTests
         {
             _config = new TestConfig();
             _host = host;
-            _host
-                .Jobs
-                .Terminate()
-                .Purge()
-                .ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         [Theory]
