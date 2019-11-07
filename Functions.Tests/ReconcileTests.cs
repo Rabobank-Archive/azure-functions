@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.WindowsAzure.Storage;
 using Xunit;
 using Response = SecurePipelineScan.VstsService.Response;
 
@@ -39,15 +40,17 @@ namespace Functions.Tests
                 .Setup(x => x.Principal(It.IsAny<string>()))
                 .Returns(PrincipalWithClaims());
 
-            var client = new Mock<IVstsRestClient>();
-            client
+            var vstsClient = new Mock<IVstsRestClient>();
+            vstsClient
                 .Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Response.PermissionsProjectId>>()))
                 .Returns(Task.FromResult(fixture.Create<Response.PermissionsProjectId>()));
+            var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
+            var config = new EnvironmentConfig {Organization = "somecompany" };
 
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
 
-            var function = new ReconcileFunction(client.Object, ruleProvider.Object, tokenizer.Object);
+            var function = new ReconcileFunction(config, tableClient, vstsClient.Object, ruleProvider.Object, tokenizer.Object);
             (await function.ReconcileAsync(request,
                 "somecompany",
                 "TAS",
@@ -69,26 +72,35 @@ namespace Functions.Tests
                 .Setup(x => x.ReconcileAsync("TAS", "repository-id", RuleScopes.Repositories, null))
                 .Returns(Task.CompletedTask)
                 .Verifiable();
+            rule
+                .As<IReconcile>()
+                .Setup(x => x.RequiresStageId)
+                .Returns(false)
+                .Verifiable();
 
             var ruleProvider = new Mock<IRulesProvider>();
             ruleProvider
                 .Setup(x => x.RepositoryRules(It.IsAny<IVstsRestClient>()))
-                .Returns(new[] { rule.Object });
+                .Returns(new[] {rule.Object});
 
             var tokenizer = new Mock<ITokenizer>();
             tokenizer
                 .Setup(x => x.Principal(It.IsAny<string>()))
                 .Returns(PrincipalWithClaims());
 
-            var client = new Mock<IVstsRestClient>();
-            client
+            var vstsClient = new Mock<IVstsRestClient>();
+            vstsClient
                 .Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Response.PermissionsProjectId>>()))
                 .Returns(Task.FromResult(fixture.Create<Response.PermissionsProjectId>()));
+
+            var config = new EnvironmentConfig {Organization = "somecompany"};
+            var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
 
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
 
-            var function = new ReconcileFunction(client.Object, ruleProvider.Object, tokenizer.Object);
+            var function = new ReconcileFunction(config, tableClient, vstsClient.Object, ruleProvider.Object,
+                tokenizer.Object);
             (await function.ReconcileAsync(request,
                 "somecompany",
                 "TAS",
@@ -115,16 +127,20 @@ namespace Functions.Tests
                 .Setup(x => x.Principal(It.IsAny<string>()))
                 .Returns(PrincipalWithClaims());
 
-            var client = new Mock<IVstsRestClient>();
-            client
+            var vstsClient = new Mock<IVstsRestClient>();
+            vstsClient
                 .Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Response.PermissionsProjectId>>()))
                 .Returns(Task.FromResult(fixture.Create<Response.PermissionsProjectId>()))
                 .Verifiable();
 
+            var config = new EnvironmentConfig { Organization = "somecompany" };
+            var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
+
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
 
-            var function = new ReconcileFunction(client.Object, ruleProvider.Object, tokenizer.Object);
+            var function = new ReconcileFunction(config, tableClient, vstsClient.Object, ruleProvider.Object,
+                tokenizer.Object);
             var result = (await function.ReconcileAsync(request,
                 "somecompany",
                 "TAS",
@@ -149,16 +165,20 @@ namespace Functions.Tests
                 .Setup(x => x.Principal(It.IsAny<string>()))
                 .Returns(PrincipalWithClaims());
 
-            var client = new Mock<IVstsRestClient>();
-            client
+            var vstsClient = new Mock<IVstsRestClient>();
+            vstsClient
                 .Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Response.PermissionsProjectId>>()))
                 .Returns(Task.FromResult(fixture.Create<Response.PermissionsProjectId>()))
                 .Verifiable();
 
+            var config = new EnvironmentConfig { Organization = "somecompany" };
+            var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
+
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
 
-            var function = new ReconcileFunction(client.Object, new Mock<IRulesProvider>().Object, tokenizer.Object);
+            var function = new ReconcileFunction(config, tableClient, vstsClient.Object,
+                new Mock<IRulesProvider>().Object, tokenizer.Object);
             var result = (await function.ReconcileAsync(request,
                 "somecompany",
                 "TAS",
@@ -179,30 +199,34 @@ namespace Functions.Tests
                 .Setup(x => x.Principal(It.IsAny<string>()))
                 .Returns(PrincipalWithClaims());
 
-            var client = new Mock<IVstsRestClient>();
-            client
+            var vstsClient = new Mock<IVstsRestClient>();
+            vstsClient
                 .Setup(x => x.GetAsync(It.Is<IVstsRequest<Response.PermissionsProjectId>>(req =>
                     req.QueryParams.Values.Contains("ab84d5a2-4b8d-68df-9ad3-cc9c8884270c"))))
                 .Returns(Task.FromResult<Response.PermissionsProjectId>(null))
                 .Verifiable();
 
-            client
+            vstsClient
                 .Setup(x => x.GetAsync(It.Is<IVstsRequest<Response.PermissionsProjectId>>(req =>
                     req.QueryParams.Values.Contains("ef2e3683-8fb5-439d-9dc9-53af732e6387"))))
                 .Returns(Task.FromResult(fixture.Create<Response.PermissionsProjectId>()))
                 .Verifiable();
 
+            var config = new EnvironmentConfig { Organization = "somecompany" };
+            var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
+
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
             request.RequestUri = new System.Uri("https://dev.azure.com/reconcile/somecompany/TAS/haspermissions?userId=ef2e3683-8fb5-439d-9dc9-53af732e6387");
 
-            var function = new ReconcileFunction(client.Object, new Mock<IRulesProvider>().Object, tokenizer.Object);
+            var function = new ReconcileFunction(config, tableClient, vstsClient.Object,
+                new Mock<IRulesProvider>().Object, tokenizer.Object);
             (await function
-                .HasPermissionAsync(request, "somecompany", "TAS"))
+                    .HasPermissionAsync(request, "somecompany", "TAS"))
                 .ShouldBeOfType<OkObjectResult>()
                 .Value
                 .ShouldBe(true);
-            client.Verify();
+            vstsClient.Verify();
         }
 
         [Fact]
@@ -216,30 +240,36 @@ namespace Functions.Tests
                 .Setup(x => x.Principal(It.IsAny<string>()))
                 .Returns(PrincipalWithClaims());
 
-            var client = new Mock<IVstsRestClient>();
-            client
+            var vstsClient = new Mock<IVstsRestClient>();
+            vstsClient
                 .Setup(x => x.GetAsync(It.Is<IVstsRequest<Response.PermissionsProjectId>>(req =>
                     req.QueryParams.Values.Contains("ab84d5a2-4b8d-68df-9ad3-cc9c8884270c"))))
                 .Returns(Task.FromResult<Response.PermissionsProjectId>(null))
                 .Verifiable();
 
-            client
+            vstsClient
                 .Setup(x => x.GetAsync(It.Is<IVstsRequest<Response.PermissionsProjectId>>(req =>
                     req.QueryParams.Values.Contains("ef2e3683-8fb5-439d-9dc9-53af732e6387"))))
                 .Returns(Task.FromResult<Response.PermissionsProjectId>(null))
                 .Verifiable();
 
+            var config = new EnvironmentConfig { Organization = "somecompany" };
+            var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
+
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
-            request.RequestUri = new System.Uri("https://dev.azure.com/reconcile/somecompany/TAS/haspermissions?userId=ef2e3683-8fb5-439d-9dc9-53af732e6387");
+            request.RequestUri =
+                new System.Uri(
+                    "https://dev.azure.com/reconcile/somecompany/TAS/haspermissions?userId=ef2e3683-8fb5-439d-9dc9-53af732e6387");
 
-            var function = new ReconcileFunction(client.Object, new Mock<IRulesProvider>().Object, tokenizer.Object);
+            var function = new ReconcileFunction(config, tableClient, vstsClient.Object,
+                new Mock<IRulesProvider>().Object, tokenizer.Object);
             (await function
-                .HasPermissionAsync(request, "somecompany", "TAS"))
+                    .HasPermissionAsync(request, "somecompany", "TAS"))
                 .ShouldBeOfType<OkObjectResult>()
                 .Value
                 .ShouldBe(false);
-            client.Verify();
+            vstsClient.Verify();
         }
 
         [Fact]
@@ -249,7 +279,11 @@ namespace Functions.Tests
             var request = new HttpRequestMessage();
             request.Headers.Authorization = null;
 
-            var function = new ReconcileFunction(null, ruleProvider.Object, new Mock<ITokenizer>().Object);
+            var config = new EnvironmentConfig {Organization = "somecompany"};
+            var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
+
+            var function = new ReconcileFunction(config, tableClient, null, ruleProvider.Object,
+                new Mock<ITokenizer>().Object);
             (await function.ReconcileAsync(request,
                 "somecompany",
                 "TAS",
@@ -268,7 +302,11 @@ namespace Functions.Tests
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
 
-            var function = new ReconcileFunction(null, new Mock<IRulesProvider>().Object, tokenizer.Object);
+            var config = new EnvironmentConfig { Organization = "somecompany" };
+            var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
+
+            var function = new ReconcileFunction(config, tableClient, null, new Mock<IRulesProvider>().Object,
+                tokenizer.Object);
             (await function.ReconcileAsync(request,
                 "somecompany",
                 "TAS",
@@ -288,25 +326,29 @@ namespace Functions.Tests
                 .Setup(x => x.Principal(It.IsAny<string>()))
                 .Returns(PrincipalWithClaims());
 
-            var client = new Mock<IVstsRestClient>();
-            client
+            var vstsClient = new Mock<IVstsRestClient>();
+            vstsClient
                 .Setup(x => x.GetAsync(It.Is<IVstsRequest<Response.PermissionsProjectId>>(req =>
                     req.QueryParams.Values.Contains("ab84d5a2-4b8d-68df-9ad3-cc9c8884270c"))))
                 .Returns(Task.FromResult(fixture.Create<Response.PermissionsProjectId>()))
                 .Verifiable();
 
+            var config = new EnvironmentConfig { Organization = "somecompany" };
+            var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
+
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
 
-            var function = new ReconcileFunction(client.Object, new Mock<IRulesProvider>().Object, tokenizer.Object);
+            var function = new ReconcileFunction(config, tableClient, vstsClient.Object,
+                new Mock<IRulesProvider>().Object, tokenizer.Object);
             (await function.ReconcileAsync(request,
-                "somecompany",
-                "TAS",
-                RuleScopes.GlobalPermissions,
-                "some-non-existing-rule"))
+                    "somecompany",
+                    "TAS",
+                    RuleScopes.GlobalPermissions,
+                    "some-non-existing-rule"))
                 .ShouldBeOfType<UnauthorizedResult>();
 
-            client.Verify();
+            vstsClient.Verify();
         }
 
         [Fact]
@@ -315,9 +357,13 @@ namespace Functions.Tests
             var request = new HttpRequestMessage();
             request.Headers.Authorization = null;
 
-            var function = new ReconcileFunction(null, new Mock<IRulesProvider>().Object, new Mock<ITokenizer>().Object);
+            var config = new EnvironmentConfig { Organization = "somecompany" };
+            var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
+
+            var function = new ReconcileFunction(config, tableClient, null, new Mock<IRulesProvider>().Object,
+                new Mock<ITokenizer>().Object);
             (await function
-                .HasPermissionAsync(request, "somecompany", "TAS"))
+                    .HasPermissionAsync(request, "somecompany", "TAS"))
                 .ShouldBeOfType<UnauthorizedResult>();
         }
 
@@ -332,9 +378,13 @@ namespace Functions.Tests
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
 
-            var function = new ReconcileFunction(null, new Mock<IRulesProvider>().Object, tokenizer.Object);
+            var config = new EnvironmentConfig { Organization = "somecompany" };
+            var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
+
+            var function = new ReconcileFunction(config, tableClient, null, new Mock<IRulesProvider>().Object,
+                tokenizer.Object);
             (await function
-                .HasPermissionAsync(request, "somecompany", "TAS"))
+                    .HasPermissionAsync(request, "somecompany", "TAS"))
                 .ShouldBeOfType<UnauthorizedResult>();
         }
 
@@ -350,23 +400,27 @@ namespace Functions.Tests
                 .Setup(x => x.Principal(It.IsAny<string>()))
                 .Returns(PrincipalWithClaims());
 
-            var client = new Mock<IVstsRestClient>();
-            client
+            var vstsClient = new Mock<IVstsRestClient>();
+            vstsClient
                 .Setup(x => x.GetAsync(It.Is<IVstsRequest<Response.PermissionsProjectId>>(req =>
                     req.QueryParams.Values.Contains("ab84d5a2-4b8d-68df-9ad3-cc9c8884270c"))))
                 .Returns(Task.FromResult(fixture.Create<Response.PermissionsProjectId>()))
                 .Verifiable();
 
+            var config = new EnvironmentConfig { Organization = "somecompany" };
+            var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
+
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
 
-            var function = new ReconcileFunction(client.Object, new Mock<IRulesProvider>().Object, tokenizer.Object);
+            var function = new ReconcileFunction(config, tableClient, vstsClient.Object,
+                new Mock<IRulesProvider>().Object, tokenizer.Object);
             (await function
-                .HasPermissionAsync(request, "somecompany", "TAS"))
+                    .HasPermissionAsync(request, "somecompany", "TAS"))
                 .ShouldBeOfType<OkObjectResult>()
                 .Value
                 .ShouldBe(false);
-            client.Verify();
+            vstsClient.Verify();
         }
 
         [Fact]
@@ -380,23 +434,27 @@ namespace Functions.Tests
                 .Setup(x => x.Principal(It.IsAny<string>()))
                 .Returns(PrincipalWithClaims());
 
-            var client = new Mock<IVstsRestClient>();
-            client
+            var vstsClient = new Mock<IVstsRestClient>();
+            vstsClient
                 .Setup(x => x.GetAsync(It.Is<IVstsRequest<Response.PermissionsProjectId>>(req =>
                     req.QueryParams.Values.Contains("ab84d5a2-4b8d-68df-9ad3-cc9c8884270c"))))
                 .Returns(Task.FromResult(fixture.Create<Response.PermissionsProjectId>()))
                 .Verifiable();
 
+            var config = new EnvironmentConfig { Organization = "somecompany" };
+            var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
+
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
 
-            var function = new ReconcileFunction(client.Object, new Mock<IRulesProvider>().Object, tokenizer.Object);
+            var function = new ReconcileFunction(config, tableClient, vstsClient.Object,
+                new Mock<IRulesProvider>().Object, tokenizer.Object);
             (await function
-                .HasPermissionAsync(request, "somecompany", "TAS"))
+                    .HasPermissionAsync(request, "somecompany", "TAS"))
                 .ShouldBeOfType<OkObjectResult>()
                 .Value
                 .ShouldBe(true);
-            client.Verify();
+            vstsClient.Verify();
         }
 
         private static void ManageProjectPropertiesPermission(IFixture fixture)

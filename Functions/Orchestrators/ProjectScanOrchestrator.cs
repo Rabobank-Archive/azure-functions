@@ -38,7 +38,7 @@ namespace Functions.Orchestrators
             if (MustRunScope(scope, RuleScopes.GlobalPermissions, RuleScopes.ReleasePipelines))
             {
                 releaseProductionItems = await context.CallActivityWithRetryAsync<IList<ProductionItem>>(
-                    nameof(GetDeploymentMethodsActivity), RetryHelper.ActivityRetryOptions, project);
+                    nameof(GetDeploymentMethodsActivity), RetryHelper.ActivityRetryOptions, project.Id);
             }
 
             if (MustRunScope(scope, RuleScopes.GlobalPermissions))

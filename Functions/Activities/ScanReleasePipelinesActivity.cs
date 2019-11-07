@@ -42,7 +42,7 @@ namespace Functions.Activities
             var rules = _rulesProvider.ReleaseRules(_azuredo)
                 .Where(x => !(x is ProductionStageUsesArtifactFromSecureBranch)).ToList();
 
-            var stageIds = productionItems
+            var productionStageIds = productionItems
                 .SelectMany(p => p.DeploymentInfo)
                 .Where(d => d.PipelineId == pipeline.Id &&
                     !string.IsNullOrWhiteSpace(d.StageId)).Select(d => d.StageId).ToList();
@@ -54,7 +54,7 @@ namespace Functions.Activities
                 Rules = await Task.WhenAll(rules.Select(async rule =>
                         {
                             bool? status;
-                            if (!stageIds.Any())
+                            if (!productionStageIds.Any())
                             {
                                 // if no specific stageId is provided, we assume that the rule does not
                                 // need it and pass null.
@@ -65,7 +65,7 @@ namespace Functions.Activities
                             {
                                 // if we have stageId's, we will invoke the rule for each
                                 // one of them.
-                                var results = await Task.WhenAll(stageIds.Select(async stageId =>
+                                var results = await Task.WhenAll(productionStageIds.Select(async stageId =>
                                     await rule.EvaluateAsync(project.Id, stageId, pipeline)
                                         .ConfigureAwait(false))).ConfigureAwait(false);
 

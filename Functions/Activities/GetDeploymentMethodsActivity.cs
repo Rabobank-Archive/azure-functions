@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Functions.Model;
 using Microsoft.Azure.WebJobs;
 using Microsoft.WindowsAzure.Storage.Table;
-using SecurePipelineScan.VstsService.Response;
 
 namespace Functions.Activities
 {
@@ -22,15 +21,15 @@ namespace Functions.Activities
         }
 
         [FunctionName(nameof(GetDeploymentMethodsActivity))]
-        public async Task<List<ProductionItem>> RunAsync([ActivityTrigger] Project project)
+        public async Task<List<ProductionItem>> RunAsync([ActivityTrigger] string projectId)
         {
-            if (project == null)
-                throw new ArgumentNullException(nameof(project));
+            if (projectId == null)
+                throw new ArgumentNullException(nameof(projectId));
 
             var query = new TableQuery<DeploymentMethod>().Where(TableQuery.CombineFilters(
                 TableQuery.GenerateFilterCondition("Organization", QueryComparisons.Equal, _config.Organization),
                 TableOperators.And,
-                TableQuery.GenerateFilterCondition("ProjectId", QueryComparisons.Equal, project.Id)));
+                TableQuery.GenerateFilterCondition("ProjectId", QueryComparisons.Equal, projectId)));
             var table = _client.GetTableReference("DeploymentMethod");
 
             if (!await table.ExistsAsync().ConfigureAwait(false))

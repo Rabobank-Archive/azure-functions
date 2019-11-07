@@ -1,11 +1,12 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AzureFunctions.TestHelpers;
 using Dynamitey.DynamicObjects;
-using Microsoft.AspNetCore.Http;
+using Functions.Model;
+using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Table;
 using Newtonsoft.Json.Linq;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
@@ -36,8 +37,20 @@ namespace Functions.IntegrationTests
             var token = await SessionToken(client, "tas", _config.ExtensionName);
             var request = new DummyHttpRequest
             {
-                Headers = {["Authorization"] = $"Bearer {token}"}
+                Headers = { ["Authorization"] = $"Bearer {token}" }
             };
+
+            var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
+            var table = tableClient.GetTableReference("DeploymentMethod");
+            var insertOperation = TableOperation.InsertOrReplace(new DeploymentMethod("rowKey","partitionKey")
+            {
+                Organization ="somecompany-test",
+                ProjectId = "53410703-e2e5-4238-9025-233bd7c811b3",
+                CiIdentifier = "1",
+                PipelineId = "1",
+                StageId = "2"
+            });
+            await table.ExecuteAsync(insertOperation);
 
             // Act
             await _host.Jobs.CallAsync(nameof(ReconcileFunction), new Dictionary<string, object>

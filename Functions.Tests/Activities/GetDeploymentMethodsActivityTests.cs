@@ -5,7 +5,6 @@ using Xunit;
 using Shouldly;
 using Functions.Model;
 using Functions.Activities;
-using Unmockable;
 using AutoFixture;
 using Response = SecurePipelineScan.VstsService.Response;
 
@@ -32,7 +31,7 @@ namespace Functions.Tests.Activities
             // Act
             var fun = new GetDeploymentMethodsActivity(client,
                 new EnvironmentConfig { Organization = organization });
-            var result = await fun.RunAsync(project);
+            var result = await fun.RunAsync(project.Id);
 
             //Assert
             result.Count.ShouldBe(0);
@@ -55,7 +54,7 @@ namespace Functions.Tests.Activities
             // Act
             var fun = new GetDeploymentMethodsActivity(client,
                 new EnvironmentConfig { Organization = organization });
-            var result = await fun.RunAsync(project);
+            var result = await fun.RunAsync(project.Id);
 
             //Assert
             result.Count.ShouldBe(0);
@@ -80,7 +79,7 @@ namespace Functions.Tests.Activities
             // Act
             var fun = new GetDeploymentMethodsActivity(client,
                 new EnvironmentConfig { Organization = organization });
-            var result = await fun.RunAsync(project);
+            var result = await fun.RunAsync(project.Id);
 
             //Assert
             result.Count.ShouldBe(numberOfRows);
@@ -105,7 +104,7 @@ namespace Functions.Tests.Activities
             // Act
             var fun = new GetDeploymentMethodsActivity(client,
                 new EnvironmentConfig { Organization = organization });
-            var result = await fun.RunAsync(project);
+            var result = await fun.RunAsync(project.Id);
 
             //Assert
             result.Count.ShouldBe(numberOfRows);
@@ -130,7 +129,7 @@ namespace Functions.Tests.Activities
             // Act
             var fun = new GetDeploymentMethodsActivity(client,
                 new EnvironmentConfig { Organization = organization });
-            var result = await fun.RunAsync(project);
+            var result = await fun.RunAsync(project.Id);
 
             //Assert
             result.Count.ShouldBe(0);
@@ -155,7 +154,7 @@ namespace Functions.Tests.Activities
             // Act
             var fun = new GetDeploymentMethodsActivity(client,
                 new EnvironmentConfig { Organization = organization });
-            var result = await fun.RunAsync(project);
+            var result = await fun.RunAsync(project.Id);
 
             //Assert
             result.Count.ShouldBe(0);
