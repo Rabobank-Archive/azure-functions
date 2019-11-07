@@ -1,11 +1,12 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AzureFunctions.TestHelpers;
 using Dynamitey.DynamicObjects;
-using Microsoft.AspNetCore.Http;
+using Functions.Model;
+using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Table;
 using Newtonsoft.Json.Linq;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
@@ -36,8 +37,10 @@ namespace Functions.IntegrationTests
             var token = await SessionToken(client, "tas", _config.ExtensionName);
             var request = new DummyHttpRequest
             {
-                Headers = {["Authorization"] = $"Bearer {token}"}
+                Headers = { ["Authorization"] = $"Bearer {token}" }
             };
+
+            await PrepareTableStorage().ConfigureAwait(false);
 
             // Act
             await _host.Jobs.CallAsync(nameof(ReconcileFunction), new Dictionary<string, object>
@@ -48,14 +51,30 @@ namespace Functions.IntegrationTests
                 ["scope"] = scope,
                 ["ruleName"] = rule,
                 ["item"] = item
-            });
+            }).ConfigureAwait(false);
 
             // Assert
             await _host.Jobs
                 .Ready()
                 .ThrowIfFailed()
-                .Purge();
+                .Purge().ConfigureAwait(false);
         }
+
+        private async Task PrepareTableStorage()
+        {
+            var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
+            var table = tableClient.GetTableReference("DeploymentMethod");
+            var insertOperation = TableOperation.InsertOrReplace(new DeploymentMethod("rowKey", "partitionKey")
+            {
+                Organization = _config.Organization,
+                ProjectId = _config.ProjectId,
+                CiIdentifier = "1",
+                PipelineId = _config.ReleasePipelineId,
+                StageId = "2"
+            });
+            await table.ExecuteAsync(insertOperation).ConfigureAwait(false);
+        }
+
 
         private static async Task<JToken> SessionToken(IVstsRestClient client, string publisher, string extension)
         {
@@ -67,7 +86,7 @@ namespace Functions.IntegrationTests
                     ExtensionName = extension,
                     PublisherName = publisher,
                     TokenType = 1
-                });
+                }).ConfigureAwait(false);
 
             return response.SelectToken("token");
         }
@@ -95,9 +114,9 @@ namespace Functions.IntegrationTests
         private static IEnumerable<object[]> Rules(Func<IRulesProvider, IEnumerable<IRule>> rules, string scope, string item)
         {
             var provider = new RulesProvider();
-            var skip = new[]
+            var skip = new string[]
             {
-                "ProductionStageUsesArtifactFromSecureBranch"
+                // List rules you want to skip
             };
             
             foreach (var rule in rules(provider).Select(x => x.GetType().Name).Except(skip))

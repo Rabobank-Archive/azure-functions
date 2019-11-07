@@ -71,7 +71,7 @@ namespace Functions.Tests.Orchestrators
             starter
                 .Verify(x => x.CallActivityWithRetryAsync<IList<ProductionItem>>(
                     nameof(GetDeploymentMethodsActivity), It.IsAny<RetryOptions>(),
-                    It.IsAny<Project>()), Times.Once);
+                    It.IsAny<string>()), Times.Once);
             starter
                 .Verify(x => x.CallSubOrchestratorAsync(
                     nameof(GlobalPermissionsOrchestrator), It.IsAny<string>(),
@@ -108,7 +108,7 @@ namespace Functions.Tests.Orchestrators
             starter
                 .Verify(x => x.CallActivityWithRetryAsync<IList<ProductionItem>>(
                     nameof(GetDeploymentMethodsActivity), It.IsAny<RetryOptions>(),
-                    It.IsAny<Project>()), Times.Once);
+                    It.IsAny<string>()), Times.Once);
             starter
                 .Verify(x => x.CallSubOrchestratorAsync(
                     nameof(GlobalPermissionsOrchestrator), It.IsAny<string>(),
@@ -209,7 +209,7 @@ namespace Functions.Tests.Orchestrators
             starter
                 .Setup(x => x.CallActivityWithRetryAsync<IList<ProductionItem>>(
                     nameof(GetDeploymentMethodsActivity), It.IsAny<RetryOptions>(),
-                    It.IsAny<Project>()))
+                    It.IsAny<string>()))
                 .ReturnsAsync(fixture.Create<IList<ProductionItem>>())
                 .Verifiable();
             starter

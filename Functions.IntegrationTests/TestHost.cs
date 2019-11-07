@@ -20,22 +20,25 @@ namespace Functions.IntegrationTests
     {
         private readonly IHost _host;
         public IJobHost Jobs => _host.Services.GetService<IJobHost>();
+        public TestConfig TestConfig { get; } = new TestConfig();
+
         public TestHost()
         {
-            var config = new TestConfig();
-            var fixture = new Fixture().Customize(new AutoNSubstituteCustomization {ConfigureMembers = true});
-            
+            var fixture = new Fixture().Customize(new AutoNSubstituteCustomization { ConfigureMembers = true });
+            var environMentConfig = fixture.Create<EnvironmentConfig>();
+            environMentConfig.Organization = TestConfig.Organization;
+
             _host = new HostBuilder()
                 .ConfigureWebJobs(builder => builder
                     .AddHttp()
                     .AddDurableTask(options => options.HubName = $"other{DateTime.Now:yyyyMMddTHHmmss}")
                     .AddAzureStorageCoreServices()
                     .ConfigureServices(services => services
-                        .AddSingleton<ITokenizer>(new Tokenizer(config.ExtensionSecret))
-                        .AddSingleton<IVstsRestClient>(new VstsRestClient(config.Organization, config.Token))
+                        .AddSingleton<ITokenizer>(new Tokenizer(TestConfig.ExtensionSecret))
+                        .AddSingleton<IVstsRestClient>(new VstsRestClient(TestConfig.Organization, TestConfig.Token))
                         .AddSingleton<IRulesProvider>(new RulesProvider())
                         .AddSingleton(fixture.Create<ILogAnalyticsClient>())
-                        .AddSingleton(fixture.Create<EnvironmentConfig>())
+                        .AddSingleton(environMentConfig)
                         .AddSingleton(CloudStorageAccount.DevelopmentStorageAccount.CreateCloudTableClient())
                         .AddSingleton(CloudStorageAccount.DevelopmentStorageAccount.CreateCloudQueueClient().Wrap())))
                 .Build();
