@@ -64,6 +64,8 @@ namespace Functions.IntegrationTests
         {
             var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
             var table = tableClient.GetTableReference("DeploymentMethod");
+            await table.CreateIfNotExistsAsync().ConfigureAwait(false);
+            
             var insertOperation = TableOperation.InsertOrReplace(new DeploymentMethod("rowKey", "partitionKey")
             {
                 Organization = _config.Organization,
