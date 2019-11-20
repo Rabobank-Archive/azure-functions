@@ -16,7 +16,7 @@ namespace Functions.Activities
             var approved = release.Environments
                 .Select(e => e.PreApprovalsSnapshot)
                 .Any(a => a.ApprovalOptions != null && !a.ApprovalOptions.ReleaseCreatorCanBeApprover &&
-                    a.Approvals.Any(approval => !approval.IsAutomated));
+                    a.Approvals != null && a.Approvals.Any(approval => !approval.IsAutomated));
 
             return approved;
         }
