@@ -27,9 +27,12 @@ namespace Functions.Tests.Orchestrators
         [InlineData(1)]
         [InlineData(3)]
         [InlineData(5)]
-        public async Task ShouldStartActivities(int count)
+        public async Task ShouldStartAllActivitiesForSoxCi(int count)
         {
             //Arrange
+            _fixture.Customize<DeploymentMethod>(x => x
+                .With(d => d.IsSoxApplication, true));
+
             var orchestrationContext = Substitute.For<DurableOrchestrationContextBase>();
             orchestrationContext
                 .CallActivityWithRetryAsync<IList<Response.Project>>(nameof(GetProjectsActivity),
@@ -65,6 +68,44 @@ namespace Functions.Tests.Orchestrators
             await orchestrationContext.Received(count * count * count)
                 .CallActivityAsync<bool>(nameof(ScanReleaseActivity), Arg.Any<Response.Release>());
             await orchestrationContext.Received(count * count * count)
+                 .CallActivityWithRetryAsync(nameof(UploadReleaseLogActivity), Arg.Any<RetryOptions>(),
+                    Arg.Any<(Response.Project, Response.Release, ProductionItem, bool)>());
+        }
+
+        [Fact]
+        public async Task ShouldNotStartScanActivitiesForNonSoxCi()
+        {
+            //Arrange
+            _fixture.Customize<DeploymentMethod>(x => x
+                .With(d => d.IsSoxApplication, false));
+
+            var orchestrationContext = Substitute.For<DurableOrchestrationContextBase>();
+            orchestrationContext
+                .CallActivityWithRetryAsync<IList<Response.Project>>(nameof(GetProjectsActivity),
+                    _fixture.Create<RetryOptions>(), null)
+                .ReturnsForAnyArgs(_fixture.CreateMany<Response.Project>(1).ToList());
+            orchestrationContext
+                .CallActivityWithRetryAsync<IList<ProductionItem>>(nameof(GetDeploymentMethodsActivity),
+                    _fixture.Create<RetryOptions>(), Arg.Any<string>())
+                .ReturnsForAnyArgs(_fixture.CreateMany<ProductionItem>(1).ToList());
+
+            //Act
+            var function = new ImpactAnalysisOrchestrator();
+            await function.RunAsync(orchestrationContext);
+
+            //Assert
+            await orchestrationContext.Received()
+                .CallActivityWithRetryAsync<IList<Response.Project>>(nameof(GetProjectsActivity),
+                    Arg.Any<RetryOptions>(), Arg.Any<DurableActivityContextBase>());
+            await orchestrationContext.Received()
+                .CallActivityWithRetryAsync<IList<ProductionItem>>(nameof(GetDeploymentMethodsActivity),
+                    Arg.Any<RetryOptions>(), Arg.Any<string>());
+            await orchestrationContext.DidNotReceive()
+                .CallActivityWithRetryAsync<IList<Response.Release>>(nameof(GetReleasesActivity),
+                    Arg.Any<RetryOptions>(), Arg.Any<(string, ProductionItem)>());
+            await orchestrationContext.DidNotReceive()
+                .CallActivityAsync<bool>(nameof(ScanReleaseActivity), Arg.Any<Response.Release>());
+            await orchestrationContext.DidNotReceive()
                  .CallActivityWithRetryAsync(nameof(UploadReleaseLogActivity), Arg.Any<RetryOptions>(),
                     Arg.Any<(Response.Project, Response.Release, ProductionItem, bool)>());
         }

@@ -22,7 +22,8 @@ namespace Functions.Orchestrators
             var projects = await context.CallActivityWithRetryAsync<IList<Response.Project>>(
                 nameof(GetProjectsActivity), RetryHelper.ActivityRetryOptions, null);
 
-            await Task.WhenAll(projects.Select(async p => await EvaluateProjectAsync(context, p)));
+            await Task.WhenAll(projects
+                .Select(async p => await EvaluateProjectAsync(context, p)));
         }
 
         private static async Task EvaluateProjectAsync(DurableOrchestrationContextBase context,
@@ -31,8 +32,11 @@ namespace Functions.Orchestrators
             var productionItems = await context.CallActivityWithRetryAsync<IList<ProductionItem>>(
                 nameof(GetDeploymentMethodsActivity), RetryHelper.ActivityRetryOptions, project.Id);
 
-            await Task.WhenAll(productionItems.Select(async p =>
-                await EvaluateProductionItemAsync(context, project, p)));
+            await Task.WhenAll(productionItems
+                .Where(p => p.DeploymentInfo
+                    .Select(d => d.IsSoxApplication)
+                    .Any(b => b))
+                .Select(async p => await EvaluateProductionItemAsync(context, project, p)));
         }
 
         private static async Task EvaluateProductionItemAsync(DurableOrchestrationContextBase context,
@@ -42,8 +46,8 @@ namespace Functions.Orchestrators
                 nameof(GetReleasesActivity), RetryHelper.ActivityRetryOptions,
                 (project.Id, productionItem));
 
-            await Task.WhenAll(releases.Select(async r =>
-                await EvaluateReleaseAsync(context, project, r, productionItem)));
+            await Task.WhenAll(releases
+                .Select(async r => await EvaluateReleaseAsync(context, project, r, productionItem)));
         }
 
         private static async Task EvaluateReleaseAsync(DurableOrchestrationContextBase context,

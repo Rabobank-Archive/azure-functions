@@ -14,6 +14,7 @@ namespace Functions.Model
 
         public string CiIdentifier { get; set; }
         public string CiName { get; set; }
+        public bool IsSoxApplication { get; set; }
         public string Organization { get; set; }
         public string ProjectId { get; set; }
         public string PipelineId { get; set; }
