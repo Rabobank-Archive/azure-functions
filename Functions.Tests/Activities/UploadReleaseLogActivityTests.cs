@@ -25,14 +25,14 @@ namespace Functions.Tests.Activities
         {
             // Arrange
             var client = Substitute.For<ILogAnalyticsClient>();
-
+            var config = new EnvironmentConfig { Organization = "somecompany" };
             var project = _fixture.Create<Response.Project>();
             var release = _fixture.Create<Response.Release>();
             var productionItem = _fixture.Create<ProductionItem>();
             var approved = _fixture.Create<bool>();
 
             // Act
-            var fun = new UploadReleaseLogActivity(client);
+            var fun = new UploadReleaseLogActivity(client, config);
             await fun.RunAsync((project, release, productionItem, approved));
 
             // Assert

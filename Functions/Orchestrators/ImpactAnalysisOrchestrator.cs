@@ -33,9 +33,7 @@ namespace Functions.Orchestrators
                 nameof(GetDeploymentMethodsActivity), RetryHelper.ActivityRetryOptions, project.Id);
 
             await Task.WhenAll(productionItems
-                .Where(p => p.DeploymentInfo
-                    .Select(d => d.IsSoxApplication)
-                    .Any(b => b))
+                .Where(p => p.DeploymentInfo.Any(d => d.IsSoxApplication))
                 .Select(async p => await EvaluateProductionItemAsync(context, project, p)));
         }
 
