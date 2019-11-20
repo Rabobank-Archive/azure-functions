@@ -13,6 +13,7 @@ namespace Functions.Model
         public DeploymentMethod() { }
 
         public string CiIdentifier { get; set; }
+        public string CiName { get; set; }
         public string Organization { get; set; }
         public string ProjectId { get; set; }
         public string PipelineId { get; set; }
