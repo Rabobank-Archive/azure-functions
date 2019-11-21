@@ -13,10 +13,10 @@ namespace Functions.Activities
             if (release == null)
                 throw new ArgumentNullException(nameof(release));
 
+
             var approved = release.Environments
-                .Select(e => e.PreApprovalsSnapshot)
-                .Any(a => a.ApprovalOptions != null && !a.ApprovalOptions.ReleaseCreatorCanBeApprover &&
-                    a.Approvals != null && a.Approvals.Any(approval => !approval.IsAutomated));
+                .SelectMany(e => e.PreDeployApprovals)
+                .Any(a => a.ApprovedBy != null && a.ApprovedBy.Id != release.CreatedBy.Id);
 
             return approved;
         }
