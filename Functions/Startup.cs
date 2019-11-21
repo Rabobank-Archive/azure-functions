@@ -10,7 +10,6 @@ using System;
 using System.Net.Http;
 using LogAnalytics.Client;
 using Microsoft.WindowsAzure.Storage;
-using Unmockable;
 
 [assembly: WebJobsStartup(typeof(Functions.Startup))]
 
@@ -53,7 +52,7 @@ namespace Functions
             var storage = CloudStorageAccount.Parse(GetEnvironmentVariable("eventQueueStorageConnectionString"));
 
             services.AddSingleton(storage.CreateCloudTableClient());
-            services.AddSingleton(storage.CreateCloudQueueClient().Wrap());
+            services.AddSingleton(storage.CreateCloudQueueClient());
 
             var config = new EnvironmentConfig
             {

@@ -7,15 +7,14 @@ using Microsoft.WindowsAzure.Storage.Queue;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using Unmockable;
 
 namespace Functions
 {
     public class PoisonQueueFunction
     {
-        private readonly IUnmockable<CloudQueueClient> _cloudQueueClient;
+        private readonly CloudQueueClient _cloudQueueClient;
 
-        public PoisonQueueFunction(IUnmockable<CloudQueueClient> cloudQueueClient)
+        public PoisonQueueFunction(CloudQueueClient cloudQueueClient)
         {
             _cloudQueueClient = cloudQueueClient;
         }
@@ -32,8 +31,8 @@ namespace Functions
             log.LogInformation($"Requeue from: {queue}");
 
             var requeuedPoisonMessages = await RequeuePoisonMessagesAsync(
-                _cloudQueueClient.Execute(c => c.GetQueueReference(queue)),
-                _cloudQueueClient.Execute(c => c.GetQueueReference($"{queue}-poison")),
+                _cloudQueueClient.GetQueueReference(queue),
+                _cloudQueueClient.GetQueueReference($"{queue}-poison"),
                 log);
 
             return new HttpResponseMessage(HttpStatusCode.OK)

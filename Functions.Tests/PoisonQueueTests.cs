@@ -5,7 +5,6 @@ using Moq;
 using Shouldly;
 using System;
 using System.Threading.Tasks;
-using Unmockable;
 using Xunit;
 
 namespace Functions.Tests
@@ -34,7 +33,7 @@ namespace Functions.Tests
             await poison.AddMessageAsync(new CloudQueueMessage(content));
 
             // Act
-            var function = new PoisonQueueFunction(client.Wrap());
+            var function = new PoisonQueueFunction(client);
             var response = await function.RequeueAsync(null, "some-queue", new Mock<ILogger>().Object);
             response.Dispose();
 

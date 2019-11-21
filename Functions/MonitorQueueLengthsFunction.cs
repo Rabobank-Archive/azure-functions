@@ -3,15 +3,14 @@ using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage.Queue;
-using Unmockable;
 
 namespace Functions
 {
     public class MonitorQueueLengthsFunction
     {
-        private readonly IUnmockable<CloudQueueClient> _cloudQueueClient;
+        private readonly CloudQueueClient _cloudQueueClient;
 
-        public MonitorQueueLengthsFunction(IUnmockable<CloudQueueClient> cloudQueueClient)
+        public MonitorQueueLengthsFunction(CloudQueueClient cloudQueueClient)
         {
             _cloudQueueClient = cloudQueueClient;
         }
@@ -25,7 +24,7 @@ namespace Functions
 
             do
             {
-                var segment = await _cloudQueueClient.Execute(c => c.ListQueuesSegmentedAsync(token));
+                var segment = await _cloudQueueClient.ListQueuesSegmentedAsync(token);
                 token = segment.ContinuationToken;
                 cloudQueueList.AddRange(segment.Results);
             }

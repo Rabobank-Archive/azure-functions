@@ -12,7 +12,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.WindowsAzure.Storage;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
-using Unmockable;
 using Xunit;
 
 namespace Functions.IntegrationTests
@@ -35,7 +34,7 @@ namespace Functions.IntegrationTests
                         .AddSingleton(fixture.Create<IVstsRestClient>())
                         .AddSingleton(fixture.Create<ILogAnalyticsClient>())
                         .AddSingleton(CloudStorageAccount.DevelopmentStorageAccount.CreateCloudTableClient())
-                        .AddSingleton(CloudStorageAccount.DevelopmentStorageAccount.CreateCloudQueueClient().Wrap())
+                        .AddSingleton(CloudStorageAccount.DevelopmentStorageAccount.CreateCloudQueueClient())
                         .AddSingleton(fixture.Create<EnvironmentConfig>())
                         .AddSingleton(fixture.Create<IRulesProvider>())))
                     .Build())

@@ -1,11 +1,12 @@
 using System;
 using System.Threading.Tasks;
+using AutoFixture;
 using Functions.Activities;
 using Functions.Model;
 using Microsoft.Azure.WebJobs;
+using Microsoft.WindowsAzure.Storage.Auth;
 using Microsoft.WindowsAzure.Storage.Queue;
 using Moq;
-using Unmockable;
 using Xunit;
 
 namespace Functions.Tests.Activities
@@ -16,10 +17,11 @@ namespace Functions.Tests.Activities
         public async Task ShouldCallCreateIfNotExistsForQueues()
         {
             // Arrange
+            var fixture = new Fixture();
             var context = new Mock<DurableActivityContextBase>();
-            var cloudQueueClient = new Intercept<CloudQueueClient>();
-            var buildCompletedQueue = new Mock<CloudQueue>(new Uri("http://bla.com"));
-            var releaseDeploymentCompletedQueue = new Mock<CloudQueue>(new Uri("http://bla.com"));
+            var cloudQueueClient = new Mock<CloudQueueClient>(fixture.Create<Uri>(), fixture.Create<StorageCredentials>());
+            var buildCompletedQueue = new Mock<CloudQueue>(fixture.Create<Uri>());
+            var releaseDeploymentCompletedQueue = new Mock<CloudQueue>(fixture.Create<Uri>());
 
             cloudQueueClient.Setup(c => c.GetQueueReference(StorageQueueNames.BuildCompletedQueueName))
                 .Returns(buildCompletedQueue.Object);
@@ -27,7 +29,7 @@ namespace Functions.Tests.Activities
                 .Returns(releaseDeploymentCompletedQueue.Object);
             
             // Act
-            var fun = new CreateStorageQueuesActivity(cloudQueueClient);
+            var fun = new CreateStorageQueuesActivity(cloudQueueClient.Object);
             await fun.RunAsync(context.Object);
 
             // Assert

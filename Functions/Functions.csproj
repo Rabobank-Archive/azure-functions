@@ -25,7 +25,6 @@
     <PackageReference Include="Polly" Version="7.1.0" />
     <PackageReference Include="SecurePipelineScan.Rules" Version="0.0.1.368945" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.5.0" />
-    <PackageReference Include="Unmockable.Wrap" Version="0.0.61" />
     <PackageReference Include="WindowsAzure.Storage" Version="9.3.3" />
   </ItemGroup>
   <ItemGroup>
