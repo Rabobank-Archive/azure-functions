@@ -34,7 +34,7 @@ namespace Functions.Activities
             var productionReleases = releases
                 .Where(r => r.Environments
                     .Any(e => releasePipelineStageIds.Contains(e.DefinitionEnvironmentId)
-                        && e.Status != "notStarted" && e.Status != "rejected"));
+                        && e.Status != "notStarted"));
 
             return await Task.WhenAll(productionReleases.Select(r => _azuredo.GetAsync(
                 ReleaseManagement.Release(projectId, r.Id.ToString()))))
