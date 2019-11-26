@@ -42,12 +42,10 @@ namespace Functions.Activities
                 .ConfigureAwait(false);
         }
 
-        private static string ToCommaSeparatedString(IEnumerable<DeploymentMethod> deploymentMethods,
-            Func<DeploymentMethod, string> d)
-        {
-            return string.Join(",", deploymentMethods
+        private static string ToCommaSeparatedString(
+            IEnumerable<DeploymentMethod> deploymentMethods, Func<DeploymentMethod, string> d) => 
+            string.Join(",", deploymentMethods
                 .Select(d)
                 .Distinct());
-        }
     }
 }
