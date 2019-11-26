@@ -34,27 +34,31 @@ namespace Functions.Orchestrators
 
             await Task.WhenAll(productionItems
                 .Where(p => p.DeploymentInfo.Any(d => d.IsSoxApplication))
-                .Select(async p => await EvaluateProductionItemAsync(context, project, p)));
+                .Select(async p => await EvaluateReleasePipelineAsync(context, project, p.ItemId,
+                    p.DeploymentInfo.Where(d => d.IsSoxApplication))));
         }
 
-        private static async Task EvaluateProductionItemAsync(DurableOrchestrationContextBase context,
-            Response.Project project, ProductionItem productionItem)
+        private static async Task EvaluateReleasePipelineAsync(
+            DurableOrchestrationContextBase context, Response.Project project, 
+            string releasePipelineId, IEnumerable<DeploymentMethod> deploymentMethods)
         {
             var releases = await context.CallActivityWithRetryAsync<IList<Response.Release>>(
                 nameof(GetReleasesActivity), RetryHelper.ActivityRetryOptions,
-                (project.Id, productionItem));
+                (project.Id, releasePipelineId, deploymentMethods));
 
-            await Task.WhenAll(releases
-                .Select(async r => await EvaluateReleaseAsync(context, project, r, productionItem)));
+            await Task.WhenAll(releases.Select(async r => 
+                await EvaluateReleaseAsync(context, project.Name, r, releasePipelineId, deploymentMethods)));
         }
 
-        private static async Task EvaluateReleaseAsync(DurableOrchestrationContextBase context,
-            Response.Project project, Response.Release release, ProductionItem productionItem)
+        private static async Task EvaluateReleaseAsync(
+            DurableOrchestrationContextBase context, string projectName, Response.Release release, 
+            string releasePipelineId, IEnumerable<DeploymentMethod> deploymentMethods)
         {
             var approved = await context.CallActivityAsync<bool>(nameof(ScanReleaseActivity), release);
 
             await context.CallActivityWithRetryAsync(nameof(UploadReleaseLogActivity),
-                RetryHelper.ActivityRetryOptions, (project, release, productionItem, approved));
+                RetryHelper.ActivityRetryOptions, (projectName, release.Id, releasePipelineId, 
+                deploymentMethods, approved));
         }
     }
 }

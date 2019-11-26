@@ -17,22 +17,26 @@ namespace Functions.Activities
         public GetReleasesActivity(IVstsRestClient azuredo) => _azuredo = azuredo;
 
         [FunctionName(nameof(GetReleasesActivity))]
-        public async Task<IList<Response.Release>> RunAsync([ActivityTrigger]
-            (string projectId, ProductionItem productionItem) input)
+        public async Task<IList<Response.Release>> RunAsync([ActivityTrigger] (string projectId,
+            string releasePipelineId, IEnumerable<DeploymentMethod> deploymentMethods) input)
         {
-            if (input.projectId == null || input.productionItem == null)
+            if (input.projectId == null || input.releasePipelineId == null || input.deploymentMethods == null)
                 throw new ArgumentNullException(nameof(input));
 
             var projectId = input.projectId;
-            var releasePipelineId = input.productionItem.ItemId;
-            var releasePipelineStageIds = input.productionItem.DeploymentInfo
+            var releasePipelineId = input.releasePipelineId;
+            var releasePipelineStageIds = input.deploymentMethods
                 .Select(d => d.StageId);
 
-            var releases = _azuredo.Get(ReleaseManagement.Releases(projectId,
-                releasePipelineId, releasePipelineStageIds, "environments", "1-1-2019"))
-                .ToList();
+            var releases = _azuredo.Get(ReleaseManagement.Releases(
+                projectId, releasePipelineId, "environments", "1-1-2019"));
 
-            return await Task.WhenAll(releases.Select(r => _azuredo.GetAsync(
+            var productionReleases = releases
+                .Where(r => r.Environments
+                    .Any(e => releasePipelineStageIds.Contains(e.Id.ToString())
+                        && e.Status != "notStarted" && e.Status != "rejected"));
+
+            return await Task.WhenAll(productionReleases.Select(r => _azuredo.GetAsync(
                 ReleaseManagement.Release(projectId, r.Id.ToString()))))
                 .ConfigureAwait(false);
         }

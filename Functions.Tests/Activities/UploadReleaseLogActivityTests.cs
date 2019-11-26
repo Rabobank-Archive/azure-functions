@@ -5,7 +5,6 @@ using Functions.Activities;
 using Functions.Model;
 using LogAnalytics.Client;
 using NSubstitute;
-using Response = SecurePipelineScan.VstsService.Response;
 using Xunit;
 
 namespace Functions.Tests.Activities
@@ -26,14 +25,15 @@ namespace Functions.Tests.Activities
             // Arrange
             var client = Substitute.For<ILogAnalyticsClient>();
             var config = new EnvironmentConfig { Organization = "somecompany" };
-            var project = _fixture.Create<Response.Project>();
-            var release = _fixture.Create<Response.Release>();
-            var productionItem = _fixture.Create<ProductionItem>();
+            var projectName = _fixture.Create<string>();
+            var releaseId = _fixture.Create<int>();
+            var releasePipelineId = _fixture.Create<string>();
+            var deploymentMethods = _fixture.CreateMany<DeploymentMethod>();
             var approved = _fixture.Create<bool>();
 
             // Act
             var fun = new UploadReleaseLogActivity(client, config);
-            await fun.RunAsync((project, release, productionItem, approved));
+            await fun.RunAsync((projectName, releaseId, releasePipelineId, deploymentMethods, approved));
 
             // Assert
             await client.Received().AddCustomLogJsonAsync("impact_analysis_log",

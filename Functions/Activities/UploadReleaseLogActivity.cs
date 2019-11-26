@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Functions.Model;
 using LogAnalytics.Client;
 using Microsoft.Azure.WebJobs;
-using Response = SecurePipelineScan.VstsService.Response;
 
 namespace Functions.Activities
 {
@@ -21,34 +20,34 @@ namespace Functions.Activities
         }
 
         [FunctionName(nameof(UploadReleaseLogActivity))]
-        public async Task RunAsync([ActivityTrigger](Response.Project project, 
-            Response.Release release, ProductionItem productionItem, bool approved) input)
+        public async Task RunAsync([ActivityTrigger](string projectName, int releaseId, 
+            string releasePipelineId, IEnumerable<DeploymentMethod> deploymentMethods, bool approved) input)
         {
-            if (input.project == null || input.release == null || input.productionItem == null)
+            if (input.projectName == null || input.releasePipelineId == null || input.deploymentMethods == null)
                 throw new ArgumentOutOfRangeException(nameof(input));
 
             var releaseLogItem = new ReleaseLogItem
             {
-                ReleaseId = input.release.Id,
+                ReleaseId = input.releaseId,
                 Approved = input.approved,
-                CiIdentifier = ToCommaSeparatedString(input.productionItem.DeploymentInfo, d => d.CiIdentifier),
-                CiName = ToCommaSeparatedString(input.productionItem.DeploymentInfo, d => d.CiName),
-                ReleaseLink = new Uri($"https://dev.azure.com/{_config.Organization}/{input.project.Name}" +
-                    $"/_releaseProgress?_a=release-pipeline-progress&releaseId={input.release.Id}"),
-                ReleasePipelineId = input.productionItem.ItemId,
-                ReleaseStageId = ToCommaSeparatedString(input.productionItem.DeploymentInfo, d => d.StageId)
+                CiIdentifier = ToCommaSeparatedString(input.deploymentMethods, d => d.CiIdentifier),
+                CiName = ToCommaSeparatedString(input.deploymentMethods, d => d.CiName),
+                ReleaseLink = new Uri($"https://dev.azure.com/{_config.Organization}/{input.projectName}" +
+                    $"/_releaseProgress?_a=release-pipeline-progress&releaseId={input.releaseId}"),
+                ReleasePipelineId = input.releasePipelineId,
+                ReleaseStageId = ToCommaSeparatedString(input.deploymentMethods, d => d.StageId)
             };
 
             await _client.AddCustomLogJsonAsync("impact_analysis_log", releaseLogItem, "evaluatedDate")
                 .ConfigureAwait(false);
         }
 
-        private static string ToCommaSeparatedString(IEnumerable<DeploymentMethod> deploymentInfo, 
-            Func<DeploymentMethod, string> p)
+        private static string ToCommaSeparatedString(IEnumerable<DeploymentMethod> deploymentMethods,
+            Func<DeploymentMethod, string> d)
         {
-            return string.Join(",", deploymentInfo
-                .Select(p)
-                .Distinct());      
+            return string.Join(",", deploymentMethods
+                .Select(d)
+                .Distinct());
         }
     }
 }

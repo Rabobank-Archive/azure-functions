@@ -43,8 +43,9 @@ namespace Functions.Tests.Orchestrators
                     _fixture.Create<RetryOptions>(), Arg.Any<string>())
                 .ReturnsForAnyArgs(_fixture.CreateMany<ProductionItem>(count).ToList());
             orchestrationContext
-                .CallActivityWithRetryAsync<IList<Response.Release>>(nameof(GetReleasesActivity),
-                    _fixture.Create<RetryOptions>(), _fixture.Create<(string, ProductionItem)>())
+                .CallActivityWithRetryAsync<IList<Response.Release>>(
+                    nameof(GetReleasesActivity), _fixture.Create<RetryOptions>(), 
+                    _fixture.Create<(string, string, IEnumerable<DeploymentMethod>)>())
                 .ReturnsForAnyArgs(_fixture.CreateMany<Response.Release>(count).ToList());
             orchestrationContext
                 .CallActivityAsync<bool>(nameof(ScanReleaseActivity),
@@ -64,12 +65,12 @@ namespace Functions.Tests.Orchestrators
                     Arg.Any<RetryOptions>(), Arg.Any<string>());
             await orchestrationContext.Received(count * count)
                 .CallActivityWithRetryAsync<IList<Response.Release>>(nameof(GetReleasesActivity),
-                    Arg.Any<RetryOptions>(), Arg.Any<(string, ProductionItem)>());
+                    Arg.Any<RetryOptions>(), Arg.Any<(string, string, IEnumerable<DeploymentMethod>)>());
             await orchestrationContext.Received(count * count * count)
                 .CallActivityAsync<bool>(nameof(ScanReleaseActivity), Arg.Any<Response.Release>());
             await orchestrationContext.Received(count * count * count)
                  .CallActivityWithRetryAsync(nameof(UploadReleaseLogActivity), Arg.Any<RetryOptions>(),
-                    Arg.Any<(Response.Project, Response.Release, ProductionItem, bool)>());
+                    Arg.Any<(string, int, string, IEnumerable<DeploymentMethod>, bool)>());
         }
 
         [Fact]
@@ -102,12 +103,12 @@ namespace Functions.Tests.Orchestrators
                     Arg.Any<RetryOptions>(), Arg.Any<string>());
             await orchestrationContext.DidNotReceive()
                 .CallActivityWithRetryAsync<IList<Response.Release>>(nameof(GetReleasesActivity),
-                    Arg.Any<RetryOptions>(), Arg.Any<(string, ProductionItem)>());
+                    Arg.Any<RetryOptions>(), Arg.Any<(string, string, IEnumerable<DeploymentMethod>)>());
             await orchestrationContext.DidNotReceive()
                 .CallActivityAsync<bool>(nameof(ScanReleaseActivity), Arg.Any<Response.Release>());
             await orchestrationContext.DidNotReceive()
                  .CallActivityWithRetryAsync(nameof(UploadReleaseLogActivity), Arg.Any<RetryOptions>(),
-                    Arg.Any<(Response.Project, Response.Release, ProductionItem, bool)>());
+                    Arg.Any<(string, int, string, IEnumerable<DeploymentMethod>, bool)>());
         }
     }
 }
