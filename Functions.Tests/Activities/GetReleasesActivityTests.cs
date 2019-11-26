@@ -28,7 +28,7 @@ namespace Functions.Tests.Activities
             _fixture.Customize<DeploymentMethod>(x => x
                 .With(d => d.StageId, "1"));
             _fixture.Customize<Response.Environment>(x => x
-                .With(e => e.Id, 1)
+                .With(e => e.DefinitionEnvironmentId, "1")
                 .With(e => e.Status, "completed"));
 
             var client = new Mock<IVstsRestClient>();
@@ -61,7 +61,7 @@ namespace Functions.Tests.Activities
             _fixture.Customize<DeploymentMethod>(x => x
                 .With(d => d.StageId, "2"));
             _fixture.Customize<Response.Environment>(x => x
-                .With(e => e.Id, 1)
+                .With(e => e.DefinitionEnvironmentId, "1")
                 .With(e => e.Status, "completed"));
 
             var client = new Mock<IVstsRestClient>();
@@ -94,7 +94,7 @@ namespace Functions.Tests.Activities
             _fixture.Customize<DeploymentMethod>(x => x
                 .With(d => d.StageId, "1"));
             _fixture.Customize<Response.Environment>(x => x
-                .With(e => e.Id, 1)
+                .With(e => e.DefinitionEnvironmentId, "1")
                 .With(e => e.Status, "notStarted"));
 
             var client = new Mock<IVstsRestClient>();
