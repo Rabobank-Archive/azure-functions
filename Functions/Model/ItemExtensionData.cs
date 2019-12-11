@@ -6,7 +6,9 @@ namespace Functions.Model
     {
         public string Item { get; set; }
         public string ItemId { get; set; }
+        public string ProjectId { get; set; }
         public IList<EvaluatedRule> Rules { get; set; }
         public string CiIdentifiers { get; set; }
+        public IList<Environment> Environments { get; set; }
     }
 }

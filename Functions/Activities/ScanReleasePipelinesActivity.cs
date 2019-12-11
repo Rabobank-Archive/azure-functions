@@ -8,6 +8,7 @@ using Microsoft.Azure.WebJobs;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Response;
+using Environment = Functions.Model.Environment;
 using Task = System.Threading.Tasks.Task;
 
 namespace Functions.Activities
@@ -50,6 +51,8 @@ namespace Functions.Activities
             {
                 Item = pipeline.Name,
                 ItemId = pipeline.Id,
+                ProjectId = project.Id,
+                Environments = pipeline.Environments.Select(e => new Environment { Id = e.Id, Name = e.Name }).ToList(),
                 Rules = await Task.WhenAll(rules.Select(async rule =>
                         {
                             bool? status;

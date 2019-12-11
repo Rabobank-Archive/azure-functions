@@ -61,6 +61,8 @@ namespace Functions.Tests.Activities
             actual.Rules.ShouldNotBeEmpty();
             client.VerifyAll();
             Assert.Equal(expected, actual.Rules.All(r => r.Status.GetValueOrDefault()));
+            actual.Environments.ShouldNotBeNull();
+            actual.Environments.First().Id.ShouldBe(pipeline.Environments.First().Id);
         }
 
         [Fact]
@@ -137,7 +139,7 @@ namespace Functions.Tests.Activities
             // Arrange
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
             var config = fixture.Create<EnvironmentConfig>();
-            var provider = CreateRulesProvider(fixture, 3, 
+            var provider = CreateRulesProvider(fixture, 3,
                 (stageId: "0", ruleResult: true),
                 // one of the checks returns null because the result could not be determined
                 (stageId: "1", ruleResult: null),
