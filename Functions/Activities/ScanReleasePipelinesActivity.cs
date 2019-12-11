@@ -51,6 +51,7 @@ namespace Functions.Activities
             {
                 Item = pipeline.Name,
                 ItemId = pipeline.Id,
+                ProjectId = project.Id,
                 Environments = pipeline.Environments.Select(e => new Environment { Id = e.Id, Name = e.Name }).ToList(),
                 Rules = await Task.WhenAll(rules.Select(async rule =>
                         {
