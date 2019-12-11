@@ -9,6 +9,6 @@ namespace Functions.Model
         public string ProjectId { get; set; }
         public IList<EvaluatedRule> Rules { get; set; }
         public string CiIdentifiers { get; set; }
-        public IList<Environment> Environments { get; internal set; }
+        public IList<Environment> Environments { get; set; }
     }
 }
