@@ -109,7 +109,8 @@
         "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', parameters('appName'))]": "Resource"
       },
       "properties": {
-        "ApplicationId": "[parameters('appName')]"
+        "ApplicationId": "[parameters('appName')]",
+        "retentionInDays": "730"
       }
     },
     {
