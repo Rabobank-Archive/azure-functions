@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Flurl.Http;
 using Microsoft.Extensions.Logging;
+using System;
 
 namespace Functions
 {
@@ -15,12 +16,7 @@ namespace Functions
         {
             try
             {
-                var response = await "https://sm9functiondev.ase-01.northeurope.azure.rabodev.com/api/ImportCmdbHttpStarter"
-                        .PostJsonAsync(new
-                        {
-                            user = "chung.lok.lam@somecompany.nl",
-                            ciIdentifier = "CI7679180"
-                        });
+                var response = await Environment.GetEnvironmentVariable("testEndpoint").GetAsync();
 
                 logger.LogInformation($"Status code is {response.StatusCode.ToString()}");
             }

@@ -1,9 +1,21 @@
 {
   "IsEncrypted": false,
   "Values": {
-    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
-    "AzureWebJobsDashboard": "UseDevelopmentStorage=true",
-    "eventQueueStorageConnectionString": "UseDevelopmentStorage=true",
-    "FUNCTIONS_WORKER_RUNTIME": "dotnet"
+    "AzureWebJobsStorage": "***REMOVED***",
+    "AzureWebJobsDashboard": "***REMOVED***",
+    "eventQueueStorageConnectionString": "***REMOVED***",
+    "AzureWebJobsSecretStorageType": "files",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+    "clientId": "99cdc9f6-c82a-4762-aabe-e30007071ebf",
+    "clientSecret": "8dz1s7hq4GqUrasJFg0H35%bbM4UTcGM%*IJdU!fRb$%IjfJkBKX$%zpYw8lkWA",
+    "extensionName": "tastest",
+    "logAnalyticsKey": "***REMOVED***",
+    "logAnalyticsWorkspace": "***REMOVED***",
+    "organization": "somecompany-test",
+    "tenantId": "***REMOVED***",
+    "TOKEN_SECRET": "***REMOVED***",
+    "vstsPat": "***REMOVED***",
+    "vstsUrl": "https://dev.azure.com/somecompany-test",
+    "testEndpoint": "***REMOVED***"
   }
 }
