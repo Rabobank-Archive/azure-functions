@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Functions.Model;
 using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
 namespace Functions.Activities
 {

@@ -4,13 +4,14 @@ using System.Threading.Tasks;
 using Functions.Activities;
 using Functions.Model;
 using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
 namespace Functions.Orchestrators
 {
     public class CompletenessOrchestrator
     {
         [FunctionName(nameof(CompletenessOrchestrator))]
-        public async Task RunAsync([OrchestrationTrigger] DurableOrchestrationContextBase context)
+        public async Task RunAsync([OrchestrationTrigger] IDurableOrchestrationContext context)
         {
             var (allSupervisors, allProjectScanners) =
                 await context.CallActivityAsync<(IList<Orchestrator>, IList<Orchestrator>)>(

@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Azure.Storage.Queue;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
-using Microsoft.WindowsAzure.Storage.Queue;
 
 namespace Functions
 {

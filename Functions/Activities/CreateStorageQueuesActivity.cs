@@ -1,7 +1,8 @@
 ﻿using System.Threading.Tasks;
 using Functions.Model;
+using Microsoft.Azure.Storage.Queue;
 using Microsoft.Azure.WebJobs;
-using Microsoft.WindowsAzure.Storage.Queue;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
 namespace Functions.Activities
 {
@@ -13,7 +14,7 @@ namespace Functions.Activities
             _cloudQueueClient = cloudQueueClient;
 
         [FunctionName(nameof(CreateStorageQueuesActivity))]
-        public async Task RunAsync([ActivityTrigger] DurableActivityContextBase context)
+        public async Task RunAsync([ActivityTrigger] IDurableActivityContext context)
         {
             var queue = _cloudQueueClient.GetQueueReference(StorageQueueNames.BuildCompletedQueueName);
             await queue.CreateIfNotExistsAsync().ConfigureAwait(false);

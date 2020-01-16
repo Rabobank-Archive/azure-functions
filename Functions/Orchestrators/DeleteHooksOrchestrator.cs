@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Functions.Activities;
 using Functions.Helpers;
 using System.Threading;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
 namespace Functions.Orchestrators
 {
@@ -14,7 +15,7 @@ namespace Functions.Orchestrators
         private const int TimerInterval = 1;
 
         [FunctionName(nameof(DeleteHooksOrchestrator))]
-        public async Task RunAsync([OrchestrationTrigger] DurableOrchestrationContextBase context)
+        public async Task RunAsync([OrchestrationTrigger] IDurableOrchestrationContext context)
         {
             var hooks = await context.CallActivityWithRetryAsync<IList<Response.Hook>>(nameof(GetHooksActivity),
                 RetryHelper.ActivityRetryOptions, null);
@@ -26,7 +27,7 @@ namespace Functions.Orchestrators
         }
 
         private async static Task StartDeleteHooksActivityWithTimerAsync(
-            DurableOrchestrationContextBase context, Response.Hook hook, int index)
+            IDurableOrchestrationContext context, Response.Hook hook, int index)
         {
             await context.CreateTimer(context.CurrentUtcDateTime.AddSeconds(index * TimerInterval), CancellationToken.None);
             await context.CallActivityWithRetryAsync(nameof(DeleteHooksActivity),

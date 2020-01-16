@@ -8,7 +8,7 @@ using Newtonsoft.Json.Linq;
 using Shouldly;
 using Xunit;
 using System;
-using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
 namespace Functions.Tests.Activities
 {

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Functions.Helpers;
 using Functions.Model;
 using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Response;

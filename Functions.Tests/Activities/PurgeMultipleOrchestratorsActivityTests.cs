@@ -1,11 +1,11 @@
 ﻿using System.Threading.Tasks;
-using Microsoft.Azure.WebJobs;
 using NSubstitute;
 using Xunit;
 using Functions.Activities;
 using System;
 using DurableTask.Core;
 using System.Collections.Generic;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
 namespace Functions.Tests.Activities
 {
@@ -15,8 +15,8 @@ namespace Functions.Tests.Activities
         public async Task ShouldSendDeleteCall()
         {
             //Arrange
-            var context = Substitute.For<DurableActivityContextBase>();
-            var client = Substitute.For<DurableOrchestrationClientBase>();
+            var context = Substitute.For<IDurableActivityContext>();
+            var client = Substitute.For<IDurableOrchestrationClient>();
 
             //Act
             var func = new PurgeMultipleOrchestratorsActivity();

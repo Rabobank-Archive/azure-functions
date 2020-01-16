@@ -2,6 +2,7 @@ using Functions.Orchestrators;
 using Functions.Starters;
 using Functions.Tests.Helpers;
 using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Microsoft.Azure.WebJobs.Extensions.Timers;
 using Moq;
 using SecurePipelineScan.VstsService;
@@ -17,7 +18,7 @@ namespace Functions.Tests.Starters
         public async Task RunShouldCallGetProjectsExactlyOnce()
         {
             //Arrange
-            var orchestrationClientMock = new Mock<DurableOrchestrationClientBase>();
+            var orchestrationClientMock = new Mock<IDurableOrchestrationClient>();
             var clientMock = new Mock<IVstsRestClient>();
             var timerInfoMock = CreateTimerInfoMock();
 
@@ -38,7 +39,7 @@ namespace Functions.Tests.Starters
         public async Task RunShouldCallSupervisorFunctionExactlyOnce()
         {
             //Arrange       
-            var orchestrationClientMock = new Mock<DurableOrchestrationClientBase>();
+            var orchestrationClientMock = new Mock<IDurableOrchestrationClient>();
             var clientMock = new Mock<IVstsRestClient>();
             var timerInfoMock = CreateTimerInfoMock();
 
@@ -53,7 +54,7 @@ namespace Functions.Tests.Starters
 
             //Assert
             orchestrationClientMock.Verify(
-                x => x.StartNewAsync(nameof(ProjectScanSupervisor), It.IsAny<object>()),
+                x => x.StartNewAsync(nameof(ProjectScanSupervisor),string.Empty, It.IsAny<object>()),
                 Times.Once());
         }
 

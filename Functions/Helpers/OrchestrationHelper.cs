@@ -1,7 +1,7 @@
 using Functions.Model;
-using Microsoft.Azure.WebJobs;
 using System;
 using System.Linq;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
 namespace Functions.Helpers
 {

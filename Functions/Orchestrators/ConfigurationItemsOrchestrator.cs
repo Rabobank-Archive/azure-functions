@@ -4,13 +4,14 @@ using System.Threading.Tasks;
 using Functions.Activities;
 using Functions.Model;
 using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
 namespace Functions.Orchestrators
 {
     public class ConfigurationItemsOrchestrator
     {
         [FunctionName(nameof(ConfigurationItemsOrchestrator))]
-        public async Task RunAsync([OrchestrationTrigger] DurableOrchestrationContextBase context)
+        public async Task RunAsync([OrchestrationTrigger] IDurableOrchestrationContext context)
         {
             if (context == null)
                 throw new ArgumentNullException(nameof(context));

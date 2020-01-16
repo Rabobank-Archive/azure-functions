@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Functions.Activities;
 using Functions.Helpers;
 using System.Threading;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
 namespace Functions.Orchestrators
 {
@@ -14,7 +15,7 @@ namespace Functions.Orchestrators
         private const int TimerInterval = 2;
 
         [FunctionName(nameof(CreateHooksOrchestrator))]
-        public async Task RunAsync([OrchestrationTrigger] DurableOrchestrationContextBase context)
+        public async Task RunAsync([OrchestrationTrigger] IDurableOrchestrationContext context)
         {
             var projects = await context.CallActivityWithRetryAsync<IList<Response.Project>>(
                 nameof(GetProjectsActivity),
@@ -31,7 +32,7 @@ namespace Functions.Orchestrators
         }
 
         private async static Task StartCreateHooksActivityWithTimerAsync(
-            DurableOrchestrationContextBase context, Response.Project project, int index, 
+            IDurableOrchestrationContext context, Response.Project project, int index, 
             IList<Response.Hook> hooks)
         {
             await context.CreateTimer(context.CurrentUtcDateTime.AddSeconds(index * TimerInterval), 

@@ -3,8 +3,7 @@ using System.Threading.Tasks;
 using AutoFixture;
 using Functions.Activities;
 using Functions.Model;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Table;
+using Microsoft.Azure.Cosmos.Table;
 using Xunit;
 
 namespace Functions.Tests.Activities

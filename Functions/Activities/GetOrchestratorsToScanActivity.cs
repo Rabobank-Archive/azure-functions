@@ -7,6 +7,7 @@ using Functions.Model;
 using Functions.Helpers;
 using Functions.Orchestrators;
 using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
 namespace Functions.Activities
 {
@@ -14,8 +15,8 @@ namespace Functions.Activities
     {
         [FunctionName(nameof(GetOrchestratorsToScanActivity))]
         public async Task<(IList<Orchestrator>, IList<Orchestrator>)> RunAsync(
-            [ActivityTrigger] DurableActivityContextBase context,
-            [OrchestrationClient] DurableOrchestrationClientBase client)
+            [ActivityTrigger] IDurableActivityContext context,
+            [DurableClient] IDurableOrchestrationClient client)
         {
             const int fromDaysAgo = 30;
             var runtimeStatuses = new List<OrchestrationRuntimeStatus>
@@ -32,20 +33,28 @@ namespace Functions.Activities
 
             var supervisors = new List<Orchestrator>();
             var projectScanners = new List<Orchestrator>();
-            var continuationToken = string.Empty;
 
+            var condition = new OrchestrationStatusQueryCondition
+            {
+                CreatedTimeFrom = DateTime.Now.Date.AddDays(-fromDaysAgo),
+                CreatedTimeTo = DateTime.Now,
+                RuntimeStatus = runtimeStatuses,
+                PageSize = 1000
+            };
+
+            string continuationToken;
             do
             {
-                var orchestratorsPage = await client.GetStatusAsync(DateTime.Now.Date.AddDays(-fromDaysAgo), 
-                        DateTime.Now, runtimeStatuses, 1000, continuationToken)
-                    .ConfigureAwait(false);
-                supervisors.AddRange(orchestratorsPage.DurableOrchestrationState
+                var orchestrationStatusQueryResult =
+                    await client.GetStatusAsync(condition, default).ConfigureAwait(false);
+                supervisors.AddRange(orchestrationStatusQueryResult.DurableOrchestrationState
                     .Where(x => x.Name == nameof(ProjectScanSupervisor))
                     .Select(OrchestrationHelper.ConvertToOrchestrator));
-                projectScanners.AddRange(orchestratorsPage.DurableOrchestrationState
+                projectScanners.AddRange(orchestrationStatusQueryResult.DurableOrchestrationState
                     .Where(x => x.Name == nameof(ProjectScanOrchestrator))
                     .Select(OrchestrationHelper.ConvertToOrchestrator));
-                continuationToken = orchestratorsPage.ContinuationToken;
+                continuationToken = orchestrationStatusQueryResult.ContinuationToken;
+
             } while (Encoding.UTF8.GetString(Convert.FromBase64String(continuationToken)) != "null");
 
             return (supervisors, projectScanners);

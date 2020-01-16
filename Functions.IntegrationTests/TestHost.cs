@@ -4,11 +4,12 @@ using AutoFixture;
 using AutoFixture.AutoNSubstitute;
 using AzureFunctions.TestHelpers;
 using LogAnalytics.Client;
+using Microsoft.Azure.Cosmos.Table;
+using Microsoft.Azure.Storage.Queue;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.WindowsAzure.Storage;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
 using Xunit;
@@ -39,7 +40,7 @@ namespace Functions.IntegrationTests
                         .AddSingleton(fixture.Create<ILogAnalyticsClient>())
                         .AddSingleton(environMentConfig)
                         .AddSingleton(CloudStorageAccount.DevelopmentStorageAccount.CreateCloudTableClient())
-                        .AddSingleton(CloudStorageAccount.DevelopmentStorageAccount.CreateCloudQueueClient())))
+                        .AddSingleton(Microsoft.Azure.Storage.CloudStorageAccount.DevelopmentStorageAccount.CreateCloudQueueClient())))
                 .Build();
         }
 

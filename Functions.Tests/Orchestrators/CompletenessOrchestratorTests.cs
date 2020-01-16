@@ -7,7 +7,7 @@ using AzDoCompliancy.CustomStatus;
 using Functions.Activities;
 using Functions.Orchestrators;
 using Functions.Model;
-using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
 using Xunit;
@@ -29,7 +29,7 @@ namespace Functions.Tests.Orchestrators
         public async Task ShouldStartActivitiesForGettingOrchestratorsToAnalyze()
         {
             //Arrange
-            var orchestrationContext = Substitute.For<DurableOrchestrationContextBase>();
+            var orchestrationContext = Substitute.For<IDurableOrchestrationContext>();
             orchestrationContext
                 .CallActivityAsync<IList<Orchestrator>>(nameof(FilterSupervisorsActivity), 
                     Arg.Any<(IList<Orchestrator>, IList<string>)>())
@@ -64,7 +64,7 @@ namespace Functions.Tests.Orchestrators
         public async Task ShouldStartSubOrchestratorForEachAnalysis(int count)
         {
             //Arrange
-            var orchestrationContext = Substitute.For<DurableOrchestrationContextBase>();
+            var orchestrationContext = Substitute.For<IDurableOrchestrationContext>();
             orchestrationContext
                 .CallActivityAsync<IList<Orchestrator>>(nameof(FilterSupervisorsActivity), 
                     Arg.Any<(IList<Orchestrator>, IList<string>)>())
@@ -95,7 +95,7 @@ namespace Functions.Tests.Orchestrators
         public async Task ShouldStartDeleteActivityForEachCompletedSupervisor(int count)
         {
             //Arrange
-            var orchestrationContext = Substitute.For<DurableOrchestrationContextBase>();
+            var orchestrationContext = Substitute.For<IDurableOrchestrationContext>();
             orchestrationContext
                 .CallActivityAsync<(IList<Orchestrator>, IList<Orchestrator>)>(nameof(GetOrchestratorsToScanActivity), null)
                 .Returns((_fixture.CreateMany<Orchestrator>(1).ToList(), _fixture.CreateMany<Orchestrator>(1).ToList()));

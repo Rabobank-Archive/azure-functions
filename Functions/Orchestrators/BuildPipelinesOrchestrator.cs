@@ -7,6 +7,7 @@ using Functions.Helpers;
 using Functions.Model;
 using Functions.Starters;
 using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService.Response;
 using Task = System.Threading.Tasks.Task;
@@ -21,7 +22,7 @@ namespace Functions.Orchestrators
 
         [FunctionName(nameof(BuildPipelinesOrchestrator))]
         public async Task<IList<ProductionItem>> RunAsync(
-            [OrchestrationTrigger] DurableOrchestrationContextBase context)
+            [OrchestrationTrigger] IDurableOrchestrationContext context)
         {
             var (project, productionItems) = context.GetInput<(Project, List<ProductionItem>)>();
 
@@ -56,7 +57,7 @@ namespace Functions.Orchestrators
                 productionItems, project);
         }
 
-        private static Task<ItemExtensionData> StartScanActivityAsync(DurableOrchestrationContextBase context, 
+        private static Task<ItemExtensionData> StartScanActivityAsync(IDurableOrchestrationContext context, 
                 BuildDefinition b, Project project, IEnumerable<ProductionItem> productionItems) => 
             context.CallActivityWithRetryAsync<ItemExtensionData>(nameof(ScanBuildPipelinesActivity),
                 RetryHelper.ActivityRetryOptions, (project, b, LinkConfigurationItemHelper.GetCiIdentifiers(

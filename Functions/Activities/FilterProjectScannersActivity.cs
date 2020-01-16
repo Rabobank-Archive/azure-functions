@@ -4,6 +4,7 @@ using Functions.Model;
 using Functions.Helpers;
 using Microsoft.Azure.WebJobs;
 using System;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
 namespace Functions.Activities
 {

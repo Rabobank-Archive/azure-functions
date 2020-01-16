@@ -1,6 +1,6 @@
-﻿using Microsoft.Azure.WebJobs;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using System;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
 namespace Functions.Model
 {

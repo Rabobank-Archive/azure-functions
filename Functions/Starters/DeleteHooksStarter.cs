@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Functions.Orchestrators;
 using System;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
 namespace Functions.Starters
 {
@@ -14,7 +15,7 @@ namespace Functions.Starters
         [FunctionName(nameof(DeleteHooksStarter))]
         [NoAutomaticTrigger]
         public async Task RunAsync(string input,
-            [OrchestrationClient] DurableOrchestrationClientBase starter)
+            [DurableClient] IDurableOrchestrationClient starter)
         {
             if (starter == null)
                 throw new ArgumentNullException(nameof(starter));

@@ -6,7 +6,6 @@ using AutoFixture;
 using AutoFixture.AutoNSubstitute;
 using AzDoCompliancy.CustomStatus;
 using Functions.Activities;
-using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
@@ -41,9 +40,17 @@ namespace Functions.Tests.Activities
             instances[6].Name = "ProjectScanOrchestrator";
             instances[9].Name = "ProjectScanOrchestrator";
 
-            var client = Substitute.For<DurableOrchestrationClientBase>();
+            var condition = new OrchestrationStatusQueryCondition
+            {
+                CreatedTimeFrom = new DateTime(),
+                CreatedTimeTo = new DateTime(),
+                RuntimeStatus = new List<OrchestrationRuntimeStatus>(),
+                PageSize = 1000
+            };
+
+            var client = Substitute.For<IDurableOrchestrationClient>();
             client
-                .GetStatusAsync(new DateTime(), new DateTime(), new List<OrchestrationRuntimeStatus>(), 1000, string.Empty)
+                .GetStatusAsync(condition, default)
                 .ReturnsForAnyArgs(new OrchestrationStatusQueryResult
                 {
                     DurableOrchestrationState = instances,
@@ -72,9 +79,17 @@ namespace Functions.Tests.Activities
                 .With(d => d.Output, JToken.FromObject(new { }))
                 .Without(d => d.CustomStatus));
 
-            var client = Substitute.For<DurableOrchestrationClientBase>();
+            var condition = new OrchestrationStatusQueryCondition
+            {
+                CreatedTimeFrom = new DateTime(),
+                CreatedTimeTo = new DateTime(),
+                RuntimeStatus = new List<OrchestrationRuntimeStatus>(),
+                PageSize = 1000
+            };
+
+            var client = Substitute.For<IDurableOrchestrationClient>();
             client
-                .GetStatusAsync(new DateTime(), new DateTime(), new List<OrchestrationRuntimeStatus>(), 1000, string.Empty)
+                .GetStatusAsync(condition, default)
                 .ReturnsForAnyArgs(new OrchestrationStatusQueryResult
                 {
                     DurableOrchestrationState = _fixture.CreateMany<DurableOrchestrationStatus>(1).ToList(),

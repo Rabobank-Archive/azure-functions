@@ -5,6 +5,7 @@ using Functions.Activities;
 using Functions.Helpers;
 using Functions.Model;
 using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService.Response;
 using Task = System.Threading.Tasks.Task;
@@ -22,7 +23,7 @@ namespace Functions.Orchestrators
         };
 
         [FunctionName(nameof(ProjectScanOrchestrator))]
-        public async Task RunAsync([OrchestrationTrigger] DurableOrchestrationContextBase context)
+        public async Task RunAsync([OrchestrationTrigger] IDurableOrchestrationContext context)
         {
             if (context == null)
             {

@@ -6,7 +6,7 @@ using AutoFixture.AutoNSubstitute;
 using Functions.Activities;
 using Functions.Orchestrators;
 using Functions.Model;
-using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using NSubstitute;
 using Xunit;
 using Response = SecurePipelineScan.VstsService.Response;
@@ -33,7 +33,7 @@ namespace Functions.Tests.Orchestrators
             _fixture.Customize<DeploymentMethod>(x => x
                 .With(d => d.IsSoxApplication, true));
 
-            var orchestrationContext = Substitute.For<DurableOrchestrationContextBase>();
+            var orchestrationContext = Substitute.For<IDurableOrchestrationContext>();
             orchestrationContext
                 .CallActivityWithRetryAsync<IList<Response.Project>>(nameof(GetProjectsActivity),
                     _fixture.Create<RetryOptions>(), null)
@@ -59,7 +59,7 @@ namespace Functions.Tests.Orchestrators
             //Assert
             await orchestrationContext.Received()
                 .CallActivityWithRetryAsync<IList<Response.Project>>(nameof(GetProjectsActivity),
-                    Arg.Any<RetryOptions>(), Arg.Any<DurableActivityContextBase>());
+                    Arg.Any<RetryOptions>(), Arg.Any<IDurableActivityContext>());
             await orchestrationContext.Received(count)
                 .CallActivityWithRetryAsync<IList<ProductionItem>>(nameof(GetDeploymentMethodsActivity),
                     Arg.Any<RetryOptions>(), Arg.Any<string>());
@@ -80,7 +80,7 @@ namespace Functions.Tests.Orchestrators
             _fixture.Customize<DeploymentMethod>(x => x
                 .With(d => d.IsSoxApplication, false));
 
-            var orchestrationContext = Substitute.For<DurableOrchestrationContextBase>();
+            var orchestrationContext = Substitute.For<IDurableOrchestrationContext>();
             orchestrationContext
                 .CallActivityWithRetryAsync<IList<Response.Project>>(nameof(GetProjectsActivity),
                     _fixture.Create<RetryOptions>(), null)
@@ -97,7 +97,7 @@ namespace Functions.Tests.Orchestrators
             //Assert
             await orchestrationContext.Received()
                 .CallActivityWithRetryAsync<IList<Response.Project>>(nameof(GetProjectsActivity),
-                    Arg.Any<RetryOptions>(), Arg.Any<DurableActivityContextBase>());
+                    Arg.Any<RetryOptions>(), Arg.Any<IDurableActivityContext>());
             await orchestrationContext.Received()
                 .CallActivityWithRetryAsync<IList<ProductionItem>>(nameof(GetDeploymentMethodsActivity),
                     Arg.Any<RetryOptions>(), Arg.Any<string>());

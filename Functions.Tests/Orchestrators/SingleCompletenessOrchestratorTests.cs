@@ -8,7 +8,7 @@ using AzDoCompliancy.CustomStatus;
 using Functions.Activities;
 using Functions.Model;
 using Functions.Orchestrators;
-using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
 using Xunit;
@@ -31,7 +31,7 @@ namespace Functions.Tests.Orchestrators
         public async Task ShouldCallActivities()
         {
             // Arrange
-            var context = Substitute.For<DurableOrchestrationContextBase>();
+            var context = Substitute.For<IDurableOrchestrationContext>();
 
             _fixture.Customize<Orchestrator>(s => s
                 .With(d => d.CustomStatus, JToken.FromObject(JToken.FromObject(
@@ -69,7 +69,7 @@ namespace Functions.Tests.Orchestrators
         public async Task ShouldStartDeleteActivityForEachCompletedOrchestrator(int count)
         {
             //Arrange
-            var context = Substitute.For<DurableOrchestrationContextBase>();
+            var context = Substitute.For<IDurableOrchestrationContext>();
 
             _fixture.Customize<Orchestrator>(s => s
                 .With(d => d.RuntimeStatus, OrchestrationRuntimeStatus.Completed)

@@ -5,7 +5,7 @@ using AutoFixture;
 using AutoFixture.AutoNSubstitute;
 using Functions.Activities;
 using Functions.Orchestrators;
-using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using NSubstitute;
 using Xunit;
 
@@ -25,7 +25,7 @@ namespace Functions.Tests.Orchestrators
         public async Task ShouldStartActivities()
         {
             //Arrange
-            var orchestrationContext = Substitute.For<DurableOrchestrationContextBase>();
+            var orchestrationContext = Substitute.For<IDurableOrchestrationContext>();
             orchestrationContext
                 .CallActivityAsync<(IList<string>, IList<string>)>(nameof(GetOrchestratorsToPurgeActivity), null)
                 .Returns((_fixture.CreateMany<string>(1).ToList(), _fixture.CreateMany<string>(1).ToList()));
@@ -54,7 +54,7 @@ namespace Functions.Tests.Orchestrators
         public async Task ShouldStartDeleteActivityForEachOrchestrator(int count)
         {
             //Arrange
-            var orchestrationContext = Substitute.For<DurableOrchestrationContextBase>();
+            var orchestrationContext = Substitute.For<IDurableOrchestrationContext>();
             orchestrationContext
                 .CallActivityAsync<(IList<string>, IList<string>)>(nameof(GetOrchestratorsToPurgeActivity), null)
                 .Returns((_fixture.CreateMany<string>(count).ToList(), _fixture.CreateMany<string>(count).ToList()));
