@@ -1,10 +1,9 @@
 {
-  "version": "2.0",
+  "version": "3.0",
   "functionTimeout": "00:10:00",
   "extensions": {
     "durableTask": {
       "hubName": "AzureDevOpsCompliancyFunctionsV1"
     }
   }
-  //"functions": ["Status"]
 }
