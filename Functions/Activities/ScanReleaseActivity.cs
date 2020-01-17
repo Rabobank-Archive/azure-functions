@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using SecurePipelineScan.VstsService.Response;
 
 namespace Functions.Activities

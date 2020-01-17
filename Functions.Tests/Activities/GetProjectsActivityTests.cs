@@ -1,7 +1,7 @@
 using System.Linq;
 using AutoFixture;
 using Functions.Activities;
-using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Moq;
 using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Response;
@@ -26,7 +26,7 @@ namespace Functions.Tests.Activities
         public void ReturnsProjectsFromRequest(int projectCount) 
         {
             // Arrange
-            var context = new Mock<DurableActivityContextBase>();
+            var context = new Mock<IDurableActivityContext>();
             var client = new Mock<IVstsRestClient>();
             var projects = _fixture.CreateMany<Project>(projectCount).ToList();
             client.Setup(c => c.Get(It.IsAny<IEnumerableRequest<Project>>()))

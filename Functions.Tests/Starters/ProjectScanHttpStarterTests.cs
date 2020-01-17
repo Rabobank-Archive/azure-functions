@@ -1,7 +1,6 @@
 using AutoFixture;
 using Functions.Orchestrators;
 using Functions.Starters;
-using Microsoft.Azure.WebJobs;
 using Moq;
 using SecurePipelineScan.VstsService;
 using Shouldly;
@@ -11,6 +10,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Xunit;
 using Response = SecurePipelineScan.VstsService.Response;
 using SecurePipelineScan.Rules.Security;
@@ -33,10 +33,10 @@ namespace Functions.Tests.Starters
             var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
             var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object);
             var result = await function.RunAsync(request, "somecompany", "TAS", RuleScopes.GlobalPermissions,
-                new Mock<DurableOrchestrationClientBase>().Object);
+                new Mock<IDurableOrchestrationClient>().Object);
 
             result.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
-            result?.Dispose();
+            result.Dispose();
         }
 
         [Fact]
@@ -51,7 +51,7 @@ namespace Functions.Tests.Starters
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
 
-            var mock = new Mock<DurableOrchestrationClientBase>();
+            var mock = new Mock<IDurableOrchestrationClient>();
 
             var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
             client
@@ -64,7 +64,7 @@ namespace Functions.Tests.Starters
                 mock.Object);
 
             mock.Verify(x => x.WaitForCompletionOrCreateCheckStatusResponseAsync(request, It.IsAny<string>(), 
-                It.IsAny<TimeSpan>()));
+                It.IsAny<TimeSpan>(), TimeSpan.FromSeconds(1)));
             client.Verify();
             result?.Dispose();
         }
@@ -80,7 +80,7 @@ namespace Functions.Tests.Starters
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
 
-            var mock = new Mock<DurableOrchestrationClientBase>();
+            var mock = new Mock<IDurableOrchestrationClient>();
 
             var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
             client
@@ -94,7 +94,7 @@ namespace Functions.Tests.Starters
 
             result.StatusCode.ShouldBe(HttpStatusCode.NotFound);
             client.Verify();
-            result?.Dispose();
+            result.Dispose();
         }
 
         [Fact]
@@ -111,7 +111,7 @@ namespace Functions.Tests.Starters
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
 
-            var mock = new Mock<DurableOrchestrationClientBase>();
+            var mock = new Mock<IDurableOrchestrationClient>();
 
             var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
             client
@@ -122,7 +122,7 @@ namespace Functions.Tests.Starters
             var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object);
             await function.RunAsync(request, "somecompany", "TAS", RuleScopes.GlobalPermissions, mock.Object);
 
-            mock.Verify(x => x.StartNewAsync(nameof(ProjectScanOrchestrator),
+            mock.Verify(x => x.StartNewAsync<object>(nameof(ProjectScanOrchestrator),string.Empty,
                 It.Is<(Response.Project, string)>(t => t.Item1 == project && t.Item2 == RuleScopes.GlobalPermissions)));
         }
 
@@ -140,7 +140,7 @@ namespace Functions.Tests.Starters
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
 
-            var mock = new Mock<DurableOrchestrationClientBase>();
+            var mock = new Mock<IDurableOrchestrationClient>();
 
             var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
             client
@@ -151,7 +151,7 @@ namespace Functions.Tests.Starters
             var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object);
             await function.RunAsync(request, "somecompany", "TAS", RuleScopes.Repositories, mock.Object);
 
-            mock.Verify(x => x.StartNewAsync(nameof(ProjectScanOrchestrator),
+            mock.Verify(x => x.StartNewAsync<object>(nameof(ProjectScanOrchestrator),string.Empty,
                 It.Is<(Response.Project, string)>(t => t.Item1 == project && t.Item2 == RuleScopes.Repositories)));
         }
 
@@ -175,12 +175,12 @@ namespace Functions.Tests.Starters
                 .ReturnsAsync(project)
                 .Verifiable();
 
-            var mock = new Mock<DurableOrchestrationClientBase>();
+            var mock = new Mock<IDurableOrchestrationClient>();
 
             var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object);
             await function.RunAsync(request, "somecompany", "TAS", RuleScopes.BuildPipelines, mock.Object);
 
-            mock.Verify(x => x.StartNewAsync(nameof(ProjectScanOrchestrator),
+            mock.Verify(x => x.StartNewAsync<object>(nameof(ProjectScanOrchestrator), string.Empty,
                 It.Is<(Response.Project, string)>(t => t.Item1 == project && t.Item2 == RuleScopes.BuildPipelines)));
         }
 
@@ -204,11 +204,11 @@ namespace Functions.Tests.Starters
                 .ReturnsAsync(project)
                 .Verifiable();
 
-            var mock = new Mock<DurableOrchestrationClientBase>();
+            var mock = new Mock<IDurableOrchestrationClient>();
             var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object);
             await function.RunAsync(request, "somecompany", "TAS", RuleScopes.ReleasePipelines, mock.Object);
 
-            mock.Verify(x => x.StartNewAsync(nameof(ProjectScanOrchestrator),
+            mock.Verify(x => x.StartNewAsync<object>(nameof(ProjectScanOrchestrator),string.Empty,
                 It.Is<(Response.Project, string)>(t => t.Item1 == project && t.Item2 == RuleScopes.ReleasePipelines)));
         }
 

@@ -7,6 +7,7 @@ using System;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
 namespace Functions.Starters
 {
@@ -26,7 +27,7 @@ namespace Functions.Starters
         public async Task<HttpResponseMessage> RunAsync(
             [HttpTrigger(AuthorizationLevel.Anonymous, Route = "scan/{organization}/{projectName}/{scope}")]
             HttpRequestMessage request, string organization, string projectName, string scope,
-            [OrchestrationClient] DurableOrchestrationClientBase starter)
+            [DurableClient] IDurableOrchestrationClient starter)
         {
             if (starter == null)
                 throw new ArgumentNullException(nameof(starter));
@@ -38,7 +39,7 @@ namespace Functions.Starters
             if (project == null)
                 return new HttpResponseMessage(HttpStatusCode.NotFound);
 
-            var instanceId = await starter.StartNewAsync(nameof(ProjectScanOrchestrator), (project, scope));
+            var instanceId = await starter.StartNewAsync<object>(nameof(ProjectScanOrchestrator), (project, scope));
             return await starter.WaitForCompletionOrCreateCheckStatusResponseAsync(request, instanceId, 
                 TimeSpan.FromSeconds(TimeOut));
         }

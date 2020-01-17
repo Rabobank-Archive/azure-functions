@@ -1,5 +1,4 @@
 ﻿using Flurl.Http;
-using Microsoft.Azure.WebJobs;
 using Polly;
 using Polly.Retry;
 using SecurePipelineScan.VstsService;
@@ -7,6 +6,7 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
 namespace Functions.Helpers
 {

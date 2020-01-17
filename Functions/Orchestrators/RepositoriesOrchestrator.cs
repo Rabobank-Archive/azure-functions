@@ -7,6 +7,7 @@ using Functions.Helpers;
 using Functions.Model;
 using Functions.Starters;
 using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService.Response;
 using Task = System.Threading.Tasks.Task;
@@ -20,7 +21,7 @@ namespace Functions.Orchestrators
         public RepositoriesOrchestrator(EnvironmentConfig config) => _config = config;
 
         [FunctionName(nameof(RepositoriesOrchestrator))]
-        public async Task RunAsync([OrchestrationTrigger] DurableOrchestrationContextBase context)
+        public async Task RunAsync([OrchestrationTrigger] IDurableOrchestrationContext context)
         {
             var (project, productionItems) = context.GetInput<(Project, List<ProductionItem>)>();
 
@@ -53,7 +54,7 @@ namespace Functions.Orchestrators
                 (repositories: data, RuleScopes.Repositories));
         }
 
-        private static Task<ItemExtensionData> StartScanActivityAsync(DurableOrchestrationContextBase context,
+        private static Task<ItemExtensionData> StartScanActivityAsync(IDurableOrchestrationContext context,
                 Repository repository, IEnumerable<MinimumNumberOfReviewersPolicy> policies, Project project, 
                 IEnumerable<ProductionItem> productionItems) =>
             context.CallActivityWithRetryAsync<ItemExtensionData>(nameof(ScanRepositoriesActivity),

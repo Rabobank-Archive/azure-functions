@@ -1,6 +1,5 @@
 ﻿using System;
 using Functions.Orchestrators;
-using Microsoft.Azure.WebJobs;
 using Moq;
 using Response = SecurePipelineScan.VstsService.Response;
 using System.Collections.Generic;
@@ -9,6 +8,7 @@ using System.Threading.Tasks;
 using Xunit;
 using AzDoCompliancy.CustomStatus;
 using Functions.Tests.Helpers;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
 namespace Functions.Tests.Orchestrators
 {
@@ -22,7 +22,7 @@ namespace Functions.Tests.Orchestrators
         {
             //Arrange       
             var projects = ProjectsTestHelper.CreateMultipleProjectsResponse(count).ToList();
-            var orchestrationClientMock = new Mock<DurableOrchestrationContextBase>();
+            var orchestrationClientMock = new Mock<IDurableOrchestrationContext>();
             orchestrationClientMock.Setup(
                 x => x.GetInput<List<Response.Project>>()).Returns(projects);
 
@@ -32,7 +32,7 @@ namespace Functions.Tests.Orchestrators
 
             //Assert
             orchestrationClientMock.Verify(
-                x => x.CallSubOrchestratorAsync(nameof(ProjectScanOrchestrator), It.IsAny<string>(), It.IsAny<object>()),
+                x => x.CallSubOrchestratorAsync<object>(nameof(ProjectScanOrchestrator), It.IsAny<string>(), It.IsAny<object>()),
                 Times.Exactly(count));
         }
 
@@ -44,7 +44,7 @@ namespace Functions.Tests.Orchestrators
         {
             //Arrange       
             var projects = ProjectsTestHelper.CreateMultipleProjectsResponse(count).ToList();
-            var orchestrationClientMock = new Mock<DurableOrchestrationContextBase>();
+            var orchestrationClientMock = new Mock<IDurableOrchestrationContext>();
             orchestrationClientMock.Setup(
                 x => x.GetInput<List<Response.Project>>()).Returns(projects);
 
@@ -62,7 +62,7 @@ namespace Functions.Tests.Orchestrators
         {
             //Arrange       
             var projects = ProjectsTestHelper.CreateMultipleProjectsResponse(1).ToList();
-            var orchestrationClientMock = new Mock<DurableOrchestrationContextBase>();
+            var orchestrationClientMock = new Mock<IDurableOrchestrationContext>();
             orchestrationClientMock.Setup(
                 x => x.GetInput<List<Response.Project>>()).Returns(projects);
 
@@ -72,7 +72,7 @@ namespace Functions.Tests.Orchestrators
 
             //Assert
             orchestrationClientMock.Verify(
-                x => x.CallSubOrchestratorAsync(nameof(ProjectScanOrchestrator),
+                x => x.CallSubOrchestratorAsync<object>(nameof(ProjectScanOrchestrator),
                     It.Is<string>(i => i.Contains(projects.First().Id)), It.IsAny<object>()));
         }
         
@@ -81,7 +81,7 @@ namespace Functions.Tests.Orchestrators
         {
             //Arrange       
             var projects = ProjectsTestHelper.CreateMultipleProjectsResponse(1).ToList();
-            var orchestrationClientMock = new Mock<DurableOrchestrationContextBase>();
+            var orchestrationClientMock = new Mock<IDurableOrchestrationContext>();
             orchestrationClientMock.Setup(
                 x => x.GetInput<List<Response.Project>>()).Returns(projects);
             orchestrationClientMock.SetupGet(x => x.InstanceId).Returns(Guid.NewGuid().ToString());
@@ -92,7 +92,7 @@ namespace Functions.Tests.Orchestrators
 
             //Assert
             orchestrationClientMock.Verify(
-                x => x.CallSubOrchestratorAsync(nameof(ProjectScanOrchestrator),
+                x => x.CallSubOrchestratorAsync<object>(nameof(ProjectScanOrchestrator),
                     It.Is<string>(i => i.Contains(orchestrationClientMock.Object.InstanceId)), It.IsAny<object>()));
         }
     }

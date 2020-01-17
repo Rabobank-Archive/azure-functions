@@ -3,6 +3,7 @@ using Microsoft.Azure.WebJobs;
 using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Requests;
 using System.Threading.Tasks;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
 namespace Functions.Activities
 {
@@ -19,7 +20,7 @@ namespace Functions.Activities
         }
 
         [FunctionName(nameof(UploadExtensionDataActivity))]
-        public async Task RunAsync([ActivityTrigger] DurableActivityContext input)
+        public async Task RunAsync([ActivityTrigger] IDurableActivityContext input)
         {
             var (data, scope) = input.GetInput<(ItemsExtensionData, string)>();
             await _azuredo.PutAsync(ExtensionManagement.ExtensionData<ExtensionDataReports>(

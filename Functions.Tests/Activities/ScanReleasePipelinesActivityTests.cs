@@ -196,7 +196,7 @@ namespace Functions.Tests.Activities
 
             var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () =>
                 await activity.RunAsync((null, null, null)));
-            exception.Message.ShouldContainWithoutWhitespace("Value cannot be null. Parameter name: input");
+            exception.Message.ShouldContainWithoutWhitespace("Value cannot be null. (Parameter 'input')");
         }
 
         [Fact]
@@ -222,7 +222,7 @@ namespace Functions.Tests.Activities
 
             var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () =>
                 await activity.RunAsync((null, releasePipeline, productionItems)));
-            exception.Message.ShouldContainWithoutWhitespace("Value cannot be null. Parameter name: input");
+            exception.Message.ShouldContainWithoutWhitespace("Value cannot be null. (Parameter 'input')");
         }
 
         [Fact]
@@ -248,7 +248,7 @@ namespace Functions.Tests.Activities
 
             var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () =>
                 await activity.RunAsync((project, null, productionItems)));
-            exception.Message.ShouldContainWithoutWhitespace("Value cannot be null. Parameter name: input");
+            exception.Message.ShouldContainWithoutWhitespace("Value cannot be null. (Parameter 'input')");
         }
 
         private IRulesProvider CreateRulesProvider(ISpecimenBuilder fixture, int numRules,

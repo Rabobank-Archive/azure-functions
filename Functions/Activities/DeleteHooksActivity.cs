@@ -4,6 +4,7 @@ using SecurePipelineScan.VstsService.Requests;
 using Response = SecurePipelineScan.VstsService.Response;
 using System.Threading.Tasks;
 using System;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
 namespace Functions.Activities
 {
@@ -14,7 +15,7 @@ namespace Functions.Activities
         public DeleteHooksActivity(IVstsRestClient azuredo) => _azuredo = azuredo;
 
         [FunctionName(nameof(DeleteHooksActivity))]
-        public async Task RunAsync([ActivityTrigger] DurableActivityContextBase context)
+        public async Task RunAsync([ActivityTrigger] IDurableActivityContext context)
         {
             if (context == null)
                 throw new ArgumentNullException(nameof(context));

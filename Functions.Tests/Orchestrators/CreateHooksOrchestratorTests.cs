@@ -1,5 +1,4 @@
 ﻿using Functions.Orchestrators;
-using Microsoft.Azure.WebJobs;
 using Moq;
 using Response = SecurePipelineScan.VstsService.Response;
 using System.Collections.Generic;
@@ -8,6 +7,7 @@ using System.Threading.Tasks;
 using AutoFixture;
 using Xunit;
 using Functions.Activities;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
 namespace Functions.Tests.Orchestrators
 {
@@ -29,7 +29,7 @@ namespace Functions.Tests.Orchestrators
             //Arrange       
             var projects = _fixture.CreateMany<Response.Project>(projectCount).ToList();
 
-            var orchestrationClientMock = new Mock<DurableOrchestrationContextBase>();
+            var orchestrationClientMock = new Mock<IDurableOrchestrationContext>();
             
             orchestrationClientMock.Setup(
                 x => x.CallActivityWithRetryAsync<IList<Response.Project>>(nameof(GetProjectsActivity),
@@ -45,9 +45,9 @@ namespace Functions.Tests.Orchestrators
             orchestrationClientMock.Verify(x =>
                 x.CallActivityWithRetryAsync<IList<Response.Hook>>(nameof(GetHooksActivity), It.IsAny<RetryOptions>(),
                     null));
-            orchestrationClientMock.Verify(x => x.CallActivityAsync(nameof(CreateStorageQueuesActivity), null));
+            orchestrationClientMock.Verify(x => x.CallActivityAsync<object>(nameof(CreateStorageQueuesActivity), null));
             orchestrationClientMock.Verify(
-                x => x.CallActivityWithRetryAsync(nameof(CreateHooksActivity),
+                x => x.CallActivityWithRetryAsync<object>(nameof(CreateHooksActivity),
                     It.IsAny<RetryOptions>(), It.IsAny<(IList<Response.Hook>, Response.Project)>()),
                 Times.Exactly(projectCount));
         }
