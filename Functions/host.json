@@ -1,5 +1,5 @@
 {
-  "version": "3.0",
+  "version": "2.0",
   "functionTimeout": "00:10:00",
   "extensions": {
     "durableTask": {
