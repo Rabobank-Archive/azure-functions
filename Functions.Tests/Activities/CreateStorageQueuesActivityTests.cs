@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using AutoFixture;
 using Functions.Activities;
 using Functions.Model;
+using Microsoft.Azure.Storage.Auth;
 using Microsoft.Azure.Storage.Queue;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Moq;
@@ -19,8 +20,8 @@ namespace Functions.Tests.Activities
             var fixture = new Fixture();
             var context = new Mock<IDurableActivityContext>();
 
-            var cloudQueueClient = new Mock<CloudQueueClient>(fixture.Create<Uri>(),
-                fixture.Create<Microsoft.Azure.Storage.Auth.StorageCredentials>(), null);
+            var cloudQueueClient =
+                new Mock<CloudQueueClient>(fixture.Create<Uri>(), fixture.Create<StorageCredentials>(), null);
             var buildCompletedQueue = new Mock<CloudQueue>(fixture.Create<Uri>());
             var releaseDeploymentCompletedQueue = new Mock<CloudQueue>(fixture.Create<Uri>());
 
