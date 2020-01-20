@@ -1,6 +1,6 @@
 using Functions.Orchestrators;
 using Functions.Starters;
-using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Moq;
 using Xunit;
 using Task = System.Threading.Tasks.Task;
@@ -13,7 +13,7 @@ namespace Functions.Tests.Starters
         public async Task RunShouldCallOrchestratorExactlyOnce()
         {
             //Arrange       
-            var orchestrationClientMock = new Mock<DurableOrchestrationClientBase>();
+            var orchestrationClientMock = new Mock<IDurableOrchestrationClient>();
 
             //Act
             var fun = new CreateHooksStarter();
@@ -21,7 +21,7 @@ namespace Functions.Tests.Starters
 
             //Assert
             orchestrationClientMock.Verify(
-                x => x.StartNewAsync(nameof(CreateHooksOrchestrator), null),
+                x => x.StartNewAsync<object>(nameof(CreateHooksOrchestrator), null, null),
                 Times.Once());
         }
     }

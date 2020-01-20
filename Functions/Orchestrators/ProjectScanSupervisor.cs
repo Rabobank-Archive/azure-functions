@@ -6,6 +6,7 @@ using System.Linq;
 using Functions.Helpers;
 using Task = System.Threading.Tasks.Task;
 using System.Threading;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
 namespace Functions.Orchestrators
 {
@@ -14,7 +15,7 @@ namespace Functions.Orchestrators
         private const int TimerInterval = 25; 
 
         [FunctionName(nameof(ProjectScanSupervisor))]
-        public async Task RunAsync([OrchestrationTrigger] DurableOrchestrationContextBase context)
+        public async Task RunAsync([OrchestrationTrigger] IDurableOrchestrationContext context)
         {
             var projects = context.GetInput<List<Project>>();
             context.SetCustomStatus(new SupervisorOrchestrationStatus { TotalProjectCount = projects.Count });
@@ -24,7 +25,7 @@ namespace Functions.Orchestrators
         }
 
         private static async Task StartProjectScanOrchestratorWithTimerAsync(
-            DurableOrchestrationContextBase context, Project project, int index)
+            IDurableOrchestrationContext context, Project project, int index)
         {
             await context.CreateTimer(context.CurrentUtcDateTime.AddSeconds(index * TimerInterval), CancellationToken.None);
             await context.CallSubOrchestratorAsync(nameof(ProjectScanOrchestrator),

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Functions.Helpers;
 using Functions.Starters;
 using System.Collections.Generic;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using SecurePipelineScan.Rules.Security;
 using Response = SecurePipelineScan.VstsService.Response;
 
@@ -18,7 +19,7 @@ namespace Functions.Orchestrators
         public GlobalPermissionsOrchestrator(EnvironmentConfig config) => _config = config;
 
         [FunctionName(nameof(GlobalPermissionsOrchestrator))]
-        public async Task RunAsync([OrchestrationTrigger]DurableOrchestrationContextBase context)
+        public async Task RunAsync([OrchestrationTrigger]IDurableOrchestrationContext context)
         {
             var (project, productionItems) = context.GetInput<(Response.Project, List<ProductionItem>)>();
 

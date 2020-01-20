@@ -9,7 +9,8 @@ using SecurePipelineScan.VstsService;
 using System;
 using System.Net.Http;
 using LogAnalytics.Client;
-using Microsoft.WindowsAzure.Storage;
+using Microsoft.Azure.Cosmos.Table;
+using Microsoft.Azure.Storage.Queue;
 
 [assembly: WebJobsStartup(typeof(Functions.Startup))]
 
@@ -47,11 +48,12 @@ namespace Functions
 
             var extensionName = GetEnvironmentVariable("extensionName");
             var functionAppUrl = GetEnvironmentVariable("WEBSITE_HOSTNAME");
-
+            //Microsoft.Azure.Storage.Queue
             // This only works because we use the account name and account key in the connection string.
-            var storage = CloudStorageAccount.Parse(GetEnvironmentVariable("eventQueueStorageConnectionString"));
 
-            services.AddSingleton(storage.CreateCloudTableClient());
+            var connectionString = GetEnvironmentVariable("eventQueueStorageConnectionString");
+            services.AddSingleton(CloudStorageAccount.Parse(connectionString).CreateCloudTableClient());
+            var storage = Microsoft.Azure.Storage.CloudStorageAccount.Parse(connectionString);
             services.AddSingleton(storage.CreateCloudQueueClient());
 
             var config = new EnvironmentConfig

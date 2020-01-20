@@ -1,11 +1,10 @@
-﻿using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Table;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Xunit;
 using Shouldly;
 using Functions.Model;
 using Functions.Activities;
 using AutoFixture;
+using Microsoft.Azure.Cosmos.Table;
 using Response = SecurePipelineScan.VstsService.Response;
 
 namespace Functions.Tests.Activities

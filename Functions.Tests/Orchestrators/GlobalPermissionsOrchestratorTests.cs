@@ -2,7 +2,6 @@ using AutoFixture;
 using Functions.Activities;
 using Functions.Model;
 using Functions.Orchestrators;
-using Microsoft.Azure.WebJobs;
 using Moq;
 using System.Threading.Tasks;
 using AzDoCompliancy.CustomStatus;
@@ -10,6 +9,7 @@ using Xunit;
 using System;
 using SecurePipelineScan.Rules.Security;
 using System.Collections.Generic;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Response = SecurePipelineScan.VstsService.Response;
 
 namespace Functions.Tests.Orchestrators
@@ -24,7 +24,7 @@ namespace Functions.Tests.Orchestrators
             var mocks = new MockRepository(MockBehavior.Strict);
             const string instanceId = "supervisorId:projectId:scope";
 
-            var starter = mocks.Create<DurableOrchestrationContextBase>();
+            var starter = mocks.Create<IDurableOrchestrationContext>();
             starter
                 .Setup(x => x.GetInput<(Response.Project, List<ProductionItem>)>())
                 .Returns(fixture.Create<(Response.Project, List<ProductionItem>)>());
@@ -49,15 +49,15 @@ namespace Functions.Tests.Orchestrators
                 .Verifiable();
 
             starter
-                .Setup(x => x.CallActivityAsync(nameof(UploadExtensionDataActivity),
+                .Setup(x => x.CallActivityAsync<object>(nameof(UploadExtensionDataActivity),
                     It.Is<(ItemsExtensionData data, string scope)>(d =>
                     d.scope == RuleScopes.GlobalPermissions)))
-                .Returns(Task.CompletedTask);
+                .Returns(Task.FromResult<object>(null));
 
             starter
-                .Setup(x => x.CallActivityAsync(nameof(UploadPreventiveRuleLogsActivity),
+                .Setup(x => x.CallActivityAsync<object>(nameof(UploadPreventiveRuleLogsActivity),
                     It.IsAny<IEnumerable<PreventiveRuleLogItem>>()))
-                .Returns(Task.CompletedTask);
+                .Returns(Task.FromResult<object>(null));
 
             //Act
             var function = new GlobalPermissionsOrchestrator(fixture.Create<EnvironmentConfig>());

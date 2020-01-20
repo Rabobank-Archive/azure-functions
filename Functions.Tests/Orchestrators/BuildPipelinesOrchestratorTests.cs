@@ -6,7 +6,7 @@ using AzDoCompliancy.CustomStatus;
 using Functions.Activities;
 using Functions.Model;
 using Functions.Orchestrators;
-using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Moq;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService.Response;
@@ -24,7 +24,7 @@ namespace Functions.Tests.Orchestrators
             var fixture = new Fixture();
             var mocks = new MockRepository(MockBehavior.Strict);
 
-            var starter = mocks.Create<DurableOrchestrationContextBase>();
+            var starter = mocks.Create<IDurableOrchestrationContext>();
             starter
                 .Setup(x => x.GetInput<(Project, List<ProductionItem>)>())
                 .Returns(fixture.Create<(Project, List<ProductionItem>)>());
@@ -55,15 +55,15 @@ namespace Functions.Tests.Orchestrators
                 .Setup(x => x.CurrentUtcDateTime).Returns(new DateTime());
                 
             starter
-                .Setup(x => x.CallActivityAsync(nameof(UploadExtensionDataActivity),
+                .Setup(x => x.CallActivityAsync<object>(nameof(UploadExtensionDataActivity),
                     It.Is<(ItemsExtensionData data, string scope)>(t => 
                     t.scope == RuleScopes.BuildPipelines)))
-                .Returns(Task.CompletedTask);
+                .Returns(Task.FromResult<object>(null));
 
             starter
-                .Setup(x => x.CallActivityAsync(nameof(UploadPreventiveRuleLogsActivity),
+                .Setup(x => x.CallActivityAsync<object>(nameof(UploadPreventiveRuleLogsActivity),
                     It.IsAny<IEnumerable<PreventiveRuleLogItem>>()))
-                .Returns(Task.CompletedTask);
+                .Returns(Task.FromResult<object>(null));
 
             var environmentConfig = fixture.Create<EnvironmentConfig>();
 

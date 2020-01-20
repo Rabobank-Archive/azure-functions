@@ -7,6 +7,7 @@ using AzDoCompliancy.CustomStatus;
 using Functions.Helpers;
 using System;
 using System.Collections.Generic;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
 namespace Functions.Activities
 {

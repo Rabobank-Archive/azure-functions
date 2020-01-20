@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Functions.Model;
 using LogAnalytics.Client;
 using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Microsoft.Extensions.Logging;
 
 namespace Functions.Activities

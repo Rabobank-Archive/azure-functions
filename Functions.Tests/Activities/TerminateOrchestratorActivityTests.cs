@@ -1,8 +1,8 @@
 ﻿using System.Threading.Tasks;
-using Microsoft.Azure.WebJobs;
 using NSubstitute;
 using Xunit;
 using Functions.Activities;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
 namespace Functions.Tests.Activities
 {
@@ -12,7 +12,7 @@ namespace Functions.Tests.Activities
         public async Task ShouldSendTerminateCall()
         {
             //Arrange
-            var client = Substitute.For<DurableOrchestrationClientBase>();
+            var client = Substitute.For<IDurableOrchestrationClient>();
 
             //Act
             var func = new TerminateOrchestratorActivity();

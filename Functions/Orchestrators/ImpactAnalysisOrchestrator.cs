@@ -6,6 +6,7 @@ using Functions.Activities;
 using Functions.Helpers;
 using Functions.Model;
 using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Response = SecurePipelineScan.VstsService.Response;
 
 namespace Functions.Orchestrators
@@ -14,7 +15,7 @@ namespace Functions.Orchestrators
     {
         [FunctionName(nameof(ImpactAnalysisOrchestrator))]
         public async Task RunAsync(
-            [OrchestrationTrigger] DurableOrchestrationContextBase context)
+            [OrchestrationTrigger] IDurableOrchestrationContext context)
         {
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
@@ -26,7 +27,7 @@ namespace Functions.Orchestrators
                 .Select(async p => await EvaluateProjectAsync(context, p)));
         }
 
-        private static async Task EvaluateProjectAsync(DurableOrchestrationContextBase context,
+        private static async Task EvaluateProjectAsync(IDurableOrchestrationContext context,
             Response.Project project)
         {
             var productionItems = await context.CallActivityWithRetryAsync<IList<ProductionItem>>(
@@ -39,7 +40,7 @@ namespace Functions.Orchestrators
         }
 
         private static async Task EvaluateReleasePipelineAsync(
-            DurableOrchestrationContextBase context, Response.Project project, 
+            IDurableOrchestrationContext context, Response.Project project, 
             string releasePipelineId, IEnumerable<DeploymentMethod> deploymentMethods)
         {
             var releases = await context.CallActivityWithRetryAsync<IList<Response.Release>>(
@@ -51,7 +52,7 @@ namespace Functions.Orchestrators
         }
 
         private static async Task EvaluateReleaseAsync(
-            DurableOrchestrationContextBase context, string projectName, Response.Release release, 
+            IDurableOrchestrationContext context, string projectName, Response.Release release, 
             string releasePipelineId, IEnumerable<DeploymentMethod> deploymentMethods)
         {
             var approved = await context.CallActivityAsync<bool>(nameof(ScanReleaseActivity), release);

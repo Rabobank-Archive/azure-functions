@@ -1,6 +1,6 @@
 using AutoFixture;
 using Functions.Activities;
-using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Moq;
 using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Response;
@@ -20,7 +20,7 @@ namespace Functions.Tests.Activities
         {
             // Arrange
             var client = new Mock<IVstsRestClient>();
-            var context = new Mock<DurableActivityContextBase>();
+            var context = new Mock<IDurableActivityContext>();
             var hook = _fixture.Create<Hook>();
             context.Setup(c => c.GetInput<Hook>()).Returns(hook);
             

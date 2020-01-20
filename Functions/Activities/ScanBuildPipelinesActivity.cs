@@ -4,9 +4,9 @@ using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
 using Response = SecurePipelineScan.VstsService.Response;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
 namespace Functions.Activities
 {

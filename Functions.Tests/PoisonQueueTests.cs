@@ -1,10 +1,10 @@
 using Microsoft.Extensions.Logging;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Queue;
 using Moq;
 using Shouldly;
 using System;
 using System.Threading.Tasks;
+using Microsoft.Azure.Storage;
+using Microsoft.Azure.Storage.Queue;
 using Xunit;
 
 namespace Functions.Tests

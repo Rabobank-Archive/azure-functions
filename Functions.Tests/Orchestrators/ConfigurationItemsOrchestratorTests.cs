@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Functions.Activities;
 using Functions.Model;
 using Functions.Orchestrators;
-using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Moq;
 using Xunit;
 
@@ -15,7 +15,7 @@ namespace Functions.Tests.Orchestrators
         public async Task RunAsyncShouldCallGetConfigurationItemsFromTableStorageActivityOnce()
         {
             //Arrange
-            var context = new Mock<DurableOrchestrationContextBase>();
+            var context = new Mock<IDurableOrchestrationContext>();
 
             //Act
             var orchestration = new ConfigurationItemsOrchestrator();
@@ -31,7 +31,7 @@ namespace Functions.Tests.Orchestrators
         public async Task RunAsyncShouldCallLogAnalyticsConfigurationItemsUploadActivityOnce()
         {
             //Arrange
-            var context = new Mock<DurableOrchestrationContextBase>();
+            var context = new Mock<IDurableOrchestrationContext>();
 
             //Act
             var orchestration = new ConfigurationItemsOrchestrator();
@@ -39,7 +39,7 @@ namespace Functions.Tests.Orchestrators
 
             //Assert
             context.Verify(
-                x => x.CallActivityAsync(nameof(UploadConfigurationItemLogsActivity),
+                x => x.CallActivityAsync<object>(nameof(UploadConfigurationItemLogsActivity),
                     It.IsAny<List<ConfigurationItem>>()), Times.Once);
         }
     }

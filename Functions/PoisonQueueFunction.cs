@@ -3,9 +3,9 @@ using System.Net;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
-using Microsoft.WindowsAzure.Storage.Queue;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Azure.Storage.Queue;
 using Newtonsoft.Json;
 
 namespace Functions

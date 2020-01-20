@@ -4,7 +4,7 @@ using AutoFixture.AutoNSubstitute;
 using Functions.Activities;
 using LogAnalytics.Client;
 using LogAnalytics.Client.Response;
-using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using NSubstitute;
 using Shouldly;
 using Xunit;
@@ -25,7 +25,7 @@ namespace Functions.Tests.Activities
         public async Task ShouldQueryLogAnalytics()
         {
             // Arrange
-            var context = Substitute.For<DurableActivityContextBase>();
+            var context = Substitute.For<IDurableActivityContext>();
             var response = _fixture.Create<LogAnalyticsQueryResponse>();
             var client = Substitute.For<ILogAnalyticsClient>();
             client.QueryAsync("").ReturnsForAnyArgs(response);
@@ -57,7 +57,7 @@ namespace Functions.Tests.Activities
 
             // Act
             var fun = new GetScannedSupervisorsActivity(client);
-            var result = await fun.RunAsync(Substitute.For<DurableActivityContextBase>());
+            var result = await fun.RunAsync(Substitute.For<IDurableActivityContext>());
 
             // Assert
             result.Count.ShouldBe(4);
@@ -67,7 +67,7 @@ namespace Functions.Tests.Activities
         public async Task ShouldReturnEmptyListWhenLogDoesNotExist()
         {
             // Arrange
-            var context = Substitute.For<DurableActivityContextBase>();
+            var context = Substitute.For<IDurableActivityContext>();
             var client = Substitute.For<ILogAnalyticsClient>();
             client.QueryAsync("").ReturnsForAnyArgs((LogAnalyticsQueryResponse)null);
 

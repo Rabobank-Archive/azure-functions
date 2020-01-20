@@ -1,5 +1,4 @@
 ﻿using Functions.Orchestrators;
-using Microsoft.Azure.WebJobs;
 using Moq;
 using Response = SecurePipelineScan.VstsService.Response;
 using System.Collections.Generic;
@@ -8,6 +7,7 @@ using System.Threading.Tasks;
 using AutoFixture;
 using Xunit;
 using Functions.Activities;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
 namespace Functions.Tests.Orchestrators
 {
@@ -24,7 +24,7 @@ namespace Functions.Tests.Orchestrators
         public async Task RunShouldCallGetHooksExactlyOnce()
         {
             //Arrange
-            var context = new Mock<DurableOrchestrationContextBase>();
+            var context = new Mock<IDurableOrchestrationContext>();
             context.Setup(x =>
                     x.CallActivityWithRetryAsync<IList<Response.Hook>>(nameof(GetHooksActivity),
                         It.IsAny<RetryOptions>(), null))
@@ -45,7 +45,7 @@ namespace Functions.Tests.Orchestrators
         {
             //Arrange
             var accountName = _fixture.Create<string>();
-            var context = new Mock<DurableOrchestrationContextBase>();
+            var context = new Mock<IDurableOrchestrationContext>();
             context
                 .Setup(x => x.GetInput<string>())
                 .Returns(accountName);
@@ -61,8 +61,10 @@ namespace Functions.Tests.Orchestrators
             };
 
             context.Setup(x =>
-                    x.CallActivityWithRetryAsync<IList<Response.Hook>>(nameof(GetHooksActivity),
-                        It.IsAny<RetryOptions>(), null))
+                    x.CallActivityWithRetryAsync<IList<Response.Hook>>(
+                        nameof(GetHooksActivity),
+                        It.IsAny<RetryOptions>(),
+                        null))
                 .Returns(Task.FromResult((IList<Response.Hook>)hooks));
 
             //Act
@@ -71,7 +73,10 @@ namespace Functions.Tests.Orchestrators
 
             //Assert
             context.Verify(
-                x => x.CallActivityWithRetryAsync(nameof(DeleteHooksActivity), It.IsAny<RetryOptions>(), It.IsAny<Response.Hook>()),
+                x => x.CallActivityWithRetryAsync<object>(
+                    nameof(DeleteHooksActivity),
+                    It.IsAny<RetryOptions>(),
+                    It.IsAny<Response.Hook>()),
                 Times.Exactly(4));
         }
     }

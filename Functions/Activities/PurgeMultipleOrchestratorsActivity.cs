@@ -3,14 +3,15 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using DurableTask.Core;
 using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
 namespace Functions.Activities
 {
     public class PurgeMultipleOrchestratorsActivity
     {
         [FunctionName(nameof(PurgeMultipleOrchestratorsActivity))]
-        public async Task RunAsync([ActivityTrigger] DurableActivityContextBase context,
-            [OrchestrationClient] DurableOrchestrationClientBase client)
+        public async Task RunAsync([ActivityTrigger] IDurableActivityContext context,
+            [DurableClient] IDurableOrchestrationClient client)
         {
             if (client == null)
                 throw new ArgumentNullException(nameof(client));

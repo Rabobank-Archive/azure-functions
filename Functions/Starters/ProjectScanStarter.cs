@@ -5,6 +5,7 @@ using SecurePipelineScan.VstsService.Requests;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
 namespace Functions.Starters
 {
@@ -17,7 +18,7 @@ namespace Functions.Starters
         [FunctionName(nameof(ProjectScanStarter))]
         public async Task RunAsync(
             [TimerTrigger("0 0 20 * * *", RunOnStartup=false)] TimerInfo timerInfo,
-            [OrchestrationClient] DurableOrchestrationClientBase orchestrationClientBase)
+            [DurableClient] IDurableOrchestrationClient orchestrationClientBase)
         {
             if (orchestrationClientBase == null)
                 throw new ArgumentNullException(nameof(orchestrationClientBase));
