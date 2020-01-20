@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Microsoft.WindowsAzure.Storage;
 using Xunit;
 using Response = SecurePipelineScan.VstsService.Response;
+using Newtonsoft.Json;
 
 namespace Functions.Tests
 {
@@ -45,8 +46,9 @@ namespace Functions.Tests
                 .Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Response.PermissionsProjectId>>()))
                 .Returns(Task.FromResult(fixture.Create<Response.PermissionsProjectId>()));
             var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
-            var config = new EnvironmentConfig {Organization = "somecompany" };
+            var config = new EnvironmentConfig { Organization = "somecompany" };
 
+            var json = JsonConvert.SerializeObject(new { ciIdentifier = "CI123444" });
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
 
@@ -81,7 +83,7 @@ namespace Functions.Tests
             var ruleProvider = new Mock<IRulesProvider>();
             ruleProvider
                 .Setup(x => x.RepositoryRules(It.IsAny<IVstsRestClient>()))
-                .Returns(new[] {rule.Object});
+                .Returns(new[] { rule.Object });
 
             var tokenizer = new Mock<ITokenizer>();
             tokenizer
@@ -93,7 +95,7 @@ namespace Functions.Tests
                 .Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Response.PermissionsProjectId>>()))
                 .Returns(Task.FromResult(fixture.Create<Response.PermissionsProjectId>()));
 
-            var config = new EnvironmentConfig {Organization = "somecompany"};
+            var config = new EnvironmentConfig { Organization = "somecompany" };
             var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
 
             var request = new HttpRequestMessage();
@@ -107,6 +109,56 @@ namespace Functions.Tests
                 RuleScopes.Repositories,
                 rule.Object.GetType().Name,
                 "repository-id")).ShouldBeOfType<OkResult>();
+
+            rule.Verify();
+        }
+
+        [Fact]
+        public async Task CanPassPostDataToRule()
+        {
+            var fixture = new Fixture();
+            ManageProjectPropertiesPermission(fixture);
+
+            // TODO verify data is passed to rule
+            var rule = new Mock<IProjectRule>(MockBehavior.Strict);
+            rule
+                .As<IProjectReconcile>()
+                .Setup(x => x.ReconcileAsync("TAS"))
+                .Returns(Task.CompletedTask)
+                .Verifiable();
+
+            var ruleProvider = new Mock<IRulesProvider>();
+            ruleProvider
+                .Setup(x => x.GlobalPermissions(It.IsAny<IVstsRestClient>()))
+                .Returns(new[] { rule.Object });
+
+            var tokenizer = new Mock<ITokenizer>();
+            tokenizer
+                .Setup(x => x.Principal(It.IsAny<string>()))
+                .Returns(PrincipalWithClaims());
+
+            var vstsClient = new Mock<IVstsRestClient>();
+            vstsClient
+                .Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Response.PermissionsProjectId>>()))
+                .Returns(Task.FromResult(fixture.Create<Response.PermissionsProjectId>()));
+            var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
+            var config = new EnvironmentConfig { Organization = "somecompany" };
+
+            var json = JsonConvert.SerializeObject(new { ciIdentifier = "CI123444" });
+            var request = new HttpRequestMessage();
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
+            request.Content = new StringContent(
+                    json,
+                    System.Text.Encoding.UTF8,
+                    "application/json"
+                    );
+
+            var function = new ReconcileFunction(config, tableClient, vstsClient.Object, ruleProvider.Object, tokenizer.Object);
+            (await function.ReconcileAsync(request,
+                "somecompany",
+                "TAS",
+                RuleScopes.GlobalPermissions,
+                rule.Object.GetType().Name)).ShouldBeOfType<OkResult>();
 
             rule.Verify();
         }
@@ -279,7 +331,7 @@ namespace Functions.Tests
             var request = new HttpRequestMessage();
             request.Headers.Authorization = null;
 
-            var config = new EnvironmentConfig {Organization = "somecompany"};
+            var config = new EnvironmentConfig { Organization = "somecompany" };
             var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
 
             var function = new ReconcileFunction(config, tableClient, null, ruleProvider.Object,

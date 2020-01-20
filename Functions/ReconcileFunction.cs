@@ -13,6 +13,8 @@ using System.Web;
 using Functions.Activities;
 using Microsoft.WindowsAzure.Storage.Table;
 using Requests = SecurePipelineScan.VstsService.Requests;
+using System.IO;
+using Newtonsoft.Json;
 
 namespace Functions
 {
@@ -59,18 +61,38 @@ namespace Functions
             if (!(await HasPermissionToReconcileAsync(project, id, userId)))
                 return new UnauthorizedResult();
 
+            dynamic data = await DeserializeBody(request);
+
             switch (scope)
             {
                 case RuleScopes.GlobalPermissions:
                     return await ReconcileGlobalPermissionsAsync(project, ruleName);
                 case RuleScopes.Repositories:
-                    return await ReconcileItemAsync(project, ruleName, item, _ruleProvider.RepositoryRules(_vstsClient));
+                    return await ReconcileItemAsync(project, ruleName, item, _ruleProvider.RepositoryRules(_vstsClient), data);
                 case RuleScopes.BuildPipelines:
-                    return await ReconcileItemAsync(project, ruleName, item, _ruleProvider.BuildRules(_vstsClient));
+                    return await ReconcileItemAsync(project, ruleName, item, _ruleProvider.BuildRules(_vstsClient), data);
                 case RuleScopes.ReleasePipelines:
-                    return await ReconcileItemAsync(project, ruleName, item, _ruleProvider.ReleaseRules(_vstsClient));
+                    return await ReconcileItemAsync(project, ruleName, item, _ruleProvider.ReleaseRules(_vstsClient), data);
                 default:
                     return new NotFoundObjectResult(scope);
+            }
+        }
+
+        private static async Task<dynamic> DeserializeBody(HttpRequestMessage request)
+        {
+            if (request.Content == null)
+            {
+                return null;
+            }
+
+            var contentStream = await request.Content.ReadAsStreamAsync();
+
+            using (var streamReader = new StreamReader(contentStream))
+            using (var jsonReader = new JsonTextReader(streamReader))
+            {
+                var serializer = new JsonSerializer();
+
+                return serializer.Deserialize<dynamic>(jsonReader);
             }
         }
 
@@ -156,7 +178,7 @@ namespace Functions
             return new OkResult();
         }
 
-        private async Task<IActionResult> ReconcileItemAsync(string projectId, string ruleName, string item, IEnumerable<IRule> rules)
+        private async Task<IActionResult> ReconcileItemAsync(string projectId, string ruleName, string item, IEnumerable<IRule> rules, dynamic data)
         {
             if (string.IsNullOrEmpty(item))
                 throw new ArgumentNullException(nameof(item));
@@ -169,7 +191,7 @@ namespace Functions
             {
                 return new NotFoundObjectResult($"Rule not found {ruleName}");
             }
-            
+
             if (rule.RequiresStageId)
             {
                 var productionStageIds = await GetProductionStageIdsAsync(projectId, item).ConfigureAwait(false);
