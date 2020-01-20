@@ -81,7 +81,7 @@
       "type": "Microsoft.Web/serverfarms",
       "apiVersion": "2015-04-01",
       "name": "[variables('hostingPlanName')]",
-      "location": "[resourceGroup().location]",
+      "location": "[variables('location')]",
       "properties": {
         "name": "[variables('hostingPlanName')]",
         "sku": "EP1"
