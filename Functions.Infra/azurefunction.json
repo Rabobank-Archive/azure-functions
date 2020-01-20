@@ -20,17 +20,20 @@
     "logicAppNameLa": "[concat(parameters('appName'),'-monitoring-logicapp-la')]",
     "location": "[resourceGroup().location]",
     "actionGroupNameAi": "[concat('Notify Omega Team for ',parameters('appName'),' AI alerts')]",
-    "actionGroupNameLa": "[concat('Notify Omega Team for ',parameters('appName'), ' LA alerts')]"
+    "actionGroupNameLa": "[concat('Notify Omega Team for ',parameters('appName'), ' LA alerts')]",
+    "hostingplanName": "[concat(parameters('appName'),'-plan')]"
   },
   "resources": [
     {
       "name": "[parameters('appName')]",
       "type": "Microsoft.Web/sites",
       "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
         "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]",
         "[resourceId('microsoft.insights/components/', variables('appInsightsName'))]"
       ],
       "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
         "siteConfig": {
           "appSettings": [
             {
@@ -73,6 +76,16 @@
       "apiVersion": "2016-03-01",
       "location": "[variables('location')]",
       "kind": "functionapp"
+    },
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2015-04-01",
+      "name": "[variables('hostingPlanName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "name": "[variables('hostingPlanName')]",
+        "sku": "EP1"
+      }
     },
     {
       "apiVersion": "2015-05-01-preview",
@@ -446,10 +459,7 @@
                                               "type": "string"
                                             }
                                           },
-                                          "required": [
-                                            "name",
-                                            "value"
-                                          ],
+                                          "required": ["name", "value"],
                                           "type": "object"
                                         },
                                         "type": "array"
@@ -668,10 +678,7 @@
                                     "type": "array"
                                   }
                                 },
-                                "required": [
-                                  "resourceId",
-                                  "tables"
-                                ],
+                                "required": ["resourceId", "tables"],
                                 "type": "object"
                               },
                               "type": "array"
@@ -689,10 +696,7 @@
                                           "type": "string"
                                         }
                                       },
-                                      "required": [
-                                        "name",
-                                        "type"
-                                      ],
+                                      "required": ["name", "type"],
                                       "type": "object"
                                     },
                                     "type": "array"
@@ -707,11 +711,7 @@
                                     "type": "array"
                                   }
                                 },
-                                "required": [
-                                  "name",
-                                  "columns",
-                                  "rows"
-                                ],
+                                "required": ["name", "columns", "rows"],
                                 "type": "object"
                               },
                               "type": "array"
