@@ -21,7 +21,7 @@
     "location": "[resourceGroup().location]",
     "actionGroupNameAi": "[concat('Notify Omega Team for ',parameters('appName'),' AI alerts')]",
     "actionGroupNameLa": "[concat('Notify Omega Team for ',parameters('appName'), ' LA alerts')]",
-    "hostingplanName": "[concat(parameters('appName'),'-plan')]"
+    "hostingplanName": "[concat(parameters('appName'),'-hostingplan')]"
   },
   "resources": [
     {
@@ -78,22 +78,36 @@
       "kind": "functionapp"
     },
     {
-      "type": "Microsoft.Web/serverfarms",
-      "apiVersion": "2015-04-01",
-      "name": "[variables('hostingPlanName')]",
-      "location": "[variables('location')]",
-      "properties": {
-        "name": "[variables('hostingPlanName')]",
-        "sku": "EP1"
-      }
-    },
-    {
       "apiVersion": "2015-05-01-preview",
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[variables('storageName')]",
       "location": "[variables('location')]",
       "properties": {
         "accountType": "Standard_LRS"
+      }
+    },
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2018-02-01",
+      "name": "[variables('hostingPlanName')]",
+      "location": "[variables('location')]",
+      "sku": {
+        "name": "EP1",
+        "tier": "ElasticPremium",
+        "size": "EP1",
+        "family": "EP",
+        "capacity": 1
+      },
+      "kind": "elastic",
+      "properties": {
+        "perSiteScaling": false,
+        "maximumElasticWorkerCount": 1,
+        "isSpot": false,
+        "reserved": false,
+        "isXenon": false,
+        "hyperV": false,
+        "targetWorkerCount": 0,
+        "targetWorkerSizeId": 0
       }
     },
     {
@@ -134,13 +148,20 @@
       "properties": {
         "groupShortName": "Notify Omega",
         "enabled": "[parameters('alertingEnabled')]",
-        "emailReceivers": [],
-        "smsReceivers": [],
-        "webhookReceivers": [],
-        "itsmReceivers": [],
-        "azureAppPushReceivers": [],
-        "automationRunbookReceivers": [],
-        "voiceReceivers": [],
+        "emailReceivers": [
+        ],
+        "smsReceivers": [
+        ],
+        "webhookReceivers": [
+        ],
+        "itsmReceivers": [
+        ],
+        "azureAppPushReceivers": [
+        ],
+        "automationRunbookReceivers": [
+        ],
+        "voiceReceivers": [
+        ],
         "logicAppReceivers": [
           {
             "name": "send to logic app",
@@ -149,8 +170,10 @@
             "useCommonAlertSchema": false
           }
         ],
-        "azureFunctionReceivers": [],
-        "armRoleReceivers": []
+        "azureFunctionReceivers": [
+        ],
+        "armRoleReceivers": [
+        ]
       },
       "dependsOn": [
         "[resourceId('Microsoft.Logic/workflows', variables('logicAppNameAi'))]"
@@ -164,13 +187,20 @@
       "properties": {
         "groupShortName": "Notify Omega",
         "enabled": "[parameters('alertingEnabled')]",
-        "emailReceivers": [],
-        "smsReceivers": [],
-        "webhookReceivers": [],
-        "itsmReceivers": [],
-        "azureAppPushReceivers": [],
-        "automationRunbookReceivers": [],
-        "voiceReceivers": [],
+        "emailReceivers": [
+        ],
+        "smsReceivers": [
+        ],
+        "webhookReceivers": [
+        ],
+        "itsmReceivers": [
+        ],
+        "azureAppPushReceivers": [
+        ],
+        "automationRunbookReceivers": [
+        ],
+        "voiceReceivers": [
+        ],
         "logicAppReceivers": [
           {
             "name": "send to logic app",
@@ -179,8 +209,10 @@
             "useCommonAlertSchema": false
           }
         ],
-        "azureFunctionReceivers": [],
-        "armRoleReceivers": []
+        "azureFunctionReceivers": [
+        ],
+        "armRoleReceivers": [
+        ]
       },
       "dependsOn": [
         "[resourceId('Microsoft.Logic/workflows', variables('logicAppNameLa'))]"
@@ -206,7 +238,8 @@
             {
               "name": "iard name",
               "metricName": "requests/failed",
-              "dimensions": [],
+              "dimensions": [
+              ],
               "operator": "GreaterThan",
               "threshold": 1,
               "timeAggregation": "Count"
@@ -244,7 +277,8 @@
             {
               "name": "iard name",
               "metricName": "exceptions/count",
-              "dimensions": [],
+              "dimensions": [
+              ],
               "operator": "GreaterThan",
               "threshold": 1,
               "timeAggregation": "Count"
@@ -280,7 +314,8 @@
           "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
           "allOf": [
             {
-              "dimensions": [],
+              "dimensions": [
+              ],
               "metricName": "Queue length - buildcompleted",
               "metricNamespace": "azure.applicationinsights",
               "monitorTemplateType": 8,
@@ -320,7 +355,8 @@
           "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
           "allOf": [
             {
-              "dimensions": [],
+              "dimensions": [
+              ],
               "metricName": "Queue length - buildcompleted-poison",
               "metricNamespace": "azure.applicationinsights",
               "monitorTemplateType": 8,
@@ -360,7 +396,8 @@
           "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
           "allOf": [
             {
-              "dimensions": [],
+              "dimensions": [
+              ],
               "metricName": "Queue length - releasedeploymentcompleted",
               "metricNamespace": "azure.applicationinsights",
               "monitorTemplateType": 8,
@@ -400,7 +437,8 @@
           "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
           "allOf": [
             {
-              "dimensions": [],
+              "dimensions": [
+              ],
               "metricName": "Queue length - releasedeploymentcompleted-poison",
               "metricNamespace": "azure.applicationinsights",
               "monitorTemplateType": 8,
@@ -432,7 +470,8 @@
         "definition": {
           "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
           "contentVersion": "1.0.0.0",
-          "parameters": {},
+          "parameters": {
+          },
           "triggers": {
             "manual": {
               "type": "Request",
@@ -459,7 +498,10 @@
                                               "type": "string"
                                             }
                                           },
-                                          "required": ["name", "value"],
+                                          "required": [
+                                            "name",
+                                            "value"
+                                          ],
                                           "type": "object"
                                         },
                                         "type": "array"
@@ -541,7 +583,8 @@
                           },
                           "type": "object"
                         },
-                        "properties": {},
+                        "properties": {
+                        },
                         "status": {
                           "type": "string"
                         },
@@ -564,7 +607,8 @@
             "Condition": {
               "actions": {
                 "HTTP": {
-                  "runAfter": {},
+                  "runAfter": {
+                  },
                   "type": "Http",
                   "inputs": {
                     "body": {
@@ -591,7 +635,8 @@
                   }
                 }
               },
-              "runAfter": {},
+              "runAfter": {
+              },
               "expression": {
                 "and": [
                   {
@@ -605,9 +650,11 @@
               "type": "If"
             }
           },
-          "outputs": {}
+          "outputs": {
+          }
         },
-        "parameters": {}
+        "parameters": {
+        }
       }
     },
     {
@@ -620,7 +667,8 @@
         "definition": {
           "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
           "contentVersion": "1.0.0.0",
-          "parameters": {},
+          "parameters": {
+          },
           "triggers": {
             "manual": {
               "type": "Request",
@@ -678,7 +726,10 @@
                                     "type": "array"
                                   }
                                 },
-                                "required": ["resourceId", "tables"],
+                                "required": [
+                                  "resourceId",
+                                  "tables"
+                                ],
                                 "type": "object"
                               },
                               "type": "array"
@@ -696,7 +747,10 @@
                                           "type": "string"
                                         }
                                       },
-                                      "required": ["name", "type"],
+                                      "required": [
+                                        "name",
+                                        "type"
+                                      ],
                                       "type": "object"
                                     },
                                     "type": "array"
@@ -711,7 +765,11 @@
                                     "type": "array"
                                   }
                                 },
-                                "required": ["name", "columns", "rows"],
+                                "required": [
+                                  "name",
+                                  "columns",
+                                  "rows"
+                                ],
                                 "type": "object"
                               },
                               "type": "array"
@@ -742,7 +800,8 @@
           },
           "actions": {
             "HTTP": {
-              "runAfter": {},
+              "runAfter": {
+              },
               "type": "Http",
               "inputs": {
                 "body": {
@@ -769,9 +828,11 @@
               }
             }
           },
-          "outputs": {}
+          "outputs": {
+          }
         },
-        "parameters": {}
+        "parameters": {
+        }
       }
     }
   ],
