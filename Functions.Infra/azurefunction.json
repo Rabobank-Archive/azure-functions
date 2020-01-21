@@ -148,20 +148,13 @@
       "properties": {
         "groupShortName": "Notify Omega",
         "enabled": "[parameters('alertingEnabled')]",
-        "emailReceivers": [
-        ],
-        "smsReceivers": [
-        ],
-        "webhookReceivers": [
-        ],
-        "itsmReceivers": [
-        ],
-        "azureAppPushReceivers": [
-        ],
-        "automationRunbookReceivers": [
-        ],
-        "voiceReceivers": [
-        ],
+        "emailReceivers": [],
+        "smsReceivers": [],
+        "webhookReceivers": [],
+        "itsmReceivers": [],
+        "azureAppPushReceivers": [],
+        "automationRunbookReceivers": [],
+        "voiceReceivers": [],
         "logicAppReceivers": [
           {
             "name": "send to logic app",
@@ -170,10 +163,8 @@
             "useCommonAlertSchema": false
           }
         ],
-        "azureFunctionReceivers": [
-        ],
-        "armRoleReceivers": [
-        ]
+        "azureFunctionReceivers": [],
+        "armRoleReceivers": []
       },
       "dependsOn": [
         "[resourceId('Microsoft.Logic/workflows', variables('logicAppNameAi'))]"
@@ -187,20 +178,13 @@
       "properties": {
         "groupShortName": "Notify Omega",
         "enabled": "[parameters('alertingEnabled')]",
-        "emailReceivers": [
-        ],
-        "smsReceivers": [
-        ],
-        "webhookReceivers": [
-        ],
-        "itsmReceivers": [
-        ],
-        "azureAppPushReceivers": [
-        ],
-        "automationRunbookReceivers": [
-        ],
-        "voiceReceivers": [
-        ],
+        "emailReceivers": [],
+        "smsReceivers": [],
+        "webhookReceivers": [],
+        "itsmReceivers": [],
+        "azureAppPushReceivers": [],
+        "automationRunbookReceivers": [],
+        "voiceReceivers": [],
         "logicAppReceivers": [
           {
             "name": "send to logic app",
@@ -209,255 +193,11 @@
             "useCommonAlertSchema": false
           }
         ],
-        "azureFunctionReceivers": [
-        ],
-        "armRoleReceivers": [
-        ]
+        "azureFunctionReceivers": [],
+        "armRoleReceivers": []
       },
       "dependsOn": [
         "[resourceId('Microsoft.Logic/workflows', variables('logicAppNameLa'))]"
-      ]
-    },
-    {
-      "name": "[concat('Failed requests in ', parameters('appName'))]",
-      "type": "Microsoft.Insights/metricAlerts",
-      "location": "global",
-      "apiVersion": "2018-03-01",
-      "properties": {
-        "description": "failed request count > 1",
-        "severity": 3,
-        "enabled": true,
-        "scopes": [
-          "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
-        ],
-        "evaluationFrequency": "Pt1m",
-        "windowSize": "Pt5m",
-        "criteria": {
-          "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
-          "allOf": [
-            {
-              "name": "iard name",
-              "metricName": "requests/failed",
-              "dimensions": [
-              ],
-              "operator": "GreaterThan",
-              "threshold": 1,
-              "timeAggregation": "Count"
-            }
-          ]
-        },
-        "actions": [
-          {
-            "actionGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('actionGroupNameAi'))]"
-          }
-        ]
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupNameAi'))]",
-        "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
-      ]
-    },
-    {
-      "name": "[concat('Exceptions in ', parameters('appName'))]",
-      "type": "Microsoft.Insights/metricAlerts",
-      "location": "global",
-      "apiVersion": "2018-03-01",
-      "properties": {
-        "description": "Exceptions count > 1",
-        "severity": 3,
-        "enabled": true,
-        "scopes": [
-          "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
-        ],
-        "evaluationFrequency": "Pt1m",
-        "windowSize": "Pt5m",
-        "criteria": {
-          "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
-          "allOf": [
-            {
-              "name": "iard name",
-              "metricName": "exceptions/count",
-              "dimensions": [
-              ],
-              "operator": "GreaterThan",
-              "threshold": 1,
-              "timeAggregation": "Count"
-            }
-          ]
-        },
-        "actions": [
-          {
-            "actionGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('actionGroupNameAi'))]"
-          }
-        ]
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupNameAi'))]",
-        "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
-      ]
-    },
-    {
-      "name": "[concat('Long queue lenth - buildcompleted in ', parameters('appName'))]",
-      "type": "Microsoft.Insights/metricAlerts",
-      "location": "global",
-      "apiVersion": "2018-03-01",
-      "properties": {
-        "description": "Queue length > 10",
-        "severity": 3,
-        "enabled": true,
-        "scopes": [
-          "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
-        ],
-        "evaluationFrequency": "Pt1m",
-        "windowSize": "Pt5m",
-        "criteria": {
-          "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
-          "allOf": [
-            {
-              "dimensions": [
-              ],
-              "metricName": "Queue length - buildcompleted",
-              "metricNamespace": "azure.applicationinsights",
-              "monitorTemplateType": 8,
-              "name": "Metric1",
-              "operator": "GreaterThan",
-              "threshold": 10.0,
-              "timeAggregation": "Average"
-            }
-          ]
-        },
-        "actions": [
-          {
-            "actionGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('actionGroupNameAi'))]"
-          }
-        ]
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupNameAi'))]",
-        "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
-      ]
-    },
-    {
-      "name": "[concat('Long queue lenth - buildcompleted-poison in ', parameters('appName'))]",
-      "type": "Microsoft.Insights/metricAlerts",
-      "location": "global",
-      "apiVersion": "2018-03-01",
-      "properties": {
-        "description": "Queue length > 2",
-        "severity": 3,
-        "enabled": true,
-        "scopes": [
-          "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
-        ],
-        "evaluationFrequency": "Pt1m",
-        "windowSize": "Pt5m",
-        "criteria": {
-          "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
-          "allOf": [
-            {
-              "dimensions": [
-              ],
-              "metricName": "Queue length - buildcompleted-poison",
-              "metricNamespace": "azure.applicationinsights",
-              "monitorTemplateType": 8,
-              "name": "Metric1",
-              "operator": "GreaterThan",
-              "threshold": 2.0,
-              "timeAggregation": "Average"
-            }
-          ]
-        },
-        "actions": [
-          {
-            "actionGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('actionGroupNameAi'))]"
-          }
-        ]
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupNameAi'))]",
-        "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
-      ]
-    },
-    {
-      "name": "[concat('Long queue lenth - releasedeploymentcompleted in ', parameters('appName'))]",
-      "type": "Microsoft.Insights/metricAlerts",
-      "location": "global",
-      "apiVersion": "2018-03-01",
-      "properties": {
-        "description": "Queue length > 10",
-        "severity": 3,
-        "enabled": true,
-        "scopes": [
-          "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
-        ],
-        "evaluationFrequency": "Pt1m",
-        "windowSize": "Pt5m",
-        "criteria": {
-          "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
-          "allOf": [
-            {
-              "dimensions": [
-              ],
-              "metricName": "Queue length - releasedeploymentcompleted",
-              "metricNamespace": "azure.applicationinsights",
-              "monitorTemplateType": 8,
-              "name": "Metric1",
-              "operator": "GreaterThan",
-              "threshold": 10.0,
-              "timeAggregation": "Average"
-            }
-          ]
-        },
-        "actions": [
-          {
-            "actionGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('actionGroupNameAi'))]"
-          }
-        ]
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupNameAi'))]",
-        "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
-      ]
-    },
-    {
-      "name": "[concat('Long queue lenth - releasedeploymentcompleted-poison in ', parameters('appName'))]",
-      "type": "Microsoft.Insights/metricAlerts",
-      "location": "global",
-      "apiVersion": "2018-03-01",
-      "properties": {
-        "description": "Queue length > 2",
-        "severity": 3,
-        "enabled": true,
-        "scopes": [
-          "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
-        ],
-        "evaluationFrequency": "Pt1m",
-        "windowSize": "Pt5m",
-        "criteria": {
-          "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
-          "allOf": [
-            {
-              "dimensions": [
-              ],
-              "metricName": "Queue length - releasedeploymentcompleted-poison",
-              "metricNamespace": "azure.applicationinsights",
-              "monitorTemplateType": 8,
-              "name": "Metric1",
-              "operator": "GreaterThan",
-              "threshold": 2.0,
-              "timeAggregation": "Average"
-            }
-          ]
-        },
-        "actions": [
-          {
-            "actionGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('actionGroupNameAi'))]"
-          }
-        ]
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Insights/actionGroups', variables('actionGroupNameAi'))]",
-        "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
       ]
     },
     {
@@ -470,8 +210,7 @@
         "definition": {
           "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
           "contentVersion": "1.0.0.0",
-          "parameters": {
-          },
+          "parameters": {},
           "triggers": {
             "manual": {
               "type": "Request",
@@ -498,10 +237,7 @@
                                               "type": "string"
                                             }
                                           },
-                                          "required": [
-                                            "name",
-                                            "value"
-                                          ],
+                                          "required": ["name", "value"],
                                           "type": "object"
                                         },
                                         "type": "array"
@@ -583,8 +319,7 @@
                           },
                           "type": "object"
                         },
-                        "properties": {
-                        },
+                        "properties": {},
                         "status": {
                           "type": "string"
                         },
@@ -607,8 +342,7 @@
             "Condition": {
               "actions": {
                 "HTTP": {
-                  "runAfter": {
-                  },
+                  "runAfter": {},
                   "type": "Http",
                   "inputs": {
                     "body": {
@@ -635,8 +369,7 @@
                   }
                 }
               },
-              "runAfter": {
-              },
+              "runAfter": {},
               "expression": {
                 "and": [
                   {
@@ -650,11 +383,9 @@
               "type": "If"
             }
           },
-          "outputs": {
-          }
+          "outputs": {}
         },
-        "parameters": {
-        }
+        "parameters": {}
       }
     },
     {
@@ -667,8 +398,7 @@
         "definition": {
           "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
           "contentVersion": "1.0.0.0",
-          "parameters": {
-          },
+          "parameters": {},
           "triggers": {
             "manual": {
               "type": "Request",
@@ -726,10 +456,7 @@
                                     "type": "array"
                                   }
                                 },
-                                "required": [
-                                  "resourceId",
-                                  "tables"
-                                ],
+                                "required": ["resourceId", "tables"],
                                 "type": "object"
                               },
                               "type": "array"
@@ -747,10 +474,7 @@
                                           "type": "string"
                                         }
                                       },
-                                      "required": [
-                                        "name",
-                                        "type"
-                                      ],
+                                      "required": ["name", "type"],
                                       "type": "object"
                                     },
                                     "type": "array"
@@ -765,11 +489,7 @@
                                     "type": "array"
                                   }
                                 },
-                                "required": [
-                                  "name",
-                                  "columns",
-                                  "rows"
-                                ],
+                                "required": ["name", "columns", "rows"],
                                 "type": "object"
                               },
                               "type": "array"
@@ -800,8 +520,7 @@
           },
           "actions": {
             "HTTP": {
-              "runAfter": {
-              },
+              "runAfter": {},
               "type": "Http",
               "inputs": {
                 "body": {
@@ -828,11 +547,9 @@
               }
             }
           },
-          "outputs": {
-          }
+          "outputs": {}
         },
-        "parameters": {
-        }
+        "parameters": {}
       }
     }
   ],
