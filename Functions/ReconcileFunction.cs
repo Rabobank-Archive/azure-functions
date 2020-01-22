@@ -88,15 +88,9 @@ namespace Functions
                 return null;
             }
 
-            var contentStream = await request.Content.ReadAsStreamAsync();
+            var content = await request.Content.ReadAsStringAsync();
 
-            using (var streamReader = new StreamReader(contentStream))
-            using (var jsonReader = new JsonTextReader(streamReader))
-            {
-                var serializer = new JsonSerializer();
-
-                return serializer.Deserialize<dynamic>(jsonReader);
-            }
+            return JsonConvert.DeserializeObject(content);
         }
 
         [FunctionName("HasPermissionToReconcileFunction")]
