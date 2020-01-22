@@ -21,5 +21,7 @@ namespace Functions.IntegrationTests
         public string ReleasePipelineId { get; set; }
         public string BuildPipelineId { get; set; }
         public string RepositoryId { get; set; }
+        public string CmdbEndpoint { get; set; }
+        public string CmdbApiKey { get; set; }
     }
 }
