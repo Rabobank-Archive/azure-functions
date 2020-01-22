@@ -64,7 +64,7 @@ namespace Functions.IntegrationTests
             var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
             var table = tableClient.GetTableReference("DeploymentMethod");
             await table.CreateIfNotExistsAsync().ConfigureAwait(false);
-            
+
             var insertOperation = TableOperation.InsertOrReplace(new DeploymentMethod("rowKey", "partitionKey")
             {
                 Organization = _config.Organization,
@@ -81,7 +81,7 @@ namespace Functions.IntegrationTests
         {
             var response = await client.PostAsync(new VstsRequest<object, JObject>(
                     "_apis/WebPlatformAuth/SessionToken",
-                    new Dictionary {["api-version"] = "3.2-preview.1"}),
+                    new Dictionary { ["api-version"] = "3.2-preview.1" }),
                 new
                 {
                     ExtensionName = extension,
@@ -91,25 +91,25 @@ namespace Functions.IntegrationTests
 
             return response.SelectToken("token");
         }
-        
+
         public static IEnumerable<object[]> ReleaseRules() =>
-            Rules(p => p.ReleaseRules(null), 
-                RuleScopes.ReleasePipelines, 
+            Rules(p => p.ReleaseRules(null, null),
+                RuleScopes.ReleasePipelines,
                 new TestConfig().ReleasePipelineId);
-        
+
         public static IEnumerable<object[]> BuildRules() =>
             Rules(p => p.BuildRules(null),
-                RuleScopes.BuildPipelines, 
+                RuleScopes.BuildPipelines,
                 new TestConfig().BuildPipelineId);
-        
+
         public static IEnumerable<object[]> RepositoryRules() =>
             Rules(p => p.RepositoryRules(null),
-                RuleScopes.Repositories, 
+                RuleScopes.Repositories,
                 new TestConfig().RepositoryId);
 
         public static IEnumerable<object[]> GlobalPermissions() =>
             Rules(p => p.GlobalPermissions(null),
-                RuleScopes.GlobalPermissions, 
+                RuleScopes.GlobalPermissions,
                 "");
 
         private static IEnumerable<object[]> Rules(Func<IRulesProvider, IEnumerable<IRule>> rules, string scope, string item)
@@ -119,14 +119,14 @@ namespace Functions.IntegrationTests
             {
                 // List rules you want to skip
             };
-            
+
             foreach (var rule in rules(provider).Select(x => x.GetType().Name).Except(skip))
             {
-                yield return new object[] {scope, rule, item};
+                yield return new object[] { scope, rule, item };
             }
         }
 
-        public async Task InitializeAsync() => 
+        public async Task InitializeAsync() =>
             await _host
                 .Jobs
                 .Terminate()

@@ -15,6 +15,7 @@ using Microsoft.Azure.Cosmos.Table;
 using Requests = SecurePipelineScan.VstsService.Requests;
 using System.IO;
 using Newtonsoft.Json;
+using SecurePipelineScan.Rules.Security.Cmdb.Client;
 
 namespace Functions
 {
@@ -22,18 +23,20 @@ namespace Functions
     {
         private readonly IRulesProvider _ruleProvider;
         private readonly ITokenizer _tokenizer;
+        private readonly ICmdbClient _cmdbClient;
         private readonly IVstsRestClient _vstsClient;
         private readonly CloudTableClient _tableClient;
         private readonly EnvironmentConfig _config;
         private const int PermissionBit = 3;
 
-        public ReconcileFunction(EnvironmentConfig config, CloudTableClient tableClient, IVstsRestClient client, IRulesProvider ruleProvider, ITokenizer tokenizer)
+        public ReconcileFunction(EnvironmentConfig config, CloudTableClient tableClient, IVstsRestClient vstsClient, IRulesProvider ruleProvider, ITokenizer tokenizer, ICmdbClient cmdbClient)
         {
             _config = config;
-            _vstsClient = client;
+            _vstsClient = vstsClient;
             _tableClient = tableClient;
             _ruleProvider = ruleProvider;
             _tokenizer = tokenizer;
+            _cmdbClient = cmdbClient;
         }
 
         [FunctionName(nameof(ReconcileFunction))]
@@ -72,7 +75,7 @@ namespace Functions
                 case RuleScopes.BuildPipelines:
                     return await ReconcileItemAsync(project, ruleName, item, _ruleProvider.BuildRules(_vstsClient), data);
                 case RuleScopes.ReleasePipelines:
-                    return await ReconcileItemAsync(project, ruleName, item, _ruleProvider.ReleaseRules(_vstsClient), data);
+                    return await ReconcileItemAsync(project, ruleName, item, _ruleProvider.ReleaseRules(_vstsClient, _cmdbClient), data);
                 default:
                     return new NotFoundObjectResult(scope);
             }
