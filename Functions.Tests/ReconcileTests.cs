@@ -74,7 +74,7 @@ namespace Functions.Tests
             var rule = new Mock<IRepositoryRule>(MockBehavior.Strict);
             rule
                 .As<IReconcile>()
-                .Setup(x => x.ReconcileAsync("TAS", "repository-id", null, null))
+                .Setup(x => x.ReconcileAsync("TAS", "repository-id", null, It.IsAny<string>(), null))
                 .Returns(Task.CompletedTask)
                 .Verifiable();
             rule

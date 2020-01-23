@@ -71,11 +71,11 @@ namespace Functions
                 case RuleScopes.GlobalPermissions:
                     return await ReconcileGlobalPermissionsAsync(project, ruleName);
                 case RuleScopes.Repositories:
-                    return await ReconcileItemAsync(project, ruleName, item, _ruleProvider.RepositoryRules(_vstsClient), data);
+                    return await ReconcileItemAsync(project, ruleName, item, _ruleProvider.RepositoryRules(_vstsClient), userId, data);
                 case RuleScopes.BuildPipelines:
-                    return await ReconcileItemAsync(project, ruleName, item, _ruleProvider.BuildRules(_vstsClient), data);
+                    return await ReconcileItemAsync(project, ruleName, item, _ruleProvider.BuildRules(_vstsClient), userId, data);
                 case RuleScopes.ReleasePipelines:
-                    return await ReconcileItemAsync(project, ruleName, item, _ruleProvider.ReleaseRules(_vstsClient, _cmdbClient), data);
+                    return await ReconcileItemAsync(project, ruleName, item, _ruleProvider.ReleaseRules(_vstsClient, _cmdbClient), userId, data);
                 default:
                     return new NotFoundObjectResult(scope);
             }
@@ -175,7 +175,7 @@ namespace Functions
             return new OkResult();
         }
 
-        private async Task<IActionResult> ReconcileItemAsync(string projectId, string ruleName, string item, IEnumerable<IRule> rules, dynamic data)
+        private async Task<IActionResult> ReconcileItemAsync(string projectId, string ruleName, string item, IEnumerable<IRule> rules, string userId, dynamic data)
         {
             if (string.IsNullOrEmpty(item))
                 throw new ArgumentNullException(nameof(item));
@@ -198,12 +198,12 @@ namespace Functions
                 }
 
                 await Task.WhenAll(productionStageIds.Select(async stageId =>
-                        await rule.ReconcileAsync(projectId, item, stageId).ConfigureAwait(false)))
+                        await rule.ReconcileAsync(projectId, item, stageId, userId, data).ConfigureAwait(false)))
                     .ConfigureAwait(false);
             }
             else
             {
-                await rule.ReconcileAsync(projectId, item, null).ConfigureAwait(false);
+                await rule.ReconcileAsync(projectId, item, null, userId, data).ConfigureAwait(false);
             }
 
             return new OkResult();
