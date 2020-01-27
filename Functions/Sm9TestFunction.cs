@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Flurl.Http;
 using Microsoft.Extensions.Logging;
 using System;
+using Flurl;
+using Newtonsoft.Json.Linq;
 
 namespace Functions
 {
@@ -16,9 +18,8 @@ namespace Functions
         {
             try
             {
-                var response = await Environment.GetEnvironmentVariable("testEndpoint").GetAsync();
-
-                logger.LogInformation($"Status code is {response.StatusCode.ToString()}");
+                var response = (await GetCiResponseAsync(Environment.GetEnvironmentVariable("CiIdentifier")).ConfigureAwait(false));
+                logger.LogInformation(response.ToString());
             }
             catch (FlurlHttpException e)
             {
@@ -27,5 +28,14 @@ namespace Functions
 
             return new OkResult();
         }
+
+        private Task<JObject> GetCiResponseAsync(string ciIdentifier) => GetAsync<JObject>($"{Environment.GetEnvironmentVariable("CmdbEndpoint")}devices?CiIdentifier={ciIdentifier}");
+
+        private async Task<T> GetAsync<T>(string url) =>
+            await url.SetQueryParam("view", "expand")
+             .WithHeader("somecompany-apikey", Environment.GetEnvironmentVariable("CmdbApiKey"))
+             .WithHeader("content-type", "application/json")
+             .GetJsonAsync<T>()
+             .ConfigureAwait(false);
     }
 }
