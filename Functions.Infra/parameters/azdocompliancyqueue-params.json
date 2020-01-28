@@ -4,7 +4,7 @@
     "parameters": {
         "stgAccount": {
             "value": {
-                "name": "azdocompliancyqueue",
+                "name": "azdocompliancyqueue02",
                 "location": "West Europe",
                 "sku": {
                     "name": "Standard_LRS"
@@ -22,8 +22,10 @@
                 "kind": "StorageV2",
                 "networkAcls": {
                     "bypass": "AzureServices",
-                    "virtualNetworkRules": [],
-                    "ipRules": [],
+                    "virtualNetworkRules": [
+                    ],
+                    "ipRules": [
+                    ],
                     "defaultAction": "Allow"
                 }
             }
