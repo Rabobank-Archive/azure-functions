@@ -30,7 +30,7 @@ namespace Functions.Tests
             Environment.SetEnvironmentVariable("eventQueueStorageConnectionString", "UseDevelopmentStorage=true");
             Environment.SetEnvironmentVariable("TOKEN_SECRET", fixture.Create<string>());
 
-            Environment.SetEnvironmentVariable("CmdbEndpoint", fixture.Create<string>());
+            Environment.SetEnvironmentVariable("CmdbEndpoint", "http://localhost");
             Environment.SetEnvironmentVariable("CmdbApiKey", fixture.Create<string>());
 
             var startup = new Startup();
