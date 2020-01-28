@@ -1,13 +1,13 @@
+using Flurl;
+using Flurl.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Flurl.Http;
-using Microsoft.Extensions.Logging;
-using System;
-using Flurl;
-using Newtonsoft.Json.Linq;
 
 namespace Functions
 {

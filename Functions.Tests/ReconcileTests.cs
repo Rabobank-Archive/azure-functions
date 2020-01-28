@@ -1,7 +1,10 @@
 using AutoFixture;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Cosmos.Table;
 using Moq;
+using Newtonsoft.Json;
 using SecurePipelineScan.Rules.Security;
+using SecurePipelineScan.Rules.Security.Cmdb.Client;
 using SecurePipelineScan.VstsService;
 using Shouldly;
 using System.Linq;
@@ -9,11 +12,8 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.Azure.Cosmos.Table;
 using Xunit;
 using Response = SecurePipelineScan.VstsService.Response;
-using Newtonsoft.Json;
-using SecurePipelineScan.Rules.Security.Cmdb.Client;
 
 namespace Functions.Tests
 {
