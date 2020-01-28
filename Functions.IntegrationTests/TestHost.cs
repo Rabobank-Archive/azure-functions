@@ -11,6 +11,7 @@ using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SecurePipelineScan.Rules.Security;
+using SecurePipelineScan.Rules.Security.Cmdb.Client;
 using SecurePipelineScan.VstsService;
 using Xunit;
 
@@ -38,6 +39,7 @@ namespace Functions.IntegrationTests
                         .AddSingleton<IVstsRestClient>(new VstsRestClient(TestConfig.Organization, TestConfig.Token))
                         .AddSingleton<IRulesProvider>(new RulesProvider())
                         .AddSingleton(fixture.Create<ILogAnalyticsClient>())
+                        .AddSingleton(fixture.Create<ICmdbClient>())
                         .AddSingleton(environMentConfig)
                         .AddSingleton(CloudStorageAccount.DevelopmentStorageAccount.CreateCloudTableClient())
                         .AddSingleton(Microsoft.Azure.Storage.CloudStorageAccount.DevelopmentStorageAccount.CreateCloudQueueClient())))

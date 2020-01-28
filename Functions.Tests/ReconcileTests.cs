@@ -1,7 +1,10 @@
 using AutoFixture;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Cosmos.Table;
 using Moq;
+using Newtonsoft.Json;
 using SecurePipelineScan.Rules.Security;
+using SecurePipelineScan.Rules.Security.Cmdb.Client;
 using SecurePipelineScan.VstsService;
 using Shouldly;
 using System.Linq;
@@ -9,7 +12,6 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.Azure.Cosmos.Table;
 using Xunit;
 using Response = SecurePipelineScan.VstsService.Response;
 
@@ -45,12 +47,15 @@ namespace Functions.Tests
                 .Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Response.PermissionsProjectId>>()))
                 .Returns(Task.FromResult(fixture.Create<Response.PermissionsProjectId>()));
             var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
-            var config = new EnvironmentConfig {Organization = "somecompany" };
+            var config = new EnvironmentConfig { Organization = "somecompany" };
 
+            var json = JsonConvert.SerializeObject(new { ciIdentifier = "CI123444" });
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
 
-            var function = new ReconcileFunction(config, tableClient, vstsClient.Object, ruleProvider.Object, tokenizer.Object);
+            var cmdbClient = new Mock<ICmdbClient>();
+
+            var function = new ReconcileFunction(config, tableClient, vstsClient.Object, ruleProvider.Object, tokenizer.Object, cmdbClient.Object);
             (await function.ReconcileAsync(request,
                 "somecompany",
                 "TAS",
@@ -69,7 +74,7 @@ namespace Functions.Tests
             var rule = new Mock<IRepositoryRule>(MockBehavior.Strict);
             rule
                 .As<IReconcile>()
-                .Setup(x => x.ReconcileAsync("TAS", "repository-id", null))
+                .Setup(x => x.ReconcileAsync("TAS", "repository-id", null, It.IsAny<string>(), null))
                 .Returns(Task.CompletedTask)
                 .Verifiable();
             rule
@@ -81,7 +86,7 @@ namespace Functions.Tests
             var ruleProvider = new Mock<IRulesProvider>();
             ruleProvider
                 .Setup(x => x.RepositoryRules(It.IsAny<IVstsRestClient>()))
-                .Returns(new[] {rule.Object});
+                .Returns(new[] { rule.Object });
 
             var tokenizer = new Mock<ITokenizer>();
             tokenizer
@@ -93,20 +98,74 @@ namespace Functions.Tests
                 .Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Response.PermissionsProjectId>>()))
                 .Returns(Task.FromResult(fixture.Create<Response.PermissionsProjectId>()));
 
-            var config = new EnvironmentConfig {Organization = "somecompany"};
+            var config = new EnvironmentConfig { Organization = "somecompany" };
             var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
 
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
 
+            var cmdbClient = new Mock<ICmdbClient>();
+
             var function = new ReconcileFunction(config, tableClient, vstsClient.Object, ruleProvider.Object,
-                tokenizer.Object);
+                tokenizer.Object, cmdbClient.Object);
             (await function.ReconcileAsync(request,
                 "somecompany",
                 "TAS",
                 RuleScopes.Repositories,
                 rule.Object.GetType().Name,
                 "repository-id")).ShouldBeOfType<OkResult>();
+
+            rule.Verify();
+        }
+
+        [Fact]
+        public async Task CanPassPostDataToRule()
+        {
+            var fixture = new Fixture();
+            ManageProjectPropertiesPermission(fixture);
+
+            // TODO verify data is passed to rule
+            var rule = new Mock<IProjectRule>(MockBehavior.Strict);
+            rule
+                .As<IProjectReconcile>()
+                .Setup(x => x.ReconcileAsync("TAS"))
+                .Returns(Task.CompletedTask)
+                .Verifiable();
+
+            var ruleProvider = new Mock<IRulesProvider>();
+            ruleProvider
+                .Setup(x => x.GlobalPermissions(It.IsAny<IVstsRestClient>()))
+                .Returns(new[] { rule.Object });
+
+            var tokenizer = new Mock<ITokenizer>();
+            tokenizer
+                .Setup(x => x.Principal(It.IsAny<string>()))
+                .Returns(PrincipalWithClaims());
+
+            var vstsClient = new Mock<IVstsRestClient>();
+            vstsClient
+                .Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Response.PermissionsProjectId>>()))
+                .Returns(Task.FromResult(fixture.Create<Response.PermissionsProjectId>()));
+            var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
+            var config = new EnvironmentConfig { Organization = "somecompany" };
+
+            var json = JsonConvert.SerializeObject(new { ciIdentifier = "CI123444" });
+            var request = new HttpRequestMessage();
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
+            request.Content = new StringContent(
+                    json,
+                    System.Text.Encoding.UTF8,
+                    "application/json"
+                    );
+
+            var cmdbClient = new Mock<ICmdbClient>();
+
+            var function = new ReconcileFunction(config, tableClient, vstsClient.Object, ruleProvider.Object, tokenizer.Object, cmdbClient.Object);
+            (await function.ReconcileAsync(request,
+                "somecompany",
+                "TAS",
+                RuleScopes.GlobalPermissions,
+                rule.Object.GetType().Name)).ShouldBeOfType<OkResult>();
 
             rule.Verify();
         }
@@ -139,8 +198,10 @@ namespace Functions.Tests
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
 
+            var cmdbClient = new Mock<ICmdbClient>();
+
             var function = new ReconcileFunction(config, tableClient, vstsClient.Object, ruleProvider.Object,
-                tokenizer.Object);
+                tokenizer.Object, cmdbClient.Object);
             var result = (await function.ReconcileAsync(request,
                 "somecompany",
                 "TAS",
@@ -177,8 +238,10 @@ namespace Functions.Tests
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
 
+            var cmdbClient = new Mock<ICmdbClient>();
+
             var function = new ReconcileFunction(config, tableClient, vstsClient.Object,
-                new Mock<IRulesProvider>().Object, tokenizer.Object);
+                new Mock<IRulesProvider>().Object, tokenizer.Object, cmdbClient.Object);
             var result = (await function.ReconcileAsync(request,
                 "somecompany",
                 "TAS",
@@ -219,8 +282,10 @@ namespace Functions.Tests
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
             request.RequestUri = new System.Uri("https://dev.azure.com/reconcile/somecompany/TAS/haspermissions?userId=ef2e3683-8fb5-439d-9dc9-53af732e6387");
 
+            var cmdbClient = new Mock<ICmdbClient>();
+
             var function = new ReconcileFunction(config, tableClient, vstsClient.Object,
-                new Mock<IRulesProvider>().Object, tokenizer.Object);
+                new Mock<IRulesProvider>().Object, tokenizer.Object, cmdbClient.Object);
             (await function
                     .HasPermissionAsync(request, "somecompany", "TAS"))
                 .ShouldBeOfType<OkObjectResult>()
@@ -262,8 +327,10 @@ namespace Functions.Tests
                 new System.Uri(
                     "https://dev.azure.com/reconcile/somecompany/TAS/haspermissions?userId=ef2e3683-8fb5-439d-9dc9-53af732e6387");
 
+            var cmdbClient = new Mock<ICmdbClient>();
+
             var function = new ReconcileFunction(config, tableClient, vstsClient.Object,
-                new Mock<IRulesProvider>().Object, tokenizer.Object);
+                new Mock<IRulesProvider>().Object, tokenizer.Object, cmdbClient.Object);
             (await function
                     .HasPermissionAsync(request, "somecompany", "TAS"))
                 .ShouldBeOfType<OkObjectResult>()
@@ -279,11 +346,12 @@ namespace Functions.Tests
             var request = new HttpRequestMessage();
             request.Headers.Authorization = null;
 
-            var config = new EnvironmentConfig {Organization = "somecompany"};
+            var config = new EnvironmentConfig { Organization = "somecompany" };
             var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
+            var cmdbClient = new Mock<ICmdbClient>();
 
             var function = new ReconcileFunction(config, tableClient, null, ruleProvider.Object,
-                new Mock<ITokenizer>().Object);
+                new Mock<ITokenizer>().Object, cmdbClient.Object);
             (await function.ReconcileAsync(request,
                 "somecompany",
                 "TAS",
@@ -305,8 +373,9 @@ namespace Functions.Tests
             var config = new EnvironmentConfig { Organization = "somecompany" };
             var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
 
+            var cmdbClient = new Mock<ICmdbClient>();
             var function = new ReconcileFunction(config, tableClient, null, new Mock<IRulesProvider>().Object,
-                tokenizer.Object);
+                tokenizer.Object, cmdbClient.Object);
             (await function.ReconcileAsync(request,
                 "somecompany",
                 "TAS",
@@ -339,8 +408,9 @@ namespace Functions.Tests
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
 
+            var cmdbClient = new Mock<ICmdbClient>();
             var function = new ReconcileFunction(config, tableClient, vstsClient.Object,
-                new Mock<IRulesProvider>().Object, tokenizer.Object);
+                new Mock<IRulesProvider>().Object, tokenizer.Object, cmdbClient.Object);
             (await function.ReconcileAsync(request,
                     "somecompany",
                     "TAS",
@@ -360,8 +430,9 @@ namespace Functions.Tests
             var config = new EnvironmentConfig { Organization = "somecompany" };
             var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
 
+            var cmdbClient = new Mock<ICmdbClient>();
             var function = new ReconcileFunction(config, tableClient, null, new Mock<IRulesProvider>().Object,
-                new Mock<ITokenizer>().Object);
+                new Mock<ITokenizer>().Object, cmdbClient.Object);
             (await function
                     .HasPermissionAsync(request, "somecompany", "TAS"))
                 .ShouldBeOfType<UnauthorizedResult>();
@@ -381,8 +452,9 @@ namespace Functions.Tests
             var config = new EnvironmentConfig { Organization = "somecompany" };
             var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
 
+            var cmdbClient = new Mock<ICmdbClient>();
             var function = new ReconcileFunction(config, tableClient, null, new Mock<IRulesProvider>().Object,
-                tokenizer.Object);
+                tokenizer.Object, cmdbClient.Object);
             (await function
                     .HasPermissionAsync(request, "somecompany", "TAS"))
                 .ShouldBeOfType<UnauthorizedResult>();
@@ -413,8 +485,10 @@ namespace Functions.Tests
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
 
+            var cmdbClient = new Mock<ICmdbClient>();
+
             var function = new ReconcileFunction(config, tableClient, vstsClient.Object,
-                new Mock<IRulesProvider>().Object, tokenizer.Object);
+                new Mock<IRulesProvider>().Object, tokenizer.Object, cmdbClient.Object);
             (await function
                     .HasPermissionAsync(request, "somecompany", "TAS"))
                 .ShouldBeOfType<OkObjectResult>()
@@ -447,8 +521,10 @@ namespace Functions.Tests
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
 
+            var cmdbClient = new Mock<ICmdbClient>();
+
             var function = new ReconcileFunction(config, tableClient, vstsClient.Object,
-                new Mock<IRulesProvider>().Object, tokenizer.Object);
+                new Mock<IRulesProvider>().Object, tokenizer.Object, cmdbClient.Object);
             (await function
                     .HasPermissionAsync(request, "somecompany", "TAS"))
                 .ShouldBeOfType<OkObjectResult>()

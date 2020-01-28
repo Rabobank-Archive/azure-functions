@@ -11,6 +11,7 @@ using System.Net.Http;
 using LogAnalytics.Client;
 using Microsoft.Azure.Cosmos.Table;
 using Microsoft.Azure.Storage.Queue;
+using SecurePipelineScan.Rules.Security.Cmdb.Client;
 
 [assembly: WebJobsStartup(typeof(Functions.Startup))]
 
@@ -39,8 +40,11 @@ namespace Functions
 
             var vstsPat = GetEnvironmentVariable("vstsPat");
             var organization = GetEnvironmentVariable("organization");
+            var cmdbEndpoint = GetEnvironmentVariable("CmdbEndpoint");
+            var cmdbApiKey = GetEnvironmentVariable("CmdbApiKey");
 
             services.AddSingleton<IVstsRestClient>(new VstsRestClient(organization, vstsPat));
+            services.AddSingleton<ICmdbClient>(new CmdbClient(new CmdbClientConfig(cmdbApiKey, cmdbEndpoint, organization)));
 
             services.AddScoped<IMemoryCache>(_ => new MemoryCache(new MemoryCacheOptions()));
             services.AddTransient<IServiceHookScan<ReleaseDeploymentCompletedReport>, ReleaseDeploymentScan>();

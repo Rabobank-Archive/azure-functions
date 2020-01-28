@@ -13,6 +13,9 @@ using System.Web;
 using Functions.Activities;
 using Microsoft.Azure.Cosmos.Table;
 using Requests = SecurePipelineScan.VstsService.Requests;
+using System.IO;
+using Newtonsoft.Json;
+using SecurePipelineScan.Rules.Security.Cmdb.Client;
 
 namespace Functions
 {
@@ -20,18 +23,20 @@ namespace Functions
     {
         private readonly IRulesProvider _ruleProvider;
         private readonly ITokenizer _tokenizer;
+        private readonly ICmdbClient _cmdbClient;
         private readonly IVstsRestClient _vstsClient;
         private readonly CloudTableClient _tableClient;
         private readonly EnvironmentConfig _config;
         private const int PermissionBit = 3;
 
-        public ReconcileFunction(EnvironmentConfig config, CloudTableClient tableClient, IVstsRestClient client, IRulesProvider ruleProvider, ITokenizer tokenizer)
+        public ReconcileFunction(EnvironmentConfig config, CloudTableClient tableClient, IVstsRestClient vstsClient, IRulesProvider ruleProvider, ITokenizer tokenizer, ICmdbClient cmdbClient)
         {
             _config = config;
-            _vstsClient = client;
+            _vstsClient = vstsClient;
             _tableClient = tableClient;
             _ruleProvider = ruleProvider;
             _tokenizer = tokenizer;
+            _cmdbClient = cmdbClient;
         }
 
         [FunctionName(nameof(ReconcileFunction))]
@@ -59,19 +64,33 @@ namespace Functions
             if (!(await HasPermissionToReconcileAsync(project, id, userId)))
                 return new UnauthorizedResult();
 
+            dynamic data = await DeserializeBody(request);
+
             switch (scope)
             {
                 case RuleScopes.GlobalPermissions:
                     return await ReconcileGlobalPermissionsAsync(project, ruleName);
                 case RuleScopes.Repositories:
-                    return await ReconcileItemAsync(project, ruleName, item, _ruleProvider.RepositoryRules(_vstsClient));
+                    return await ReconcileItemAsync(project, ruleName, item, _ruleProvider.RepositoryRules(_vstsClient), userId, data);
                 case RuleScopes.BuildPipelines:
-                    return await ReconcileItemAsync(project, ruleName, item, _ruleProvider.BuildRules(_vstsClient));
+                    return await ReconcileItemAsync(project, ruleName, item, _ruleProvider.BuildRules(_vstsClient), userId, data);
                 case RuleScopes.ReleasePipelines:
-                    return await ReconcileItemAsync(project, ruleName, item, _ruleProvider.ReleaseRules(_vstsClient));
+                    return await ReconcileItemAsync(project, ruleName, item, _ruleProvider.ReleaseRules(_vstsClient, _cmdbClient), userId, data);
                 default:
                     return new NotFoundObjectResult(scope);
             }
+        }
+
+        private static async Task<dynamic> DeserializeBody(HttpRequestMessage request)
+        {
+            if (request.Content == null)
+            {
+                return null;
+            }
+
+            var content = await request.Content.ReadAsStringAsync();
+
+            return JsonConvert.DeserializeObject(content);
         }
 
         [FunctionName("HasPermissionToReconcileFunction")]
@@ -156,7 +175,7 @@ namespace Functions
             return new OkResult();
         }
 
-        private async Task<IActionResult> ReconcileItemAsync(string projectId, string ruleName, string item, IEnumerable<IRule> rules)
+        private async Task<IActionResult> ReconcileItemAsync(string projectId, string ruleName, string item, IEnumerable<IRule> rules, string userId, dynamic data)
         {
             if (string.IsNullOrEmpty(item))
                 throw new ArgumentNullException(nameof(item));
@@ -169,7 +188,7 @@ namespace Functions
             {
                 return new NotFoundObjectResult($"Rule not found {ruleName}");
             }
-            
+
             if (rule.RequiresStageId)
             {
                 var productionStageIds = await GetProductionStageIdsAsync(projectId, item).ConfigureAwait(false);
@@ -179,12 +198,12 @@ namespace Functions
                 }
 
                 await Task.WhenAll(productionStageIds.Select(async stageId =>
-                        await rule.ReconcileAsync(projectId, item, stageId).ConfigureAwait(false)))
+                        await rule.ReconcileAsync(projectId, item, stageId, userId, data).ConfigureAwait(false)))
                     .ConfigureAwait(false);
             }
             else
             {
-                await rule.ReconcileAsync(projectId, item, null).ConfigureAwait(false);
+                await rule.ReconcileAsync(projectId, item, null, userId, data).ConfigureAwait(false);
             }
 
             return new OkResult();

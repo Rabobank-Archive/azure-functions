@@ -7,6 +7,7 @@ using Functions.Model;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using SecurePipelineScan.Rules.Security;
+using SecurePipelineScan.Rules.Security.Cmdb.Client;
 using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Response;
 using Environment = Functions.Model.Environment;
@@ -17,15 +18,17 @@ namespace Functions.Activities
     public class ScanReleasePipelinesActivity
     {
         private readonly IRulesProvider _rulesProvider;
+        private readonly ICmdbClient _cmdbClient;
         private readonly EnvironmentConfig _config;
         private readonly IVstsRestClient _azuredo;
 
         public ScanReleasePipelinesActivity(EnvironmentConfig config, IVstsRestClient azuredo,
-            IRulesProvider rulesProvider)
+            IRulesProvider rulesProvider, ICmdbClient cmdbClient)
         {
             _config = config;
             _azuredo = azuredo;
             _rulesProvider = rulesProvider;
+            _cmdbClient = cmdbClient;
         }
 
         [FunctionName(nameof(ScanReleasePipelinesActivity))]
@@ -41,7 +44,7 @@ namespace Functions.Activities
             var project = input.project;
             var pipeline = input.releasePipeline;
             var productionItems = input.productionItems;
-            var rules = _rulesProvider.ReleaseRules(_azuredo);
+            var rules = _rulesProvider.ReleaseRules(_azuredo, _cmdbClient);
 
             var productionStageIds = productionItems
                 .SelectMany(p => p.DeploymentInfo)

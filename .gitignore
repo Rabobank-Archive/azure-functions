@@ -338,3 +338,5 @@ reports/
 coverage.opencover.xml
 
 appsettings.user.json
+Functions/local.settings.json
+NuGet.Config

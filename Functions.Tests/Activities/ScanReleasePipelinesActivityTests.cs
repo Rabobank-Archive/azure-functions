@@ -8,6 +8,7 @@ using Functions.Activities;
 using Functions.Model;
 using Moq;
 using SecurePipelineScan.Rules.Security;
+using SecurePipelineScan.Rules.Security.Cmdb.Client;
 using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Response;
 using Shouldly;
@@ -51,8 +52,10 @@ namespace Functions.Tests.Activities
             productionItems[0].DeploymentInfo = deploymentMethods;
             productionItems[0].ItemId = pipeline.Id;
 
+            var cmdbClient = new Mock<ICmdbClient>();
+
             // Act
-            var activity = new ScanReleasePipelinesActivity(config, client.Object, provider);
+            var activity = new ScanReleasePipelinesActivity(config, client.Object, provider, cmdbClient.Object);
             var actual = await activity.RunAsync((project, pipeline, productionItems));
 
             // Assert
@@ -88,8 +91,10 @@ namespace Functions.Tests.Activities
             productionItems[0].DeploymentInfo = deploymentMethods;
             productionItems[0].ItemId = pipeline.Id;
 
+            var cmdbClient = new Mock<ICmdbClient>();
+
             // Act
-            var activity = new ScanReleasePipelinesActivity(config, client.Object, provider);
+            var activity = new ScanReleasePipelinesActivity(config, client.Object, provider, cmdbClient.Object);
             var actual = await activity.RunAsync((project, pipeline, productionItems));
 
             // Assert
@@ -121,8 +126,10 @@ namespace Functions.Tests.Activities
             productionItems[0].DeploymentInfo = deploymentMethods;
             productionItems[0].ItemId = pipeline.Id;
 
+            var cmdbClient = new Mock<ICmdbClient>();
+
             // Act
-            var activity = new ScanReleasePipelinesActivity(config, client.Object, provider);
+            var activity = new ScanReleasePipelinesActivity(config, client.Object, provider, cmdbClient.Object);
             var actual = await activity.RunAsync((project, pipeline, productionItems));
 
             // Assert
@@ -160,8 +167,10 @@ namespace Functions.Tests.Activities
             productionItems[0].DeploymentInfo = deploymentMethods;
             productionItems[0].ItemId = pipeline.Id;
 
+            var cmdbClient = new Mock<ICmdbClient>();
+
             // Act
-            var activity = new ScanReleasePipelinesActivity(config, client.Object, provider);
+            var activity = new ScanReleasePipelinesActivity(config, client.Object, provider, cmdbClient.Object);
             var actual = await activity.RunAsync((project, pipeline, productionItems));
 
             // Assert
@@ -182,17 +191,20 @@ namespace Functions.Tests.Activities
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
             var provider = new Mock<IRulesProvider>();
             provider
-                .Setup(x => x.ReleaseRules(It.IsAny<IVstsRestClient>()))
+                .Setup(x => x.ReleaseRules(It.IsAny<IVstsRestClient>(), It.IsAny<ICmdbClient>()))
                 .Returns(fixture.CreateMany<IReleasePipelineRule>())
                 .Verifiable();
 
             var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
 
+            var cmdbClient = new Mock<ICmdbClient>();
+
             // Act
             var activity = new ScanReleasePipelinesActivity(
                 fixture.Create<EnvironmentConfig>(),
                 client.Object,
-                provider.Object);
+                provider.Object,
+                cmdbClient.Object);
 
             var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () =>
                 await activity.RunAsync((null, null, null)));
@@ -206,7 +218,7 @@ namespace Functions.Tests.Activities
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
             var provider = new Mock<IRulesProvider>();
             provider
-                .Setup(x => x.ReleaseRules(It.IsAny<IVstsRestClient>()))
+                .Setup(x => x.ReleaseRules(It.IsAny<IVstsRestClient>(), It.IsAny<ICmdbClient>()))
                 .Returns(fixture.CreateMany<IReleasePipelineRule>())
                 .Verifiable();
 
@@ -214,11 +226,14 @@ namespace Functions.Tests.Activities
             var releasePipeline = fixture.Create<ReleaseDefinition>();
             var productionItems = fixture.Create<IList<ProductionItem>>();
 
+            var cmdbClient = new Mock<ICmdbClient>();
+
             // Act
             var activity = new ScanReleasePipelinesActivity(
                 fixture.Create<EnvironmentConfig>(),
                 client.Object,
-                provider.Object);
+                provider.Object,
+                cmdbClient.Object);
 
             var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () =>
                 await activity.RunAsync((null, releasePipeline, productionItems)));
@@ -232,7 +247,7 @@ namespace Functions.Tests.Activities
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
             var provider = new Mock<IRulesProvider>();
             provider
-                .Setup(x => x.ReleaseRules(It.IsAny<IVstsRestClient>()))
+                .Setup(x => x.ReleaseRules(It.IsAny<IVstsRestClient>(), It.IsAny<ICmdbClient>()))
                 .Returns(fixture.CreateMany<IReleasePipelineRule>())
                 .Verifiable();
 
@@ -240,11 +255,14 @@ namespace Functions.Tests.Activities
             var project = fixture.Create<Project>();
             var productionItems = fixture.Create<IList<ProductionItem>>();
 
+            var cmdbClient = new Mock<ICmdbClient>();
+
             // Act
             var activity = new ScanReleasePipelinesActivity(
                 fixture.Create<EnvironmentConfig>(),
                 client.Object,
-                provider.Object);
+                provider.Object,
+                cmdbClient.Object);
 
             var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () =>
                 await activity.RunAsync((project, null, productionItems)));
@@ -270,7 +288,7 @@ namespace Functions.Tests.Activities
             }
 
             provider
-                .Setup(x => x.ReleaseRules(It.IsAny<IVstsRestClient>()))
+                .Setup(x => x.ReleaseRules(It.IsAny<IVstsRestClient>(), It.IsAny<ICmdbClient>()))
                 .Returns(rules.Select(r => r.Object))
                 .Verifiable();
             return provider.Object;
