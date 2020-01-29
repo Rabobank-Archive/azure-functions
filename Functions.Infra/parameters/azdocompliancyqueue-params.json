@@ -32,7 +32,7 @@
         },
         "keyVault": {
             "value": {
-                "name": "azdocompliancy-kv",
+                "name": "azdocompliancy-kv02",
                 "enableKeyRotation": false
             }
         }
