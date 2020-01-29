@@ -16,7 +16,7 @@ namespace Functions.Starters
             if (orchestrationClientBase == null)
                 throw new ArgumentNullException(nameof(orchestrationClientBase));
 
-            await orchestrationClientBase.StartNewAsync(nameof(ImpactAnalysisOrchestrator), null)
+            await orchestrationClientBase.StartNewAsync(nameof(ImpactAnalysisOrchestrator))
                 .ConfigureAwait(false);
         }
     }

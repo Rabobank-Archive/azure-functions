@@ -20,7 +20,7 @@ namespace Functions.Starters
             if (starter == null)
                 throw new ArgumentNullException(nameof(starter));
 
-            await starter.StartNewAsync(nameof(DeleteHooksOrchestrator), _config.EventQueueStorageAccountName);
+            await starter.StartNewAsync<string>(nameof(DeleteHooksOrchestrator), _config.EventQueueStorageAccountName);
         }
     }
 }

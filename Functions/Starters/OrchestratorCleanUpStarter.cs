@@ -10,13 +10,13 @@ namespace Functions.Starters
     {
         [FunctionName("OrchestratorCleanUpStarter")]
         public async Task RunAsync(
-            [TimerTrigger("0 0 2 * * *", RunOnStartup=false)] TimerInfo timerInfo, 
+            [TimerTrigger("0 0 2 * * *", RunOnStartup = false)] TimerInfo timerInfo,
             [DurableClient] IDurableOrchestrationClient orchestrationClientBase)
         {
             if (orchestrationClientBase == null)
                 throw new ArgumentNullException(nameof(orchestrationClientBase));
 
-            await orchestrationClientBase.StartNewAsync(nameof(OrchestratorCleanUpOrchestrator), null)
+            await orchestrationClientBase.StartNewAsync(nameof(OrchestratorCleanUpOrchestrator))
                 .ConfigureAwait(false);
         }
     }
