@@ -23,7 +23,7 @@ namespace Functions.Tests.Starters
             await function.RunAsync(timerInfo, orchestrationClient);
 
             //Assert
-            await orchestrationClient.Received().StartNewAsync<object>(nameof(CompletenessOrchestrator), null, null);
+            await orchestrationClient.Received().StartNewAsync<object>(nameof(CompletenessOrchestrator), string.Empty, null);
         }
     }
 }

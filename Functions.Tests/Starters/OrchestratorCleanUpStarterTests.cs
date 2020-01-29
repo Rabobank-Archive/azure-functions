@@ -24,7 +24,7 @@ namespace Functions.Tests.Starters
 
             //Assert
             await orchestrationClient.Received()
-                .StartNewAsync<object>(nameof(OrchestratorCleanUpOrchestrator), null, null);
+                .StartNewAsync<object>(nameof(OrchestratorCleanUpOrchestrator), string.Empty, null);
         }
     }
 }

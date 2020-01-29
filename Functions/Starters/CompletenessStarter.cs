@@ -10,13 +10,13 @@ namespace Functions.Starters
     {
         [FunctionName(nameof(CompletenessStarter))]
         public async Task RunAsync(
-            [TimerTrigger("0 0 3 * * *", RunOnStartup=false)] TimerInfo timerInfo, 
+            [TimerTrigger("0 0 3 * * *", RunOnStartup = false)] TimerInfo timerInfo,
             [DurableClient] IDurableOrchestrationClient orchestrationClientBase)
         {
             if (orchestrationClientBase == null)
                 throw new ArgumentNullException(nameof(orchestrationClientBase));
 
-            await orchestrationClientBase.StartNewAsync(nameof(CompletenessOrchestrator), null)
+            await orchestrationClientBase.StartNewAsync(nameof(CompletenessOrchestrator))
                 .ConfigureAwait(false);
         }
     }

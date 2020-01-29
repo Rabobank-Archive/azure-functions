@@ -20,12 +20,12 @@ namespace Functions.Tests.Starters
 
             //Act
             var fun = new DeleteHooksStarter(config);
-            await fun.RunAsync("", client.Object);
+            await fun.RunAsync(string.Empty, client.Object);
 
             //Assert
             client.Verify(x => x.StartNewAsync<object>(
-                    nameof(DeleteHooksOrchestrator), 
-                    config.EventQueueStorageAccountName, null),
+                    nameof(DeleteHooksOrchestrator)
+                    , string.Empty, config.EventQueueStorageAccountName),
                 Times.Once());
         }
     }

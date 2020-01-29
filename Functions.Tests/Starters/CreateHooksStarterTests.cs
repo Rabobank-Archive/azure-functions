@@ -21,7 +21,7 @@ namespace Functions.Tests.Starters
 
             //Assert
             orchestrationClientMock.Verify(
-                x => x.StartNewAsync<object>(nameof(CreateHooksOrchestrator), null, null),
+                x => x.StartNewAsync<object>(nameof(CreateHooksOrchestrator), string.Empty, null),
                 Times.Once());
         }
     }
