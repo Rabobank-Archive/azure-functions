@@ -32,6 +32,7 @@ namespace Functions.Tests
 
             Environment.SetEnvironmentVariable("CmdbEndpoint", "http://localhost");
             Environment.SetEnvironmentVariable("CmdbApiKey", fixture.Create<string>());
+            Environment.SetEnvironmentVariable("NonProdCiIdentifier", fixture.Create<string>());
 
             var startup = new Startup();
 
