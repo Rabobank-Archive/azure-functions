@@ -42,9 +42,10 @@ namespace Functions
             var organization = GetEnvironmentVariable("organization");
             var cmdbEndpoint = GetEnvironmentVariable("CmdbEndpoint");
             var cmdbApiKey = GetEnvironmentVariable("CmdbApiKey");
+            var nonProdCiIdentifier = GetEnvironmentVariable("NonProdCiIdentifier");
 
             services.AddSingleton<IVstsRestClient>(new VstsRestClient(organization, vstsPat));
-            services.AddSingleton<ICmdbClient>(new CmdbClient(new CmdbClientConfig(cmdbApiKey, cmdbEndpoint, organization)));
+            services.AddSingleton<ICmdbClient>(new CmdbClient(new CmdbClientConfig(cmdbApiKey, cmdbEndpoint, organization, nonProdCiIdentifier)));
 
             services.AddScoped<IMemoryCache>(_ => new MemoryCache(new MemoryCacheOptions()));
             services.AddTransient<IServiceHookScan<ReleaseDeploymentCompletedReport>, ReleaseDeploymentScan>();
