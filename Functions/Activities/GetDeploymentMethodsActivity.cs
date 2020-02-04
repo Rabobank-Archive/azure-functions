@@ -14,7 +14,7 @@ namespace Functions.Activities
         private readonly CloudTableClient _client;
         private readonly EnvironmentConfig _config;
 
-        public GetDeploymentMethodsActivity(CloudTableClient client, 
+        public GetDeploymentMethodsActivity(CloudTableClient client,
             EnvironmentConfig config)
         {
             _client = client;
@@ -51,8 +51,22 @@ namespace Functions.Activities
                 .Select(g => new ProductionItem
                 {
                     ItemId = g.Key,
-                    DeploymentInfo = g.ToList()
-                }).ToList();
+                    DeploymentInfo = g.Select(x => x.CiIdentifier == _config.NonProdCiIdentifier ? ToNonProdCi(x) : x)
+                                      .ToList()
+                })
+                .ToList();
         }
+
+        private static DeploymentMethod ToNonProdCi(DeploymentMethod x) =>
+            new DeploymentMethod(x.RowKey, x.PartitionKey)
+            {
+                CiIdentifier = "NON-PROD",
+                CiName = x.CiName,
+                IsSoxApplication = x.IsSoxApplication,
+                Organization = x.Organization,
+                PipelineId = x.PipelineId,
+                ProjectId = x.ProjectId,
+                StageId = x.StageId
+            };
     }
 }
