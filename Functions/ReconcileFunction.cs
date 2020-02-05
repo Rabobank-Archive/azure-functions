@@ -64,7 +64,7 @@ namespace Functions
             if (!(await HasPermissionToReconcileAsync(project, id, userId)))
                 return new UnauthorizedResult();
 
-            dynamic data = await DeserializeBody(request);
+            var data = await DeserializeBody(request);
 
             switch (scope)
             {
@@ -81,12 +81,10 @@ namespace Functions
             }
         }
 
-        private static async Task<dynamic> DeserializeBody(HttpRequestMessage request)
+        private static async Task<object> DeserializeBody(HttpRequestMessage request)
         {
             if (request.Content == null)
-            {
                 return null;
-            }
 
             var content = await request.Content.ReadAsStringAsync();
 
@@ -175,7 +173,7 @@ namespace Functions
             return new OkResult();
         }
 
-        private async Task<IActionResult> ReconcileItemAsync(string projectId, string ruleName, string item, IEnumerable<IRule> rules, string userId, dynamic data)
+        private async Task<IActionResult> ReconcileItemAsync(string projectId, string ruleName, string item, IEnumerable<IRule> rules, string userId, object data)
         {
             if (string.IsNullOrEmpty(item))
                 throw new ArgumentNullException(nameof(item));
