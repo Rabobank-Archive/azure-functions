@@ -18,6 +18,11 @@ namespace Functions.Activities
             [ActivityTrigger] IDurableActivityContext context,
             [DurableClient] IDurableOrchestrationClient client)
         {
+            if (client == null)
+            {
+                throw new ArgumentNullException(nameof(client));
+            }
+
             const int fromDaysAgo = 30;
             var runtimeStatuses = new List<OrchestrationRuntimeStatus>
             {

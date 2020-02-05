@@ -1,4 +1,4 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <RuleSet Name="SonarQube - Rabobank.TAS.azdo-compliancy-completeness TAS" ToolsVersion="16.0">
-  <Include Path="..\.sonarlint\somecompany.tas.azdo-compliancy-completenesscsharp.ruleset" Action="Default" />
+  <Include Path="..\.sonarlint\azdo-compliancycsharp.ruleset" Action="Default" />
 </RuleSet>
