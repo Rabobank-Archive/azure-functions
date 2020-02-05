@@ -49,7 +49,6 @@ namespace Functions.Tests
             var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
             var config = new EnvironmentConfig { Organization = "somecompany" };
 
-            var json = JsonConvert.SerializeObject(new { ciIdentifier = "CI123444" });
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
 
@@ -124,7 +123,6 @@ namespace Functions.Tests
             var fixture = new Fixture();
             ManageProjectPropertiesPermission(fixture);
 
-            // TODO verify data is passed to rule
             var rule = new Mock<IProjectRule>(MockBehavior.Strict);
             rule
                 .As<IProjectReconcile>()

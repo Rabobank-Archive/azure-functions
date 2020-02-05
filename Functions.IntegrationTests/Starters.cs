@@ -24,10 +24,10 @@ namespace Functions.IntegrationTests
         public async Task ProjectsScan()
         {
             // Arrange
-            var fixture = new Fixture().Customize(new AutoNSubstituteCustomization { ConfigureMembers = true });
+            var fixture = new Fixture().Customize(new AutoNSubstituteCustomization {ConfigureMembers = true});
             fixture.RepeatCount = 1;
 
-            using (var host = new HostBuilder()
+            using var host = new HostBuilder()
                 .ConfigureWebJobs(builder => builder
                     .AddHttp()
                     .AddDurableTask(options => options.HubName = nameof(ProjectsScan))
@@ -37,30 +37,71 @@ namespace Functions.IntegrationTests
                         .AddSingleton(fixture.Create<ILogAnalyticsClient>())
                         .AddSingleton(fixture.Create<ICmdbClient>())
                         .AddSingleton(CloudStorageAccount.DevelopmentStorageAccount.CreateCloudTableClient())
-                        .AddSingleton(Microsoft.Azure.Storage.CloudStorageAccount.DevelopmentStorageAccount.CreateCloudQueueClient())
+                        .AddSingleton(Microsoft.Azure.Storage.CloudStorageAccount.DevelopmentStorageAccount
+                            .CreateCloudQueueClient())
                         .AddSingleton(fixture.Create<EnvironmentConfig>())
                         .AddSingleton(fixture.Create<IRulesProvider>())))
-                    .Build())
+                .Build();
+            await host.StartAsync();
+
+            var jobs = host.Services.GetService<IJobHost>();
+            await jobs
+                .Terminate()
+                .Purge();
+
+            // Act
+            await jobs.CallAsync(nameof(ProjectScanStarter), new Dictionary<string, object>
             {
-                await host.StartAsync();
+                ["timerInfo"] = fixture.Create<TimerInfo>()
+            });
 
-                var jobs = host.Services.GetService<IJobHost>();
-                await jobs
-                    .Terminate()
-                    .Purge();
+            // Assert
+            await jobs
+                .Ready()
+                .ThrowIfFailed()
+                .Purge();
+        }
 
-                // Act
-                await jobs.CallAsync(nameof(ProjectScanStarter), new Dictionary<string, object>
-                {
-                    ["timerInfo"] = fixture.Create<TimerInfo>()
-                });
+        [Fact]
+        public async Task CompletenessScan()
+        {
+            // Arrange
+            var fixture = new Fixture().Customize(new AutoNSubstituteCustomization {ConfigureMembers = true});
+            fixture.RepeatCount = 1;
 
-                // Assert
-                await jobs
-                    .Ready()
-                    .ThrowIfFailed()
-                    .Purge();
-            }
+            using var host = new HostBuilder()
+                .ConfigureWebJobs(builder => builder
+                    .AddHttp()
+                    .AddDurableTask(options => options.HubName = nameof(CompletenessScan))
+                    .AddAzureStorageCoreServices()
+                    .ConfigureServices(services => services
+                        .AddSingleton(fixture.Create<IVstsRestClient>())
+                        .AddSingleton(fixture.Create<ILogAnalyticsClient>())
+                        .AddSingleton(fixture.Create<ICmdbClient>())
+                        .AddSingleton(CloudStorageAccount.DevelopmentStorageAccount.CreateCloudTableClient())
+                        .AddSingleton(Microsoft.Azure.Storage.CloudStorageAccount.DevelopmentStorageAccount
+                            .CreateCloudQueueClient())
+                        .AddSingleton(fixture.Create<EnvironmentConfig>())
+                        .AddSingleton(fixture.Create<IRulesProvider>())))
+                .Build();
+            await host.StartAsync();
+
+            var jobs = host.Services.GetService<IJobHost>();
+            await jobs
+                .Terminate()
+                .Purge();
+
+            // Act
+            await jobs.CallAsync(nameof(CompletenessStarter), new Dictionary<string, object>
+            {
+                ["timerInfo"] = fixture.Create<TimerInfo>()
+            });
+
+            // Assert
+            await jobs
+                .Ready()
+                .ThrowIfFailed()
+                .Purge();
         }
     }
 }

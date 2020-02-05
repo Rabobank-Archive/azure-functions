@@ -5,6 +5,7 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -13,7 +14,6 @@ using System.Web;
 using Functions.Activities;
 using Microsoft.Azure.Cosmos.Table;
 using Requests = SecurePipelineScan.VstsService.Requests;
-using System.IO;
 using Newtonsoft.Json;
 using SecurePipelineScan.Rules.Security.Cmdb.Client;
 
@@ -64,7 +64,7 @@ namespace Functions
             if (!(await HasPermissionToReconcileAsync(project, id, userId)))
                 return new UnauthorizedResult();
 
-            var data = await DeserializeBody(request);
+            var data = await DeserializeBodyAsync(request);
 
             switch (scope)
             {
@@ -81,13 +81,12 @@ namespace Functions
             }
         }
 
-        private static async Task<object> DeserializeBody(HttpRequestMessage request)
+        private static async Task<object> DeserializeBodyAsync(HttpRequestMessage request)
         {
             if (request.Content == null)
                 return null;
 
-            var content = await request.Content.ReadAsStringAsync();
-
+            var content = await request.Content.ReadAsStringAsync().ConfigureAwait(false);
             return JsonConvert.DeserializeObject(content);
         }
 
@@ -173,7 +172,7 @@ namespace Functions
             return new OkResult();
         }
 
-        private async Task<IActionResult> ReconcileItemAsync(string projectId, string ruleName, string item, IEnumerable<IRule> rules, string userId, object data)
+        private async Task<IActionResult> ReconcileItemAsync(string projectId, string ruleName, string item, IEnumerable rules, string userId, object data)
         {
             if (string.IsNullOrEmpty(item))
                 throw new ArgumentNullException(nameof(item));

@@ -18,6 +18,11 @@ namespace Functions.Activities
             [ActivityTrigger] IDurableActivityContext context,
             [DurableClient] IDurableOrchestrationClient client)
         {
+            if (client == null)
+            {
+                throw new ArgumentNullException(nameof(client));
+            }
+
             const int fromDaysAgo = 30;
             var runtimeStatuses = new List<OrchestrationRuntimeStatus>
             {
@@ -27,8 +32,7 @@ namespace Functions.Activities
                 OrchestrationRuntimeStatus.Failed,
                 OrchestrationRuntimeStatus.Pending,
                 OrchestrationRuntimeStatus.Running,
-                OrchestrationRuntimeStatus.Terminated,
-                OrchestrationRuntimeStatus.Unknown
+                OrchestrationRuntimeStatus.Terminated
             };
 
             var supervisors = new List<Orchestrator>();

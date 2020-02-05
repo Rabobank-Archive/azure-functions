@@ -59,7 +59,7 @@ namespace Functions.Tests.Activities
 
             //Act
             var func = new GetOrchestratorsToScanActivity();
-            (var supervisors, var projectScanOrchestrators) = await func.RunAsync(null, client);
+            var (supervisors, projectScanOrchestrators) = await func.RunAsync(null, client);
 
             //Assert
             supervisors.Count.ShouldBe(1);
