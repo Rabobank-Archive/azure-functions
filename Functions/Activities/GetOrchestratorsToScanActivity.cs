@@ -32,8 +32,7 @@ namespace Functions.Activities
                 OrchestrationRuntimeStatus.Failed,
                 OrchestrationRuntimeStatus.Pending,
                 OrchestrationRuntimeStatus.Running,
-                OrchestrationRuntimeStatus.Terminated,
-                OrchestrationRuntimeStatus.Unknown
+                OrchestrationRuntimeStatus.Terminated
             };
 
             var supervisors = new List<Orchestrator>();
