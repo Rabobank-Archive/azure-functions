@@ -11,6 +11,7 @@ namespace Functions.Activities
 {
     public class GetDeploymentMethodsActivity
     {
+        private const string NONPROD = "NON-PROD";
         private readonly CloudTableClient _client;
         private readonly EnvironmentConfig _config;
 
@@ -60,13 +61,13 @@ namespace Functions.Activities
         private static DeploymentMethod ToNonProdCi(DeploymentMethod x) =>
             new DeploymentMethod(x.RowKey, x.PartitionKey)
             {
-                CiIdentifier = "NON-PROD",
+                CiIdentifier = NONPROD,
                 CiName = x.CiName,
                 IsSoxApplication = x.IsSoxApplication,
                 Organization = x.Organization,
                 PipelineId = x.PipelineId,
                 ProjectId = x.ProjectId,
-                StageId = x.StageId
+                StageId = NONPROD
             };
     }
 }

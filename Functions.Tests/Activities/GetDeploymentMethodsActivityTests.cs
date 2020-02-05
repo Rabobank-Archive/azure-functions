@@ -189,7 +189,7 @@ namespace Functions.Tests.Activities
 
             //Assert
             result.Count.ShouldBe(3);
-            result.ShouldContain(x => x.DeploymentInfo.Any(d => d.CiIdentifier == "NON-PROD"));
+            result.ShouldContain(x => x.DeploymentInfo.Any(d => d.CiIdentifier == "NON-PROD" && d.StageId == "NON-PROD"));
         }
 
         private static async Task CreateDummyTable(CloudTable table, string organization,
