@@ -67,7 +67,8 @@ namespace Functions
                 Organization = organization,
                 FunctionAppHostname = functionAppUrl,
                 EventQueueStorageAccountName = storage.Credentials.AccountName,
-                EventQueueStorageAccountKey = Convert.ToBase64String(storage.Credentials.ExportKey())
+                EventQueueStorageAccountKey = Convert.ToBase64String(storage.Credentials.ExportKey()),
+                NonProdCiIdentifier = nonProdCiIdentifier
             };
 
             services.AddSingleton(config);

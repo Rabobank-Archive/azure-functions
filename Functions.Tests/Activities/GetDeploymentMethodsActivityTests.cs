@@ -6,6 +6,7 @@ using Functions.Activities;
 using AutoFixture;
 using Microsoft.Azure.Cosmos.Table;
 using Response = SecurePipelineScan.VstsService.Response;
+using System.Linq;
 
 namespace Functions.Tests.Activities
 {
@@ -157,6 +158,38 @@ namespace Functions.Tests.Activities
 
             //Assert
             result.Count.ShouldBe(0);
+        }
+
+        [Fact]
+        public async Task ShouldReturnNonProdForNonProdCI()
+        {
+            // Arrange 
+            var storage = CloudStorageAccount.Parse("UseDevelopmentStorage=true");
+            var client = storage.CreateCloudTableClient();
+            var table = client.GetTableReference("DeploymentMethod");
+
+            var fixture = new Fixture();
+            var project = fixture.Create<Response.Project>();
+            var organization = fixture.Create<string>();
+
+            await CreateDummyTable(table, organization, project.Id, 2)
+                .ConfigureAwait(false);
+
+            fixture.Customize<DeploymentMethod>(ctx => ctx
+                .With(x => x.Organization, organization)
+                .With(x => x.ProjectId, project.Id)
+                .With(x => x.CiIdentifier, "CI12345"));
+
+            await table.ExecuteAsync(TableOperation.Insert(fixture.Create<DeploymentMethod>())).ConfigureAwait(false); ;
+
+            // Act
+            var fun = new GetDeploymentMethodsActivity(client,
+                new EnvironmentConfig { Organization = organization, NonProdCiIdentifier = "CI12345" });
+            var result = await fun.RunAsync(project.Id);
+
+            //Assert
+            result.Count.ShouldBe(3);
+            result.ShouldContain(x => x.DeploymentInfo.Any(d => d.CiIdentifier == "NON-PROD" && d.StageId == "NON-PROD"));
         }
 
         private static async Task CreateDummyTable(CloudTable table, string organization,
