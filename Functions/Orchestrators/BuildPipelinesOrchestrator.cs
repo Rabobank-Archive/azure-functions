@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -24,7 +25,8 @@ namespace Functions.Orchestrators
         public async Task<IList<ProductionItem>> RunAsync(
             [OrchestrationTrigger] IDurableOrchestrationContext context)
         {
-            var (project, productionItems) = context.GetInput<(Project, List<ProductionItem>)>();
+            var (project, productionItems, scanDate) = 
+                context.GetInput<(Project, List<ProductionItem>, DateTime)>();
 
             context.SetCustomStatus(new ScanOrchestrationStatus
             {
@@ -48,7 +50,7 @@ namespace Functions.Orchestrators
             };
 
             await context.CallActivityAsync(nameof(UploadPreventiveRuleLogsActivity),
-                data.Flatten(RuleScopes.BuildPipelines, context.InstanceId));
+                data.Flatten(RuleScopes.BuildPipelines, context.InstanceId, project.Id, scanDate));
 
             await context.CallActivityAsync(nameof(UploadExtensionDataActivity),
                 (buildPipelines: data, RuleScopes.BuildPipelines));

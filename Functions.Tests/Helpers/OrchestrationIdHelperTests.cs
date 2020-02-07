@@ -13,12 +13,12 @@ namespace Functions.Tests.Helpers
             var instanceId = "blablabla";
 
             //Act
-            var result = GetSupervisorId(instanceId);
+            var result = GetSuperVisorIdForScopeOrchestrator(instanceId);
 
             //Assert
             result.ShouldBeNull();
         }
-        
+
         [Fact]
         public void ProjectScanOrchestrationIdShouldReturnSupervisorId()
         {
@@ -28,12 +28,12 @@ namespace Functions.Tests.Helpers
             var instanceId = CreateProjectScanOrchestrationId(supervisorId, projectId);
 
             //Act
-            var result = GetSupervisorId(instanceId);
+            var result = GetSuperVisorIdForProjectOrchestrator(instanceId);
 
             //Assert
             result.ShouldBe(supervisorId);
         }
-        
+
         [Fact]
         public void ProjectScanScopeOrchestrationIdShouldReturnSupervisorId()
         {
@@ -46,7 +46,7 @@ namespace Functions.Tests.Helpers
                 scope);
 
             //Act
-            var result = GetSupervisorId(instanceId);
+            var result = GetSuperVisorIdForScopeOrchestrator(instanceId);
 
             //Assert
             result.ShouldBe(supervisorId);

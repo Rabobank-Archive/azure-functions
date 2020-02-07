@@ -20,7 +20,7 @@ namespace Functions.Activities
             var allProjectScanners = input.Item2;
 
             return allProjectScanners
-                .Where(i => OrchestrationHelper.GetSupervisorId(i.InstanceId) == supervisor.InstanceId)
+                .Where(i => OrchestrationHelper.GetSuperVisorIdForProjectOrchestrator(i.InstanceId) == supervisor.InstanceId)
                 .ToList();
         }
     }
