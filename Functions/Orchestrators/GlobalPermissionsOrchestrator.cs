@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using SecurePipelineScan.Rules.Security;
 using Response = SecurePipelineScan.VstsService.Response;
+using System;
 
 namespace Functions.Orchestrators
 {
@@ -21,7 +22,8 @@ namespace Functions.Orchestrators
         [FunctionName(nameof(GlobalPermissionsOrchestrator))]
         public async Task RunAsync([OrchestrationTrigger]IDurableOrchestrationContext context)
         {
-            var (project, productionItems) = context.GetInput<(Response.Project, List<ProductionItem>)>();
+            var (project, productionItems, scanDate) = 
+                context.GetInput<(Response.Project, List<ProductionItem>, DateTime)>();
 
             context.SetCustomStatus(new ScanOrchestrationStatus
             {
@@ -46,7 +48,7 @@ namespace Functions.Orchestrators
             };
 
             await context.CallActivityAsync(nameof(UploadPreventiveRuleLogsActivity), 
-                data.Flatten(RuleScopes.GlobalPermissions, context.InstanceId));
+                data.Flatten(RuleScopes.GlobalPermissions, context.InstanceId, project.Id, scanDate));
 
             await context.CallActivityAsync(nameof(UploadExtensionDataActivity), 
                 (permissions: data, RuleScopes.GlobalPermissions));

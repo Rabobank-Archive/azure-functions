@@ -123,7 +123,7 @@ namespace Functions.Tests.Starters
             await function.RunAsync(request, "somecompany", "TAS", RuleScopes.GlobalPermissions, mock.Object);
 
             mock.Verify(x => x.StartNewAsync<object>(nameof(ProjectScanOrchestrator),string.Empty,
-                It.Is<(Response.Project, string)>(t => t.Item1 == project && t.Item2 == RuleScopes.GlobalPermissions)));
+                It.Is<(Response.Project, string, DateTime)>(t => t.Item1 == project && t.Item2 == RuleScopes.GlobalPermissions)));
         }
 
         [Fact]
@@ -152,7 +152,7 @@ namespace Functions.Tests.Starters
             await function.RunAsync(request, "somecompany", "TAS", RuleScopes.Repositories, mock.Object);
 
             mock.Verify(x => x.StartNewAsync<object>(nameof(ProjectScanOrchestrator),string.Empty,
-                It.Is<(Response.Project, string)>(t => t.Item1 == project && t.Item2 == RuleScopes.Repositories)));
+                It.Is<(Response.Project, string, DateTime)>(t => t.Item1 == project && t.Item2 == RuleScopes.Repositories)));
         }
 
         [Fact]
@@ -181,7 +181,7 @@ namespace Functions.Tests.Starters
             await function.RunAsync(request, "somecompany", "TAS", RuleScopes.BuildPipelines, mock.Object);
 
             mock.Verify(x => x.StartNewAsync<object>(nameof(ProjectScanOrchestrator), string.Empty,
-                It.Is<(Response.Project, string)>(t => t.Item1 == project && t.Item2 == RuleScopes.BuildPipelines)));
+                It.Is<(Response.Project, string, DateTime)>(t => t.Item1 == project && t.Item2 == RuleScopes.BuildPipelines)));
         }
 
         [Fact]
@@ -209,7 +209,7 @@ namespace Functions.Tests.Starters
             await function.RunAsync(request, "somecompany", "TAS", RuleScopes.ReleasePipelines, mock.Object);
 
             mock.Verify(x => x.StartNewAsync<object>(nameof(ProjectScanOrchestrator),string.Empty,
-                It.Is<(Response.Project, string)>(t => t.Item1 == project && t.Item2 == RuleScopes.ReleasePipelines)));
+                It.Is<(Response.Project, string, DateTime)>(t => t.Item1 == project && t.Item2 == RuleScopes.ReleasePipelines)));
         }
 
         private static ClaimsPrincipal PrincipalWithClaims() =>

@@ -38,7 +38,7 @@ namespace Functions.Activities
                     .Count(x => x.RuntimeStatus == OrchestrationRuntimeStatus.Completed),
                 FailedProjectIds = string.Join(", ", projectScanners
                     .Where(x => x.RuntimeStatus != OrchestrationRuntimeStatus.Completed)
-                    .Select(x => OrchestrationHelper.GetProjectId(x.InstanceId)))
+                    .Select(x => OrchestrationHelper.GetProjectIdForProjectOrchestrator(x.InstanceId)))
             };
         }
     }

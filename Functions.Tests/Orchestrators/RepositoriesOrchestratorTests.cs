@@ -26,8 +26,8 @@ namespace Functions.Tests.Orchestrators
 
             var starter = mocks.Create<IDurableOrchestrationContext>();
             starter
-                .Setup(x => x.GetInput<(Project, List<ProductionItem>)>())
-                .Returns(fixture.Create<(Project, List<ProductionItem>)>());
+                .Setup(x => x.GetInput<(Project, List<ProductionItem>, DateTime)>())
+                .Returns(fixture.Create<(Project, List<ProductionItem>, DateTime)>());
 
             starter
                 .Setup(x => x.InstanceId)
