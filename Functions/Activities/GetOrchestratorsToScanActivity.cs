@@ -49,16 +49,16 @@ namespace Functions.Activities
             string continuationToken;
             do
             {
-                var orchestrationStatusQueryResult =
+                var queryResult =
                     await client.GetStatusAsync(condition, default).ConfigureAwait(false);
-                supervisors.AddRange(orchestrationStatusQueryResult.DurableOrchestrationState
+                supervisors.AddRange(queryResult.DurableOrchestrationState
                     .Where(x => x.Name == nameof(ProjectScanSupervisor))
                     .Select(OrchestrationHelper.ConvertToOrchestrator));
-                projectScanners.AddRange(orchestrationStatusQueryResult.DurableOrchestrationState
+                projectScanners.AddRange(queryResult.DurableOrchestrationState
                     .Where(x => x.Name == nameof(ProjectScanOrchestrator))
                     .Select(OrchestrationHelper.ConvertToOrchestrator));
-                continuationToken = orchestrationStatusQueryResult.ContinuationToken;
-
+                continuationToken = queryResult.ContinuationToken;
+                condition.ContinuationToken = continuationToken;
             } while (Encoding.UTF8.GetString(Convert.FromBase64String(continuationToken)) != "null");
 
             return (supervisors, projectScanners);
