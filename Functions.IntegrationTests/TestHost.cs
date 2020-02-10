@@ -11,7 +11,7 @@ using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SecurePipelineScan.Rules.Security;
-using SecurePipelineScan.Rules.Security.Cmdb.Client;
+using Functions.Cmdb.Client;
 using SecurePipelineScan.VstsService;
 using Xunit;
 

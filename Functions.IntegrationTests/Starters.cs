@@ -12,7 +12,7 @@ using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SecurePipelineScan.Rules.Security;
-using SecurePipelineScan.Rules.Security.Cmdb.Client;
+using Functions.Cmdb.Client;
 using SecurePipelineScan.VstsService;
 using Xunit;
 
@@ -24,7 +24,7 @@ namespace Functions.IntegrationTests
         public async Task ProjectsScan()
         {
             // Arrange
-            var fixture = new Fixture().Customize(new AutoNSubstituteCustomization {ConfigureMembers = true});
+            var fixture = new Fixture().Customize(new AutoNSubstituteCustomization { ConfigureMembers = true });
             fixture.RepeatCount = 1;
 
             using var host = new HostBuilder()
@@ -66,7 +66,7 @@ namespace Functions.IntegrationTests
         public async Task CompletenessScan()
         {
             // Arrange
-            var fixture = new Fixture().Customize(new AutoNSubstituteCustomization {ConfigureMembers = true});
+            var fixture = new Fixture().Customize(new AutoNSubstituteCustomization { ConfigureMembers = true });
             fixture.RepeatCount = 1;
 
             using var host = new HostBuilder()

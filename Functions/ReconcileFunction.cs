@@ -15,7 +15,7 @@ using Functions.Activities;
 using Microsoft.Azure.Cosmos.Table;
 using Requests = SecurePipelineScan.VstsService.Requests;
 using Newtonsoft.Json;
-using SecurePipelineScan.Rules.Security.Cmdb.Client;
+using Functions.Cmdb.Client;
 
 namespace Functions
 {
@@ -75,7 +75,7 @@ namespace Functions
                 case RuleScopes.BuildPipelines:
                     return await ReconcileItemAsync(project, ruleName, item, _ruleProvider.BuildRules(_vstsClient), userId, data);
                 case RuleScopes.ReleasePipelines:
-                    return await ReconcileItemAsync(project, ruleName, item, _ruleProvider.ReleaseRules(_vstsClient, _cmdbClient), userId, data);
+                    return await ReconcileItemAsync(project, ruleName, item, _ruleProvider.ReleaseRules(_vstsClient, null), userId, data);
                 default:
                     return new NotFoundObjectResult(scope);
             }

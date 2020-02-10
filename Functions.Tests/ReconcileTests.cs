@@ -4,7 +4,7 @@ using Microsoft.Azure.Cosmos.Table;
 using Moq;
 using Newtonsoft.Json;
 using SecurePipelineScan.Rules.Security;
-using SecurePipelineScan.Rules.Security.Cmdb.Client;
+using Functions.Cmdb.Client;
 using SecurePipelineScan.VstsService;
 using Shouldly;
 using System.Linq;

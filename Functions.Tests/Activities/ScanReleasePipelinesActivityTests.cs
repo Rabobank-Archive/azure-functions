@@ -7,13 +7,13 @@ using AutoFixture.Kernel;
 using Functions.Activities;
 using Functions.Model;
 using Moq;
-using SecurePipelineScan.Rules.Security;
-using SecurePipelineScan.Rules.Security.Cmdb.Client;
+using Functions.Cmdb.Client;
 using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Response;
 using Shouldly;
 using Xunit;
 using Task = System.Threading.Tasks.Task;
+using SecurePipelineScan.Rules.Security;
 
 namespace Functions.Tests.Activities
 {
@@ -191,7 +191,7 @@ namespace Functions.Tests.Activities
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
             var provider = new Mock<IRulesProvider>();
             provider
-                .Setup(x => x.ReleaseRules(It.IsAny<IVstsRestClient>(), It.IsAny<ICmdbClient>()))
+                .Setup(x => x.ReleaseRules(It.IsAny<IVstsRestClient>(), null))
                 .Returns(fixture.CreateMany<IReleasePipelineRule>())
                 .Verifiable();
 
@@ -218,7 +218,7 @@ namespace Functions.Tests.Activities
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
             var provider = new Mock<IRulesProvider>();
             provider
-                .Setup(x => x.ReleaseRules(It.IsAny<IVstsRestClient>(), It.IsAny<ICmdbClient>()))
+                .Setup(x => x.ReleaseRules(It.IsAny<IVstsRestClient>(), null))
                 .Returns(fixture.CreateMany<IReleasePipelineRule>())
                 .Verifiable();
 
@@ -247,7 +247,7 @@ namespace Functions.Tests.Activities
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
             var provider = new Mock<IRulesProvider>();
             provider
-                .Setup(x => x.ReleaseRules(It.IsAny<IVstsRestClient>(), It.IsAny<ICmdbClient>()))
+                .Setup(x => x.ReleaseRules(It.IsAny<IVstsRestClient>(), null))
                 .Returns(fixture.CreateMany<IReleasePipelineRule>())
                 .Verifiable();
 
@@ -288,7 +288,7 @@ namespace Functions.Tests.Activities
             }
 
             provider
-                .Setup(x => x.ReleaseRules(It.IsAny<IVstsRestClient>(), It.IsAny<ICmdbClient>()))
+                .Setup(x => x.ReleaseRules(It.IsAny<IVstsRestClient>(), null))
                 .Returns(rules.Select(r => r.Object))
                 .Verifiable();
             return provider.Object;

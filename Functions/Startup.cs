@@ -11,7 +11,7 @@ using System.Net.Http;
 using LogAnalytics.Client;
 using Microsoft.Azure.Cosmos.Table;
 using Microsoft.Azure.Storage.Queue;
-using SecurePipelineScan.Rules.Security.Cmdb.Client;
+using Functions.Cmdb.Client;
 
 [assembly: WebJobsStartup(typeof(Functions.Startup))]
 
