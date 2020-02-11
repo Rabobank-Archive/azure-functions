@@ -12,6 +12,7 @@ using LogAnalytics.Client;
 using Microsoft.Azure.Cosmos.Table;
 using Microsoft.Azure.Storage.Queue;
 using Functions.Cmdb.Client;
+using Functions.ProductionItems;
 
 [assembly: WebJobsStartup(typeof(Functions.Startup))]
 
@@ -72,10 +73,13 @@ namespace Functions
             };
 
             services.AddSingleton(config);
-            services.AddSingleton<IRulesProvider, RulesProvider>();
             services.AddSingleton<ITokenizer>(new Tokenizer(GetEnvironmentVariable("TOKEN_SECRET")));
 
+            services.AddDefaultRules();
             services.AddSingleton(new HttpClient());
+
+            services.AddSingleton<IDeploymentMethodsRepository, DeploymentMethodsRepository>();
+            services.AddTransient<IProductionItems, ProductionItemsResolver>();
         }
 
         private static string GetEnvironmentVariable(string variableName)

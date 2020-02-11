@@ -14,9 +14,8 @@ namespace Functions.Activities
         public GetRepositoriesAndPoliciesActivity(IVstsRestClient azuredo) => _azuredo = azuredo;
 
         [FunctionName(nameof(GetRepositoriesAndPoliciesActivity))]
-        public (IEnumerable<Response.Repository>, IEnumerable<Response.MinimumNumberOfReviewersPolicy>)
+        public IEnumerable<Response.Repository>
             Run([ActivityTrigger] Response.Project project) =>
-                (_azuredo.Get(Repository.Repositories(project.Id)),
-                _azuredo.Get(Policies.MinimumNumberOfReviewersPolicies(project.Id)));
+                _azuredo.Get(Repository.Repositories(project.Id));
     }
 }

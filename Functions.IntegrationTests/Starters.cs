@@ -40,7 +40,7 @@ namespace Functions.IntegrationTests
                         .AddSingleton(Microsoft.Azure.Storage.CloudStorageAccount.DevelopmentStorageAccount
                             .CreateCloudQueueClient())
                         .AddSingleton(fixture.Create<EnvironmentConfig>())
-                        .AddSingleton(fixture.Create<IRulesProvider>())))
+                        .AddDefaultRules()))
                 .Build();
             await host.StartAsync();
 
@@ -82,7 +82,7 @@ namespace Functions.IntegrationTests
                         .AddSingleton(Microsoft.Azure.Storage.CloudStorageAccount.DevelopmentStorageAccount
                             .CreateCloudQueueClient())
                         .AddSingleton(fixture.Create<EnvironmentConfig>())
-                        .AddSingleton(fixture.Create<IRulesProvider>())))
+                        .AddDefaultRules()))
                 .Build();
             await host.StartAsync();
 

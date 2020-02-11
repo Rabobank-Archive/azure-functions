@@ -27,15 +27,13 @@ namespace Functions.Tests.Activities
 
             var project = fixture.Create<Project>();
             var activity = new GetRepositoriesAndPoliciesActivity(client.Object);
-            
+
             // Act
-            var (repositories, policies) = activity.Run(project);
-            
+            var repositories = activity.Run(project);
+
             // Assert
             repositories.ShouldNotBeNull();
             repositories.ShouldNotBeEmpty();
-            policies.ShouldNotBeNull();
-            policies.ShouldNotBeEmpty();
         }
     }
 }

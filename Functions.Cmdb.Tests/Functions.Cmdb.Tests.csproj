@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Functions\Functions.csproj" />
+    <ProjectReference Include="..\Functions.Cmdb\Functions.Cmdb.csproj" />
   </ItemGroup>
 
   <ItemGroup>

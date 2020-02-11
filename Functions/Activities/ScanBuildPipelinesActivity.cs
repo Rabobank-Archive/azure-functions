@@ -1,27 +1,25 @@
 ﻿using Functions.Model;
 using Microsoft.Azure.WebJobs;
 using SecurePipelineScan.Rules.Security;
-using SecurePipelineScan.VstsService;
 using Response = SecurePipelineScan.VstsService.Response;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
+using System.Collections.Generic;
 
 namespace Functions.Activities
 {
     public class ScanBuildPipelinesActivity
     {
-        private readonly IRulesProvider _rulesProvider;
+        private readonly IEnumerable<IBuildPipelineRule> _rules;
         private readonly EnvironmentConfig _config;
-        private readonly IVstsRestClient _azuredo;
 
-        public ScanBuildPipelinesActivity(EnvironmentConfig config, IVstsRestClient azuredo,
-            IRulesProvider rulesProvider)
+        public ScanBuildPipelinesActivity(EnvironmentConfig config,
+            IEnumerable<IBuildPipelineRule> rules)
         {
             _config = config;
-            _azuredo = azuredo;
-            _rulesProvider = rulesProvider;
+            _rules = rules;
         }
 
         [FunctionName(nameof(ScanBuildPipelinesActivity))]
@@ -35,19 +33,18 @@ namespace Functions.Activities
             var buildPipeline = input.Item2;
             var ciIdentifiers = input.Item3;
 
-            var rules = _rulesProvider.BuildRules(_azuredo).ToList();
-
             return new ItemExtensionData
             {
                 Item = buildPipeline.Name,
                 ItemId = buildPipeline.Id,
-                Rules = await Task.WhenAll(rules.Select(async rule =>
+                Rules = await Task.WhenAll(_rules.Select(async rule =>
                     new EvaluatedRule
                     {
                         Name = rule.GetType().Name,
                         Description = rule.Description,
                         Link = rule.Link,
-                        IsSox = rule.IsSox,
+                        // TODO: fix IsSox
+                        IsSox = false,
                         Status = await rule.EvaluateAsync(project, buildPipeline)
                             .ConfigureAwait(false),
                         Reconcile = ReconcileFunction.ReconcileFromRule(rule as IReconcile, _config,

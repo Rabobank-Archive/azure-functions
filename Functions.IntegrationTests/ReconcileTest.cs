@@ -6,6 +6,7 @@ using AzureFunctions.TestHelpers;
 using Dynamitey.DynamicObjects;
 using Functions.Model;
 using Microsoft.Azure.Cosmos.Table;
+using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json.Linq;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
@@ -92,35 +93,46 @@ namespace Functions.IntegrationTests
             return response.SelectToken("token");
         }
 
-        public static IEnumerable<object[]> ReleaseRules() =>
-            Rules(p => p.ReleaseRules(null, null),
-                RuleScopes.ReleasePipelines,
+        public static IEnumerable<object[]> ReleaseRules() => Rules(
+                new string[] { "NobodyCanDeleteReleases",
+                               "NobodyCanManageApprovalsAndCreateReleases",
+                               "PipelineHasRequiredRetentionPolicy",
+                               "ReleasePipelineUsesBuildArtifact",
+                               "ProductionStageUsesArtifactFromSecureBranch",
+                               "PipelineHasAtLeastOneStageWithApproval",
+                               "ReleasePipelineHasSm9ChangeTask",
+                               "ReleasePipelineHasDeploymentMethod"}, RuleScopes.ReleasePipelines,
                 new TestConfig().ReleasePipelineId);
 
         public static IEnumerable<object[]> BuildRules() =>
-            Rules(p => p.BuildRules(null),
+            Rules(new string[] {
+                "NobodyCanDeleteBuilds",
+                "ArtifactIsStoredSecure",
+                "BuildPipelineHasSonarqubeTask",
+                "BuildPipelineHasFortifyTask",
+                "BuildPipelineHasNexusIqTask",
+                "BuildPipelineHasCredScanTask"},
                 RuleScopes.BuildPipelines,
                 new TestConfig().BuildPipelineId);
 
         public static IEnumerable<object[]> RepositoryRules() =>
-            Rules(p => p.RepositoryRules(null),
+            Rules(new string[] { "NobodyCanDeleteTheRepository", "ReleaseBranchesProtectedByPolicies", "NobodyCanBypassPolicies" },
                 RuleScopes.Repositories,
                 new TestConfig().RepositoryId);
 
         public static IEnumerable<object[]> GlobalPermissions() =>
-            Rules(p => p.GlobalPermissions(null),
+            Rules(new string[] { "NobodyCanDeleteTheTeamProject", "ShouldBlockPlainTextCredentialsInPipelines" },
                 RuleScopes.GlobalPermissions,
                 "");
 
-        private static IEnumerable<object[]> Rules(Func<IRulesProvider, IEnumerable<IRule>> rules, string scope, string item)
+        private static IEnumerable<object[]> Rules(IEnumerable<string> rules, string scope, string item)
         {
-            var provider = new RulesProvider();
             var skip = new string[]
             {
                 // List rules you want to skip
             };
 
-            foreach (var rule in rules(provider).Select(x => x.GetType().Name).Except(skip))
+            foreach (var rule in rules.Except(skip))
             {
                 yield return new object[] { scope, rule, item };
             }

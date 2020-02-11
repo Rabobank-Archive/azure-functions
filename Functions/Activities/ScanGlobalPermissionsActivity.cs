@@ -1,27 +1,25 @@
 using Functions.Model;
 using Microsoft.Azure.WebJobs;
 using SecurePipelineScan.Rules.Security;
-using SecurePipelineScan.VstsService;
 using Response = SecurePipelineScan.VstsService.Response;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
+using System.Collections.Generic;
 
 namespace Functions.Activities
 {
     public class ScanGlobalPermissionsActivity
     {
-        private readonly IVstsRestClient _azuredo;
         private readonly EnvironmentConfig _config;
-        private readonly IRulesProvider _rulesProvider;
+        private readonly IEnumerable<IProjectRule> _rules;
 
-        public ScanGlobalPermissionsActivity(IVstsRestClient azuredo,
-            EnvironmentConfig config, IRulesProvider rulesProvider)
+        public ScanGlobalPermissionsActivity(
+            EnvironmentConfig config, IEnumerable<IProjectRule> rules)
         {
-            _azuredo = azuredo;
             _config = config;
-            _rulesProvider = rulesProvider;
+            _rules = rules;
         }
 
         [FunctionName(nameof(ScanGlobalPermissionsActivity))]
@@ -34,19 +32,18 @@ namespace Functions.Activities
             var project = input.Item1;
             var ciIdentifiers = input.Item2;
 
-            var rules = _rulesProvider.GlobalPermissions(_azuredo);
-
             return new ItemExtensionData
             {
                 Item = null,
                 ItemId = null,
-                Rules = await Task.WhenAll(rules.Select(async r =>
+                Rules = await Task.WhenAll(_rules.Select(async r =>
                     new EvaluatedRule
                     {
                         Name = r.GetType().Name,
                         Description = r.Description,
                         Link = r.Link,
-                        IsSox = r.IsSox,
+                        // TODO: fix IsSox
+                        IsSox = false,
                         Status = await r.EvaluateAsync(project.Id)
                             .ConfigureAwait(false),
                         Reconcile = ReconcileFunction.ReconcileFromRule(

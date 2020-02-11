@@ -37,7 +37,7 @@ namespace Functions.IntegrationTests
                     .ConfigureServices(services => services
                         .AddSingleton<ITokenizer>(new Tokenizer(TestConfig.ExtensionSecret))
                         .AddSingleton<IVstsRestClient>(new VstsRestClient(TestConfig.Organization, TestConfig.Token))
-                        .AddSingleton<IRulesProvider>(new RulesProvider())
+                        .AddDefaultRules()
                         .AddSingleton(fixture.Create<ILogAnalyticsClient>())
                         .AddSingleton(fixture.Create<ICmdbClient>())
                         .AddSingleton(environMentConfig)
