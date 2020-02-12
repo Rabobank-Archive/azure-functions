@@ -15,6 +15,8 @@ using Functions.Cmdb.Client;
 using SecurePipelineScan.VstsService;
 using Xunit;
 using SecurePipelineScan.VstsService.Security;
+using Functions.Cmdb.ProductionItems;
+using Functions.Helpers;
 
 namespace Functions.IntegrationTests
 {
@@ -43,7 +45,12 @@ namespace Functions.IntegrationTests
                         .AddSingleton(fixture.Create<ICmdbClient>())
                         .AddSingleton(environMentConfig)
                         .AddSingleton(CloudStorageAccount.DevelopmentStorageAccount.CreateCloudTableClient())
-                        .AddSingleton(Microsoft.Azure.Storage.CloudStorageAccount.DevelopmentStorageAccount.CreateCloudQueueClient())))
+                        .AddSingleton(Microsoft.Azure.Storage.CloudStorageAccount.DevelopmentStorageAccount.CreateCloudQueueClient())
+                        .AddSingleton<IProductionItemsRepository, ProductionItemsRepository>()
+                        .AddTransient<IProductionItemsResolver, ProductionItemsResolver>()
+                        .AddSingleton<ISoxLookup, SoxLookup>()
+                        .AddTransient<IReleasePipelineHasDeploymentMethodReconciler, ReleasePipelineHasDeploymentMethodReconciler>()
+                        ))
                 .Build();
         }
 

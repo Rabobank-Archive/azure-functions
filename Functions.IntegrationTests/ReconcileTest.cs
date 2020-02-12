@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -6,8 +5,6 @@ using AzureFunctions.TestHelpers;
 using Dynamitey.DynamicObjects;
 using Functions.Model;
 using Microsoft.Azure.Cosmos.Table;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json.Linq;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
@@ -24,9 +21,6 @@ namespace Functions.IntegrationTests
         {
             _config = new TestConfig();
             _host = host;
-
-            // TODO: kijken of we hiermee de tests kunnen uitvoeren
-            // var releasePipelineRules = (_host as IHost).Services.GetServices(typeof(IReleasePipelineRule));
         }
 
         [Theory]
