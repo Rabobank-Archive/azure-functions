@@ -3,7 +3,6 @@ using System.Collections.Generic;
 
 namespace Functions.Helpers
 {
-
     public class SoxLookup : ISoxLookup
     {
         private HashSet<string> _soxRules => new HashSet<string>

@@ -54,7 +54,7 @@ namespace Functions
             if (isProdConfigurationItem && !IsUserEntitledForCi(user, assignmentGroup))
                 return new UnauthorizedResult();
 
-            var stages = await _productionItemsResolver.ResolveAsync(projectId, itemId);
+            var stages = await _productionItemsResolver.ResolveAsync(projectId, itemId).ConfigureAwait(false);
 
             foreach (var stage in stages)
                 await UpdateDeploymentMethodAsync(projectId, itemId, stage, ci).ConfigureAwait(false);
