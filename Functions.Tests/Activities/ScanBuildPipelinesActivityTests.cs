@@ -6,6 +6,7 @@ using Response = SecurePipelineScan.VstsService.Response;
 using Shouldly;
 using System.Threading.Tasks;
 using Xunit;
+using Functions.Helpers;
 
 namespace Functions.Tests.Activities
 {
@@ -22,10 +23,12 @@ namespace Functions.Tests.Activities
             var buildPipeline = fixture.Create<Response.BuildDefinition>();
             var ciIdentifiers = fixture.Create<string>();
 
+            var soxLookup = fixture.Create<SoxLookup>();
+
             // Act
             var activity = new ScanBuildPipelinesActivity(
                 fixture.Create<EnvironmentConfig>(),
-                rules);
+                rules, soxLookup);
 
             var result = await activity.RunAsync((project, buildPipeline, ciIdentifiers));
 

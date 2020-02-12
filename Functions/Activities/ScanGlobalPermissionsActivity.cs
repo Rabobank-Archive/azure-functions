@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using System.Collections.Generic;
+using Functions.Helpers;
 
 namespace Functions.Activities
 {
@@ -14,12 +15,14 @@ namespace Functions.Activities
     {
         private readonly EnvironmentConfig _config;
         private readonly IEnumerable<IProjectRule> _rules;
+        private readonly ISoxLookup _soxLookup;
 
         public ScanGlobalPermissionsActivity(
-            EnvironmentConfig config, IEnumerable<IProjectRule> rules)
+            EnvironmentConfig config, IEnumerable<IProjectRule> rules, ISoxLookup soxLookup)
         {
             _config = config;
             _rules = rules;
+            _soxLookup = soxLookup;
         }
 
         [FunctionName(nameof(ScanGlobalPermissionsActivity))]
@@ -37,18 +40,20 @@ namespace Functions.Activities
                 Item = null,
                 ItemId = null,
                 Rules = await Task.WhenAll(_rules.Select(async r =>
-                    new EvaluatedRule
+                {
+                    var ruleName = r.GetType().Name;
+                    return new EvaluatedRule
                     {
-                        Name = r.GetType().Name,
+                        Name = ruleName,
                         Description = r.Description,
                         Link = r.Link,
-                        // TODO: fix IsSox
-                        IsSox = false,
+                        IsSox = _soxLookup.IsSox(ruleName),
                         Status = await r.EvaluateAsync(project.Id)
-                            .ConfigureAwait(false),
+                                .ConfigureAwait(false),
                         Reconcile = ReconcileFunction.ReconcileFromRule(
-                            _config, project.Id, r as IProjectReconcile)
-                    })
+                                _config, project.Id, r as IProjectReconcile)
+                    };
+                })
                     .ToList())
                     .ConfigureAwait(false),
                 CiIdentifiers = ciIdentifiers

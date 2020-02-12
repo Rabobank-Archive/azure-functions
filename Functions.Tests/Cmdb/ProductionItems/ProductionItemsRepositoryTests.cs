@@ -5,11 +5,11 @@ using Functions.Model;
 using AutoFixture;
 using Microsoft.Azure.Cosmos.Table;
 using Response = SecurePipelineScan.VstsService.Response;
-using Functions.ProductionItems;
+using Functions.Cmdb.ProductionItems;
 
-namespace Functions.Tests.Activities
+namespace Functions.Tests.Cmdb.ProductionItems
 {
-    public class DeploymentMethodsRepositoryTests
+    public class ProductionItemsRepositoryTests
     {
         [Fact]
         public async Task ShouldReturnEmptyListIfTableDoesNotExist()
@@ -28,7 +28,7 @@ namespace Functions.Tests.Activities
             var organization = fixture.Create<string>();
 
             // Act
-            var fun = new DeploymentMethodsRepository(client,
+            var fun = new ProductionItemsRepository(client,
                 new EnvironmentConfig { Organization = organization });
             var result = await fun.GetAsync(project.Id);
 
@@ -51,7 +51,7 @@ namespace Functions.Tests.Activities
             var organization = fixture.Create<string>();
 
             // Act
-            var fun = new DeploymentMethodsRepository(client,
+            var fun = new ProductionItemsRepository(client,
                 new EnvironmentConfig { Organization = organization });
             var result = await fun.GetAsync(project.Id);
 
@@ -76,7 +76,7 @@ namespace Functions.Tests.Activities
                 .ConfigureAwait(false);
 
             // Act
-            var fun = new DeploymentMethodsRepository(client,
+            var fun = new ProductionItemsRepository(client,
                 new EnvironmentConfig { Organization = organization });
             var result = await fun.GetAsync(project.Id);
 
@@ -101,7 +101,7 @@ namespace Functions.Tests.Activities
                 .ConfigureAwait(false);
 
             // Act
-            var fun = new DeploymentMethodsRepository(client,
+            var fun = new ProductionItemsRepository(client,
                 new EnvironmentConfig { Organization = organization });
             var result = await fun.GetAsync(project.Id);
 
@@ -126,7 +126,7 @@ namespace Functions.Tests.Activities
                 .ConfigureAwait(false);
 
             // Act
-            var fun = new DeploymentMethodsRepository(client,
+            var fun = new ProductionItemsRepository(client,
                 new EnvironmentConfig { Organization = organization });
             var result = await fun.GetAsync(project.Id);
 
@@ -151,7 +151,7 @@ namespace Functions.Tests.Activities
                 .ConfigureAwait(false);
 
             // Act
-            var fun = new DeploymentMethodsRepository(client,
+            var fun = new ProductionItemsRepository(client,
                 new EnvironmentConfig { Organization = organization });
             var result = await fun.GetAsync(project.Id);
 

@@ -16,13 +16,15 @@ namespace Functions.Activities
     public class ScanReleasePipelinesActivity
     {
         private readonly IEnumerable<IReleasePipelineRule> _rules;
+        private readonly ISoxLookup _soxLookup;
         private readonly EnvironmentConfig _config;
 
         public ScanReleasePipelinesActivity(EnvironmentConfig config,
-            IEnumerable<IReleasePipelineRule> rules)
+            IEnumerable<IReleasePipelineRule> rules, ISoxLookup soxLookup)
         {
             _config = config;
             _rules = rules;
+            _soxLookup = soxLookup;
         }
 
         [FunctionName(nameof(ScanReleasePipelinesActivity))]
@@ -47,13 +49,13 @@ namespace Functions.Activities
                 Environments = pipeline.Environments.Select(e => new Environment { Id = e.Id, Name = e.Name }).ToList(),
                 Rules = await Task.WhenAll(_rules.Select(async rule =>
                         {
+                            var ruleName = rule.GetType().Name;
                             return new EvaluatedRule
                             {
-                                Name = rule.GetType().Name,
+                                Name = ruleName,
                                 Description = rule.Description,
                                 Link = rule.Link,
-                                // TODO: fix IsSox
-                                IsSox = false,
+                                IsSox = _soxLookup.IsSox(ruleName),
                                 Status = await rule.EvaluateAsync(project.Id, pipeline)
                                     .ConfigureAwait(false),
                                 Reconcile = ReconcileFunction.ReconcileFromRule(rule as IReconcile, _config,

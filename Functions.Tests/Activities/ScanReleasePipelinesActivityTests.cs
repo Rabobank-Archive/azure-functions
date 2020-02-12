@@ -13,6 +13,7 @@ using Shouldly;
 using Xunit;
 using Task = System.Threading.Tasks.Task;
 using SecurePipelineScan.Rules.Security;
+using Functions.Helpers;
 
 namespace Functions.Tests.Activities
 {
@@ -40,10 +41,10 @@ namespace Functions.Tests.Activities
             productionItems[0].DeploymentInfo = deploymentMethods;
             productionItems[0].ItemId = pipeline.Id;
 
-            var cmdbClient = new Mock<ICmdbClient>();
+            var soxLookup = fixture.Create<SoxLookup>();
 
             // Act
-            var activity = new ScanReleasePipelinesActivity(config, rules);
+            var activity = new ScanReleasePipelinesActivity(config, rules, soxLookup);
             var actual = await activity.RunAsync((project, pipeline, productionItems));
 
             // Assert
@@ -73,10 +74,10 @@ namespace Functions.Tests.Activities
             productionItems[0].DeploymentInfo = deploymentMethods;
             productionItems[0].ItemId = pipeline.Id;
 
-            var cmdbClient = new Mock<ICmdbClient>();
+            var soxLookup = fixture.Create<SoxLookup>();
 
             // Act
-            var activity = new ScanReleasePipelinesActivity(config, rules);
+            var activity = new ScanReleasePipelinesActivity(config, rules, soxLookup);
             var actual = await activity.RunAsync((project, pipeline, productionItems));
 
             // Assert
@@ -91,11 +92,13 @@ namespace Functions.Tests.Activities
         {
             // Arrange
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
+            var soxLookup = fixture.Create<SoxLookup>();
+
 
             // Act
             var activity = new ScanReleasePipelinesActivity(
                 fixture.Create<EnvironmentConfig>(),
-                fixture.CreateMany<IReleasePipelineRule>());
+                fixture.CreateMany<IReleasePipelineRule>(), soxLookup);
 
             var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () =>
                 await activity.RunAsync((null, null, null)));
@@ -110,11 +113,12 @@ namespace Functions.Tests.Activities
 
             var releasePipeline = fixture.Create<ReleaseDefinition>();
             var productionItems = fixture.Create<IList<ProductionItem>>();
+            var soxLookup = fixture.Create<SoxLookup>();
 
             // Act
             var activity = new ScanReleasePipelinesActivity(
                 fixture.Create<EnvironmentConfig>(),
-fixture.CreateMany<IReleasePipelineRule>());
+fixture.CreateMany<IReleasePipelineRule>(), soxLookup);
 
             var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () =>
                 await activity.RunAsync((null, releasePipeline, productionItems)));
@@ -130,11 +134,11 @@ fixture.CreateMany<IReleasePipelineRule>());
             var project = fixture.Create<Project>();
             var productionItems = fixture.Create<IList<ProductionItem>>();
 
-            var cmdbClient = new Mock<ICmdbClient>();
+            var soxLookup = fixture.Create<SoxLookup>();
 
             // Act
             var activity = new ScanReleasePipelinesActivity(
-                fixture.Create<EnvironmentConfig>(), fixture.CreateMany<IReleasePipelineRule>());
+                fixture.Create<EnvironmentConfig>(), fixture.CreateMany<IReleasePipelineRule>(), soxLookup);
 
             var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () =>
                 await activity.RunAsync((project, null, productionItems)));

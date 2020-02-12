@@ -9,6 +9,7 @@ using Shouldly;
 using System.Threading.Tasks;
 using Xunit;
 using System.Collections.Generic;
+using Functions.Helpers;
 
 namespace Functions.Tests.Activities
 {
@@ -22,10 +23,12 @@ namespace Functions.Tests.Activities
 
             var request = fixture.Create<(Response.Project, Response.Repository, string)>();
 
+            var soxLookup = fixture.Create<SoxLookup>();
+
             // Act
             var activity = new ScanRepositoriesActivity(
                 fixture.Create<EnvironmentConfig>(),
- fixture.CreateMany<IRepositoryRule>());
+ fixture.CreateMany<IRepositoryRule>(), soxLookup);
 
             var result = await activity.RunAsync(request);
 

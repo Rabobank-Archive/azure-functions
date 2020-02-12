@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using System.Collections.Generic;
+using Functions.Helpers;
 
 namespace Functions.Activities
 {
@@ -14,10 +15,12 @@ namespace Functions.Activities
     {
         private readonly IEnumerable<IBuildPipelineRule> _rules;
         private readonly EnvironmentConfig _config;
+        private readonly ISoxLookup _soxLookup;
 
         public ScanBuildPipelinesActivity(EnvironmentConfig config,
-            IEnumerable<IBuildPipelineRule> rules)
+            IEnumerable<IBuildPipelineRule> rules, ISoxLookup soxLookup)
         {
+            _soxLookup = soxLookup;
             _config = config;
             _rules = rules;
         }
@@ -38,17 +41,19 @@ namespace Functions.Activities
                 Item = buildPipeline.Name,
                 ItemId = buildPipeline.Id,
                 Rules = await Task.WhenAll(_rules.Select(async rule =>
-                    new EvaluatedRule
                     {
-                        Name = rule.GetType().Name,
-                        Description = rule.Description,
-                        Link = rule.Link,
-                        // TODO: fix IsSox
-                        IsSox = false,
-                        Status = await rule.EvaluateAsync(project, buildPipeline)
-                            .ConfigureAwait(false),
-                        Reconcile = ReconcileFunction.ReconcileFromRule(rule as IReconcile, _config,
-                            project.Id, RuleScopes.BuildPipelines, buildPipeline.Id)
+                        var ruleName = rule.GetType().Name;
+                        return new EvaluatedRule
+                        {
+                            Name = ruleName,
+                            Description = rule.Description,
+                            Link = rule.Link,
+                            IsSox = _soxLookup.IsSox(ruleName),
+                            Status = await rule.EvaluateAsync(project, buildPipeline)
+                                .ConfigureAwait(false),
+                            Reconcile = ReconcileFunction.ReconcileFromRule(rule as IReconcile, _config,
+                                project.Id, RuleScopes.BuildPipelines, buildPipeline.Id)
+                        };
                     })
                     .ToList())
                     .ConfigureAwait(false),

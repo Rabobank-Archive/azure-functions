@@ -26,8 +26,7 @@ namespace Functions.IntegrationTests
             _host = host;
 
             // TODO: kijken of we hiermee de tests kunnen uitvoeren
-            var releasePipelineRules = (_host as IHost).Services.GetServices(typeof(IReleasePipelineRule));
-
+            // var releasePipelineRules = (_host as IHost).Services.GetServices(typeof(IReleasePipelineRule));
         }
 
         [Theory]

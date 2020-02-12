@@ -12,8 +12,9 @@ using LogAnalytics.Client;
 using Microsoft.Azure.Cosmos.Table;
 using Microsoft.Azure.Storage.Queue;
 using Functions.Cmdb.Client;
-using Functions.ProductionItems;
 using SecurePipelineScan.VstsService.Security;
+using Functions.Helpers;
+using Functions.Cmdb.ProductionItems;
 
 [assembly: WebJobsStartup(typeof(Functions.Startup))]
 
@@ -79,8 +80,10 @@ namespace Functions
             services.AddDefaultRules();
             services.AddSingleton(new HttpClient());
 
-            services.AddSingleton<IDeploymentMethodsRepository, DeploymentMethodsRepository>();
+            services.AddSingleton<IProductionItemsRepository, ProductionItemsRepository>();
             services.AddTransient<IProductionItemsResolver, ProductionItemsResolver>();
+            services.AddSingleton<ISoxLookup, SoxLookup>();
+            services.AddTransient<IReleasePipelineHasDeploymentMethodReconciler, ReleasePipelineHasDeploymentMethodReconciler>();
         }
 
         private static string GetEnvironmentVariable(string variableName)

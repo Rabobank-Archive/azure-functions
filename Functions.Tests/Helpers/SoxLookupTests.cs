@@ -1,9 +1,9 @@
-﻿using Functions.Security;
+﻿using Functions.Helpers;
 using SecurePipelineScan.Rules.Security;
 using Shouldly;
 using Xunit;
 
-namespace Functions.Tests.Security
+namespace Functions.Tests.Helpers
 {
     public class SoxLoopupTests
     {

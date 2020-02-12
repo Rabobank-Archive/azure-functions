@@ -9,6 +9,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
+using Functions.Helpers;
 
 namespace Functions.Tests.Activities
 {
@@ -28,10 +29,12 @@ namespace Functions.Tests.Activities
             var project = fixture.Create<Response.Project>();
             var ciIdentifiers = fixture.Create<string>();
 
+            var soxLookup = fixture.Create<SoxLookup>();
+
             //Act
             var fun = new ScanGlobalPermissionsActivity(
                 fixture.Create<EnvironmentConfig>(),
-                new[] { rule.Object, rule.Object });
+                new[] { rule.Object, rule.Object }, soxLookup);
 
             await fun.RunAsync((project, ciIdentifiers));
 
@@ -56,10 +59,12 @@ namespace Functions.Tests.Activities
                 .Setup(x => x.Impact)
                 .Returns(new[] { "just some action" });
 
+            var soxLookup = fixture.Create<SoxLookup>();
+
             //Act
             var fun = new ScanGlobalPermissionsActivity(
                 config,
-                new[] { rule.Object });
+                new[] { rule.Object }, soxLookup);
             var result = await fun.RunAsync((project, ciIdentifiers));
 
             var ruleName = rule.Object.GetType().Name;

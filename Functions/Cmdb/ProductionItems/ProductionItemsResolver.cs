@@ -3,20 +3,20 @@ using System.Linq;
 using System.Threading.Tasks;
 using SecurePipelineScan.Rules.Security;
 
-namespace Functions.ProductionItems
+namespace Functions.Cmdb.ProductionItems
 {
     public class ProductionItemsResolver : IProductionItemsResolver
     {
-        private readonly IDeploymentMethodsRepository _deploymentMethodsRepository;
+        private readonly IProductionItemsRepository _productionItemRepository;
 
-        public ProductionItemsResolver(IDeploymentMethodsRepository deploymentMethodsRepository)
+        public ProductionItemsResolver(IProductionItemsRepository productionItemRepository)
         {
-            this._deploymentMethodsRepository = deploymentMethodsRepository;
+            _productionItemRepository = productionItemRepository;
         }
 
         public async Task<IEnumerable<string>> ResolveAsync(string project, string id)
         {
-            var deploymentMethods = await _deploymentMethodsRepository.GetAsync(project).ConfigureAwait(false);
+            var deploymentMethods = await _productionItemRepository.GetAsync(project).ConfigureAwait(false);
 
             return deploymentMethods.Where(x => x.PipelineId == id && !string.IsNullOrWhiteSpace(x.StageId))
                                     .Select(x => x.StageId)

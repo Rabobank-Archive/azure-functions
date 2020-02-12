@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Functions.Cmdb.ProductionItems;
 using Functions.Model;
-using Functions.ProductionItems;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
@@ -12,12 +12,12 @@ namespace Functions.Activities
     public class GetDeploymentMethodsActivity
     {
         private const string NONPROD = "NON-PROD";
-        private readonly IDeploymentMethodsRepository _deploymentMethodsRepository;
+        private readonly IProductionItemsRepository _productionItemsRepository;
         private readonly EnvironmentConfig _config;
 
-        public GetDeploymentMethodsActivity(EnvironmentConfig config, IDeploymentMethodsRepository deploymentMethodsRepository)
+        public GetDeploymentMethodsActivity(EnvironmentConfig config, IProductionItemsRepository productionItemRepository)
         {
-            this._deploymentMethodsRepository = deploymentMethodsRepository;
+            this._productionItemsRepository = productionItemRepository;
             this._config = config;
         }
 
@@ -27,7 +27,7 @@ namespace Functions.Activities
             if (projectId == null)
                 throw new ArgumentNullException(nameof(projectId));
 
-            var deploymentMethodEntities = await _deploymentMethodsRepository.GetAsync(projectId).ConfigureAwait(false);
+            var deploymentMethodEntities = await _productionItemsRepository.GetAsync(projectId).ConfigureAwait(false);
 
             return deploymentMethodEntities
                 .GroupBy(d => d.PipelineId)

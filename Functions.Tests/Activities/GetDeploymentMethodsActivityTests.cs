@@ -6,8 +6,8 @@ using Functions.Activities;
 using AutoFixture;
 using Response = SecurePipelineScan.VstsService.Response;
 using System.Linq;
-using Functions.ProductionItems;
 using Moq;
+using Functions.Cmdb.ProductionItems;
 
 namespace Functions.Tests.Activities
 {
@@ -26,7 +26,7 @@ namespace Functions.Tests.Activities
                 .With(x => x.ProjectId, project.Id)
                 .With(x => x.CiIdentifier, "CI12345"));
 
-            var repo = new Mock<IDeploymentMethodsRepository>();
+            var repo = new Mock<IProductionItemsRepository>();
 
 
             repo

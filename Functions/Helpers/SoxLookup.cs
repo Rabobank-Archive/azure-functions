@@ -1,15 +1,12 @@
 ﻿using SecurePipelineScan.Rules.Security;
 using System.Collections.Generic;
 
-namespace Functions.Security
+namespace Functions.Helpers
 {
-    public class SoxLookup
+
+    public class SoxLookup : ISoxLookup
     {
-        private HashSet<string> SoxRules
-        {
-            get
-            {
-                return new HashSet<string>
+        private HashSet<string> _soxRules => new HashSet<string>
                 {
                     nameof(ArtifactIsStoredSecure),
                     nameof(NobodyCanBypassPolicies),
@@ -24,15 +21,13 @@ namespace Functions.Security
                     nameof(ReleaseBranchesProtectedByPolicies),
                     nameof(ReleasePipelineUsesBuildArtifact)
                 };
-            }
-        }
 
         public bool IsSox(string ruleName)
         {
             if (string.IsNullOrEmpty(ruleName))
                 return false;
 
-            return SoxRules.Contains(ruleName);
+            return _soxRules.Contains(ruleName);
         }
     }
 }

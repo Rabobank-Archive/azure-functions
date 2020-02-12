@@ -5,15 +5,15 @@ using System.Threading.Tasks;
 using Functions.Model;
 using Microsoft.Azure.Cosmos.Table;
 
-namespace Functions.ProductionItems
+namespace Functions.Cmdb.ProductionItems
 {
 
-    public class DeploymentMethodsRepository : IDeploymentMethodsRepository
+    public class ProductionItemsRepository : IProductionItemsRepository
     {
         private readonly CloudTableClient _client;
         private readonly EnvironmentConfig _config;
 
-        public DeploymentMethodsRepository(CloudTableClient client,
+        public ProductionItemsRepository(CloudTableClient client,
             EnvironmentConfig config)
         {
             _client = client;
