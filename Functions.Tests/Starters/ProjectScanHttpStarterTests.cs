@@ -14,6 +14,7 @@ using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Xunit;
 using Response = SecurePipelineScan.VstsService.Response;
 using SecurePipelineScan.Rules.Security;
+using SecurePipelineScan.VstsService.Security;
 
 namespace Functions.Tests.Starters
 {
@@ -63,7 +64,7 @@ namespace Functions.Tests.Starters
             var result = await function.RunAsync(request, "somecompany", "TAS", RuleScopes.GlobalPermissions,
                 mock.Object);
 
-            mock.Verify(x => x.WaitForCompletionOrCreateCheckStatusResponseAsync(request, It.IsAny<string>(), 
+            mock.Verify(x => x.WaitForCompletionOrCreateCheckStatusResponseAsync(request, It.IsAny<string>(),
                 It.IsAny<TimeSpan>(), TimeSpan.FromSeconds(1)));
             client.Verify();
             result?.Dispose();
@@ -122,7 +123,7 @@ namespace Functions.Tests.Starters
             var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object);
             await function.RunAsync(request, "somecompany", "TAS", RuleScopes.GlobalPermissions, mock.Object);
 
-            mock.Verify(x => x.StartNewAsync<object>(nameof(ProjectScanOrchestrator),string.Empty,
+            mock.Verify(x => x.StartNewAsync<object>(nameof(ProjectScanOrchestrator), string.Empty,
                 It.Is<(Response.Project, string)>(t => t.Item1 == project && t.Item2 == RuleScopes.GlobalPermissions)));
         }
 
@@ -151,7 +152,7 @@ namespace Functions.Tests.Starters
             var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object);
             await function.RunAsync(request, "somecompany", "TAS", RuleScopes.Repositories, mock.Object);
 
-            mock.Verify(x => x.StartNewAsync<object>(nameof(ProjectScanOrchestrator),string.Empty,
+            mock.Verify(x => x.StartNewAsync<object>(nameof(ProjectScanOrchestrator), string.Empty,
                 It.Is<(Response.Project, string)>(t => t.Item1 == project && t.Item2 == RuleScopes.Repositories)));
         }
 
@@ -208,7 +209,7 @@ namespace Functions.Tests.Starters
             var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object);
             await function.RunAsync(request, "somecompany", "TAS", RuleScopes.ReleasePipelines, mock.Object);
 
-            mock.Verify(x => x.StartNewAsync<object>(nameof(ProjectScanOrchestrator),string.Empty,
+            mock.Verify(x => x.StartNewAsync<object>(nameof(ProjectScanOrchestrator), string.Empty,
                 It.Is<(Response.Project, string)>(t => t.Item1 == project && t.Item2 == RuleScopes.ReleasePipelines)));
         }
 

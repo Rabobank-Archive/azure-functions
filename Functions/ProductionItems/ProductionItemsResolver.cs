@@ -5,18 +5,13 @@ using SecurePipelineScan.Rules.Security;
 
 namespace Functions.ProductionItems
 {
-    public class ProductionItemsResolver : IProductionItems
+    public class ProductionItemsResolver : IProductionItemsResolver
     {
         private readonly IDeploymentMethodsRepository _deploymentMethodsRepository;
 
         public ProductionItemsResolver(IDeploymentMethodsRepository deploymentMethodsRepository)
         {
             this._deploymentMethodsRepository = deploymentMethodsRepository;
-        }
-
-        public string Resolve(string id)
-        {
-            throw new System.NotImplementedException();
         }
 
         public async Task<IEnumerable<string>> ResolveAsync(string project, string id)

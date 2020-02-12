@@ -13,6 +13,7 @@ using Microsoft.Azure.Cosmos.Table;
 using Microsoft.Azure.Storage.Queue;
 using Functions.Cmdb.Client;
 using Functions.ProductionItems;
+using SecurePipelineScan.VstsService.Security;
 
 [assembly: WebJobsStartup(typeof(Functions.Startup))]
 
@@ -79,7 +80,7 @@ namespace Functions
             services.AddSingleton(new HttpClient());
 
             services.AddSingleton<IDeploymentMethodsRepository, DeploymentMethodsRepository>();
-            services.AddTransient<IProductionItems, ProductionItemsResolver>();
+            services.AddTransient<IProductionItemsResolver, ProductionItemsResolver>();
         }
 
         private static string GetEnvironmentVariable(string variableName)

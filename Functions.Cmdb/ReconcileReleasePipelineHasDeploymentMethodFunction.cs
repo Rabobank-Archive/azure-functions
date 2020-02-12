@@ -1,22 +1,33 @@
-﻿using System;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.Http;
+using SecurePipelineScan.VstsService;
+using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
+using System.Web;
+using Requests = SecurePipelineScan.VstsService.Requests;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-using SecurePipelineScan.Rules.Security;
 using Functions.Cmdb.Client;
 using Functions.Cmdb.Model;
-using SecurePipelineScan.VstsService;
+using Newtonsoft.Json.Serialization;
 using SecurePipelineScan.VstsService.Requests;
 using SecurePipelineScan.VstsService.Response;
-using Task = System.Threading.Tasks.Task;
+using SecurePipelineScan.VstsService.Security;
+using SecurePipelineScan.Rules.Security;
 
-namespace Functions.Cmdb
+namespace Functions
 {
-    public class ReleasePipelineHasDeploymentMethod : IReleasePipelineRule, IReconcile
+    public class ReconcileReleasePipelineHasDeploymentMethodFunction
     {
+        private readonly ITokenizer _tokenizer;
+        private readonly ICmdbClient _cmdbClient;
+        private readonly IProductionItemsResolver _productionItemsResolver;
+        private readonly IVstsRestClient _vstsClient;
+        private const int PermissionBit = 3;
+
         private const string AzureDevOpsDeploymentMethod = "Azure Devops";
         private readonly JsonSerializerSettings _serializerSettings = new JsonSerializerSettings
         {
@@ -25,52 +36,99 @@ namespace Functions.Cmdb
                 NamingStrategy = new CamelCaseNamingStrategy()
             }
         };
-        private readonly IVstsRestClient _vstsClient;
-        private readonly ICmdbClient _cmdbClient;
 
-        public ReleasePipelineHasDeploymentMethod(IVstsRestClient vstsClient, ICmdbClient cmdbClient)
+        public ReconcileReleasePipelineHasDeploymentMethodFunction(IVstsRestClient vstsClient, ITokenizer tokenizer, ICmdbClient cmdbClient, IProductionItemsResolver productionItemsResolver)
         {
             _vstsClient = vstsClient;
+            _tokenizer = tokenizer;
             _cmdbClient = cmdbClient;
+            _productionItemsResolver = productionItemsResolver;
         }
 
-        [ExcludeFromCodeCoverage] public string Description => "Release pipeline has valid CMDB link";
-        [ExcludeFromCodeCoverage] public string Link => "https://confluence.dev.somecompany.nl/x/PqKbD";
-        [ExcludeFromCodeCoverage] public bool IsSox => false;
-        [ExcludeFromCodeCoverage] public bool RequiresStageId => false;
-
-        string[] IReconcile.Impact => new[] {
-            "In the CMDB the deployment method for the CI is set to Azure DevOps and coupled to this release pipeline",
-        };
-
-        public Task<bool?> EvaluateAsync(string projectId, string stageId, ReleaseDefinition releasePipeline)
+        [FunctionName(nameof(ReconcileReleasePipelineHasDeploymentMethodFunction))]
+        public async Task<IActionResult> ReconcileAsync([HttpTrigger(AuthorizationLevel.Anonymous, Route = "reconcile/{organization}/{project}/releasepipelines/ReleasePipelineHasDeploymentMethod/{item?}")]HttpRequestMessage request,
+            string organization,
+            string project,
+            string item = null)
         {
-            if (releasePipeline == null)
-                throw new ArgumentNullException(nameof(releasePipeline));
+            if (string.IsNullOrWhiteSpace(project))
+                throw new ArgumentNullException(nameof(project));
 
-            // TODO evaluate rule based on the configuration items in the next sprint (starting 6-feb-2020)
-            return Task.FromResult<bool?>(stageId == "NON-PROD" || releasePipeline.Environments.Any(e => e.Id == stageId));
+            var id = _tokenizer.IdentifierFromClaim(request);
+
+            if (id == null)
+                return new UnauthorizedResult();
+
+            var userId = GetUserIdFromQueryString(request);
+
+            if (!(await HasPermissionToReconcileAsync(project, id, userId)))
+                return new UnauthorizedResult();
+
+            var (ciIdentifier, environment) = await GetData(request);
+
+            return await ReconcileAsync(project, id, userId, ciIdentifier, environment);
         }
 
-        public async Task ReconcileAsync(string projectId, string itemId, string stageId, string userId, object data = null)
+        private async Task<IActionResult> ReconcileAsync(string projectId, string itemId, string userId, string ciIdentifier, string environment)
         {
-            (string ciIdentifier, string productionStage) = GetData(data ?? new { });
-
             var user = await GetUserAsync(userId).ConfigureAwait(false);
             var ci = await GetCiAsync(ciIdentifier).ConfigureAwait(false);
             var assignmentGroup = await GetAssignmentGroupAsync(ci?.Device?.AssignmentGroup).ConfigureAwait(false);
             var isProdConfigurationItem = IsProdConfigurationItem(ciIdentifier);
 
             if (isProdConfigurationItem && !IsUserEntitledForCi(user, assignmentGroup))
-                return;
+                return new UnauthorizedResult();
 
-            await UpdateDeploymentMethodAsync(projectId, itemId, productionStage, ci).ConfigureAwait(false);
+            var stages = await _productionItemsResolver.ResolveAsync(projectId, itemId);
+
+            foreach (var stage in stages)
+                await UpdateDeploymentMethodAsync(projectId, itemId, stage, ci).ConfigureAwait(false);
 
             if (isProdConfigurationItem)
                 await RemoveDeploymentMethodFromNonProdConfigurationItemAsync(projectId, itemId).ConfigureAwait(false);
+
+            return new OkResult();
         }
 
-        private async Task RemoveDeploymentMethodFromNonProdConfigurationItemAsync(string projectId, string itemId)
+        private async Task<(string, string)> GetData(HttpRequestMessage request)
+        {
+            if (request.Content == null)
+                return (_cmdbClient.Config.NonProdCiIdentifier, null);
+
+            var content = await request.Content.ReadAsStringAsync().ConfigureAwait(false);
+            dynamic data = JsonConvert.DeserializeObject(content);
+
+            var ciIdentifier = (string)data.ciIdentifier ?? _cmdbClient.Config.NonProdCiIdentifier;
+
+            return (ciIdentifier, (string)data.environment);
+        }
+
+        private static string GetUserIdFromQueryString(HttpRequestMessage request)
+        {
+            var query = request.RequestUri?.Query != null
+                ? HttpUtility.ParseQueryString(request.RequestUri?.Query)
+                : null;
+
+            return query?.Get("userId");
+        }
+
+        private async Task<bool> HasPermissionToReconcileAsync(string project, string id, string userId = null)
+        {
+            var permissions = await _vstsClient.GetAsync(Requests.Permissions.PermissionsGroupProjectId(project, id)).ConfigureAwait(false);
+            if (permissions == null)
+            {
+                permissions = await _vstsClient.GetAsync(Requests.Permissions.PermissionsGroupProjectId(project, userId)).ConfigureAwait(false);
+                if (permissions == null)
+                {
+                    return false;
+                }
+            }
+
+            return permissions.Security.Permissions.Any(x =>
+                x.DisplayName == "Manage project properties" && x.PermissionId == PermissionBit);
+        }
+
+        private async System.Threading.Tasks.Task RemoveDeploymentMethodFromNonProdConfigurationItemAsync(string projectId, string itemId)
         {
             var ci = await GetCiAsync(_cmdbClient.Config.NonProdCiIdentifier).ConfigureAwait(false);
             var deploymentMethods = ci?.Device?.DeploymentInfo ?? new DeploymentInfo[0];
@@ -137,7 +195,7 @@ namespace Functions.Cmdb
             return (ciIdentifier, (string)dynamicData.environment);
         }
 
-        private async Task UpdateDeploymentMethodAsync(string projectId, string itemId, string productionStage, CiContentItem ci)
+        private async System.Threading.Tasks.Task UpdateDeploymentMethodAsync(string projectId, string itemId, string productionStage, CiContentItem ci)
         {
             var deploymentMethods = ci.Device?.DeploymentInfo ?? new DeploymentInfo[0];
             if (deploymentMethods.Where(x => x.DeploymentMethod == AzureDevOpsDeploymentMethod)
@@ -182,4 +240,3 @@ namespace Functions.Cmdb
         }
     }
 }
-

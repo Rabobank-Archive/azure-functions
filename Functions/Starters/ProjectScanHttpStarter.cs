@@ -8,6 +8,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
+using SecurePipelineScan.VstsService.Security;
 
 namespace Functions.Starters
 {
@@ -40,7 +41,7 @@ namespace Functions.Starters
                 return new HttpResponseMessage(HttpStatusCode.NotFound);
 
             var instanceId = await starter.StartNewAsync<object>(nameof(ProjectScanOrchestrator), (project, scope));
-            return await starter.WaitForCompletionOrCreateCheckStatusResponseAsync(request, instanceId, 
+            return await starter.WaitForCompletionOrCreateCheckStatusResponseAsync(request, instanceId,
                 TimeSpan.FromSeconds(TimeOut));
         }
 

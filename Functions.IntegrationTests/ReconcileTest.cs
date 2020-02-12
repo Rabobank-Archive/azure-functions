@@ -6,6 +6,7 @@ using AzureFunctions.TestHelpers;
 using Dynamitey.DynamicObjects;
 using Functions.Model;
 using Microsoft.Azure.Cosmos.Table;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json.Linq;
 using SecurePipelineScan.Rules.Security;
@@ -23,6 +24,10 @@ namespace Functions.IntegrationTests
         {
             _config = new TestConfig();
             _host = host;
+
+            // TODO: kijken of we hiermee de tests kunnen uitvoeren
+            var releasePipelineRules = (_host as IHost).Services.GetServices(typeof(IReleasePipelineRule));
+
         }
 
         [Theory]
@@ -92,6 +97,17 @@ namespace Functions.IntegrationTests
 
             return response.SelectToken("token");
         }
+
+        public static IEnumerable<object[]> ReleaseRules2() => Rules(
+        new string[] { "NobodyCanDeleteReleases",
+                               "NobodyCanManageApprovalsAndCreateReleases",
+                               "PipelineHasRequiredRetentionPolicy",
+                               "ReleasePipelineUsesBuildArtifact",
+                               "ProductionStageUsesArtifactFromSecureBranch",
+                               "PipelineHasAtLeastOneStageWithApproval",
+                               "ReleasePipelineHasSm9ChangeTask",
+                               "ReleasePipelineHasDeploymentMethod"}, RuleScopes.ReleasePipelines,
+        new TestConfig().ReleasePipelineId);
 
         public static IEnumerable<object[]> ReleaseRules() => Rules(
                 new string[] { "NobodyCanDeleteReleases",

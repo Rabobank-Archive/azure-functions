@@ -5,17 +5,15 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web;
-using Functions.Activities;
 using Microsoft.Azure.Cosmos.Table;
 using Requests = SecurePipelineScan.VstsService.Requests;
 using Newtonsoft.Json;
-using Functions.Cmdb.Client;
+using SecurePipelineScan.VstsService.Security;
 
 namespace Functions
 {
@@ -23,20 +21,18 @@ namespace Functions
     {
         private readonly IEnumerable<IRule> _rules;
         private readonly ITokenizer _tokenizer;
-        private readonly ICmdbClient _cmdbClient;
         private readonly IVstsRestClient _vstsClient;
         private readonly CloudTableClient _tableClient;
         private readonly EnvironmentConfig _config;
         private const int PermissionBit = 3;
 
-        public ReconcileFunction(EnvironmentConfig config, CloudTableClient tableClient, IVstsRestClient vstsClient, IEnumerable<IRule> rules, ITokenizer tokenizer, ICmdbClient cmdbClient)
+        public ReconcileFunction(EnvironmentConfig config, CloudTableClient tableClient, IVstsRestClient vstsClient, IEnumerable<IRule> rules, ITokenizer tokenizer)
         {
             _config = config;
             _vstsClient = vstsClient;
             _tableClient = tableClient;
             _rules = rules;
             _tokenizer = tokenizer;
-            _cmdbClient = cmdbClient;
         }
 
         [FunctionName(nameof(ReconcileFunction))]

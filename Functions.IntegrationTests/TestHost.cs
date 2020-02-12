@@ -14,6 +14,7 @@ using SecurePipelineScan.Rules.Security;
 using Functions.Cmdb.Client;
 using SecurePipelineScan.VstsService;
 using Xunit;
+using SecurePipelineScan.VstsService.Security;
 
 namespace Functions.IntegrationTests
 {
