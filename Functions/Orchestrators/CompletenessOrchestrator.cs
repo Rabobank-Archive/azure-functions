@@ -5,13 +5,14 @@ using Functions.Activities;
 using Functions.Model;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
+using Microsoft.Extensions.Logging;
 
 namespace Functions.Orchestrators
 {
     public class CompletenessOrchestrator
     {
         [FunctionName(nameof(CompletenessOrchestrator))]
-        public async Task RunAsync([OrchestrationTrigger] IDurableOrchestrationContext context)
+        public async Task RunAsync([OrchestrationTrigger] IDurableOrchestrationContext context, ILogger logger)
         {
             var (allSupervisors, allProjectScanners) =
                 await context.CallActivityAsync<(IList<Orchestrator>, IList<Orchestrator>)>(

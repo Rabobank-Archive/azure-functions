@@ -6,6 +6,7 @@ using AzDoCompliancy.CustomStatus;
 using Functions.Activities;
 using Functions.Model;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using Shouldly;
 using Xunit;
@@ -40,7 +41,7 @@ namespace Functions.Tests.Activities
 
             //Act
             var fun = new FilterSupervisorsActivity();
-            var filteredInstances = fun.Run((instances, instanceIds));
+            var filteredInstances = fun.Run((instances, instanceIds), _fixture.Create<ILogger>());
 
             //Assert
             filteredInstances.Count.ShouldBe(7);

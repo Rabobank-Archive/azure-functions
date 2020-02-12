@@ -7,6 +7,7 @@ using AutoFixture.AutoNSubstitute;
 using AzDoCompliancy.CustomStatus;
 using Functions.Activities;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
 using Shouldly;
@@ -59,7 +60,8 @@ namespace Functions.Tests.Activities
 
             //Act
             var func = new GetOrchestratorsToScanActivity();
-            var (supervisors, projectScanOrchestrators) = await func.RunAsync(null, client);
+            var (supervisors, projectScanOrchestrators) =
+                await func.RunAsync(null, client, _fixture.Create<ILogger>());
 
             //Assert
             supervisors.Count.ShouldBe(1);
@@ -98,7 +100,7 @@ namespace Functions.Tests.Activities
 
             //Act
             var func = new GetOrchestratorsToScanActivity();
-            var (supervisors, _) = await func.RunAsync(null, client);
+            var (supervisors, _) = await func.RunAsync(null, client, _fixture.Create<ILogger>());
 
             // Assert
             supervisors[0].CustomStatus.ShouldBeNull();

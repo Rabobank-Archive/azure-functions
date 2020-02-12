@@ -25,8 +25,7 @@ namespace Functions.Activities
                 OrchestrationRuntimeStatus.Terminated,
                 OrchestrationRuntimeStatus.Running,
                 OrchestrationRuntimeStatus.ContinuedAsNew,
-                OrchestrationRuntimeStatus.Pending,
-                OrchestrationRuntimeStatus.Unknown
+                OrchestrationRuntimeStatus.Pending
             };
 
             var condition = new OrchestrationStatusQueryCondition

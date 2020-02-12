@@ -40,8 +40,8 @@ namespace Functions.Tests.Orchestrators
 
             var starter = mocks.Create<IDurableOrchestrationContext>();
             starter
-                .Setup(x => x.GetInput<(Project, string)>())
-                .Returns((fixture.Create<Project>(), "unknownScope"));
+                .Setup(x => x.GetInput<(Project, string, DateTime)>())
+                .Returns((fixture.Create<Project>(), "unknownScope", fixture.Create<DateTime>()));
 
             starter
                 .Setup(x => x.InstanceId)
@@ -75,19 +75,19 @@ namespace Functions.Tests.Orchestrators
             starter
                 .Verify(x => x.CallSubOrchestratorAsync<object>(
                     nameof(GlobalPermissionsOrchestrator), It.IsAny<string>(),
-                    It.IsAny<(Project, IList<ProductionItem>)>()), Times.Once);
+                    It.IsAny<(Project, IList<ProductionItem>, DateTime)>()), Times.Once);
             starter
                 .Verify(x => x.CallSubOrchestratorAsync<IList<ProductionItem>>(
                     nameof(ReleasePipelinesOrchestrator), It.IsAny<string>(),
-                    It.IsAny<(Project, IList<ProductionItem>)>()), Times.Never);
+                    It.IsAny<(Project, IList<ProductionItem>, DateTime)>()), Times.Never);
             starter
                 .Verify(x => x.CallSubOrchestratorAsync<IList<ProductionItem>>(
                     nameof(BuildPipelinesOrchestrator), It.IsAny<string>(),
-                    It.IsAny<(Project, IList<ProductionItem>)>()), Times.Never);
+                    It.IsAny<(Project, IList<ProductionItem>, DateTime)>()), Times.Never);
             starter
                 .Verify(x => x.CallSubOrchestratorAsync<object>(
                     nameof(RepositoriesOrchestrator), It.IsAny<string>(),
-                    It.IsAny<(Project, IList<ProductionItem>)>()), Times.Never);
+                    It.IsAny<(Project, IList<ProductionItem>, DateTime)>()), Times.Never);
         }
 
 
@@ -112,19 +112,19 @@ namespace Functions.Tests.Orchestrators
             starter
                 .Verify(x => x.CallSubOrchestratorAsync<object>(
                     nameof(GlobalPermissionsOrchestrator), It.IsAny<string>(),
-                    It.IsAny<(Project, IList<ProductionItem>)>()), Times.Never);
+                    It.IsAny<(Project, IList<ProductionItem>, DateTime)>()), Times.Never);
             starter
                 .Verify(x => x.CallSubOrchestratorAsync<IList<ProductionItem>>(
                     nameof(ReleasePipelinesOrchestrator), It.IsAny<string>(),
-                    It.IsAny<(Project, IList<ProductionItem>)>()), Times.Once);
+                    It.IsAny<(Project, IList<ProductionItem>, DateTime)>()), Times.Once);
             starter
                 .Verify(x => x.CallSubOrchestratorAsync<IList<ProductionItem>>(
                     nameof(BuildPipelinesOrchestrator), It.IsAny<string>(),
-                    It.IsAny<(Project, IList<ProductionItem>)>()), Times.Never);
+                    It.IsAny<(Project, IList<ProductionItem>, DateTime)>()), Times.Never);
             starter
                 .Verify(x => x.CallSubOrchestratorAsync<object>(
                     nameof(RepositoriesOrchestrator), It.IsAny<string>(),
-                    It.IsAny<(Project, IList<ProductionItem>)>()), Times.Never);
+                    It.IsAny<(Project, IList<ProductionItem>, DateTime)>()), Times.Never);
         }
 
         [Fact]
@@ -147,19 +147,19 @@ namespace Functions.Tests.Orchestrators
             starter
                 .Verify(x => x.CallSubOrchestratorAsync<object>(
                     nameof(GlobalPermissionsOrchestrator), It.IsAny<string>(),
-                    It.IsAny<(Project, IList<ProductionItem>)>()), Times.Never);
+                    It.IsAny<(Project, IList<ProductionItem>, DateTime)>()), Times.Never);
             starter
                 .Verify(x => x.CallSubOrchestratorAsync<IList<ProductionItem>>(
                     nameof(ReleasePipelinesOrchestrator), It.IsAny<string>(),
-                    It.IsAny<(Project, IList<ProductionItem>)>()), Times.Never);
+                    It.IsAny<(Project, IList<ProductionItem>, DateTime)>()), Times.Never);
             starter
                 .Verify(x => x.CallSubOrchestratorAsync<IList<ProductionItem>>(
                     nameof(BuildPipelinesOrchestrator), It.IsAny<string>(),
-                    It.IsAny<(Project, IList<ProductionItem>)>()), Times.Once);
+                    It.IsAny<(Project, IList<ProductionItem>, DateTime)>()), Times.Once);
             starter
                 .Verify(x => x.CallSubOrchestratorAsync<object>(
                     nameof(RepositoriesOrchestrator), It.IsAny<string>(),
-                    It.IsAny<(Project, IList<ProductionItem>)>()), Times.Never);
+                    It.IsAny<(Project, IList<ProductionItem>, DateTime)>()), Times.Never);
         }
 
         [Fact]
@@ -182,27 +182,27 @@ namespace Functions.Tests.Orchestrators
             starter
                 .Verify(x => x.CallSubOrchestratorAsync<object>(
                     nameof(GlobalPermissionsOrchestrator), It.IsAny<string>(),
-                    It.IsAny<(Project, IList<ProductionItem>)>()), Times.Never);
+                    It.IsAny<(Project, IList<ProductionItem>, DateTime)>()), Times.Never);
             starter
                 .Verify(x => x.CallSubOrchestratorAsync<IList<ProductionItem>>(
                     nameof(ReleasePipelinesOrchestrator), It.IsAny<string>(),
-                    It.IsAny<(Project, IList<ProductionItem>)>()), Times.Never);
+                    It.IsAny<(Project, IList<ProductionItem>, DateTime)>()), Times.Never);
             starter
                 .Verify(x => x.CallSubOrchestratorAsync<IList<ProductionItem>>(
                     nameof(BuildPipelinesOrchestrator), It.IsAny<string>(),
-                    It.IsAny<(Project, IList<ProductionItem>)>()), Times.Never);
+                    It.IsAny<(Project, IList<ProductionItem>, DateTime)>()), Times.Never);
             starter
                 .Verify(x => x.CallSubOrchestratorAsync<object>(
                     nameof(RepositoriesOrchestrator), It.IsAny<string>(),
-                    It.IsAny<(Project, IList<ProductionItem>)>()), Times.Once);
+                    It.IsAny<(Project, IList<ProductionItem>, DateTime)>()), Times.Once);
         }
 
         private Mock<IDurableOrchestrationContext> CreateStarter(Fixture fixture, MockRepository mocks, string scope)
         {
             var starter = mocks.Create<IDurableOrchestrationContext>();
             starter
-                .Setup(x => x.GetInput<(Project, string)>())
-                .Returns((fixture.Create<Project>(), scope));
+                .Setup(x => x.GetInput<(Project, string, DateTime)>())
+                .Returns((fixture.Create<Project>(), scope, fixture.Create<DateTime>()));
             starter
                 .Setup(x => x.InstanceId)
                 .Returns(fixture.Create<string>());
@@ -215,25 +215,25 @@ namespace Functions.Tests.Orchestrators
             starter
                 .Setup(x => x.CallSubOrchestratorAsync<object>(
                     nameof(GlobalPermissionsOrchestrator), It.IsAny<string>(),
-                    It.IsAny<(Project, IList<ProductionItem>)>()))
+                    It.IsAny<(Project, IList<ProductionItem>, DateTime)>()))
                 .Returns(Task.FromResult<object>(null))
                 .Verifiable();
             starter
                 .Setup(x => x.CallSubOrchestratorAsync<IList<ProductionItem>>(
                     nameof(ReleasePipelinesOrchestrator), It.IsAny<string>(),
-                    It.IsAny<(Project, IList<ProductionItem>)>()))
+                    It.IsAny<(Project, IList<ProductionItem>, DateTime)>()))
                 .ReturnsAsync(fixture.Create<IList<ProductionItem>>())
                 .Verifiable();
             starter
                 .Setup(x => x.CallSubOrchestratorAsync<IList<ProductionItem>>(
                     nameof(BuildPipelinesOrchestrator), It.IsAny<string>(),
-                    It.IsAny<(Project, IList<ProductionItem>)>()))
+                    It.IsAny<(Project, IList<ProductionItem>, DateTime)>()))
                 .ReturnsAsync(fixture.Create<IList<ProductionItem>>())
                 .Verifiable();
             starter
                 .Setup(x => x.CallSubOrchestratorAsync<object>(
                     nameof(RepositoriesOrchestrator), It.IsAny<string>(),
-                    It.IsAny<(Project, IList<ProductionItem>)>()))
+                    It.IsAny<(Project, IList<ProductionItem>, DateTime)>()))
                 .Returns(Task.FromResult<object>(null))
                 .Verifiable();
             return starter;

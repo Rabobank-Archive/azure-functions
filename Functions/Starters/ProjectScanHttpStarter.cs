@@ -40,7 +40,8 @@ namespace Functions.Starters
             if (project == null)
                 return new HttpResponseMessage(HttpStatusCode.NotFound);
 
-            var instanceId = await starter.StartNewAsync<object>(nameof(ProjectScanOrchestrator), (project, scope));
+            var scanDate = DateTime.UtcNow;
+            var instanceId = await starter.StartNewAsync<object>(nameof(ProjectScanOrchestrator), (project, scope, scanDate));
             return await starter.WaitForCompletionOrCreateCheckStatusResponseAsync(request, instanceId,
                 TimeSpan.FromSeconds(TimeOut));
         }

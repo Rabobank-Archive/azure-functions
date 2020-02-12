@@ -30,7 +30,7 @@ namespace Functions.Orchestrators
                 throw new ArgumentNullException(nameof(context));
             }
 
-            var (project, scope) = context.GetInput<(Project, string)>();
+            var (project, scope, scanDate) = context.GetInput<(Project, string, DateTime)>();
 
             IList<ProductionItem> releaseProductionItems = new List<ProductionItem>();
             IList<ProductionItem> buildProductionItems = new List<ProductionItem>();
@@ -46,7 +46,7 @@ namespace Functions.Orchestrators
             {
                 await context.CallSubOrchestratorAsync(nameof(GlobalPermissionsOrchestrator),
                     OrchestrationHelper.CreateProjectScanScopeOrchestrationId(context.InstanceId,
-                        RuleScopes.GlobalPermissions), (project, releaseProductionItems));
+                        RuleScopes.GlobalPermissions), (project, releaseProductionItems, scanDate));
             }
 
             if (MustRunScope(scope, RuleScopes.ReleasePipelines))
@@ -54,7 +54,7 @@ namespace Functions.Orchestrators
                 buildProductionItems =
                     await context.CallSubOrchestratorAsync<IList<ProductionItem>>(
                         nameof(ReleasePipelinesOrchestrator), OrchestrationHelper.CreateProjectScanScopeOrchestrationId(
-                            context.InstanceId, RuleScopes.ReleasePipelines), (project, releaseProductionItems));
+                            context.InstanceId, RuleScopes.ReleasePipelines), (project, releaseProductionItems, scanDate));
             }
 
             if (MustRunScope(scope, RuleScopes.BuildPipelines))
@@ -62,14 +62,14 @@ namespace Functions.Orchestrators
                 repositoryProductionItems =
                     await context.CallSubOrchestratorAsync<IList<ProductionItem>>(
                         nameof(BuildPipelinesOrchestrator), OrchestrationHelper.CreateProjectScanScopeOrchestrationId(
-                            context.InstanceId, RuleScopes.BuildPipelines), (project, buildProductionItems));
+                            context.InstanceId, RuleScopes.BuildPipelines), (project, buildProductionItems, scanDate));
             }
 
             if (MustRunScope(scope, RuleScopes.Repositories))
             {
                 await context.CallSubOrchestratorAsync(nameof(RepositoriesOrchestrator),
                     OrchestrationHelper.CreateProjectScanScopeOrchestrationId(context.InstanceId,
-                        RuleScopes.Repositories), (project, repositoryProductionItems));
+                        RuleScopes.Repositories), (project, repositoryProductionItems, scanDate));
             }
         }
 

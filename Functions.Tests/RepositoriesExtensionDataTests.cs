@@ -42,17 +42,18 @@ namespace Functions.Tests
 
             var expected = new PreventiveRuleLogItem
             {
+                EvaluatedDate = now,
+                ScanDate = now,
+                ScanId = "supId",
                 Project = "TAS",
                 ProjectId = "projId",
-                Scope = RuleScopes.Repositories,
+                Scope = RuleScopes.Repositories, 
                 Item = "SOx-Compliant-Demo",
                 Rule = "NobodyCanDoAnything",
-                Status = true,
-                EvaluatedDate = now,
-                ScanId = "supId"
+                Status = true
             }.ToExpectedObject();
 
-            var result = data.Flatten(RuleScopes.Repositories, scanId).Single();
+            var result = data.Flatten(RuleScopes.Repositories, scanId, "projId", now).Single();
             expected.ShouldEqual(result);
         }
     }

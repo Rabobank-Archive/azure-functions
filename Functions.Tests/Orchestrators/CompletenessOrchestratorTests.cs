@@ -8,6 +8,7 @@ using Functions.Activities;
 using Functions.Orchestrators;
 using Functions.Model;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
 using Xunit;
@@ -43,7 +44,7 @@ namespace Functions.Tests.Orchestrators
 
             //Act
             var function = new CompletenessOrchestrator();
-            await function.RunAsync(orchestrationContext);
+            await function.RunAsync(orchestrationContext, Substitute.For<ILogger>());
 
             //Assert
             await orchestrationContext.Received()
@@ -78,7 +79,7 @@ namespace Functions.Tests.Orchestrators
 
             //Act
             var function = new CompletenessOrchestrator();
-            await function.RunAsync(orchestrationContext);
+            await function.RunAsync(orchestrationContext, Substitute.For<ILogger>());
 
             //Assert
             await orchestrationContext.Received(count)
@@ -109,7 +110,7 @@ namespace Functions.Tests.Orchestrators
 
             //Act
             var function = new CompletenessOrchestrator();
-            await function.RunAsync(orchestrationContext);
+            await function.RunAsync(orchestrationContext, Substitute.For<ILogger>());
 
             //Assert
             await orchestrationContext.Received(count)
