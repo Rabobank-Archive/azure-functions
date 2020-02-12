@@ -5,6 +5,7 @@ using Functions.Activities;
 using LogAnalytics.Client;
 using LogAnalytics.Client.Response;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Shouldly;
 using Xunit;
@@ -32,7 +33,7 @@ namespace Functions.Tests.Activities
 
             // Act
             var fun = new GetScannedSupervisorsActivity(client);
-            await fun.RunAsync(context);
+            await fun.RunAsync(context, Substitute.For<ILogger>());
 
             // Assert
             await client.ReceivedWithAnyArgs().QueryAsync("");
@@ -57,7 +58,9 @@ namespace Functions.Tests.Activities
 
             // Act
             var fun = new GetScannedSupervisorsActivity(client);
-            var result = await fun.RunAsync(Substitute.For<IDurableActivityContext>());
+            var result = await fun.RunAsync(
+                Substitute.For<IDurableActivityContext>(), 
+                Substitute.For<ILogger>());
 
             // Assert
             result.Count.ShouldBe(4);
@@ -73,7 +76,7 @@ namespace Functions.Tests.Activities
 
             // Act
             var fun = new GetScannedSupervisorsActivity(client);
-            var result = await fun.RunAsync(context);
+            var result = await fun.RunAsync(context, Substitute.For<ILogger>());
 
             // Assert
             result.Count.ShouldBe(0);

@@ -8,6 +8,7 @@ using Functions.Helpers;
 using Functions.Orchestrators;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
+using Microsoft.Extensions.Logging;
 
 namespace Functions.Activities
 {
@@ -16,7 +17,8 @@ namespace Functions.Activities
         [FunctionName(nameof(GetOrchestratorsToScanActivity))]
         public async Task<(IList<Orchestrator>, IList<Orchestrator>)> RunAsync(
             [ActivityTrigger] IDurableActivityContext context,
-            [DurableClient] IDurableOrchestrationClient client)
+            [DurableClient] IDurableOrchestrationClient client,
+            ILogger logger)
         {
             if (client == null)
             {
@@ -61,6 +63,7 @@ namespace Functions.Activities
                 condition.ContinuationToken = continuationToken;
             } while (Encoding.UTF8.GetString(Convert.FromBase64String(continuationToken)) != "null");
 
+            logger.LogInformation($"Completed {nameof(GetOrchestratorsToScanActivity)}, supervisors:{supervisors.Count}, projectScanners:{projectScanners.Count}");
             return (supervisors, projectScanners);
         }
     }
