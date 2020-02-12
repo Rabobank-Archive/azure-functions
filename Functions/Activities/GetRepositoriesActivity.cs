@@ -7,13 +7,13 @@ using Response = SecurePipelineScan.VstsService.Response;
 
 namespace Functions.Activities
 {
-    public class GetRepositoriesAndPoliciesActivity
+    public class GetRepositoriesActivity
     {
         private readonly IVstsRestClient _azuredo;
 
-        public GetRepositoriesAndPoliciesActivity(IVstsRestClient azuredo) => _azuredo = azuredo;
+        public GetRepositoriesActivity(IVstsRestClient azuredo) => _azuredo = azuredo;
 
-        [FunctionName(nameof(GetRepositoriesAndPoliciesActivity))]
+        [FunctionName(nameof(GetRepositoriesActivity))]
         public IEnumerable<Response.Repository>
             Run([ActivityTrigger] Response.Project project) =>
                 _azuredo.Get(Repository.Repositories(project.Id));

@@ -48,7 +48,7 @@ namespace Functions.Tests.Orchestrators
 
             starter
                 .Setup(x => x.CallActivityWithRetryAsync<IEnumerable<Repository>>(
-                    nameof(GetRepositoriesAndPoliciesActivity), It.IsAny<RetryOptions>(),
+                    nameof(GetRepositoriesActivity), It.IsAny<RetryOptions>(),
                     It.IsAny<Project>()))
                 .ReturnsAsync((fixture.CreateMany<Repository>()))
                 .Verifiable();

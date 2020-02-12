@@ -24,7 +24,7 @@ namespace Functions.Orchestrators
         [FunctionName(nameof(RepositoriesOrchestrator))]
         public async Task RunAsync([OrchestrationTrigger] IDurableOrchestrationContext context)
         {
-            var (project, productionItems, scanDate) = 
+            var (project, productionItems, scanDate) =
                 context.GetInput<(Project, List<ProductionItem>, DateTime)>();
 
             context.SetCustomStatus(new ScanOrchestrationStatus
@@ -33,7 +33,7 @@ namespace Functions.Orchestrators
                 Scope = RuleScopes.Repositories
             });
 
-            var repositories = await context.CallActivityWithRetryAsync<IEnumerable<Repository>>(nameof(GetRepositoriesAndPoliciesActivity),
+            var repositories = await context.CallActivityWithRetryAsync<IEnumerable<Repository>>(nameof(GetRepositoriesActivity),
                 RetryHelper.ActivityRetryOptions, project);
 
             var data = new ItemsExtensionData
