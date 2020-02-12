@@ -42,10 +42,6 @@
     <Folder Include="Properties\" />
   </ItemGroup>
 
-  <!-- <ItemGroup>
-    <ProjectReference Include="..\Functions.Cmdb\Functions.Cmdb.csproj" />
-  </ItemGroup> -->
-
   <Target Name="CopyExtensionsJson" AfterTargets="_GenerateFunctionsAndCopyContentFiles">
     <Message Importance="High" Text="Overwritting extensions.json file with one from build." />
 
