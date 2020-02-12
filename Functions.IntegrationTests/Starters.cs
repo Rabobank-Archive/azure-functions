@@ -15,6 +15,8 @@ using SecurePipelineScan.Rules.Security;
 using Functions.Cmdb.Client;
 using SecurePipelineScan.VstsService;
 using Xunit;
+using Functions.Cmdb.ProductionItems;
+using Functions.Helpers;
 
 namespace Functions.IntegrationTests
 {
@@ -34,13 +36,18 @@ namespace Functions.IntegrationTests
                     .AddAzureStorageCoreServices()
                     .ConfigureServices(services => services
                         .AddSingleton(fixture.Create<IVstsRestClient>())
+                        .AddDefaultRules()
                         .AddSingleton(fixture.Create<ILogAnalyticsClient>())
                         .AddSingleton(fixture.Create<ICmdbClient>())
                         .AddSingleton(CloudStorageAccount.DevelopmentStorageAccount.CreateCloudTableClient())
                         .AddSingleton(Microsoft.Azure.Storage.CloudStorageAccount.DevelopmentStorageAccount
                             .CreateCloudQueueClient())
                         .AddSingleton(fixture.Create<EnvironmentConfig>())
-                        .AddDefaultRules()))
+                                                .AddSingleton<IProductionItemsRepository, ProductionItemsRepository>()
+                        .AddTransient<IProductionItemsResolver, ProductionItemsResolver>()
+                        .AddSingleton<ISoxLookup, SoxLookup>()
+                        .AddTransient<IReleasePipelineHasDeploymentMethodReconciler, ReleasePipelineHasDeploymentMethodReconciler>()
+                        ))
                 .Build();
             await host.StartAsync();
 
