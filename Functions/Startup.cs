@@ -15,6 +15,7 @@ using Functions.Cmdb.Client;
 using SecurePipelineScan.VstsService.Security;
 using Functions.Helpers;
 using Functions.Cmdb.ProductionItems;
+using Functions.Routing;
 
 [assembly: WebJobsStartup(typeof(Functions.Startup))]
 
@@ -27,6 +28,7 @@ namespace Functions
             if (builder == null)
                 throw new ArgumentNullException(nameof(builder));
 
+            builder.AddRoutePriority();
             RegisterServices(builder.Services);
         }
 
