@@ -31,10 +31,9 @@ namespace Functions
         }
 
         [FunctionName(nameof(ReconcileReleasePipelineHasDeploymentMethodFunction))]
-        public async Task<IActionResult> ReconcileAsync([HttpTrigger(AuthorizationLevel.Anonymous, Route = "reconcile/{organization}/{project}/releasepipelines/ReleasePipelineHasDeploymentMethod/{item?}")]HttpRequestMessage request,
-            string organization,
-            string project,
-            string item = null)
+        // regex needed in route to make it more specific than the default Reconcile ruoute
+        public async Task<IActionResult> ReconcileAsync([HttpTrigger(AuthorizationLevel.Anonymous, Route = "reconcile/{organization}/{project}/{scope}/{ruleName:regex(^ReleasePipelineHasDeploymentMethod$)}/{item?}")]HttpRequestMessage request,
+            string project)
         {
             if (string.IsNullOrWhiteSpace(project))
                 throw new ArgumentNullException(nameof(project));
@@ -46,7 +45,7 @@ namespace Functions
 
             var userId = GetUserIdFromQueryString(request);
 
-            if (!(await HasPermissionToReconcileAsync(project, id, userId)))
+            if (!await HasPermissionToReconcileAsync(project, id, userId))
                 return new UnauthorizedResult();
 
             var (ciIdentifier, environment) = await GetData(request);
