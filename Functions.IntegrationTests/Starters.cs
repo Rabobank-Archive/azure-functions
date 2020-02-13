@@ -43,10 +43,10 @@ namespace Functions.IntegrationTests
                         .AddSingleton(Microsoft.Azure.Storage.CloudStorageAccount.DevelopmentStorageAccount
                             .CreateCloudQueueClient())
                         .AddSingleton(fixture.Create<EnvironmentConfig>())
-                                                .AddSingleton<IProductionItemsRepository, ProductionItemsRepository>()
-                        .AddTransient<IProductionItemsResolver, ProductionItemsResolver>()
-                        .AddSingleton<ISoxLookup, SoxLookup>()
-                        .AddTransient<IReleasePipelineHasDeploymentMethodReconciler, ReleasePipelineHasDeploymentMethodReconciler>()
+                        .AddSingleton(fixture.Create<IProductionItemsRepository>())
+                        .AddSingleton(fixture.Create<ProductionItemsResolver>())
+                        .AddSingleton(fixture.Create<ISoxLookup>())
+                        .AddSingleton(fixture.Create<ReleasePipelineHasDeploymentMethodReconciler>())
                         ))
                 .Build();
             await host.StartAsync();
