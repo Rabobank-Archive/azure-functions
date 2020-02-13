@@ -36,7 +36,10 @@ namespace Functions.IntegrationTests
                     .AddAzureStorageCoreServices()
                     .ConfigureServices(services => services
                         .AddSingleton(fixture.Create<IVstsRestClient>())
-                        .AddDefaultRules()
+                        .AddSingleton(fixture.CreateMany<IReleasePipelineRule>(3))
+                        .AddSingleton(fixture.CreateMany<IProjectRule>(2))
+                        .AddSingleton(fixture.CreateMany<IBuildPipelineRule>(2))
+                        .AddSingleton(fixture.CreateMany<IRepositoryRule>(2))
                         .AddSingleton(fixture.Create<ILogAnalyticsClient>())
                         .AddSingleton(fixture.Create<ICmdbClient>())
                         .AddSingleton(CloudStorageAccount.DevelopmentStorageAccount.CreateCloudTableClient())
