@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Routing;
@@ -8,10 +9,11 @@ using Microsoft.Azure.WebJobs.Host.Config;
 
 namespace Functions.Routing
 {
+    [ExcludeFromCodeCoverage]
     public class RoutePriorityExtensionConfigProvider : IExtensionConfigProvider
     {
-        IApplicationLifetime _applicationLifetime;
-        IWebJobsRouter _router;
+        readonly IApplicationLifetime _applicationLifetime;
+        readonly IWebJobsRouter _router;
 
         public RoutePriorityExtensionConfigProvider(IApplicationLifetime applicationLifetime, IWebJobsRouter router)
         {

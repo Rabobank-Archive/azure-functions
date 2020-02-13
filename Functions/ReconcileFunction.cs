@@ -26,12 +26,22 @@ namespace Functions
         private readonly EnvironmentConfig _config;
         private const int PermissionBit = 3;
 
-        public ReconcileFunction(EnvironmentConfig config, CloudTableClient tableClient, IVstsRestClient vstsClient, IEnumerable<IRule> rules, ITokenizer tokenizer)
+        public ReconcileFunction(EnvironmentConfig config,
+                                 CloudTableClient tableClient,
+                                 IVstsRestClient vstsClient,
+                                 IEnumerable<IBuildPipelineRule> buildPipelineRules,
+                                 IEnumerable<IReleasePipelineRule> releasePipelineRules,
+                                 IEnumerable<IProjectRule> projectRules,
+                                 IEnumerable<IRepositoryRule> repositoryRules,
+                                 ITokenizer tokenizer)
         {
             _config = config;
             _vstsClient = vstsClient;
             _tableClient = tableClient;
-            _rules = rules;
+            _rules = new List<IRule>(buildPipelineRules)
+                            .Concat(releasePipelineRules)
+                            .Concat(projectRules)
+                            .Concat(repositoryRules);
             _tokenizer = tokenizer;
         }
 

@@ -4,11 +4,9 @@ using Microsoft.Azure.Cosmos.Table;
 using Moq;
 using Newtonsoft.Json;
 using SecurePipelineScan.Rules.Security;
-using Functions.Cmdb.Client;
 using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Security;
 using Shouldly;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;
@@ -48,7 +46,7 @@ namespace Functions.Tests
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
 
-            var function = new ReconcileFunction(config, tableClient, vstsClient.Object, new[] { rule.Object }, tokenizer.Object);
+            var function = new ReconcileFunction(config, tableClient, vstsClient.Object, new IBuildPipelineRule[0], new IReleasePipelineRule[0], new[] { rule.Object }, new IRepositoryRule[0], tokenizer.Object);
             (await function.ReconcileAsync(request,
                 "somecompany",
                 "TAS",
@@ -87,7 +85,7 @@ namespace Functions.Tests
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
 
-            var function = new ReconcileFunction(config, tableClient, vstsClient.Object, new[] { rule.Object },
+            var function = new ReconcileFunction(config, tableClient, vstsClient.Object, new IBuildPipelineRule[0], new IReleasePipelineRule[0], new IProjectRule[0], new[] { rule.Object },
                 tokenizer.Object);
             (await function.ReconcileAsync(request,
                 "somecompany",
@@ -133,7 +131,7 @@ namespace Functions.Tests
                     "application/json"
                     );
 
-            var function = new ReconcileFunction(config, tableClient, vstsClient.Object, new[] { rule.Object }, tokenizer.Object);
+            var function = new ReconcileFunction(config, tableClient, vstsClient.Object, new IBuildPipelineRule[0], new IReleasePipelineRule[0], new[] { rule.Object }, new IRepositoryRule[0], tokenizer.Object);
             (await function.ReconcileAsync(request,
                 "somecompany",
                 "TAS",
@@ -166,7 +164,7 @@ namespace Functions.Tests
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
 
-            var function = new ReconcileFunction(config, tableClient, vstsClient.Object, Enumerable.Empty<IProjectRule>(),
+            var function = new ReconcileFunction(config, tableClient, vstsClient.Object, new IBuildPipelineRule[0], new IReleasePipelineRule[0], new IProjectRule[0], new IRepositoryRule[0],
                 tokenizer.Object);
             var result = (await function.ReconcileAsync(request,
                 "somecompany",
@@ -206,7 +204,7 @@ namespace Functions.Tests
 
 
             var function = new ReconcileFunction(config, tableClient, vstsClient.Object,
-                Enumerable.Empty<IProjectRule>(), tokenizer.Object);
+                new IBuildPipelineRule[0], new IReleasePipelineRule[0], new IProjectRule[0], new IRepositoryRule[0], tokenizer.Object);
             var result = (await function.ReconcileAsync(request,
                 "somecompany",
                 "TAS",
@@ -248,7 +246,7 @@ namespace Functions.Tests
             request.RequestUri = new System.Uri("https://dev.azure.com/reconcile/somecompany/TAS/haspermissions?userId=ef2e3683-8fb5-439d-9dc9-53af732e6387");
 
             var function = new ReconcileFunction(config, tableClient, vstsClient.Object,
-                Enumerable.Empty<IProjectRule>(), tokenizer.Object);
+                new IBuildPipelineRule[0], new IReleasePipelineRule[0], new IProjectRule[0], new IRepositoryRule[0], tokenizer.Object);
             (await function
                     .HasPermissionAsync(request, "somecompany", "TAS"))
                 .ShouldBeOfType<OkObjectResult>()
@@ -291,7 +289,7 @@ namespace Functions.Tests
                     "https://dev.azure.com/reconcile/somecompany/TAS/haspermissions?userId=ef2e3683-8fb5-439d-9dc9-53af732e6387");
 
             var function = new ReconcileFunction(config, tableClient, vstsClient.Object,
-                Enumerable.Empty<IProjectRule>(), tokenizer.Object);
+                new IBuildPipelineRule[0], new IReleasePipelineRule[0], new IProjectRule[0], new IRepositoryRule[0], tokenizer.Object);
             (await function
                     .HasPermissionAsync(request, "somecompany", "TAS"))
                 .ShouldBeOfType<OkObjectResult>()
@@ -309,7 +307,7 @@ namespace Functions.Tests
             var config = new EnvironmentConfig { Organization = "somecompany" };
             var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
 
-            var function = new ReconcileFunction(config, tableClient, null, Enumerable.Empty<IProjectRule>(),
+            var function = new ReconcileFunction(config, tableClient, null, new IBuildPipelineRule[0], new IReleasePipelineRule[0], new IProjectRule[0], new IRepositoryRule[0],
                 new Mock<ITokenizer>().Object);
             (await function.ReconcileAsync(request,
                 "somecompany",
@@ -332,7 +330,7 @@ namespace Functions.Tests
             var config = new EnvironmentConfig { Organization = "somecompany" };
             var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
 
-            var function = new ReconcileFunction(config, tableClient, null, Enumerable.Empty<IProjectRule>(),
+            var function = new ReconcileFunction(config, tableClient, null, new IBuildPipelineRule[0], new IReleasePipelineRule[0], new IProjectRule[0], new IRepositoryRule[0],
                 tokenizer.Object);
             (await function.ReconcileAsync(request,
                 "somecompany",
@@ -367,7 +365,7 @@ namespace Functions.Tests
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
 
             var function = new ReconcileFunction(config, tableClient, vstsClient.Object,
-                Enumerable.Empty<IProjectRule>(), tokenizer.Object);
+                new IBuildPipelineRule[0], new IReleasePipelineRule[0], new IProjectRule[0], new IRepositoryRule[0], tokenizer.Object);
             (await function.ReconcileAsync(request,
                     "somecompany",
                     "TAS",
@@ -387,7 +385,7 @@ namespace Functions.Tests
             var config = new EnvironmentConfig { Organization = "somecompany" };
             var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
 
-            var function = new ReconcileFunction(config, tableClient, null, Enumerable.Empty<IProjectRule>(),
+            var function = new ReconcileFunction(config, tableClient, null, new IBuildPipelineRule[0], new IReleasePipelineRule[0], new IProjectRule[0], new IRepositoryRule[0],
                 new Mock<ITokenizer>().Object);
             (await function
                     .HasPermissionAsync(request, "somecompany", "TAS"))
@@ -408,7 +406,7 @@ namespace Functions.Tests
             var config = new EnvironmentConfig { Organization = "somecompany" };
             var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
 
-            var function = new ReconcileFunction(config, tableClient, null, Enumerable.Empty<IProjectRule>(),
+            var function = new ReconcileFunction(config, tableClient, null, new IBuildPipelineRule[0], new IReleasePipelineRule[0], new IProjectRule[0], new IRepositoryRule[0],
                 tokenizer.Object);
             (await function
                     .HasPermissionAsync(request, "somecompany", "TAS"))
@@ -441,7 +439,7 @@ namespace Functions.Tests
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
 
             var function = new ReconcileFunction(config, tableClient, vstsClient.Object,
-                Enumerable.Empty<IProjectRule>(), tokenizer.Object);
+                new IBuildPipelineRule[0], new IReleasePipelineRule[0], new IProjectRule[0], new IRepositoryRule[0], tokenizer.Object);
             (await function
                     .HasPermissionAsync(request, "somecompany", "TAS"))
                 .ShouldBeOfType<OkObjectResult>()
@@ -475,7 +473,7 @@ namespace Functions.Tests
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
 
             var function = new ReconcileFunction(config, tableClient, vstsClient.Object,
-                Enumerable.Empty<IProjectRule>(), tokenizer.Object);
+                new IBuildPipelineRule[0], new IReleasePipelineRule[0], new IProjectRule[0], new IRepositoryRule[0], tokenizer.Object);
             (await function
                     .HasPermissionAsync(request, "somecompany", "TAS"))
                 .ShouldBeOfType<OkObjectResult>()

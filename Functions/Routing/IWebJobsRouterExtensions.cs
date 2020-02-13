@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -6,6 +7,7 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 
 namespace Functions.Routing
 {
+    [ExcludeFromCodeCoverage]
     public static class IWebJobsRouterExtensions
     {
         public static List<Route> GetRoutes(this IWebJobsRouter router)
@@ -16,6 +18,7 @@ namespace Functions.Routing
             var functionRoutes = field.GetValue(router);
             var routeCollection = (RouteCollection)functionRoutes;
             var routes = GetRoutes(routeCollection);
+
             return routes;
         }
 
