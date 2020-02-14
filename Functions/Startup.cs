@@ -52,7 +52,7 @@ namespace Functions
             services.AddSingleton<IVstsRestClient>(new VstsRestClient(organization, vstsPat));
             services.AddSingleton<ICmdbClient>(new CmdbClient(new CmdbClientConfig(cmdbApiKey, cmdbEndpoint, organization, nonProdCiIdentifier)));
 
-            services.AddScoped<IMemoryCache>(_ => new MemoryCache(new MemoryCacheOptions()));
+            services.AddSingleton<IMemoryCache>(_ => new MemoryCache(new MemoryCacheOptions()));
             services.AddTransient<IServiceHookScan<ReleaseDeploymentCompletedReport>, ReleaseDeploymentScan>();
             services.AddTransient<IServiceHookScan<BuildScanReport>, BuildScan>();
 
@@ -83,9 +83,10 @@ namespace Functions
             services.AddSingleton(new HttpClient());
 
             services.AddSingleton<IProductionItemsRepository, ProductionItemsRepository>();
-            services.AddTransient<IProductionItemsResolver, ProductionItemsResolver>();
+            services.AddScoped<IProductionItemsResolver, ProductionItemsResolver>();
             services.AddSingleton<ISoxLookup, SoxLookup>();
-            services.AddTransient<IReleasePipelineHasDeploymentMethodReconciler, ReleasePipelineHasDeploymentMethodReconciler>();
+            services.AddScoped<IReleasePipelineHasDeploymentMethodReconciler, ReleasePipelineHasDeploymentMethodReconciler>();
+            services.AddScoped<IPoliciesResolver, PoliciesResolver>();
         }
 
         private static string GetEnvironmentVariable(string variableName)

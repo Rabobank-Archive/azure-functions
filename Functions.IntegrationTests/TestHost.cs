@@ -50,6 +50,7 @@ namespace Functions.IntegrationTests
                         .AddTransient<IProductionItemsResolver, ProductionItemsResolver>()
                         .AddSingleton<ISoxLookup, SoxLookup>()
                         .AddTransient<IReleasePipelineHasDeploymentMethodReconciler, ReleasePipelineHasDeploymentMethodReconciler>()
+                        .AddSingleton(fixture.Create<IPoliciesResolver>())
                         ))
                 .Build();
         }

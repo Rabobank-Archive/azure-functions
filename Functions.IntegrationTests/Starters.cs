@@ -50,6 +50,7 @@ namespace Functions.IntegrationTests
                         .AddSingleton(fixture.Create<ProductionItemsResolver>())
                         .AddSingleton(fixture.Create<ISoxLookup>())
                         .AddSingleton(fixture.Create<ReleasePipelineHasDeploymentMethodReconciler>())
+                        .AddSingleton(fixture.Create<IPoliciesResolver>())
                         ))
                 .Build();
             await host.StartAsync();
