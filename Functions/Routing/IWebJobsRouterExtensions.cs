@@ -15,6 +15,10 @@ namespace Functions.Routing
             var type = typeof(WebJobsRouter);
             var fields = type.GetRuntimeFields();
             var field = fields.FirstOrDefault(f => f.Name == "_functionRoutes");
+
+            if (field == null)
+                return new List<Route>();
+
             var functionRoutes = field.GetValue(router);
             var routeCollection = (RouteCollection)functionRoutes;
             var routes = GetRoutes(routeCollection);
@@ -34,6 +38,7 @@ namespace Functions.Routing
                 }
                 routes.Add((Route)collection[i]);
             }
+
             return routes;
         }
     }

@@ -29,9 +29,7 @@ namespace Functions.Routing
         public void Initialize(ExtensionConfigContext context)
         {
             if (context is null)
-            {
                 throw new ArgumentNullException(nameof(context));
-            }
         }
 
         public void ReorderRoutes()
@@ -56,20 +54,16 @@ namespace Functions.Routing
             for (var i = 0; i < xTemplate.Segments.Count; i++)
             {
                 if (yTemplate.Segments.Count <= i)
-                {
                     return -1;
-                }
 
                 var xSegment = xTemplate.Segments[i].Parts[0];
                 var ySegment = yTemplate.Segments[i].Parts[0];
+
                 if (!xSegment.IsParameter && ySegment.IsParameter)
-                {
                     return -1;
-                }
+
                 if (xSegment.IsParameter && !ySegment.IsParameter)
-                {
                     return 1;
-                }
 
                 if (xSegment.IsParameter)
                 {
@@ -86,15 +80,13 @@ namespace Functions.Routing
                 {
                     var comparison = string.Compare(xSegment.Text, ySegment.Text, StringComparison.OrdinalIgnoreCase);
                     if (comparison != 0)
-                    {
                         return comparison;
-                    }
                 }
             }
+
             if (yTemplate.Segments.Count > xTemplate.Segments.Count)
-            {
                 return 1;
-            }
+
             return 0;
         }
     }
