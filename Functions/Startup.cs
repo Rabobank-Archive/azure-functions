@@ -83,10 +83,10 @@ namespace Functions
             services.AddSingleton(new HttpClient());
 
             services.AddSingleton<IProductionItemsRepository, ProductionItemsRepository>();
-            services.AddScoped<IProductionItemsResolver, ProductionItemsResolver>();
+            services.AddSingleton<IProductionItemsResolver, ProductionItemsResolver>();
             services.AddSingleton<ISoxLookup, SoxLookup>();
-            services.AddScoped<IReleasePipelineHasDeploymentMethodReconciler, ReleasePipelineHasDeploymentMethodReconciler>();
-            services.AddScoped<IPoliciesResolver, PoliciesResolver>();
+            services.AddSingleton<IReleasePipelineHasDeploymentMethodReconciler, ReleasePipelineHasDeploymentMethodReconciler>();
+            services.AddSingleton<IPoliciesResolver, PoliciesResolver>();
         }
 
         private static string GetEnvironmentVariable(string variableName)
