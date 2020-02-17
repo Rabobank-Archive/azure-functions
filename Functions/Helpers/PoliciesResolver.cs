@@ -19,6 +19,11 @@ namespace Functions.Helpers
             _memoryCache = memoryCache;
         }
 
+        public void Clear(string projectId)
+        {
+            _memoryCache.Remove(projectId);
+        }
+
         public IEnumerable<MinimumNumberOfReviewersPolicy> Resolve(string projectId)
         {
             if (_memoryCache.TryGetValue<IEnumerable<MinimumNumberOfReviewersPolicy>>(projectId, out var policies))

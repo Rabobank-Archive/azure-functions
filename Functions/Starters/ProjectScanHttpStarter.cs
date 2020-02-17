@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using SecurePipelineScan.VstsService.Security;
+using SecurePipelineScan.Rules.Security;
 
 namespace Functions.Starters
 {
@@ -16,12 +17,14 @@ namespace Functions.Starters
     {
         private readonly ITokenizer _tokenizer;
         private readonly IVstsRestClient _azuredo;
+        private readonly IPoliciesResolver _policiesResolver;
         private const int TimeOut = 180;
 
-        public ProjectScanHttpStarter(ITokenizer tokenizer, IVstsRestClient azuredo)
+        public ProjectScanHttpStarter(ITokenizer tokenizer, IVstsRestClient azuredo, IPoliciesResolver policiesResolver)
         {
             _tokenizer = tokenizer;
             _azuredo = azuredo;
+            _policiesResolver = policiesResolver;
         }
 
         [FunctionName(nameof(ProjectScanHttpStarter))]
@@ -39,6 +42,9 @@ namespace Functions.Starters
             var project = await _azuredo.GetAsync(Project.ProjectByName(projectName));
             if (project == null)
                 return new HttpResponseMessage(HttpStatusCode.NotFound);
+
+            // clear cache for manual scan
+            _policiesResolver.Clear(project.Id);
 
             var scanDate = DateTime.UtcNow;
             var instanceId = await starter.StartNewAsync<object>(nameof(ProjectScanOrchestrator), (project, scope, scanDate));
