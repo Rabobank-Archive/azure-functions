@@ -14,6 +14,9 @@ using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Xunit;
 using Response = SecurePipelineScan.VstsService.Response;
 using SecurePipelineScan.Rules.Security;
+using SecurePipelineScan.VstsService.Security;
+using Functions.Helpers;
+using AutoFixture.AutoMoq;
 
 namespace Functions.Tests.Starters
 {
@@ -31,7 +34,10 @@ namespace Functions.Tests.Starters
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
 
             var client = new Mock<IVstsRestClient>(MockBehavior.Strict);
-            var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object);
+
+            var fixture = new Fixture();
+            fixture.Customize(new AutoMoqCustomization());
+            var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object, fixture.Create<PoliciesResolver>());
             var result = await function.RunAsync(request, "somecompany", "TAS", RuleScopes.GlobalPermissions,
                 new Mock<IDurableOrchestrationClient>().Object);
 
@@ -43,6 +49,8 @@ namespace Functions.Tests.Starters
         public async Task RunFromHttp_WithCredential_OkResult()
         {
             var fixture = new Fixture();
+            fixture.Customize(new AutoMoqCustomization());
+
             var tokenizer = new Mock<ITokenizer>();
             tokenizer
                 .Setup(x => x.Principal(It.IsAny<string>()))
@@ -59,11 +67,11 @@ namespace Functions.Tests.Starters
                 .ReturnsAsync(fixture.Create<Response.Project>())
                 .Verifiable();
 
-            var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object);
+            var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object, fixture.Create<PoliciesResolver>());
             var result = await function.RunAsync(request, "somecompany", "TAS", RuleScopes.GlobalPermissions,
                 mock.Object);
 
-            mock.Verify(x => x.WaitForCompletionOrCreateCheckStatusResponseAsync(request, It.IsAny<string>(), 
+            mock.Verify(x => x.WaitForCompletionOrCreateCheckStatusResponseAsync(request, It.IsAny<string>(),
                 It.IsAny<TimeSpan>(), TimeSpan.FromSeconds(1)));
             client.Verify();
             result?.Dispose();
@@ -88,7 +96,10 @@ namespace Functions.Tests.Starters
                 .ReturnsAsync((Response.Project)null)
                 .Verifiable();
 
-            var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object);
+            var fixture = new Fixture();
+            fixture.Customize(new AutoMoqCustomization());
+
+            var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object, fixture.Create<PoliciesResolver>());
             var result = await function.RunAsync(request, "somecompany", "TAS", RuleScopes.GlobalPermissions,
                 mock.Object);
 
@@ -101,6 +112,7 @@ namespace Functions.Tests.Starters
         public async Task GlobalPermissionsScopeTest()
         {
             var fixture = new Fixture();
+            fixture.Customize(new AutoMoqCustomization());
             var project = fixture.Create<Response.Project>();
 
             var tokenizer = new Mock<ITokenizer>();
@@ -119,10 +131,10 @@ namespace Functions.Tests.Starters
                 .ReturnsAsync(project)
                 .Verifiable();
 
-            var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object);
+            var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object, fixture.Create<PoliciesResolver>());
             await function.RunAsync(request, "somecompany", "TAS", RuleScopes.GlobalPermissions, mock.Object);
 
-            mock.Verify(x => x.StartNewAsync<object>(nameof(ProjectScanOrchestrator),string.Empty,
+            mock.Verify(x => x.StartNewAsync<object>(nameof(ProjectScanOrchestrator), string.Empty,
                 It.Is<(Response.Project, string, DateTime)>(t => t.Item1 == project && t.Item2 == RuleScopes.GlobalPermissions)));
         }
 
@@ -130,6 +142,8 @@ namespace Functions.Tests.Starters
         public async Task RepositoryScopeTest()
         {
             var fixture = new Fixture();
+            fixture.Customize(new AutoMoqCustomization());
+
             var project = fixture.Create<Response.Project>();
 
             var tokenizer = new Mock<ITokenizer>();
@@ -148,10 +162,10 @@ namespace Functions.Tests.Starters
                 .ReturnsAsync(project)
                 .Verifiable();
 
-            var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object);
+            var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object, fixture.Create<PoliciesResolver>());
             await function.RunAsync(request, "somecompany", "TAS", RuleScopes.Repositories, mock.Object);
 
-            mock.Verify(x => x.StartNewAsync<object>(nameof(ProjectScanOrchestrator),string.Empty,
+            mock.Verify(x => x.StartNewAsync<object>(nameof(ProjectScanOrchestrator), string.Empty,
                 It.Is<(Response.Project, string, DateTime)>(t => t.Item1 == project && t.Item2 == RuleScopes.Repositories)));
         }
 
@@ -159,6 +173,8 @@ namespace Functions.Tests.Starters
         public async Task BuildPipelinesScopeTest()
         {
             var fixture = new Fixture();
+            fixture.Customize(new AutoMoqCustomization());
+
             var project = fixture.Create<Response.Project>();
 
             var tokenizer = new Mock<ITokenizer>();
@@ -177,7 +193,7 @@ namespace Functions.Tests.Starters
 
             var mock = new Mock<IDurableOrchestrationClient>();
 
-            var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object);
+            var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object, fixture.Create<PoliciesResolver>());
             await function.RunAsync(request, "somecompany", "TAS", RuleScopes.BuildPipelines, mock.Object);
 
             mock.Verify(x => x.StartNewAsync<object>(nameof(ProjectScanOrchestrator), string.Empty,
@@ -188,6 +204,8 @@ namespace Functions.Tests.Starters
         public async Task ReleasePipelinesScopeTest()
         {
             var fixture = new Fixture();
+            fixture.Customize(new AutoMoqCustomization());
+
             var project = fixture.Create<Response.Project>();
 
             var tokenizer = new Mock<ITokenizer>();
@@ -205,10 +223,11 @@ namespace Functions.Tests.Starters
                 .Verifiable();
 
             var mock = new Mock<IDurableOrchestrationClient>();
-            var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object);
+
+            var function = new ProjectScanHttpStarter(tokenizer.Object, client.Object, fixture.Create<PoliciesResolver>());
             await function.RunAsync(request, "somecompany", "TAS", RuleScopes.ReleasePipelines, mock.Object);
 
-            mock.Verify(x => x.StartNewAsync<object>(nameof(ProjectScanOrchestrator),string.Empty,
+            mock.Verify(x => x.StartNewAsync<object>(nameof(ProjectScanOrchestrator), string.Empty,
                 It.Is<(Response.Project, string, DateTime)>(t => t.Item1 == project && t.Item2 == RuleScopes.ReleasePipelines)));
         }
 

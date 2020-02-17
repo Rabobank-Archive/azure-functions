@@ -7,8 +7,6 @@ using Functions.Model;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using SecurePipelineScan.Rules.Security;
-using SecurePipelineScan.Rules.Security.Cmdb.Client;
-using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Response;
 using Environment = Functions.Model.Environment;
 using Task = System.Threading.Tasks.Task;
@@ -17,18 +15,16 @@ namespace Functions.Activities
 {
     public class ScanReleasePipelinesActivity
     {
-        private readonly IRulesProvider _rulesProvider;
-        private readonly ICmdbClient _cmdbClient;
+        private readonly IEnumerable<IReleasePipelineRule> _rules;
+        private readonly ISoxLookup _soxLookup;
         private readonly EnvironmentConfig _config;
-        private readonly IVstsRestClient _azuredo;
 
-        public ScanReleasePipelinesActivity(EnvironmentConfig config, IVstsRestClient azuredo,
-            IRulesProvider rulesProvider, ICmdbClient cmdbClient)
+        public ScanReleasePipelinesActivity(EnvironmentConfig config,
+            IEnumerable<IReleasePipelineRule> rules, ISoxLookup soxLookup)
         {
             _config = config;
-            _azuredo = azuredo;
-            _rulesProvider = rulesProvider;
-            _cmdbClient = cmdbClient;
+            _rules = rules;
+            _soxLookup = soxLookup;
         }
 
         [FunctionName(nameof(ScanReleasePipelinesActivity))]
@@ -44,12 +40,6 @@ namespace Functions.Activities
             var project = input.project;
             var pipeline = input.releasePipeline;
             var productionItems = input.productionItems;
-            var rules = _rulesProvider.ReleaseRules(_azuredo, _cmdbClient);
-
-            var productionStageIds = productionItems
-                .SelectMany(p => p.DeploymentInfo)
-                .Where(d => d.PipelineId == pipeline.Id &&
-                    !string.IsNullOrWhiteSpace(d.StageId)).Select(d => d.StageId).ToList();
 
             return new ItemExtensionData
             {
@@ -57,44 +47,17 @@ namespace Functions.Activities
                 ItemId = pipeline.Id,
                 ProjectId = project.Id,
                 Environments = pipeline.Environments.Select(e => new Environment { Id = e.Id, Name = e.Name }).ToList(),
-                Rules = await Task.WhenAll(rules.Select(async rule =>
+                Rules = await Task.WhenAll(_rules.Select(async rule =>
                         {
-                            bool? status;
-                            if (!productionStageIds.Any())
-                            {
-                                // if no specific stageId is provided, we assume that the rule does not
-                                // need it and pass null.
-                                status = await rule.EvaluateAsync(project.Id, null, pipeline)
-                                    .ConfigureAwait(false);
-                            }
-                            else
-                            {
-                                // if we have stageId's, we will invoke the rule for each
-                                // one of them.
-                                var results = await Task.WhenAll(productionStageIds.Select(async stageId =>
-                                    await rule.EvaluateAsync(project.Id, stageId, pipeline)
-                                        .ConfigureAwait(false))).ConfigureAwait(false);
-
-                                if (results.Any(r => r == null))
-                                {
-                                    // If any of the results above is null (could not be determined), it mean that the status
-                                    // cannot be determined.
-                                    status = null;
-                                }
-                                else
-                                {
-                                    // otherwise, all results must be true for the status to be true.
-                                    status = results.All(r => r.HasValue && r.Value);
-                                }
-                            }
-
+                            var ruleName = rule.GetType().Name;
                             return new EvaluatedRule
                             {
-                                Name = rule.GetType().Name,
+                                Name = ruleName,
                                 Description = rule.Description,
                                 Link = rule.Link,
-                                IsSox = rule.IsSox,
-                                Status = status,
+                                IsSox = _soxLookup.IsSox(ruleName),
+                                Status = await rule.EvaluateAsync(project.Id, pipeline)
+                                    .ConfigureAwait(false),
                                 Reconcile = ReconcileFunction.ReconcileFromRule(rule as IReconcile, _config,
                                     project.Id, RuleScopes.ReleasePipelines, pipeline.Id)
                             };

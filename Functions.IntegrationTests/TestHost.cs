@@ -11,9 +11,12 @@ using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SecurePipelineScan.Rules.Security;
-using SecurePipelineScan.Rules.Security.Cmdb.Client;
+using Functions.Cmdb.Client;
 using SecurePipelineScan.VstsService;
 using Xunit;
+using SecurePipelineScan.VstsService.Security;
+using Functions.Cmdb.ProductionItems;
+using Functions.Helpers;
 
 namespace Functions.IntegrationTests
 {
@@ -37,12 +40,18 @@ namespace Functions.IntegrationTests
                     .ConfigureServices(services => services
                         .AddSingleton<ITokenizer>(new Tokenizer(TestConfig.ExtensionSecret))
                         .AddSingleton<IVstsRestClient>(new VstsRestClient(TestConfig.Organization, TestConfig.Token))
-                        .AddSingleton<IRulesProvider>(new RulesProvider())
+                        .AddDefaultRules()
                         .AddSingleton(fixture.Create<ILogAnalyticsClient>())
                         .AddSingleton(fixture.Create<ICmdbClient>())
                         .AddSingleton(environMentConfig)
                         .AddSingleton(CloudStorageAccount.DevelopmentStorageAccount.CreateCloudTableClient())
-                        .AddSingleton(Microsoft.Azure.Storage.CloudStorageAccount.DevelopmentStorageAccount.CreateCloudQueueClient())))
+                        .AddSingleton(Microsoft.Azure.Storage.CloudStorageAccount.DevelopmentStorageAccount.CreateCloudQueueClient())
+                        .AddSingleton<IProductionItemsRepository, ProductionItemsRepository>()
+                        .AddTransient<IProductionItemsResolver, ProductionItemsResolver>()
+                        .AddSingleton<ISoxLookup, SoxLookup>()
+                        .AddTransient<IReleasePipelineHasDeploymentMethodReconciler, ReleasePipelineHasDeploymentMethodReconciler>()
+                        .AddSingleton(fixture.Create<IPoliciesResolver>())
+                        ))
                 .Build();
         }
 

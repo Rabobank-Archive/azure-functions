@@ -34,33 +34,31 @@ namespace Functions.Tests.Orchestrators
                 .Returns(fixture.Create<string>());
 
             starter
-                .Setup(x => x.SetCustomStatus(It.Is<ScanOrchestrationStatus>(s => 
+                .Setup(x => x.SetCustomStatus(It.Is<ScanOrchestrationStatus>(s =>
                     s.Scope == RuleScopes.Repositories)))
                 .Verifiable();
 
             starter
                 .Setup(x => x.CallActivityWithRetryAsync<ItemExtensionData>(
-                    nameof(ScanRepositoriesActivity), It.IsAny<RetryOptions>(), 
-                    It.IsAny<(Project, Repository, IEnumerable<MinimumNumberOfReviewersPolicy>, 
+                    nameof(ScanRepositoriesActivity), It.IsAny<RetryOptions>(),
+                    It.IsAny<(Project, Repository,
                     string)>()))
                 .ReturnsAsync(fixture.Create<ItemExtensionData>())
                 .Verifiable();
-            
+
             starter
-                .Setup(x => x.CallActivityWithRetryAsync<(IEnumerable<Repository>, 
-                    IEnumerable<MinimumNumberOfReviewersPolicy>)>(
-                    nameof(GetRepositoriesAndPoliciesActivity), It.IsAny<RetryOptions>(),
+                .Setup(x => x.CallActivityWithRetryAsync<IEnumerable<Repository>>(
+                    nameof(GetRepositoriesActivity), It.IsAny<RetryOptions>(),
                     It.IsAny<Project>()))
-                .ReturnsAsync((fixture.CreateMany<Repository>(),
-                    fixture.CreateMany<MinimumNumberOfReviewersPolicy>()))
+                .ReturnsAsync((fixture.CreateMany<Repository>()))
                 .Verifiable();
-            
+
             starter
                 .Setup(x => x.CurrentUtcDateTime).Returns(new DateTime());
-            
+
             starter
                 .Setup(x => x.CallActivityAsync<object>(nameof(UploadExtensionDataActivity),
-                    It.Is<(ItemsExtensionData data, string scope)>(t => 
+                    It.Is<(ItemsExtensionData data, string scope)>(t =>
                     t.scope == RuleScopes.Repositories)))
                 .Returns(Task.FromResult<object>(null));
 

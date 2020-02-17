@@ -12,9 +12,11 @@ using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SecurePipelineScan.Rules.Security;
-using SecurePipelineScan.Rules.Security.Cmdb.Client;
+using Functions.Cmdb.Client;
 using SecurePipelineScan.VstsService;
 using Xunit;
+using Functions.Cmdb.ProductionItems;
+using Functions.Helpers;
 
 namespace Functions.IntegrationTests
 {
@@ -24,7 +26,7 @@ namespace Functions.IntegrationTests
         public async Task ProjectsScan()
         {
             // Arrange
-            var fixture = new Fixture().Customize(new AutoNSubstituteCustomization {ConfigureMembers = true});
+            var fixture = new Fixture().Customize(new AutoNSubstituteCustomization { ConfigureMembers = true });
             fixture.RepeatCount = 1;
 
             using var host = new HostBuilder()
@@ -34,13 +36,22 @@ namespace Functions.IntegrationTests
                     .AddAzureStorageCoreServices()
                     .ConfigureServices(services => services
                         .AddSingleton(fixture.Create<IVstsRestClient>())
+                        .AddSingleton(fixture.CreateMany<IReleasePipelineRule>(3))
+                        .AddSingleton(fixture.CreateMany<IProjectRule>(2))
+                        .AddSingleton(fixture.CreateMany<IBuildPipelineRule>(2))
+                        .AddSingleton(fixture.CreateMany<IRepositoryRule>(2))
                         .AddSingleton(fixture.Create<ILogAnalyticsClient>())
                         .AddSingleton(fixture.Create<ICmdbClient>())
                         .AddSingleton(CloudStorageAccount.DevelopmentStorageAccount.CreateCloudTableClient())
                         .AddSingleton(Microsoft.Azure.Storage.CloudStorageAccount.DevelopmentStorageAccount
                             .CreateCloudQueueClient())
                         .AddSingleton(fixture.Create<EnvironmentConfig>())
-                        .AddSingleton(fixture.Create<IRulesProvider>())))
+                        .AddSingleton(fixture.Create<IProductionItemsRepository>())
+                        .AddSingleton(fixture.Create<ProductionItemsResolver>())
+                        .AddSingleton(fixture.Create<ISoxLookup>())
+                        .AddSingleton(fixture.Create<ReleasePipelineHasDeploymentMethodReconciler>())
+                        .AddSingleton(fixture.Create<IPoliciesResolver>())
+                        ))
                 .Build();
             await host.StartAsync();
 
@@ -66,7 +77,7 @@ namespace Functions.IntegrationTests
         public async Task CompletenessScan()
         {
             // Arrange
-            var fixture = new Fixture().Customize(new AutoNSubstituteCustomization {ConfigureMembers = true});
+            var fixture = new Fixture().Customize(new AutoNSubstituteCustomization { ConfigureMembers = true });
             fixture.RepeatCount = 1;
 
             using var host = new HostBuilder()
@@ -82,7 +93,7 @@ namespace Functions.IntegrationTests
                         .AddSingleton(Microsoft.Azure.Storage.CloudStorageAccount.DevelopmentStorageAccount
                             .CreateCloudQueueClient())
                         .AddSingleton(fixture.Create<EnvironmentConfig>())
-                        .AddSingleton(fixture.Create<IRulesProvider>())))
+                        .AddDefaultRules()))
                 .Build();
             await host.StartAsync();
 

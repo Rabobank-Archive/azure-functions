@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Functions.Cmdb.ProductionItems;
 using Functions.Model;
-using Microsoft.Azure.Cosmos.Table;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
@@ -12,14 +12,13 @@ namespace Functions.Activities
     public class GetDeploymentMethodsActivity
     {
         private const string NONPROD = "NON-PROD";
-        private readonly CloudTableClient _client;
+        private readonly IProductionItemsRepository _productionItemsRepository;
         private readonly EnvironmentConfig _config;
 
-        public GetDeploymentMethodsActivity(CloudTableClient client,
-            EnvironmentConfig config)
+        public GetDeploymentMethodsActivity(EnvironmentConfig config, IProductionItemsRepository productionItemRepository)
         {
-            _client = client;
-            _config = config;
+            this._productionItemsRepository = productionItemRepository;
+            this._config = config;
         }
 
         [FunctionName(nameof(GetDeploymentMethodsActivity))]
@@ -28,24 +27,7 @@ namespace Functions.Activities
             if (projectId == null)
                 throw new ArgumentNullException(nameof(projectId));
 
-            var query = new TableQuery<DeploymentMethod>().Where(TableQuery.CombineFilters(
-                TableQuery.GenerateFilterCondition("Organization", QueryComparisons.Equal, _config.Organization),
-                TableOperators.And,
-                TableQuery.GenerateFilterCondition("ProjectId", QueryComparisons.Equal, projectId)));
-            var table = _client.GetTableReference("DeploymentMethod");
-
-            if (!await table.ExistsAsync().ConfigureAwait(false))
-                return new List<ProductionItem>();
-
-            var deploymentMethodEntities = new List<DeploymentMethod>();
-            TableContinuationToken continuationToken = null;
-            do
-            {
-                var page = await table.ExecuteQuerySegmentedAsync(query, continuationToken)
-                    .ConfigureAwait(false);
-                continuationToken = page.ContinuationToken;
-                deploymentMethodEntities.AddRange(page.Results);
-            } while (continuationToken != null);
+            var deploymentMethodEntities = await _productionItemsRepository.GetAsync(projectId).ConfigureAwait(false);
 
             return deploymentMethodEntities
                 .GroupBy(d => d.PipelineId)

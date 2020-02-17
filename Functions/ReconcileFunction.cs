@@ -5,38 +5,44 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web;
-using Functions.Activities;
 using Microsoft.Azure.Cosmos.Table;
 using Requests = SecurePipelineScan.VstsService.Requests;
 using Newtonsoft.Json;
-using SecurePipelineScan.Rules.Security.Cmdb.Client;
+using SecurePipelineScan.VstsService.Security;
 
 namespace Functions
 {
     public class ReconcileFunction
     {
-        private readonly IRulesProvider _ruleProvider;
+        private readonly IEnumerable<IRule> _rules;
         private readonly ITokenizer _tokenizer;
-        private readonly ICmdbClient _cmdbClient;
         private readonly IVstsRestClient _vstsClient;
         private readonly CloudTableClient _tableClient;
         private readonly EnvironmentConfig _config;
         private const int PermissionBit = 3;
 
-        public ReconcileFunction(EnvironmentConfig config, CloudTableClient tableClient, IVstsRestClient vstsClient, IRulesProvider ruleProvider, ITokenizer tokenizer, ICmdbClient cmdbClient)
+        public ReconcileFunction(EnvironmentConfig config,
+                                 CloudTableClient tableClient,
+                                 IVstsRestClient vstsClient,
+                                 IEnumerable<IBuildPipelineRule> buildPipelineRules,
+                                 IEnumerable<IReleasePipelineRule> releasePipelineRules,
+                                 IEnumerable<IProjectRule> projectRules,
+                                 IEnumerable<IRepositoryRule> repositoryRules,
+                                 ITokenizer tokenizer)
         {
             _config = config;
             _vstsClient = vstsClient;
             _tableClient = tableClient;
-            _ruleProvider = ruleProvider;
+            _rules = new List<IRule>(buildPipelineRules)
+                            .Concat(releasePipelineRules)
+                            .Concat(projectRules)
+                            .Concat(repositoryRules);
             _tokenizer = tokenizer;
-            _cmdbClient = cmdbClient;
         }
 
         [FunctionName(nameof(ReconcileFunction))]
@@ -71,11 +77,11 @@ namespace Functions
                 case RuleScopes.GlobalPermissions:
                     return await ReconcileGlobalPermissionsAsync(project, ruleName);
                 case RuleScopes.Repositories:
-                    return await ReconcileItemAsync(project, ruleName, item, _ruleProvider.RepositoryRules(_vstsClient), userId, data);
+                    return await ReconcileItemAsync(project, ruleName, item, userId, data);
                 case RuleScopes.BuildPipelines:
-                    return await ReconcileItemAsync(project, ruleName, item, _ruleProvider.BuildRules(_vstsClient), userId, data);
+                    return await ReconcileItemAsync(project, ruleName, item, userId, data);
                 case RuleScopes.ReleasePipelines:
-                    return await ReconcileItemAsync(project, ruleName, item, _ruleProvider.ReleaseRules(_vstsClient, _cmdbClient), userId, data);
+                    return await ReconcileItemAsync(project, ruleName, item, userId, data);
                 default:
                     return new NotFoundObjectResult(scope);
             }
@@ -158,8 +164,7 @@ namespace Functions
 
         private async Task<IActionResult> ReconcileGlobalPermissionsAsync(string project, string ruleName)
         {
-            var rule = _ruleProvider
-                .GlobalPermissions(_vstsClient)
+            var rule = _rules
                 .OfType<IProjectReconcile>()
                 .SingleOrDefault(x => x.GetType().Name == ruleName);
 
@@ -169,15 +174,16 @@ namespace Functions
             }
 
             await rule.ReconcileAsync(project);
+
             return new OkResult();
         }
 
-        private async Task<IActionResult> ReconcileItemAsync(string projectId, string ruleName, string item, IEnumerable rules, string userId, object data)
+        private async Task<IActionResult> ReconcileItemAsync(string projectId, string ruleName, string item, string userId, object data)
         {
             if (string.IsNullOrEmpty(item))
                 throw new ArgumentNullException(nameof(item));
 
-            var rule = rules
+            var rule = _rules
                 .OfType<IReconcile>()
                 .SingleOrDefault(x => x.GetType().Name == ruleName);
 
@@ -186,36 +192,9 @@ namespace Functions
                 return new NotFoundObjectResult($"Rule not found {ruleName}");
             }
 
-            if (rule.RequiresStageId)
-            {
-                var productionStageIds = await GetProductionStageIdsAsync(projectId, item).ConfigureAwait(false);
-                if (!productionStageIds.Any())
-                {
-                    throw new InvalidOperationException($"Rule '{rule.GetType().Name}' requires stageId's but none are provided");
-                }
-
-                await Task.WhenAll(productionStageIds.Select(async stageId =>
-                        await rule.ReconcileAsync(projectId, item, stageId, userId, data).ConfigureAwait(false)))
-                    .ConfigureAwait(false);
-            }
-            else
-            {
-                await rule.ReconcileAsync(projectId, item, null, userId, data).ConfigureAwait(false);
-            }
+            await rule.ReconcileAsync(projectId, item).ConfigureAwait(false);
 
             return new OkResult();
-        }
-
-        private async Task<List<string>> GetProductionStageIdsAsync(string projectId, string pipelineId)
-        {
-            var productionItems = await new GetDeploymentMethodsActivity(_tableClient, _config).RunAsync(projectId)
-                .ConfigureAwait(false);
-
-            return productionItems
-                .Where(p => p.ItemId == pipelineId)
-                .SelectMany(p => p.DeploymentInfo)
-                .Where(d =>
-                    !string.IsNullOrWhiteSpace(d.StageId)).Select(d => d.StageId).Distinct().ToList();
         }
 
         private static string GetUserIdFromQueryString(HttpRequestMessage request)

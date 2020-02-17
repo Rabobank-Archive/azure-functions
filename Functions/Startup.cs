@@ -11,7 +11,11 @@ using System.Net.Http;
 using LogAnalytics.Client;
 using Microsoft.Azure.Cosmos.Table;
 using Microsoft.Azure.Storage.Queue;
-using SecurePipelineScan.Rules.Security.Cmdb.Client;
+using Functions.Cmdb.Client;
+using SecurePipelineScan.VstsService.Security;
+using Functions.Helpers;
+using Functions.Cmdb.ProductionItems;
+using Functions.Routing;
 
 [assembly: WebJobsStartup(typeof(Functions.Startup))]
 
@@ -24,6 +28,7 @@ namespace Functions
             if (builder == null)
                 throw new ArgumentNullException(nameof(builder));
 
+            builder.AddRoutePriority();
             RegisterServices(builder.Services);
         }
 
@@ -47,7 +52,7 @@ namespace Functions
             services.AddSingleton<IVstsRestClient>(new VstsRestClient(organization, vstsPat));
             services.AddSingleton<ICmdbClient>(new CmdbClient(new CmdbClientConfig(cmdbApiKey, cmdbEndpoint, organization, nonProdCiIdentifier)));
 
-            services.AddScoped<IMemoryCache>(_ => new MemoryCache(new MemoryCacheOptions()));
+            services.AddSingleton<IMemoryCache>(_ => new MemoryCache(new MemoryCacheOptions()));
             services.AddTransient<IServiceHookScan<ReleaseDeploymentCompletedReport>, ReleaseDeploymentScan>();
             services.AddTransient<IServiceHookScan<BuildScanReport>, BuildScan>();
 
@@ -72,10 +77,16 @@ namespace Functions
             };
 
             services.AddSingleton(config);
-            services.AddSingleton<IRulesProvider, RulesProvider>();
             services.AddSingleton<ITokenizer>(new Tokenizer(GetEnvironmentVariable("TOKEN_SECRET")));
 
+            services.AddDefaultRules();
             services.AddSingleton(new HttpClient());
+
+            services.AddSingleton<IProductionItemsRepository, ProductionItemsRepository>();
+            services.AddSingleton<IProductionItemsResolver, ProductionItemsResolver>();
+            services.AddSingleton<ISoxLookup, SoxLookup>();
+            services.AddSingleton<IReleasePipelineHasDeploymentMethodReconciler, ReleasePipelineHasDeploymentMethodReconciler>();
+            services.AddSingleton<IPoliciesResolver, PoliciesResolver>();
         }
 
         private static string GetEnvironmentVariable(string variableName)

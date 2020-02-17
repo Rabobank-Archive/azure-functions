@@ -1,17 +1,15 @@
 using AutoFixture;
 using AutoFixture.AutoMoq;
 using Functions.Activities;
-using Functions.Model;
 using Moq;
 using SecurePipelineScan.Rules.Security;
-using SecurePipelineScan.VstsService;
 using Response = SecurePipelineScan.VstsService.Response;
 using Shouldly;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
-using System.Collections.Generic;
+using Functions.Helpers;
 
 namespace Functions.Tests.Activities
 {
@@ -28,19 +26,15 @@ namespace Functions.Tests.Activities
                 .Setup(x => x.EvaluateAsync(It.IsAny<string>()))
                 .Returns(Task.FromResult(true));
 
-            var ruleSets = new Mock<IRulesProvider>();
-            ruleSets
-                .Setup(x => x.GlobalPermissions(It.IsAny<IVstsRestClient>()))
-                .Returns(new[] { rule.Object, rule.Object });
-
             var project = fixture.Create<Response.Project>();
             var ciIdentifiers = fixture.Create<string>();
 
+            var soxLookup = fixture.Create<SoxLookup>();
+
             //Act
             var fun = new ScanGlobalPermissionsActivity(
-                fixture.Create<IVstsRestClient>(),
                 fixture.Create<EnvironmentConfig>(),
-                ruleSets.Object);
+                new[] { rule.Object, rule.Object }, soxLookup);
 
             await fun.RunAsync((project, ciIdentifiers));
 
@@ -55,7 +49,6 @@ namespace Functions.Tests.Activities
             //Arrange
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
             var config = fixture.Create<EnvironmentConfig>();
-            var clientMock = new Mock<IVstsRestClient>();
 
             var project = fixture.Create<Response.Project>();
             var ciIdentifiers = fixture.Create<string>();
@@ -66,16 +59,12 @@ namespace Functions.Tests.Activities
                 .Setup(x => x.Impact)
                 .Returns(new[] { "just some action" });
 
-            var rulesProvider = new Mock<IRulesProvider>();
-            rulesProvider
-                .Setup(x => x.GlobalPermissions(It.IsAny<IVstsRestClient>()))
-                .Returns(new[] { rule.Object });
+            var soxLookup = fixture.Create<SoxLookup>();
 
             //Act
             var fun = new ScanGlobalPermissionsActivity(
-                clientMock.Object,
                 config,
-                rulesProvider.Object);
+                new[] { rule.Object }, soxLookup);
             var result = await fun.RunAsync((project, ciIdentifiers));
 
             var ruleName = rule.Object.GetType().Name;

@@ -11,7 +11,8 @@ steps:
   - task: DotNetCoreCLI@2
     displayName: Restore
     inputs:
-      command: restore
+      command: restore 
+      arguments: '--no-cache'
       vstsFeed: 'ea1adc59-f67e-40d5-8539-4c897a894647'
 
   - task: DotNetCoreCLI@2

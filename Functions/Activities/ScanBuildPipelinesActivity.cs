@@ -1,27 +1,28 @@
 ﻿using Functions.Model;
 using Microsoft.Azure.WebJobs;
 using SecurePipelineScan.Rules.Security;
-using SecurePipelineScan.VstsService;
 using Response = SecurePipelineScan.VstsService.Response;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
+using System.Collections.Generic;
+using Functions.Helpers;
 
 namespace Functions.Activities
 {
     public class ScanBuildPipelinesActivity
     {
-        private readonly IRulesProvider _rulesProvider;
+        private readonly IEnumerable<IBuildPipelineRule> _rules;
         private readonly EnvironmentConfig _config;
-        private readonly IVstsRestClient _azuredo;
+        private readonly ISoxLookup _soxLookup;
 
-        public ScanBuildPipelinesActivity(EnvironmentConfig config, IVstsRestClient azuredo,
-            IRulesProvider rulesProvider)
+        public ScanBuildPipelinesActivity(EnvironmentConfig config,
+            IEnumerable<IBuildPipelineRule> rules, ISoxLookup soxLookup)
         {
+            _soxLookup = soxLookup;
             _config = config;
-            _azuredo = azuredo;
-            _rulesProvider = rulesProvider;
+            _rules = rules;
         }
 
         [FunctionName(nameof(ScanBuildPipelinesActivity))]
@@ -35,23 +36,24 @@ namespace Functions.Activities
             var buildPipeline = input.Item2;
             var ciIdentifiers = input.Item3;
 
-            var rules = _rulesProvider.BuildRules(_azuredo).ToList();
-
             return new ItemExtensionData
             {
                 Item = buildPipeline.Name,
                 ItemId = buildPipeline.Id,
-                Rules = await Task.WhenAll(rules.Select(async rule =>
-                    new EvaluatedRule
+                Rules = await Task.WhenAll(_rules.Select(async rule =>
                     {
-                        Name = rule.GetType().Name,
-                        Description = rule.Description,
-                        Link = rule.Link,
-                        IsSox = rule.IsSox,
-                        Status = await rule.EvaluateAsync(project, buildPipeline)
-                            .ConfigureAwait(false),
-                        Reconcile = ReconcileFunction.ReconcileFromRule(rule as IReconcile, _config,
-                            project.Id, RuleScopes.BuildPipelines, buildPipeline.Id)
+                        var ruleName = rule.GetType().Name;
+                        return new EvaluatedRule
+                        {
+                            Name = ruleName,
+                            Description = rule.Description,
+                            Link = rule.Link,
+                            IsSox = _soxLookup.IsSox(ruleName),
+                            Status = await rule.EvaluateAsync(project, buildPipeline)
+                                .ConfigureAwait(false),
+                            Reconcile = ReconcileFunction.ReconcileFromRule(rule as IReconcile, _config,
+                                project.Id, RuleScopes.BuildPipelines, buildPipeline.Id)
+                        };
                     })
                     .ToList())
                     .ConfigureAwait(false),

@@ -24,7 +24,7 @@ namespace Functions.Orchestrators
         [FunctionName(nameof(RepositoriesOrchestrator))]
         public async Task RunAsync([OrchestrationTrigger] IDurableOrchestrationContext context)
         {
-            var (project, productionItems, scanDate) = 
+            var (project, productionItems, scanDate) =
                 context.GetInput<(Project, List<ProductionItem>, DateTime)>();
 
             context.SetCustomStatus(new ScanOrchestrationStatus
@@ -33,22 +33,21 @@ namespace Functions.Orchestrators
                 Scope = RuleScopes.Repositories
             });
 
-            var (repositories, policies) = await context.CallActivityWithRetryAsync<(IEnumerable<Repository>, 
-                IEnumerable<MinimumNumberOfReviewersPolicy>)>(nameof(GetRepositoriesAndPoliciesActivity), 
+            var repositories = await context.CallActivityWithRetryAsync<IEnumerable<Repository>>(nameof(GetRepositoriesActivity),
                 RetryHelper.ActivityRetryOptions, project);
 
             var data = new ItemsExtensionData
             {
                 Id = project.Name,
                 Date = context.CurrentUtcDateTime,
-                RescanUrl = ProjectScanHttpStarter.RescanUrl(_config, project.Name, 
+                RescanUrl = ProjectScanHttpStarter.RescanUrl(_config, project.Name,
                     RuleScopes.Repositories),
-                HasReconcilePermissionUrl = ReconcileFunction.HasReconcilePermissionUrl(_config, 
+                HasReconcilePermissionUrl = ReconcileFunction.HasReconcilePermissionUrl(_config,
                     project.Id),
                 Reports = await Task.WhenAll(repositories.Select(r =>
-                    StartScanActivityAsync(context, r, policies, project, productionItems)))
+                    StartScanActivityAsync(context, r, project, productionItems)))
             };
-            
+
             await context.CallActivityAsync(nameof(UploadPreventiveRuleLogsActivity),
                 data.Flatten(RuleScopes.Repositories, context.InstanceId, project.Id, scanDate));
 
@@ -57,10 +56,10 @@ namespace Functions.Orchestrators
         }
 
         private static Task<ItemExtensionData> StartScanActivityAsync(IDurableOrchestrationContext context,
-                Repository repository, IEnumerable<MinimumNumberOfReviewersPolicy> policies, Project project, 
+                Repository repository, Project project,
                 IEnumerable<ProductionItem> productionItems) =>
             context.CallActivityWithRetryAsync<ItemExtensionData>(nameof(ScanRepositoriesActivity),
-                RetryHelper.ActivityRetryOptions, (project, repository, policies, 
+                RetryHelper.ActivityRetryOptions, (project, repository,
                 LinkConfigurationItemHelper.GetCiIdentifiers(
                 productionItems
                     .Where(r => r.ItemId == repository.Id))));

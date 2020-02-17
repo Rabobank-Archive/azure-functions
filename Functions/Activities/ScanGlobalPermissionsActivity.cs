@@ -1,27 +1,28 @@
 using Functions.Model;
 using Microsoft.Azure.WebJobs;
 using SecurePipelineScan.Rules.Security;
-using SecurePipelineScan.VstsService;
 using Response = SecurePipelineScan.VstsService.Response;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
+using System.Collections.Generic;
+using Functions.Helpers;
 
 namespace Functions.Activities
 {
     public class ScanGlobalPermissionsActivity
     {
-        private readonly IVstsRestClient _azuredo;
         private readonly EnvironmentConfig _config;
-        private readonly IRulesProvider _rulesProvider;
+        private readonly IEnumerable<IProjectRule> _rules;
+        private readonly ISoxLookup _soxLookup;
 
-        public ScanGlobalPermissionsActivity(IVstsRestClient azuredo,
-            EnvironmentConfig config, IRulesProvider rulesProvider)
+        public ScanGlobalPermissionsActivity(
+            EnvironmentConfig config, IEnumerable<IProjectRule> rules, ISoxLookup soxLookup)
         {
-            _azuredo = azuredo;
             _config = config;
-            _rulesProvider = rulesProvider;
+            _rules = rules;
+            _soxLookup = soxLookup;
         }
 
         [FunctionName(nameof(ScanGlobalPermissionsActivity))]
@@ -34,24 +35,25 @@ namespace Functions.Activities
             var project = input.Item1;
             var ciIdentifiers = input.Item2;
 
-            var rules = _rulesProvider.GlobalPermissions(_azuredo);
-
             return new ItemExtensionData
             {
                 Item = null,
                 ItemId = null,
-                Rules = await Task.WhenAll(rules.Select(async r =>
-                    new EvaluatedRule
+                Rules = await Task.WhenAll(_rules.Select(async r =>
+                {
+                    var ruleName = r.GetType().Name;
+                    return new EvaluatedRule
                     {
-                        Name = r.GetType().Name,
+                        Name = ruleName,
                         Description = r.Description,
                         Link = r.Link,
-                        IsSox = r.IsSox,
+                        IsSox = _soxLookup.IsSox(ruleName),
                         Status = await r.EvaluateAsync(project.Id)
-                            .ConfigureAwait(false),
+                                .ConfigureAwait(false),
                         Reconcile = ReconcileFunction.ReconcileFromRule(
-                            _config, project.Id, r as IProjectReconcile)
-                    })
+                                _config, project.Id, r as IProjectReconcile)
+                    };
+                })
                     .ToList())
                     .ConfigureAwait(false),
                 CiIdentifiers = ciIdentifiers
