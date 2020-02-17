@@ -31,7 +31,6 @@ namespace Functions
         }
 
         [FunctionName(nameof(ReconcileReleasePipelineHasDeploymentMethodFunction))]
-        // regex needed in route to make it more specific than the default Reconcile ruoute
         public async Task<IActionResult> ReconcileAsync([HttpTrigger(AuthorizationLevel.Anonymous, Route = "reconcile/{organization}/{project}/releasepipelines/ReleasePipelineHasDeploymentMethod/{item?}")]HttpRequestMessage request,
             string project)
         {

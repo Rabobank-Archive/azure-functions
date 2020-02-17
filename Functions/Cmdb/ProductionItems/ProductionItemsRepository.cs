@@ -7,7 +7,6 @@ using Microsoft.Azure.Cosmos.Table;
 
 namespace Functions.Cmdb.ProductionItems
 {
-
     public class ProductionItemsRepository : IProductionItemsRepository
     {
         private readonly CloudTableClient _client;
