@@ -1,0 +1,23 @@
+name: test
+on:
+  push:
+    branches:
+      - master
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@master
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '3.1.100'
+          source-url: https://nuget.pkg.github.com/azure-devops-compliance/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      - run: dotnet build -c release
+      - run: dotnet test -c release
+        env:
+          TOKEN: ${{secrets.AZURE_DEVOPS_TOKEN}}
+          AzureWebJobsStorage: ${{secrets.AzureWebJobsStorage}}
