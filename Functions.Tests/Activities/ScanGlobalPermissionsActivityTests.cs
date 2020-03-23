@@ -2,12 +2,12 @@ using AutoFixture;
 using AutoFixture.AutoMoq;
 using Functions.Activities;
 using Moq;
-using SecurePipelineScan.Rules.Security;
 using Response = SecurePipelineScan.VstsService.Response;
 using Shouldly;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using AzureDevOps.Compliance.Rules;
 using Xunit;
 using Functions.Helpers;
 
@@ -29,14 +29,12 @@ namespace Functions.Tests.Activities
             var project = fixture.Create<Response.Project>();
             var ciIdentifiers = fixture.Create<string>();
 
-            var soxLookup = fixture.Create<SoxLookup>();
-
             //Act
             var fun = new ScanGlobalPermissionsActivity(
                 fixture.Create<EnvironmentConfig>(),
-                new[] { rule.Object, rule.Object }, soxLookup);
+                new[] { rule.Object, rule.Object });
 
-            await fun.RunAsync((project, ciIdentifiers));
+            await fun.RunAsync(project);
 
             //Assert
             rule.Verify(x => x.EvaluateAsync(It.IsAny<string>()), Times.AtLeastOnce());
@@ -59,13 +57,11 @@ namespace Functions.Tests.Activities
                 .Setup(x => x.Impact)
                 .Returns(new[] { "just some action" });
 
-            var soxLookup = fixture.Create<SoxLookup>();
-
             //Act
             var fun = new ScanGlobalPermissionsActivity(
                 config,
-                new[] { rule.Object }, soxLookup);
-            var result = await fun.RunAsync((project, ciIdentifiers));
+                new[] { rule.Object });
+            var result = await fun.RunAsync(project);
 
             var ruleName = rule.Object.GetType().Name;
 

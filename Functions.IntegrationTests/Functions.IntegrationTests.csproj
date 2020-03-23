@@ -8,6 +8,7 @@
 
     <ItemGroup>
         <PackageReference Include="AutoFixture.AutoNSubstitute" Version="4.11.0" />
+        <PackageReference Include="AzureDevOps.RestService" Version="1.0.0.785" />
         <PackageReference Include="AzureFunctions.TestHelpers" Version="3.1.74" />
         <PackageReference Include="Microsoft.Azure.Cosmos.Table" Version="1.0.6" />
         <PackageReference Include="Microsoft.Azure.Functions.Extensions" Version="1.0.0" />

@@ -4,15 +4,14 @@ using System.Linq;
 using AutoFixture;
 using AutoFixture.AutoMoq;
 using AutoFixture.Kernel;
+using AzureDevOps.Compliance.Rules;
 using Functions.Activities;
 using Functions.Model;
 using Moq;
-using Functions.Cmdb.Client;
 using SecurePipelineScan.VstsService.Response;
 using Shouldly;
 using Xunit;
 using Task = System.Threading.Tasks.Task;
-using SecurePipelineScan.Rules.Security;
 using Functions.Helpers;
 
 namespace Functions.Tests.Activities
@@ -37,15 +36,9 @@ namespace Functions.Tests.Activities
                 deploymentMethod.PipelineId = pipeline.Id;
                 deploymentMethod.StageId = i.ToString();
             }
-            var productionItems = fixture.CreateMany<ProductionItem>(1).ToList();
-            productionItems[0].DeploymentInfo = deploymentMethods;
-            productionItems[0].ItemId = pipeline.Id;
-
-            var soxLookup = fixture.Create<SoxLookup>();
-
             // Act
-            var activity = new ScanReleasePipelinesActivity(config, rules, soxLookup);
-            var actual = await activity.RunAsync((project, pipeline, productionItems));
+            var activity = new ScanReleasePipelinesActivity(config, rules);
+            var actual = await activity.RunAsync((project, pipeline));
 
             // Assert
             actual.ShouldNotBeNull();
@@ -70,15 +63,10 @@ namespace Functions.Tests.Activities
                 deploymentMethod.PipelineId = pipeline.Id;
                 deploymentMethod.StageId = null;
             }
-            var productionItems = fixture.CreateMany<ProductionItem>(1).ToList();
-            productionItems[0].DeploymentInfo = deploymentMethods;
-            productionItems[0].ItemId = pipeline.Id;
-
-            var soxLookup = fixture.Create<SoxLookup>();
 
             // Act
-            var activity = new ScanReleasePipelinesActivity(config, rules, soxLookup);
-            var actual = await activity.RunAsync((project, pipeline, productionItems));
+            var activity = new ScanReleasePipelinesActivity(config, rules);
+            var actual = await activity.RunAsync((project, pipeline));
 
             // Assert
             actual.ShouldNotBeNull();
@@ -92,16 +80,14 @@ namespace Functions.Tests.Activities
         {
             // Arrange
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
-            var soxLookup = fixture.Create<SoxLookup>();
-
 
             // Act
             var activity = new ScanReleasePipelinesActivity(
                 fixture.Create<EnvironmentConfig>(),
-                fixture.CreateMany<IReleasePipelineRule>(), soxLookup);
+                fixture.CreateMany<IReleasePipelineRule>());
 
             var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () =>
-                await activity.RunAsync((null, null, null)));
+                await activity.RunAsync((null, null)));
             exception.Message.ShouldContainWithoutWhitespace("Value cannot be null. (Parameter 'input')");
         }
 
@@ -112,16 +98,14 @@ namespace Functions.Tests.Activities
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
 
             var releasePipeline = fixture.Create<ReleaseDefinition>();
-            var productionItems = fixture.Create<IList<ProductionItem>>();
-            var soxLookup = fixture.Create<SoxLookup>();
 
             // Act
             var activity = new ScanReleasePipelinesActivity(
                 fixture.Create<EnvironmentConfig>(),
-fixture.CreateMany<IReleasePipelineRule>(), soxLookup);
+fixture.CreateMany<IReleasePipelineRule>());
 
             var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () =>
-                await activity.RunAsync((null, releasePipeline, productionItems)));
+                await activity.RunAsync((null, releasePipeline)));
             exception.Message.ShouldContainWithoutWhitespace("Value cannot be null. (Parameter 'input')");
         }
 
@@ -132,16 +116,13 @@ fixture.CreateMany<IReleasePipelineRule>(), soxLookup);
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
 
             var project = fixture.Create<Project>();
-            var productionItems = fixture.Create<IList<ProductionItem>>();
-
-            var soxLookup = fixture.Create<SoxLookup>();
 
             // Act
             var activity = new ScanReleasePipelinesActivity(
-                fixture.Create<EnvironmentConfig>(), fixture.CreateMany<IReleasePipelineRule>(), soxLookup);
+                fixture.Create<EnvironmentConfig>(), fixture.CreateMany<IReleasePipelineRule>());
 
             var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () =>
-                await activity.RunAsync((project, null, productionItems)));
+                await activity.RunAsync((project, null)));
             exception.Message.ShouldContainWithoutWhitespace("Value cannot be null. (Parameter 'input')");
         }
 

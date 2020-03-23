@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
+using AzureDevOps.Compliance.Rules;
 using Microsoft.Extensions.Caching.Memory;
-using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
 using SecurePipelineScan.VstsService.Response;
 

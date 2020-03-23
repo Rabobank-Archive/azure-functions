@@ -2,14 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AzDoCompliancy.CustomStatus;
+using AzureDevOps.Compliance.Rules;
 using Functions.Activities;
 using Functions.Helpers;
 using Functions.Model;
 using Functions.Starters;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
-using SecurePipelineScan.Rules.Security;
 using Response = SecurePipelineScan.VstsService.Response;
 
 namespace Functions.Orchestrators
@@ -21,17 +20,12 @@ namespace Functions.Orchestrators
         public ReleasePipelinesOrchestrator(EnvironmentConfig config) => _config = config;
 
         [FunctionName(nameof(ReleasePipelinesOrchestrator))]
-        public async Task<IList<ProductionItem>> RunAsync(
+        public async Task RunAsync(
             [OrchestrationTrigger] IDurableOrchestrationContext context)
         {
-            var (project, productionItems, scanDate) = 
-                context.GetInput<(Response.Project, List<ProductionItem>, DateTime)>();
-            context.SetCustomStatus(new ScanOrchestrationStatus
-            {
-                Project = project.Name,
-                Scope = RuleScopes.ReleasePipelines
-            });
-
+            var (project, scanDate) = 
+                context.GetInput<(Response.Project, DateTime)>();
+           
             var releasePipelines =
                 await context.CallActivityWithRetryAsync<List<Response.ReleaseDefinition>>(
                 nameof(GetReleasePipelinesActivity), RetryHelper.ActivityRetryOptions, project.Id);
@@ -45,24 +39,17 @@ namespace Functions.Orchestrators
                 HasReconcilePermissionUrl = ReconcileFunction.HasReconcilePermissionUrl(
                     _config, project.Id),
                 Reports = await Task.WhenAll(releasePipelines.Select(r =>
-                    StartScanActivityAsync(context, r, project, productionItems
-                        .Where(p => p.ItemId == r.Id))))
+                    StartScanActivityAsync(context, r, project)))
             };
-
-            await context.CallActivityAsync(nameof(UploadPreventiveRuleLogsActivity),
-                data.Flatten(RuleScopes.ReleasePipelines, context.InstanceId, project.Id, scanDate));
 
             await context.CallActivityAsync(nameof(UploadExtensionDataActivity),
                 (releasePipelines: data, RuleScopes.ReleasePipelines));
-
-            return LinkConfigurationItemHelper.LinkCisToBuildPipelines(releasePipelines,
-                productionItems, project);
         }
 
         private static Task<ItemExtensionData> StartScanActivityAsync(IDurableOrchestrationContext context,
-                Response.ReleaseDefinition r, Response.Project project, IEnumerable<ProductionItem> productionItems) =>
+                Response.ReleaseDefinition r, Response.Project project) =>
             context.CallActivityWithRetryAsync<ItemExtensionData>(
                 nameof(ScanReleasePipelinesActivity), RetryHelper.ActivityRetryOptions,
-                (project, r, productionItems));
+                (project, r));
     }
 }

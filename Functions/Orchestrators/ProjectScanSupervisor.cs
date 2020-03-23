@@ -1,5 +1,4 @@
-﻿using AzDoCompliancy.CustomStatus;
-using Microsoft.Azure.WebJobs;
+﻿using Microsoft.Azure.WebJobs;
 using SecurePipelineScan.VstsService.Response;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,7 +19,6 @@ namespace Functions.Orchestrators
         {
             var scanDate = context.CurrentUtcDateTime;
             var projects = context.GetInput<List<Project>>();
-            context.SetCustomStatus(new SupervisorOrchestrationStatus { TotalProjectCount = projects.Count });
 
             await Task.WhenAll(projects.Select(async (p, i) => 
                 await StartProjectScanOrchestratorWithTimerAsync(context, p, i, scanDate)));
@@ -31,7 +29,6 @@ namespace Functions.Orchestrators
         {
             await context.CreateTimer(context.CurrentUtcDateTime.AddSeconds(index * TimerInterval), CancellationToken.None);
             await context.CallSubOrchestratorAsync(nameof(ProjectScanOrchestrator),
-                OrchestrationHelper.CreateProjectScanOrchestrationId(context.InstanceId, project.Id),
                 (project, (string)null, scanDate));
         }
     }

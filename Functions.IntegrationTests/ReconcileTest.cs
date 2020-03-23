@@ -1,12 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AzureDevOps.Compliance.Rules;
 using AzureFunctions.TestHelpers;
 using Dynamitey.DynamicObjects;
-using Functions.Model;
-using Microsoft.Azure.Cosmos.Table;
 using Newtonsoft.Json.Linq;
-using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
 using Xunit;
 
@@ -38,8 +36,6 @@ namespace Functions.IntegrationTests
                 Headers = { ["Authorization"] = $"Bearer {token}" }
             };
 
-            await PrepareTableStorage().ConfigureAwait(false);
-
             // Act
             await _host.Jobs.CallAsync(nameof(ReconcileFunction), new Dictionary<string, object>
             {
@@ -58,24 +54,7 @@ namespace Functions.IntegrationTests
                 .Purge().ConfigureAwait(false);
         }
 
-        private async Task PrepareTableStorage()
-        {
-            var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
-            var table = tableClient.GetTableReference("DeploymentMethod");
-            await table.CreateIfNotExistsAsync().ConfigureAwait(false);
-
-            var insertOperation = TableOperation.InsertOrReplace(new DeploymentMethod("rowKey", "partitionKey")
-            {
-                Organization = _config.Organization,
-                ProjectId = _config.ProjectId,
-                CiIdentifier = "1",
-                PipelineId = _config.ReleasePipelineId,
-                StageId = "2"
-            });
-            await table.ExecuteAsync(insertOperation).ConfigureAwait(false);
-        }
-
-
+       
         private static async Task<JToken> SessionToken(IVstsRestClient client, string publisher, string extension)
         {
             var response = await client.PostAsync(new VstsRequest<object, JObject>(

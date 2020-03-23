@@ -2,7 +2,6 @@ using Functions.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
 using System;
 using System.Collections.Generic;
@@ -10,7 +9,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web;
-using Microsoft.Azure.Cosmos.Table;
+using AzureDevOps.Compliance.Rules;
 using Requests = SecurePipelineScan.VstsService.Requests;
 using Newtonsoft.Json;
 using SecurePipelineScan.VstsService.Security;
@@ -22,22 +21,16 @@ namespace Functions
         private readonly IEnumerable<IRule> _rules;
         private readonly ITokenizer _tokenizer;
         private readonly IVstsRestClient _vstsClient;
-        private readonly CloudTableClient _tableClient;
-        private readonly EnvironmentConfig _config;
         private const int PermissionBit = 3;
 
-        public ReconcileFunction(EnvironmentConfig config,
-                                 CloudTableClient tableClient,
-                                 IVstsRestClient vstsClient,
+        public ReconcileFunction(IVstsRestClient vstsClient,
                                  IEnumerable<IBuildPipelineRule> buildPipelineRules,
                                  IEnumerable<IReleasePipelineRule> releasePipelineRules,
                                  IEnumerable<IProjectRule> projectRules,
                                  IEnumerable<IRepositoryRule> repositoryRules,
                                  ITokenizer tokenizer)
         {
-            _config = config;
             _vstsClient = vstsClient;
-            _tableClient = tableClient;
             _rules = new List<IRule>(buildPipelineRules)
                             .Concat(releasePipelineRules)
                             .Concat(projectRules)
@@ -77,11 +70,11 @@ namespace Functions
                 case RuleScopes.GlobalPermissions:
                     return await ReconcileGlobalPermissionsAsync(project, ruleName);
                 case RuleScopes.Repositories:
-                    return await ReconcileItemAsync(project, ruleName, item, userId, data);
+                    return await ReconcileItemAsync(project, ruleName, item);
                 case RuleScopes.BuildPipelines:
-                    return await ReconcileItemAsync(project, ruleName, item, userId, data);
+                    return await ReconcileItemAsync(project, ruleName, item);
                 case RuleScopes.ReleasePipelines:
-                    return await ReconcileItemAsync(project, ruleName, item, userId, data);
+                    return await ReconcileItemAsync(project, ruleName, item);
                 default:
                     return new NotFoundObjectResult(scope);
             }
@@ -178,7 +171,7 @@ namespace Functions
             return new OkResult();
         }
 
-        private async Task<IActionResult> ReconcileItemAsync(string projectId, string ruleName, string item, string userId, object data)
+        private async Task<IActionResult> ReconcileItemAsync(string projectId, string ruleName, string item)
         {
             if (string.IsNullOrEmpty(item))
                 throw new ArgumentNullException(nameof(item));

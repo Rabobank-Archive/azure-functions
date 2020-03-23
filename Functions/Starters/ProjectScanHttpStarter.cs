@@ -7,9 +7,9 @@ using System;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using AzureDevOps.Compliance.Rules;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using SecurePipelineScan.VstsService.Security;
-using SecurePipelineScan.Rules.Security;
 
 namespace Functions.Starters
 {

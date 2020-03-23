@@ -1,13 +1,12 @@
 ﻿using Functions.Model;
 using Microsoft.Azure.WebJobs;
-using SecurePipelineScan.Rules.Security;
 using Response = SecurePipelineScan.VstsService.Response;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using System.Collections.Generic;
-using Functions.Helpers;
+using AzureDevOps.Compliance.Rules;
 
 namespace Functions.Activities
 {
@@ -15,26 +14,23 @@ namespace Functions.Activities
     {
         private readonly IEnumerable<IBuildPipelineRule> _rules;
         private readonly EnvironmentConfig _config;
-        private readonly ISoxLookup _soxLookup;
 
         public ScanBuildPipelinesActivity(EnvironmentConfig config,
-            IEnumerable<IBuildPipelineRule> rules, ISoxLookup soxLookup)
+            IEnumerable<IBuildPipelineRule> rules)
         {
-            _soxLookup = soxLookup;
             _config = config;
             _rules = rules;
         }
 
         [FunctionName(nameof(ScanBuildPipelinesActivity))]
         public async Task<ItemExtensionData> RunAsync(
-            [ActivityTrigger] (Response.Project, Response.BuildDefinition, string) input)
+            [ActivityTrigger] (Response.Project, Response.BuildDefinition) input)
         {
-            if (input.Item1 == null || input.Item2 == null || input.Item3 == null)
+            if (input.Item1 == null || input.Item2 == null)
                 throw new ArgumentNullException(nameof(input));
 
             var project = input.Item1;
             var buildPipeline = input.Item2;
-            var ciIdentifiers = input.Item3;
 
             return new ItemExtensionData
             {
@@ -48,7 +44,6 @@ namespace Functions.Activities
                             Name = ruleName,
                             Description = rule.Description,
                             Link = rule.Link,
-                            IsSox = _soxLookup.IsSox(ruleName),
                             Status = await rule.EvaluateAsync(project, buildPipeline)
                                 .ConfigureAwait(false),
                             Reconcile = ReconcileFunction.ReconcileFromRule(rule as IReconcile, _config,
@@ -56,8 +51,7 @@ namespace Functions.Activities
                         };
                     })
                     .ToList())
-                    .ConfigureAwait(false),
-                CiIdentifiers = ciIdentifiers
+                    .ConfigureAwait(false)
             };
         }
     }

@@ -1,12 +1,11 @@
 using AutoFixture;
 using AutoFixture.AutoMoq;
 using Functions.Activities;
-using SecurePipelineScan.Rules.Security;
 using Response = SecurePipelineScan.VstsService.Response;
 using Shouldly;
 using System.Threading.Tasks;
+using AzureDevOps.Compliance.Rules;
 using Xunit;
-using Functions.Helpers;
 
 namespace Functions.Tests.Activities
 {
@@ -23,14 +22,12 @@ namespace Functions.Tests.Activities
             var buildPipeline = fixture.Create<Response.BuildDefinition>();
             var ciIdentifiers = fixture.Create<string>();
 
-            var soxLookup = fixture.Create<SoxLookup>();
-
             // Act
             var activity = new ScanBuildPipelinesActivity(
                 fixture.Create<EnvironmentConfig>(),
-                rules, soxLookup);
+                rules);
 
-            var result = await activity.RunAsync((project, buildPipeline, ciIdentifiers));
+            var result = await activity.RunAsync((project, buildPipeline));
 
             // Assert
             result.ShouldNotBeNull();

@@ -1,13 +1,12 @@
 using Functions.Model;
 using Microsoft.Azure.WebJobs;
-using SecurePipelineScan.Rules.Security;
 using Response = SecurePipelineScan.VstsService.Response;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using System.Collections.Generic;
-using Functions.Helpers;
+using AzureDevOps.Compliance.Rules;
 
 namespace Functions.Activities
 {
@@ -15,25 +14,20 @@ namespace Functions.Activities
     {
         private readonly EnvironmentConfig _config;
         private readonly IEnumerable<IProjectRule> _rules;
-        private readonly ISoxLookup _soxLookup;
 
         public ScanGlobalPermissionsActivity(
-            EnvironmentConfig config, IEnumerable<IProjectRule> rules, ISoxLookup soxLookup)
+            EnvironmentConfig config, IEnumerable<IProjectRule> rules)
         {
             _config = config;
             _rules = rules;
-            _soxLookup = soxLookup;
         }
 
         [FunctionName(nameof(ScanGlobalPermissionsActivity))]
         public async Task<ItemExtensionData> RunAsync([ActivityTrigger]
-            (Response.Project, string) input)
+            Response.Project project)
         {
-            if (input.Item1 == null)
-                throw new ArgumentNullException(nameof(input));
-
-            var project = input.Item1;
-            var ciIdentifiers = input.Item2;
+            if (project == null)
+                throw new ArgumentNullException(nameof(project));
 
             return new ItemExtensionData
             {
@@ -47,7 +41,6 @@ namespace Functions.Activities
                         Name = ruleName,
                         Description = r.Description,
                         Link = r.Link,
-                        IsSox = _soxLookup.IsSox(ruleName),
                         Status = await r.EvaluateAsync(project.Id)
                                 .ConfigureAwait(false),
                         Reconcile = ReconcileFunction.ReconcileFromRule(
@@ -55,8 +48,7 @@ namespace Functions.Activities
                     };
                 })
                     .ToList())
-                    .ConfigureAwait(false),
-                CiIdentifiers = ciIdentifiers
+                    .ConfigureAwait(false)
             };
         }
     }

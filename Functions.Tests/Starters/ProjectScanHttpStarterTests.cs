@@ -13,10 +13,10 @@ using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Xunit;
 using Response = SecurePipelineScan.VstsService.Response;
-using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService.Security;
 using Functions.Helpers;
 using AutoFixture.AutoMoq;
+using AzureDevOps.Compliance.Rules;
 
 namespace Functions.Tests.Starters
 {

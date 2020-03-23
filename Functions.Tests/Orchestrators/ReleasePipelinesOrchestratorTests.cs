@@ -3,17 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using AutoFixture;
 using AutoFixture.AutoNSubstitute;
-using AzDoCompliancy.CustomStatus;
+using AzureDevOps.Compliance.Rules;
 using Functions.Activities;
 using Functions.Model;
 using Functions.Orchestrators;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Moq;
-using SecurePipelineScan.Rules.Security;
-using SecurePipelineScan.VstsService.Response;
-using Shouldly;
+using Response = SecurePipelineScan.VstsService.Response;
 using Xunit;
-using Task = System.Threading.Tasks.Task;
+using System.Threading.Tasks;
 
 namespace Functions.Tests.Orchestrators
 {
@@ -31,39 +29,28 @@ namespace Functions.Tests.Orchestrators
         public async Task ShouldCallActivityAsyncForProject()
         {
             //Arrange
-            _fixture.Customize<ReleaseDefinition>(f => f
+            _fixture.Customize<Response.ReleaseDefinition>(f => f
                  .With(r => r.Id, "1"));
-            _fixture.Customize<ProductionItem>(f => f
-                .With(p => p.ItemId, "1"));
 
             var mocks = new MockRepository(MockBehavior.Strict);
 
             var starter = mocks.Create<IDurableOrchestrationContext>();
             starter
-                .Setup(x => x.GetInput<(Project, List<ProductionItem>, DateTime)>())
-                .Returns(_fixture.Create<(Project, List<ProductionItem>, DateTime)>());
-
-            starter
-                .Setup(x => x.InstanceId)
-                .Returns(_fixture.Create<string>());
-
-            starter
-                .Setup(x => x.SetCustomStatus(It.Is<ScanOrchestrationStatus>(s => 
-                    s.Scope == RuleScopes.ReleasePipelines)))
-                .Verifiable();
+                .Setup(x => x.GetInput<(Response.Project,  DateTime)>())
+                .Returns(_fixture.Create<(Response.Project,  DateTime)>());
 
             starter
                 .Setup(x => x.CallActivityWithRetryAsync<ItemExtensionData>(
                     nameof(ScanReleasePipelinesActivity), It.IsAny<RetryOptions>(),
-                    It.IsAny<(Project, ReleaseDefinition, IEnumerable<ProductionItem>)>()))
+                    It.IsAny<(Response.Project, Response.ReleaseDefinition)>()))
                 .ReturnsAsync(_fixture.Create<ItemExtensionData>())
                 .Verifiable();
 
             starter
-                .Setup(x => x.CallActivityWithRetryAsync<List<ReleaseDefinition>>(
+                .Setup(x => x.CallActivityWithRetryAsync<List<Response.ReleaseDefinition>>(
                     nameof(GetReleasePipelinesActivity), It.IsAny<RetryOptions>(),
                     It.IsAny<string>()))
-                .ReturnsAsync(_fixture.CreateMany<ReleaseDefinition>().ToList())
+                .ReturnsAsync(_fixture.CreateMany<Response.ReleaseDefinition>().ToList())
                 .Verifiable();
 
             starter
@@ -74,21 +61,15 @@ namespace Functions.Tests.Orchestrators
                     It.Is<(ItemsExtensionData data, string scope)>(t => 
                     t.scope == RuleScopes.ReleasePipelines)))
                 .Returns(Task.FromResult<object>(null));
-
-            starter
-                .Setup(x => x.CallActivityAsync<object>(nameof(UploadPreventiveRuleLogsActivity),
-                    It.IsAny<IEnumerable<PreventiveRuleLogItem>>()))
-                .Returns(Task.FromResult<object>(null));
-
+            
             var environmentConfig = _fixture.Create<EnvironmentConfig>();
 
             //Act
             var function = new ReleasePipelinesOrchestrator(environmentConfig);
-            var result = await function.RunAsync(starter.Object);
+            await function.RunAsync(starter.Object);
 
             //Assert           
             mocks.VerifyAll();
-            result.ShouldNotBeNull();
         }
     }
 }

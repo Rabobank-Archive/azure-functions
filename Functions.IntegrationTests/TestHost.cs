@@ -1,66 +1,66 @@
 using System;
+using System.Text;
 using System.Threading.Tasks;
 using AutoFixture;
 using AutoFixture.AutoNSubstitute;
+using AzureDevOps.Compliance.Rules;
 using AzureFunctions.TestHelpers;
-using LogAnalytics.Client;
+using Flurl;
+using Flurl.Http;
+using Functions.Helpers;
 using Microsoft.Azure.Cosmos.Table;
 using Microsoft.Azure.Storage.Queue;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using SecurePipelineScan.Rules.Security;
-using Functions.Cmdb.Client;
 using SecurePipelineScan.VstsService;
 using Xunit;
 using SecurePipelineScan.VstsService.Security;
-using Functions.Cmdb.ProductionItems;
-using Functions.Helpers;
 
 namespace Functions.IntegrationTests
 {
     public class TestHost : IDisposable, IAsyncLifetime
     {
-        private readonly IHost _host;
+        private IHost _host;
         public IJobHost Jobs => _host.Services.GetService<IJobHost>();
         public TestConfig TestConfig { get; } = new TestConfig();
 
-        public TestHost()
+        private async Task Initialize()
         {
-            var fixture = new Fixture().Customize(new AutoNSubstituteCustomization { ConfigureMembers = true });
+            var fixture = new Fixture().Customize(new AutoNSubstituteCustomization {ConfigureMembers = true});
             var environMentConfig = fixture.Create<EnvironmentConfig>();
             environMentConfig.Organization = TestConfig.Organization;
+
+            var secret = await ExtensionSecret();
 
             _host = new HostBuilder()
                 .ConfigureWebJobs(builder => builder
                     .AddHttp()
-                    .AddDurableTask(options => options.HubName = $"other{DateTime.Now:yyyyMMddTHHmmss}")
+                    .AddDurableTask(options => options.HubName = nameof(ReconcileTest))
                     .AddAzureStorageCoreServices()
                     .ConfigureServices(services => services
-                        .AddSingleton<ITokenizer>(new Tokenizer(TestConfig.ExtensionSecret))
+                        .AddSingleton<ITokenizer>(new Tokenizer(secret))
                         .AddSingleton<IVstsRestClient>(new VstsRestClient(TestConfig.Organization, TestConfig.Token))
                         .AddDefaultRules()
-                        .AddSingleton(fixture.Create<ILogAnalyticsClient>())
-                        .AddSingleton(fixture.Create<ICmdbClient>())
                         .AddSingleton(environMentConfig)
-                        .AddSingleton(CloudStorageAccount.DevelopmentStorageAccount.CreateCloudTableClient())
-                        .AddSingleton(Microsoft.Azure.Storage.CloudStorageAccount.DevelopmentStorageAccount.CreateCloudQueueClient())
-                        .AddSingleton<IProductionItemsRepository, ProductionItemsRepository>()
-                        .AddTransient<IProductionItemsResolver, ProductionItemsResolver>()
-                        .AddSingleton<ISoxLookup, SoxLookup>()
-                        .AddTransient<IReleasePipelineHasDeploymentMethodReconciler, ReleasePipelineHasDeploymentMethodReconciler>()
-                        .AddSingleton(fixture.Create<IPoliciesResolver>())
-                        ))
+                        .AddSingleton<IPoliciesResolver, PoliciesResolver>()
+                        .AddSingleton<IMemoryCache, MemoryCache>()
+                    ))
                 .Build();
+
+            await _host.StartAsync();
         }
 
-        public void Dispose()
-        {
-            _host.Dispose();
-        }
+        private Task<string> ExtensionSecret() =>
+            new Url($"https://marketplace.visualstudio.com/_apis/gallery/publishers/tas/extensions/{TestConfig.ExtensionName}/certificates/latest")
+                .WithBasicAuth(string.Empty, TestConfig.Token)
+                .GetStringAsync();
 
-        public async Task InitializeAsync() => await _host.StartAsync();
+        public void Dispose() => _host?.Dispose();
+
+        public async Task InitializeAsync() => await Initialize();
 
         public Task DisposeAsync() => Task.CompletedTask;
     }

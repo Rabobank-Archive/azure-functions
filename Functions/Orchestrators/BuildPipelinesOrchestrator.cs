@@ -2,16 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AzDoCompliancy.CustomStatus;
+using AzureDevOps.Compliance.Rules;
 using Functions.Activities;
 using Functions.Helpers;
 using Functions.Model;
 using Functions.Starters;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
-using SecurePipelineScan.Rules.Security;
-using SecurePipelineScan.VstsService.Response;
-using Task = System.Threading.Tasks.Task;
+using Response = SecurePipelineScan.VstsService.Response;
 
 namespace Functions.Orchestrators
 {
@@ -22,19 +20,13 @@ namespace Functions.Orchestrators
         public BuildPipelinesOrchestrator(EnvironmentConfig config) => _config = config;
 
         [FunctionName(nameof(BuildPipelinesOrchestrator))]
-        public async Task<IList<ProductionItem>> RunAsync(
+        public async Task RunAsync(
             [OrchestrationTrigger] IDurableOrchestrationContext context)
         {
-            var (project, productionItems, scanDate) = 
-                context.GetInput<(Project, List<ProductionItem>, DateTime)>();
-
-            context.SetCustomStatus(new ScanOrchestrationStatus
-            {
-                Project = project.Name,
-                Scope = RuleScopes.BuildPipelines
-            });
-
-            var buildPipelines = await context.CallActivityWithRetryAsync<List<BuildDefinition>>(
+            var (project, scanDate) = 
+                context.GetInput<(Response.Project, DateTime)>();
+            
+            var buildPipelines = await context.CallActivityWithRetryAsync<List<Response.BuildDefinition>>(
                 nameof(GetBuildPipelinesActivity), RetryHelper.ActivityRetryOptions, project.Id);
 
             var data = new ItemsExtensionData
@@ -46,24 +38,16 @@ namespace Functions.Orchestrators
                 HasReconcilePermissionUrl = ReconcileFunction.HasReconcilePermissionUrl(_config,
                     project.Id),
                 Reports = await Task.WhenAll(buildPipelines.Select(b =>
-                    StartScanActivityAsync(context, b, project, productionItems)))
+                    StartScanActivityAsync(context, b, project)))
             };
-
-            await context.CallActivityAsync(nameof(UploadPreventiveRuleLogsActivity),
-                data.Flatten(RuleScopes.BuildPipelines, context.InstanceId, project.Id, scanDate));
 
             await context.CallActivityAsync(nameof(UploadExtensionDataActivity),
                 (buildPipelines: data, RuleScopes.BuildPipelines));
-
-            return LinkConfigurationItemHelper.LinkCisToRepositories(buildPipelines,
-                productionItems, project);
         }
 
         private static Task<ItemExtensionData> StartScanActivityAsync(IDurableOrchestrationContext context, 
-                BuildDefinition b, Project project, IEnumerable<ProductionItem> productionItems) => 
+            Response.BuildDefinition b, Response.Project project) => 
             context.CallActivityWithRetryAsync<ItemExtensionData>(nameof(ScanBuildPipelinesActivity),
-                RetryHelper.ActivityRetryOptions, (project, b, LinkConfigurationItemHelper.GetCiIdentifiers(
-                productionItems
-                    .Where(r => r.ItemId == b.Id))));
+                RetryHelper.ActivityRetryOptions, (project, b));
     }
 }

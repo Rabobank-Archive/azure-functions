@@ -2,19 +2,14 @@
 using Microsoft.Azure.WebJobs.Hosting;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
-using SecurePipelineScan.Rules.Events;
-using SecurePipelineScan.Rules.Reports;
-using SecurePipelineScan.Rules.Security;
 using SecurePipelineScan.VstsService;
 using System;
 using System.Net.Http;
-using LogAnalytics.Client;
+using AzureDevOps.Compliance.Rules;
 using Microsoft.Azure.Cosmos.Table;
 using Microsoft.Azure.Storage.Queue;
-using Functions.Cmdb.Client;
 using SecurePipelineScan.VstsService.Security;
 using Functions.Helpers;
-using Functions.Cmdb.ProductionItems;
 using Functions.Routing;
 
 [assembly: WebJobsStartup(typeof(Functions.Startup))]
@@ -34,27 +29,13 @@ namespace Functions
 
         private void RegisterServices(IServiceCollection services)
         {
-            var tenantId = GetEnvironmentVariable("tenantId");
-            var clientId = GetEnvironmentVariable("clientId");
-            var clientSecret = GetEnvironmentVariable("clientSecret");
-
-            var workspace = GetEnvironmentVariable("logAnalyticsWorkspace");
-            var key = GetEnvironmentVariable("logAnalyticsKey");
-            services.AddSingleton<ILogAnalyticsClient>(new LogAnalyticsClient(workspace, key,
-                new AzureTokenProvider(tenantId, clientId, clientSecret)));
-
             var vstsPat = GetEnvironmentVariable("vstsPat");
             var organization = GetEnvironmentVariable("organization");
-            var cmdbEndpoint = GetEnvironmentVariable("CmdbEndpoint");
-            var cmdbApiKey = GetEnvironmentVariable("CmdbApiKey");
             var nonProdCiIdentifier = GetEnvironmentVariable("NonProdCiIdentifier");
 
             services.AddSingleton<IVstsRestClient>(new VstsRestClient(organization, vstsPat));
-            services.AddSingleton<ICmdbClient>(new CmdbClient(new CmdbClientConfig(cmdbApiKey, cmdbEndpoint, organization, nonProdCiIdentifier)));
 
             services.AddSingleton<IMemoryCache>(_ => new MemoryCache(new MemoryCacheOptions()));
-            services.AddTransient<IServiceHookScan<ReleaseDeploymentCompletedReport>, ReleaseDeploymentScan>();
-            services.AddTransient<IServiceHookScan<BuildScanReport>, BuildScan>();
 
             var extensionName = GetEnvironmentVariable("extensionName");
             var functionAppUrl = GetEnvironmentVariable("WEBSITE_HOSTNAME");
@@ -82,10 +63,6 @@ namespace Functions
             services.AddDefaultRules();
             services.AddSingleton(new HttpClient());
 
-            services.AddSingleton<IProductionItemsRepository, ProductionItemsRepository>();
-            services.AddSingleton<IProductionItemsResolver, ProductionItemsResolver>();
-            services.AddSingleton<ISoxLookup, SoxLookup>();
-            services.AddSingleton<IReleasePipelineHasDeploymentMethodReconciler, ReleasePipelineHasDeploymentMethodReconciler>();
             services.AddSingleton<IPoliciesResolver, PoliciesResolver>();
         }
 
