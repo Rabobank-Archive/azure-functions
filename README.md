@@ -1,61 +1,24 @@
-# Functions
+```bash
+export azdev_token=
+export azdev_organization=
+export extension_secret=
+export extension_name=azure-devops-compliance
+export extension_publisher=riezebosch
 
-type            | function
-----------------|----------
-Time-triggered  | compliancy check van projecten, repo's en pipelines
-Http-triggered  | rescan van compliancy van project
-Event-triggered | compliancy check van build & release completed events 
-Non-triggered   | het opnieuw proberen van messages in de poison-queue
-Time-triggered  | controleren van compleetheid van de compliancy check
+export rg=
+export name=
 
-## Compliancy
-![arch](docs/arch.png)
+az group create --name $rg --location westeurope
+az storage account create -g $rg -n $name
 
-### Rules
+function=$(az functionapp create -g $rg -n $name -s $name --consumption-plan-location westeurope --os-type windows --runtime dotnet --functions-version 3 -o tsv --query "id")
+az ad sp create-for-rbac --name $name --role contributor --scopes $function --sdk-auth
 
-Functionele [rules](https://dev.azure.com/somecompany/TAS/_git/azdo-compliancy-rules) voor het controleren en oplossen van compliancy van projecten.
+az functionapp cors add -a https://$extension_publisher.gallerycdn.vsassets.io -n $name -g $rg
+az functionapp config appsettings set --name $name --resource-group $rg --settings TOKEN=$azdev_token ORGANIZATION=$azdev_organization
+az functionapp config appsettings set --name $name --resource-group $rg --settings EXTENSION_NAME=$extension_name EXTENSION_PUBLISHER=$extension_publisher EXTENSION_SECRET=$extension_secret  
 
-### VstsRestClient
+curl https://github.com/azure-devops-compliance/azure-functions/releases/latest/download/release.zip -L --output release.zip
+az functionapp deployment source config-zip -g $rg -n $name --src release.zip
+```
 
-Hand-rolled mockable REST client voor Azure DevOps.
-
-### LogAnalyticsClient
-
-Hand-rolled client voor wegschrijven en uitlezen van records in LogAnalytics.
-
-### Frontend
-
-Azure DevOps frontend extension voor het weergeven van compliancy reports en uitvoeren van reconcile en rescan.
-
-### Shared Secret
-
-Het authorization header dat meekomt vanuit de compliancy frontend in Azure DevOps is signed met het secret van de 
-extension en daarop wordt gecontroleerd in de `Tokenizer`. Dit secret wordt meegegeven als secret variable in de pipeline
-bij de deployment van de functions.
-
-Mocht je het secret ooit opnieuw nodig hebben, dan kan je deze downloaden in de [marketplace](https://marketplace.visualstudio.com):
-
-![certificate](docs/marketplace.png)
-
-## Hooks
-
-Om te reageren op de builds & releases die klaar zijn wordt met behulp van een function
-in elk team project een tweetal hooks aangemaakt die het completed event in de storage queue
-wegschrijven.
-
-![hooks](docs/hooks.png)
-
-## Completeness
-
-De function controleert of de scan op 600+ team projects succesvol is afgerond. Door throttling
-op de REST API en null reference exception in code kan het voorkomen dat analyze voortijdig wordt afgebroken. 
-
-![completeness](docs/completeness.png)
-
-## Configuration Items Deployment Method (SM9)
-
-De koppeling tussen Configuration Items en bijbehorende release piplines is vastgelegd in SM9.
-Deze data wordt opgehaald met een function in een aparte resource group met toegang tot de on-premises
-CMDB in SM9 en wordt beschikbaar gemaakt via table storage.
-
-![sm9](docs/sm9.png)

@@ -1,16 +1,14 @@
-﻿using Microsoft.Azure.WebJobs;
+﻿using System;
+using System.Net.Http;
+using AzureDevOps.Compliance.Rules;
+using Functions.Helpers;
+using Functions.Routing;
+using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Hosting;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using SecurePipelineScan.VstsService;
-using System;
-using System.Net.Http;
-using AzureDevOps.Compliance.Rules;
-using Microsoft.Azure.Cosmos.Table;
-using Microsoft.Azure.Storage.Queue;
 using SecurePipelineScan.VstsService.Security;
-using Functions.Helpers;
-using Functions.Routing;
 
 [assembly: WebJobsStartup(typeof(Functions.Startup))]
 
@@ -27,38 +25,24 @@ namespace Functions
             RegisterServices(builder.Services);
         }
 
-        private void RegisterServices(IServiceCollection services)
+        private static void RegisterServices(IServiceCollection services)
         {
-            var vstsPat = GetEnvironmentVariable("vstsPat");
-            var organization = GetEnvironmentVariable("organization");
-            var nonProdCiIdentifier = GetEnvironmentVariable("NonProdCiIdentifier");
+            var token = GetEnvironmentVariable("TOKEN");
+            var organization = GetEnvironmentVariable("ORGANIZATION");
 
-            services.AddSingleton<IVstsRestClient>(new VstsRestClient(organization, vstsPat));
-
+            services.AddSingleton<IVstsRestClient>(new VstsRestClient(organization, token));
             services.AddSingleton<IMemoryCache>(_ => new MemoryCache(new MemoryCacheOptions()));
-
-            var extensionName = GetEnvironmentVariable("extensionName");
-            var functionAppUrl = GetEnvironmentVariable("WEBSITE_HOSTNAME");
-            //Microsoft.Azure.Storage.Queue
-            // This only works because we use the account name and account key in the connection string.
-
-            var connectionString = GetEnvironmentVariable("eventQueueStorageConnectionString");
-            services.AddSingleton(CloudStorageAccount.Parse(connectionString).CreateCloudTableClient());
-            var storage = Microsoft.Azure.Storage.CloudStorageAccount.Parse(connectionString);
-            services.AddSingleton(storage.CreateCloudQueueClient());
 
             var config = new EnvironmentConfig
             {
-                ExtensionName = extensionName,
+                ExtensionName = GetEnvironmentVariable("EXTENSION_NAME"),
+                ExtensionPublisher = GetEnvironmentVariable("EXTENSION_PUBLISHER"),
                 Organization = organization,
-                FunctionAppHostname = functionAppUrl,
-                EventQueueStorageAccountName = storage.Credentials.AccountName,
-                EventQueueStorageAccountKey = Convert.ToBase64String(storage.Credentials.ExportKey()),
-                NonProdCiIdentifier = nonProdCiIdentifier
+                FunctionAppHostname = GetEnvironmentVariable("WEBSITE_HOSTNAME"),
             };
 
             services.AddSingleton(config);
-            services.AddSingleton<ITokenizer>(new Tokenizer(GetEnvironmentVariable("TOKEN_SECRET")));
+            services.AddSingleton<ITokenizer>(new Tokenizer(GetEnvironmentVariable("EXTENSION_SECRET")));
 
             services.AddDefaultRules();
             services.AddSingleton(new HttpClient());
@@ -66,11 +50,11 @@ namespace Functions
             services.AddSingleton<IPoliciesResolver, PoliciesResolver>();
         }
 
-        private static string GetEnvironmentVariable(string variableName)
+        private static string GetEnvironmentVariable(string name)
         {
-            return Environment.GetEnvironmentVariable(variableName, EnvironmentVariableTarget.Process)
-                   ?? throw new ArgumentNullException(variableName,
-                       $"Please provide a valid value for environment variable '{variableName}'");
+            return Environment.GetEnvironmentVariable(name, EnvironmentVariableTarget.Process)
+                   ?? throw new ArgumentNullException(name,
+                       $"Please provide a valid value for environment variable '{name}'");
         }
     }
 }

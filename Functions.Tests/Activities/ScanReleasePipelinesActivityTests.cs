@@ -27,15 +27,7 @@ namespace Functions.Tests.Activities
             var rules = CreateRules(fixture, 0);
             var project = fixture.Create<Project>();
             var pipeline = fixture.Create<ReleaseDefinition>();
-            var deploymentMethods = fixture.CreateMany<DeploymentMethod>(3).ToList();
-            for (var i = 0; i < deploymentMethods.Count; i++)
-            {
-                var deploymentMethod = deploymentMethods[i];
-                deploymentMethod.Organization = config.Organization;
-                deploymentMethod.ProjectId = project.Id;
-                deploymentMethod.PipelineId = pipeline.Id;
-                deploymentMethod.StageId = i.ToString();
-            }
+
             // Act
             var activity = new ScanReleasePipelinesActivity(config, rules);
             var actual = await activity.RunAsync((project, pipeline));
@@ -55,14 +47,6 @@ namespace Functions.Tests.Activities
             var rules = CreateRules(fixture, 3, true);
             var project = fixture.Create<Project>();
             var pipeline = fixture.Create<ReleaseDefinition>();
-            var deploymentMethods = fixture.CreateMany<DeploymentMethod>(3).ToList();
-            foreach (var deploymentMethod in deploymentMethods)
-            {
-                deploymentMethod.Organization = config.Organization;
-                deploymentMethod.ProjectId = project.Id;
-                deploymentMethod.PipelineId = pipeline.Id;
-                deploymentMethod.StageId = null;
-            }
 
             // Act
             var activity = new ScanReleasePipelinesActivity(config, rules);

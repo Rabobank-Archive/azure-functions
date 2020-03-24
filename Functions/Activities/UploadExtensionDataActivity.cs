@@ -24,7 +24,7 @@ namespace Functions.Activities
         {
             var (data, scope) = input.GetInput<(ItemsExtensionData, string)>();
             await _azuredo.PutAsync(ExtensionManagement.ExtensionData<ExtensionDataReports>(
-                "tas", _config.ExtensionName, scope), data)
+                _config.ExtensionPublisher, _config.ExtensionName, scope), data)
                 .ConfigureAwait(false);
         }
     }

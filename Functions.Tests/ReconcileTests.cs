@@ -1,16 +1,15 @@
-using AutoFixture;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.Cosmos.Table;
-using Moq;
 using Newtonsoft.Json;
-using SecurePipelineScan.VstsService;
-using SecurePipelineScan.VstsService.Security;
-using Shouldly;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using AutoFixture;
 using AzureDevOps.Compliance.Rules;
+using Moq;
+using SecurePipelineScan.VstsService;
+using SecurePipelineScan.VstsService.Security;
+using Shouldly;
 using Xunit;
 using Response = SecurePipelineScan.VstsService.Response;
 
@@ -40,8 +39,6 @@ namespace Functions.Tests
             vstsClient
                 .Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Response.PermissionsProjectId>>()))
                 .Returns(Task.FromResult(fixture.Create<Response.PermissionsProjectId>()));
-            var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
-            var config = new EnvironmentConfig { Organization = "somecompany" };
 
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
@@ -78,9 +75,6 @@ namespace Functions.Tests
             vstsClient
                 .Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Response.PermissionsProjectId>>()))
                 .Returns(Task.FromResult(fixture.Create<Response.PermissionsProjectId>()));
-
-            var config = new EnvironmentConfig { Organization = "somecompany" };
-            var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
 
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
@@ -119,8 +113,6 @@ namespace Functions.Tests
             vstsClient
                 .Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Response.PermissionsProjectId>>()))
                 .Returns(Task.FromResult(fixture.Create<Response.PermissionsProjectId>()));
-            var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
-            var config = new EnvironmentConfig { Organization = "somecompany" };
 
             var json = JsonConvert.SerializeObject(new { ciIdentifier = "CI123444" });
             var request = new HttpRequestMessage();
@@ -158,9 +150,6 @@ namespace Functions.Tests
                 .Returns(Task.FromResult(fixture.Create<Response.PermissionsProjectId>()))
                 .Verifiable();
 
-            var config = new EnvironmentConfig { Organization = "somecompany" };
-            var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
-
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
 
@@ -195,9 +184,6 @@ namespace Functions.Tests
                 .Setup(x => x.GetAsync(It.IsAny<IVstsRequest<Response.PermissionsProjectId>>()))
                 .Returns(Task.FromResult(fixture.Create<Response.PermissionsProjectId>()))
                 .Verifiable();
-
-            var config = new EnvironmentConfig { Organization = "somecompany" };
-            var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
 
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
@@ -238,9 +224,6 @@ namespace Functions.Tests
                 .Returns(Task.FromResult(fixture.Create<Response.PermissionsProjectId>()))
                 .Verifiable();
 
-            var config = new EnvironmentConfig { Organization = "somecompany" };
-            var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
-
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
             request.RequestUri = new System.Uri("https://dev.azure.com/reconcile/somecompany/TAS/haspermissions?userId=ef2e3683-8fb5-439d-9dc9-53af732e6387");
@@ -279,9 +262,6 @@ namespace Functions.Tests
                 .Returns(Task.FromResult<Response.PermissionsProjectId>(null))
                 .Verifiable();
 
-            var config = new EnvironmentConfig { Organization = "somecompany" };
-            var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
-
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
             request.RequestUri =
@@ -304,9 +284,6 @@ namespace Functions.Tests
             var request = new HttpRequestMessage();
             request.Headers.Authorization = null;
 
-            var config = new EnvironmentConfig { Organization = "somecompany" };
-            var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
-
             var function = new ReconcileFunction(null, new IBuildPipelineRule[0], new IReleasePipelineRule[0], new IProjectRule[0], new IRepositoryRule[0],
                 new Mock<ITokenizer>().Object);
             (await function.ReconcileAsync(request,
@@ -326,9 +303,6 @@ namespace Functions.Tests
 
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
-
-            var config = new EnvironmentConfig { Organization = "somecompany" };
-            var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
 
             var function = new ReconcileFunction(null, new IBuildPipelineRule[0], new IReleasePipelineRule[0], new IProjectRule[0], new IRepositoryRule[0],
                 tokenizer.Object);
@@ -358,9 +332,6 @@ namespace Functions.Tests
                 .Returns(Task.FromResult(fixture.Create<Response.PermissionsProjectId>()))
                 .Verifiable();
 
-            var config = new EnvironmentConfig { Organization = "somecompany" };
-            var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
-
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
 
@@ -382,9 +353,6 @@ namespace Functions.Tests
             var request = new HttpRequestMessage();
             request.Headers.Authorization = null;
 
-            var config = new EnvironmentConfig { Organization = "somecompany" };
-            var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
-
             var function = new ReconcileFunction(null, new IBuildPipelineRule[0], new IReleasePipelineRule[0], new IProjectRule[0], new IRepositoryRule[0],
                 new Mock<ITokenizer>().Object);
             (await function
@@ -402,9 +370,6 @@ namespace Functions.Tests
 
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
-
-            var config = new EnvironmentConfig { Organization = "somecompany" };
-            var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
 
             var function = new ReconcileFunction(null, new IBuildPipelineRule[0], new IReleasePipelineRule[0], new IProjectRule[0], new IRepositoryRule[0],
                 tokenizer.Object);
@@ -431,9 +396,6 @@ namespace Functions.Tests
                     req.QueryParams.Values.Contains("ab84d5a2-4b8d-68df-9ad3-cc9c8884270c"))))
                 .Returns(Task.FromResult(fixture.Create<Response.PermissionsProjectId>()))
                 .Verifiable();
-
-            var config = new EnvironmentConfig { Organization = "somecompany" };
-            var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
 
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
@@ -465,9 +427,6 @@ namespace Functions.Tests
                     req.QueryParams.Values.Contains("ab84d5a2-4b8d-68df-9ad3-cc9c8884270c"))))
                 .Returns(Task.FromResult(fixture.Create<Response.PermissionsProjectId>()))
                 .Verifiable();
-
-            var config = new EnvironmentConfig { Organization = "somecompany" };
-            var tableClient = CloudStorageAccount.Parse("UseDevelopmentStorage=true").CreateCloudTableClient();
 
             var request = new HttpRequestMessage();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
