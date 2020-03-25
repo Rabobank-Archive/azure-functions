@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AzureDevOps.Compliance.Rules;
-using Functions.Helpers;
 using Functions.Model;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using SecurePipelineScan.VstsService.Response;
-using Environment = Functions.Model.Environment;
 using Task = System.Threading.Tasks.Task;
 
 namespace Functions.Activities
