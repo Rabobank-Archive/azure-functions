@@ -1,3 +1,7 @@
+[![build](https://github.com/azure-devops-compliance/azure-functions/workflows/test/badge.svg)](https://github.com/azure-devops-compliance/azure-functions/actions)
+[![codecov](https://codecov.io/gh/azure-devops-compliance/azure-functions/branch/master/graph/badge.svg)](https://codecov.io/gh/azure-devops-compliance/azure-functions)
+[![stryker](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fazure-devops-compliance%2Fazure-functions%2Fmaster)](https://dashboard.stryker-mutator.io/reports/github.com/azure-devops-compliance/azure-functions/master)
+
 ```bash
 export azdev_token=
 export azdev_organization=
